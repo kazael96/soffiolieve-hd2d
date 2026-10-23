@@ -1,0 +1,47 @@
+name: Publish Soffiolieve HD-2D
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  release:
+    types: [published]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download verified demo release
+        run: curl --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
+      - name: Verify and unpack site
+        run: |
+          python3 - <<'PY'
+          import hashlib,zipfile,shutil
+          from pathlib import Path
+          archive=Path('site.zip')
+          assert hashlib.sha256(archive.read_bytes()).hexdigest()=='2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6'
+          with zipfile.ZipFile(archive) as z:
+              assert all(not Path(n).is_absolute() and '..' not in Path(n).parts for n in z.namelist())
+              z.extractall('_release')
+          target=Path('_site')
+          shutil.move('_release/soffiolieve',target)
+          assert (target/'index.html').is_file()
+          assert (target/'assets/animated/800-front.png').is_file()
+          print('Verified original demo package and extracted static site')
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
