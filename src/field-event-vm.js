@@ -20,17 +20,17 @@
           const a=c.args,v=a.map(x=>this.value(x));
           switch(c.name){
             case 'VMNop':case 'VMNop2':break;
-            case 'VMHalt':this.pc=null;break;
+            case 'RTEndGlobal':case 'VMHalt':this.pc=null;break;
             case 'VMReturn':this.pc=this.calls.length?this.calls.pop():null;break;
             case 'VMCall':this.calls.push(this.pc);this.pc=a[0];break;
             case 'VMJump':this.pc=a[0];break;
-            case 'VMJumpIf':if(a[0]===255?this.stack.pop():cmp(a[0],...this.comparison))this.pc=a[1];break;
+            case 'VMJumpIf':if(a[0]===255?!this.stack.pop():cmp(a[0],...this.comparison))this.pc=a[1];break;
             case 'StackPush':this.stack.push(v[0]);break;
             case 'StackPushConst':this.stack.push(a[0]);break;
             case 'StackPushFlag':this.stack.push(this.state.flags.includes(v[0])?1:0);break;
             case 'StackPop':this.set(a[0],this.stack.pop());break;
             case 'StackCmp':{const b=this.stack.pop(),x=this.stack.pop();this.stack.push(cmp(a[0],x,b)?1:0);break;}
-            case 'WorkSet':this.set(a[0],v[1]);break;
+            case 'WorkGet':case 'WorkSet':this.set(a[0],v[1]);break;
             case 'WorkSetConst':this.set(a[0],a[1]);break;
             case 'WorkAdd':this.set(a[0],v[0]+v[1]);break;
             case 'WorkSub':this.set(a[0],v[0]-v[1]);break;
@@ -49,7 +49,7 @@
     }
   }
   function messagePages(text,words){
-    return text.replace(/\{(?:0100|0101|0102|0200):([0-9]+)\}/g,(_,i)=>words[i]??'')
+    return text.replace(/\{(?:0100|0101|0102|0109|0112|0200|0201):([0-9]+)\}/g,(_,i)=>words[i]??'')
       .replace(/\{(?:ff00|bd02)(?::[^}]*)?\}/g,'').replace(/\\n/g,'\n')
       .split(/\{be0[01]\}/).map(p=>p.replace(/^\n+|\n+$/g,'')).filter(Boolean);
   }

@@ -12,11 +12,11 @@ test('Every extracted branch and movement pointer resolves; no guessed instructi
    instructions++;
    if(['VMJump','VMCall'].includes(c.name))assert.ok(p.code[c.args[0]],`${bank}:${at}`);
    if(c.name==='VMJumpIf')assert.ok(p.code[c.args[1]],`${bank}:${at}`);
-   if(!['VMHalt','VMReturn','VMJump'].includes(c.name))assert.ok(p.code[c.end],`${bank}:${at} next`);
+   if(!['VMHalt','VMReturn','VMJump','RTEndGlobal'].includes(c.name))assert.ok(p.code[c.end],`${bank}:${at} next`);
    if(c.name==='ActorCmdExec')assert.equal(p.movements[c.args[1]].at(-1)[0],254);
   }
  }
- assert.equal(instructions,1603);
+ assert.equal(instructions,1798);
 });
 
 test('Original Italian location and event text are retained, including placeholders and paging',()=>{
@@ -37,7 +37,7 @@ function machine(code,host={command:async()=>false}){
 test('VM preserves constant versus indirect assignment, comparisons, calls and flags',async()=>{
  const m=machine([
   ['WorkSetConst',[0x4000,0x4001]],['WorkSetConst',[0x4001,7]],['WorkSet',[0x4002,0x4001]],
-  ['StackPush',[0x4002]],['StackPushConst',[7]],['StackCmp',[1]],['VMJumpIf',[255,9]],
+  ['StackPush',[0x4002]],['StackPushConst',[8]],['StackCmp',[1]],['VMJumpIf',[255,9]],
   ['FlagSet',[99]],['VMHalt'],['VMCall',[12]],['FlagSet',[1]],['VMHalt'],['FlagSet',[2]],['VMReturn']
  ]);
  await m.run(1,0);assert.equal(m.state.vars[0x4000],0x4001);assert.equal(m.state.vars[0x4002],7);assert.deepEqual(m.state.flags,[2,1]);
@@ -69,4 +69,8 @@ test('The original bedroom intro emits its complete message order and simultaneo
  assert.deepEqual(messages,[0,1,2,3,4,5,6,7]);assert.equal(m.state.vars[16513],1);
  assert.ok(movements.some(([actor])=>actor===255));assert.ok(movements.some(([actor])=>actor===1));
  assert.ok(m.state.flags.includes(2434));assert.ok(!m.state.flags.includes(501));
+});
+
+test('Stack condition branches on false, independently of numeric comparison branches',async()=>{
+ for(const condition of [0,1]){const m=machine([['StackPushConst',[condition]],['VMJumpIf',[255,4]],['FlagSet',[10]],['VMHalt'],['FlagSet',[20]],['VMHalt']]);await m.run(1,0);assert.deepEqual(m.state.flags,condition?[10]:[20]);}
 });

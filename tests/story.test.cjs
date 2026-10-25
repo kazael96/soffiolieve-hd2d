@@ -12,7 +12,7 @@ test('all three choices preserve the original rival order and elemental matchups
 test('story saves are separate from the removed custom chapter',()=>{
  const values=new Map([['soffiolieve-journey-v1','{"version":1,"complete":true}']]);const storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};
  assert.equal(Story.read(storage).phase,'gift');const s=Story.fresh();Story.choose(s,'Snivy');
- s.party=[{name:'Snivy',level:5,xp:135,hp:20,status:'',pp:[{id:33,left:35}]}];
+ s.party=[{name:'Snivy',nickname:'',level:5,xp:135,hp:20,status:'',pp:[{id:33,left:35}]}];
  assert.equal(Story.write(storage,s),true);assert.deepEqual(Story.read(storage),s);assert.ok(values.has('soffiolieve-journey-v1'));
 });
 test('corrupt saves, unknown scenes and impossible starter state cannot resume',()=>{

@@ -46,7 +46,14 @@ vm.runInNewContext(fs.readFileSync(path.join(site,'opening-assets.js'),'utf8'),a
 vm.runInNewContext(fs.readFileSync(path.join(site,'opening-sprites.js'),'utf8'),assets);
 const opening=assets.window.OPENING_ASSETS;
 for(const texture of Object.values(opening.textures))assert.ok(fs.existsSync(path.join(site,texture.src)),texture.src);
-for(const frames of Object.values(assets.window.OPENING_SPRITES))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame)),frame);
+for(const frames of Object.values(assets.window.OPENING_SPRITES))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame.split('?')[0])),frame);
+for(const file of ['phone-assets.js','field-audio.js','battle-fields.js'])vm.runInNewContext(fs.readFileSync(path.join(site,file),'utf8'),assets);
+for(const frames of Object.values(assets.window.PHONE_ASSETS.portraits))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame)),frame);
+for(const record of Object.values(assets.window.FIELD_AUDIO))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
+for(const record of Object.values(assets.window.BATTLE_FIELDS.textures))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
+assert.equal(assets.window.BATTLE_FIELDS.scenes.room.fieldId,9);
+assert.equal(assets.window.BATTLE_FIELDS.scenes.room.terrain,4);
+assert.equal(assets.window.BATTLE_FIELDS.scenes.route.terrain,5);
 function reachable(map,spawn,targets){
  context.renderer.scene=map;
  assert.ok(can(...spawn),'Blocked spawn '+spawn);

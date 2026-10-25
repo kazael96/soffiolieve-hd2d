@@ -13,9 +13,9 @@ import ndspy.narc
 import ndspy.rom
 
 SELECTED = {
-    317: list(range(9)), 389: list(range(14)), 390: [0, 1, 4],
+    317: list(range(9)), 389: [*range(14),15,16], 390: [0, 1, 4],
     391: list(range(9)), 392: list(range(5)), 393: [0], 394: [0, 1],
-    395: [0], 396: [0, 9, 10, 4, 5, 6, 7, 8],
+    395: [0], 396: [0, 9, 10, 4, 5, 6, 7, 8, 12],
 }
 FORMATS = {'u8': 'B', 'u16': 'H', 'u32': 'I', 'any': 'H', 'var': 'H'}
 
@@ -113,7 +113,7 @@ def program(data, selected, table):
                         break
                 movements[str(args[1])] = sequence
             code[str(start)] = {'op': opcode, 'name': name, 'args': args, 'end': pos}
-            if name in ('VMHalt', 'VMReturn', 'VMJump'):
+            if name in ('VMHalt', 'VMReturn', 'VMJump', 'RTEndGlobal'):
                 break
     return {'entries': entries, 'supportedEntries': selected, 'code': code, 'movements': movements,
             'sourceSha256': hashlib.sha256(data).hexdigest()}
@@ -154,9 +154,21 @@ def extract(rom_path):
     for zone, selected in SELECTED.items():
         values = struct.unpack_from('<BBHHHHH4HHHHHHHHHiii', headers, 48 * zone)
         script, bank, event = values[4], values[6], values[12]
-        result['zones'][str(zone)] = {'zone': zone, 'script': script, 'text': bank, **entities(events[event])}
+        init=[];triggers=[];raw=scripts[script+1];pos=0
+        while struct.unpack_from('<H',raw,pos)[0]:
+            mode,entry=struct.unpack_from('<HI',raw,pos);pos+=6
+            if mode==1:
+                q=pos+entry
+                while struct.unpack_from('<H',raw,q)[0]:
+                    var,value,event_id=struct.unpack_from('<HHH',raw,q);q+=6
+                    triggers.append({'var':var,'value':value,'entry':event_id-1})
+            else:init.append({'mode':mode,'entry':entry-1})
+        result['zones'][str(zone)] = {'zone': zone, 'script': script, 'text': bank, 'music':values[7], 'init':init, 'onEnter':triggers, **entities(events[event])}
         result['scripts'][str(script)] = program(scripts[script], selected, table)
         result['texts'][str(bank)] = messages(text[bank])
+    result['scripts']['862'] = program(scripts[862], [0, 5], table)
+    result['texts']['283'] = messages(text[283])
+    result['phoneTexts'] = messages(narc('a/0/0/2')[192])
     return result
 
 

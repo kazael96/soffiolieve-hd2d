@@ -431,7 +431,9 @@
   },
   "231": {
     "name": "ActivateRelocator",
-    "args": []
+    "args": [
+      "u16"
+    ]
   },
   "257": {
     "name": "PokePartyIsFullHP",
@@ -621,13 +623,120 @@
     ]
   },
   "594": {
-    "name": "s0252_ActorPairGetTrID",
-    "args": [
-      "var"
-    ]
+    "name": "UnknownBW0252",
+    "args": []
   },
   "607": {
     "name": "UnknownBW025F",
+    "args": []
+  },
+  "576": {
+    "name": "UnknownBW0240",
+    "args": [
+      "u16"
+    ]
+  },
+  "183": {
+    "name": "s00B7_ItemCheckSpace",
+    "args": [
+      "any",
+      "any",
+      "var"
+    ]
+  },
+  "41": {
+    "name": "s0029_WorkGet",
+    "args": [
+      "var",
+      "var"
+    ]
+  },
+  "29": {
+    "name": "s001D_RTEndGlobal",
+    "args": []
+  },
+  "78": {
+    "name": "s004E_WordSetItemNameEx",
+    "args": [
+      "u8",
+      "any",
+      "any",
+      "u8"
+    ]
+  },
+  "181": {
+    "name": "s00B5_ItemAdd",
+    "args": [
+      "any",
+      "any",
+      "var"
+    ]
+  },
+  "187": {
+    "name": "s00BB_ItemGetPocket",
+    "args": [
+      "any",
+      "var"
+    ]
+  },
+  "82": {
+    "name": "s0052_WordSetItemPocketName",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "77": {
+    "name": "s004D_WordSetItemName",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "79": {
+    "name": "s004F_WordSetItemNameWithArticle",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "80": {
+    "name": "s0050_WordSetTMMoveName",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "590": {
+    "name": "UnknownBW024E",
+    "args": []
+  },
+  "591": {
+    "name": "UnknownBW024F",
+    "args": []
+  },
+  "73": {
+    "name": "s0049_ActorMsgVersioned",
+    "args": [
+      "any",
+      "any",
+      "any",
+      "any",
+      "any",
+      "any"
+    ]
+  },
+  "464": {
+    "name": "s01D0_UnityTowerCallFloorSelect",
+    "args": [
+      "any",
+      "var",
+      "var",
+      "var"
+    ]
+  },
+  "592": {
+    "name": "UnknownBW0250",
     "args": []
   }
 }

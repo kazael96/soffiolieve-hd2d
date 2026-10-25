@@ -1,6 +1,6 @@
 """Local conversion of user-supplied IRBI maps. Never copies the ROM into the site."""
 from pathlib import Path
-import argparse, json, math, struct, shutil, subprocess
+import argparse, json, math, struct, shutil, subprocess, hashlib
 import numpy as np
 from PIL import Image
 import ndspy.rom, ndspy.narc
@@ -31,55 +31,9 @@ def convert(model,texture,key):
 assets=OUTPUT/'assets/opening';assets.mkdir(parents=True,exist_ok=True)
 textures={};models={}
 def flatten(file,key):
-    raw=file.read_bytes();length=u32(raw,12);doc=json.loads(raw[20:20+length]);binary=raw[28+length:]
-    def accessor(index):
-        a=doc['accessors'][index];v=doc['bufferViews'][a['bufferView']]
-        fmt,size={5126:('f',4),5125:('I',4),5123:('H',2),5121:('B',1)}[a['componentType']]
-        count={'SCALAR':1,'VEC2':2,'VEC3':3,'VEC4':4,'MAT4':16}[a['type']]
-        offset=v.get('byteOffset',0)+a.get('byteOffset',0);stride=v.get('byteStride',count*size)
-        vals=np.array([struct.unpack_from('<'+fmt*count,binary,offset+i*stride) for i in range(a['count'])],dtype=float)
-        if a.get('normalized'):vals/={5121:255,5123:65535}[a['componentType']]
-        return vals
-    world={}
-    def visit(i,parent):
-        n=doc['nodes'][i]
-        if 'matrix' in n:local=np.array(n['matrix']).reshape((4,4),order='F')
-        else:
-            x,y,z,w=n.get('rotation',[0,0,0,1]);rot=np.array([[1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w)], [2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w)],[2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y)]])
-            local=np.eye(4);local[:3,:3]=rot@np.diag(n.get('scale',[1,1,1]));local[:3,3]=n.get('translation',[0,0,0])
-        world[i]=parent@local
-        for c in n.get('children',[]):visit(c,world[i])
-    for i in doc['scenes'][doc.get('scene',0)]['nodes']:visit(i,np.eye(4))
-    groups=[]
-    for ni,node in enumerate(doc['nodes']):
-        if 'mesh' not in node:continue
-        for primitive in doc['meshes'][node['mesh']]['primitives']:
-            a=primitive['attributes'];p=accessor(a['POSITION']);norm=accessor(a['NORMAL']) if 'NORMAL' in a else np.tile([0,1,0],(len(p),1))
-            matrices=np.tile(world[ni],(len(p),1,1))
-            if 'skin' in node:
-                skin=doc['skins'][node['skin']];inverse=accessor(skin['inverseBindMatrices'])
-                joints=[world[i]@inverse[j].reshape((4,4),order='F') for j,i in enumerate(skin['joints'])]
-                indices=accessor(a['JOINTS_0']).astype(int);weights=accessor(a['WEIGHTS_0'])
-                matrices=np.array([sum((joints[j]*w for j,w in zip(js,ws)),np.zeros((4,4))) for js,ws in zip(indices,weights)])
-            p=np.einsum('nij,nj->ni',matrices,np.column_stack((p,np.ones(len(p)))))[:,:3]/16
-            norm=np.einsum('nij,nj->ni',matrices[:,:3,:3],norm)
-            colors=accessor(a['COLOR_0'])[:,:3] if 'COLOR_0' in a else np.ones((len(p),3))
-            mat=doc['materials'][primitive['material']];pbr=mat.get('pbrMetallicRoughness',{});factor=pbr.get('baseColorFactor',[1,1,1,1]);colors*=factor[:3]
-            texid=pbr.get('baseColorTexture',{}).get('index');texture=None;width=height=1;sampler={}
-            if texid is not None:
-                tex=doc['textures'][texid];img=doc['images'][tex['source']]['uri'];texture=key+'-'+Path(img).stem
-                path=assets/(texture+'.png');shutil.copyfile(file.parent/img,path)
-                with Image.open(path) as im:width,height=im.size
-                textures[texture]={'src':'assets/opening/'+path.name,'w':width,'h':height}
-                sampler=doc.get('samplers',[])[tex['sampler']] if 'sampler' in tex else {}
-            uv=accessor(a['TEXCOORD_0']) if 'TEXCOORD_0' in a else np.zeros((len(p),2));uv*=np.array([width,height])
-            packed=np.concatenate([p,uv,colors,norm],axis=1)
-            idx=accessor(primitive['indices']).astype(int).flatten() if 'indices' in primitive else range(len(p))
-            groups.append({'texture':texture,'w':width,'h':height,'alpha':factor[3],
-                'repeatS':sampler.get('wrapS',10497)!=33071,'repeatT':sampler.get('wrapT',10497)!=33071,
-                'mirrorS':sampler.get('wrapS')==33648,'mirrorT':sampler.get('wrapT')==33648,
-                'verts':np.round(packed[idx].flatten(),5).tolist()})
-    models[key]={'groups':groups}
+    from nitro_geometry import flatten_glb
+    model,images=flatten_glb(file,key,assets,'assets/opening')
+    models[key]=model;textures.update(images)
 
 bundles={}
 def prop(id,indoor):
@@ -89,9 +43,9 @@ def prop(id,indoor):
     bundle=narc('a/2/3/0' if indoor else 'a/2/2/9')[member]
     count=bundle[2]//2;offsets=struct.unpack_from('<'+str(count*2)+'I',bundle,4)
     matching=[i for i in range(count) if struct.unpack_from('<H',bundle,offsets[i])[0]==id]
-    if not matching and indoor and id in (23,24):
-        # Laboratory machines have identical models in banks 1, 3, 38 and 42.
-        member=1;bundle=narc('a/2/3/0')[member];count=bundle[2]//2
+    if not matching and indoor and id in (23,24,139,140,141):
+        # The laboratory machines and room-change props are in shared bundles.
+        member=1 if id in (23,24) else 5;bundle=narc('a/2/3/0')[member];count=bundle[2]//2
         offsets=struct.unpack_from('<'+str(count*2)+'I',bundle,4)
         matching=[i for i in range(count) if struct.unpack_from('<H',bundle,offsets[i])[0]==id]
     assert matching, (kind,id)
@@ -101,7 +55,7 @@ def prop(id,indoor):
     return key
 
 scenes={}
-specs={'bedroom':[(505,212,0,0)],'home':[(504,212,0,0)],'bianca':[(502,212,0,0)],'lab':[(506,213,0,0)],'north':[(4,2,0,-64),(5,2,0,-96),(6,2,-32,-96)]}
+specs={'bedroom':[(505,212,0,0)],'bedroomMess':[(633,212,0,0)],'home':[(504,212,0,0)],'bianca':[(502,212,0,0)],'biancaRoom':[(503,212,0,0)],'komorHome':[(500,212,0,0)],'komorRoom':[(501,212,0,0)],'lab':[(506,213,0,0)],'north':[(4,2,0,-64),(5,2,0,-96),(6,2,-32,-96)]}
 for name,entries in specs.items():
     scene={'instances':[],'permissionGrids':[]}
     for id,texture,x,z in entries:
@@ -119,7 +73,7 @@ for name,entries in specs.items():
             scene['instances'].append({'model':prop((hi<<8)|lo,name!='north'),'x':x+px/65536,'y':py/65536,'z':z-pz/65536,'rotation':rot*math.tau/65536})
     scenes[name]=scene
     print('scene',name,len(scene['instances']))
-payload={'models':models,'textures':textures,'scenes':scenes,'source':{'game':'POKEMON B','code':rom.idCode.decode(),'landArchive':'a/0/0/8','landMembers':[505,504,502,506,4,5,6]}}
+payload={'models':models,'textures':textures,'scenes':scenes,'source':{'game':'POKEMON B','code':rom.idCode.decode(),'landArchive':'a/0/0/8','landMembers':sorted({member for entries in specs.values() for member,_,_,_ in entries})}}
 (OUTPUT/'opening-assets.js').write_text('window.OPENING_ASSETS='+json.dumps(payload,separators=(',',':'))+';\n',encoding='utf8',newline='\n')
 print('textures',len(textures),'models',len(models))
 
@@ -141,11 +95,29 @@ import ndspy.texture, ndspy.color
 ndspy.color.prepareLUTs()
 table=narc('a/0/4/8')[0];graphics=narc('a/0/4/9')
 fmt=struct.Struct('<HBBBBBBBBBBBbbbHHHHHH');sprites={}
-for name,id in [('Regalo',208),('Padre',24),('Viandante',18)]:
+for name,id in [('Komor',7),('Belle',134),('Aralia',105),('Mamma',147),('Regalo',208),('Padre',24),('Viandante',18),*[(f'Original{i}',i) for i in [9,14,20,22,25,26,27]]]:
     record=fmt.unpack_from(table,4+id*fmt.size);resource=record[15];tex=ndspy.texture.NSBTX(graphics[resource]);paths=[]
     palette=tex.palettes[0][1]
     palette.colors=[ndspy.color.pack(*c) for c in palette.colors]
     for i,(n,t) in enumerate(tex.textures):
-        file=f'assets/opening/{name}-{i}.png';t.renderAsImage(tex.palettes[0][1]).save(OUTPUT/file);paths.append(file)
+        t.isColor0Transparent=True
+        file=f'assets/opening/{name}-{i}.png';t.renderAsImage(tex.palettes[0][1]).save(OUTPUT/file);paths.append(file+'?v='+hashlib.sha256((OUTPUT/file).read_bytes()).hexdigest()[:12])
     sprites[name]=paths;print(name,id,resource,len(paths),[n for n,t in tex.textures][:4])
 (OUTPUT/'opening-sprites.js').write_text('window.OPENING_SPRITES='+json.dumps(sprites,separators=(',',':'))+';\n',encoding='utf8',newline='\n')
+
+# The two opening gestures are billboard animation programs in IRBI overlay 21.
+# Match the complete ROM byte sequences, including END; never infer a frame from
+# a model's texture count (Belle's padded texture slots are transparent).
+overlay=rom.loadArm9Overlays()[21]
+gestures={}
+for name,signature in {
+    'Komor':[(3,2),(12,4),(13,4),(12,2),(3,2),(13,4),(3,2)],
+    'Belle':[(3,10),(12,8),(13,25),(14,3),(3,10)],
+}.items():
+    needle=b''.join(struct.pack('<HH',*step) for step in [*signature,(0x3fff,0)])
+    assert overlay.data.count(needle)==1, f'Unexpected IRBI gesture program: {name}'
+    offset=overlay.data.index(needle)
+    steps=[list(struct.unpack_from('<HH',overlay.data,offset+i*4)) for i in range(len(signature))]
+    gestures[name]={'steps':steps,'overlay':21,'offset':offset}
+with (OUTPUT/'opening-sprites.js').open('a',encoding='utf8',newline='\n') as output:
+    output.write('window.OPENING_GESTURES='+json.dumps(gestures,separators=(',',':'))+';\n')
