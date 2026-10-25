@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="it">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soffiolieve • HD-2D</title>
+<link rel="stylesheet" href="style.css">
+<body>
+<div id="loading">Soffiolieve<span>Il vento di casa…</span>
+</div>
+<canvas id="stage">
+</canvas>
+<canvas id="world">
+</canvas>
+<header>
+<a class="brand">◈ <span>UNIMA<span class="sub">UN NUOVO INIZIO</span>
+</span>
+</a>
+<div class="place">SOFFIOLIEVE <small>Primavera · Luce del pomeriggio</small>
+</div>
+<button id="openLab" aria-label="Apri laboratorio lotte">⚗ <span>Laboratorio lotte</span>
+</button>
+<details id="audioControls">
+<summary id="audioLabel">♫ Audio spento</summary>
+<div class="audio-panel">
+<button id="audioToggle" aria-pressed="false">Attiva audio</button>
+<label>Musica <input id="volume-music" type="range" min="0" max="100" aria-label="Volume musica">
+</label>
+<label>Effetti <input id="volume-sfx" type="range" min="0" max="100" aria-label="Volume effetti">
+</label>
+<label>Versi <input id="volume-cry" type="range" min="0" max="100" aria-label="Volume versi">
+</label>
+<meter id="audioMeter" min="0" max="1" value="0" aria-label="Livello audio">
+</meter>
+<small id="audioStatus" role="status">
+</small>
+</div>
+</details>
+<button id="help" aria-label="Apri guida">? <span>Guida</span>
+</button>
+</header>
+<button id="openJournal" aria-label="Apri diario di viaggio">
+<span class="eyebrow">DIARIO DI VIAGGIO <span id="questCount">0/3</span>
+</span>
+<span id="questSummary">Parla con Belle, vicino a casa.</span>
+<span class="journal-hint">Apri diario · J</span>
+</button>
+<div class="companion">
+<div id="mini">
+</div>
+<div>
+<small>IL TUO COMPAGNO</small>
+<strong id="partnerName">Snivy <em>Lv. 8</em>
+</strong>
+<span id="partnerHp">
+</span>
+</div>
+<button id="team" aria-label="Cambia compagno" title="Cambia compagno">⇄</button>
+</div>
+<footer>
+<div>
+<kbd>W A S D</kbd> / <kbd>↑ ↓ ← →</kbd> Muoviti <b>·</b> <kbd>E</kbd> Interagisci <b>·</b> <kbd>Shift</kbd> Corri</div>
+<span>SOFFIOLIEVE <b>●</b> DEMO 0.9</span>
+</footer>
+<div id="zoomControls" role="group" aria-label="Zoom visuale">
+<button id="zoomOut" aria-label="Riduci zoom">−</button>
+<output id="zoomValue">140%</output>
+<button id="zoomIn" aria-label="Aumenta zoom">+</button>
+</div>
+<div id="context" hidden>
+</div>
+<div id="toast">
+</div>
+<div id="touch" aria-label="Comandi su schermo">
+<div class="direction-pad">
+<button data-key="ArrowUp" aria-label="Vai a nord">↑</button>
+<button data-key="ArrowLeft" aria-label="Vai a ovest">←</button>
+<button data-key="ArrowDown" aria-label="Vai a sud">↓</button>
+<button data-key="ArrowRight" aria-label="Vai a est">→</button>
+</div>
+<div class="touch-actions">
+<button data-key="Shift" aria-label="Tieni premuto per correre">Corri</button>
+<button id="interact" aria-label="Interagisci">Parla · E</button>
+</div>
+</div>
+<dialog id="journal" aria-labelledby="journalTitle">
+<div class="journal-heading">
+<div>
+<span class="eyebrow">SOFFIOLIEVE / CAPITOLO 01</span>
+<h2 id="journalTitle">Il vento di casa.</h2>
+</div>
+<button id="closeJournal" aria-label="Chiudi diario">✕</button>
+</div>
+<p id="questObjective">
+</p>
+<ol class="journey-steps">
+<li>
+<strong>Belle</strong>
+<span>Vicino a casa, nel centro del paese.</span>
+<small id="visitBelle">Da incontrare</small>
+</li>
+<li>
+<strong>Komor</strong>
+<span>Sul sentiero a est, oltre la casa con il tetto blu.</span>
+<small id="visitKomor">Da incontrare</small>
+</li>
+<li>
+<strong>Aralia</strong>
+<span>Davanti al laboratorio, a nord-ovest.</span>
+<small id="visitAralia">Da incontrare</small>
+</li>
+</ol>
+<p class="fine">Le lotte con Belle e Komor sono facoltative. Parla con entrambi, poi torna da Aralia per completare il primo incontro.</p>
+<fieldset>
+<legend>Come vuoi esplorare?</legend>
+<label>
+<input type="checkbox" id="touchPreference"> Mostra sempre i comandi su schermo</label>
+<label>
+<input type="checkbox" id="focusPreference"> Messa a fuoco uniforme</label>
+</fieldset>
+<p id="saveStatus" role="status">
+</p>
+<p class="fine">Il salvataggio è locale a questo browser. Riprendi dall’ultimo punto salvato fuori dalla lotta. La modalità privata o la cancellazione dei dati del sito possono rimuoverlo.</p>
+<div class="journal-actions">
+<button id="saveNow">Salva adesso</button>
+<button id="resetJourney">Ricomincia</button>
+</div>
+<div id="resetConfirmation" hidden>
+<p>Vuoi ricominciare? Posizione, compagno e incontri salvati verranno sostituiti.</p>
+<button id="cancelReset">Continua il viaggio</button>
+<button id="confirmReset">Sì, ricomincia</button>
+</div>
+</dialog>
+<dialog id="dialogue" aria-labelledby="dialogueTitle">
+<div class="speaker">
+<img id="dialoguePortrait" alt="" width="64" height="64">
+<span id="speakerName" class="eyebrow">
+</span>
+</div>
+<h2 id="dialogueTitle">
+</h2>
+<p id="dialogueText">
+</p>
+<div class="dialogue-actions">
+<button id="dialogueContinue">A presto!</button>
+<button id="dialogueBattle">Allenati</button>
+</div>
+</dialog>
+<dialog id="modal">
+<span class="eyebrow">SOFFIOLIEVE / DEMO 0.9</span>
+<h2>Il vento di casa.</h2>
+<p>Geometrie, texture del paese e sprite letti dalla ROM italiana di Pokémon Nero, con illuminazione calda, profondità e ombre morbide.</p>
+<p>
+<b>WASD o frecce</b> per muoverti, <b>Shift</b> per correre, <b>E</b> per interagire. <b>♫ Audio</b> attiva musica, versi ed effetti originali; i volumi sono regolabili separatamente. <b>Rotellina o + / −</b> per lo zoom (90–200%). <b>V</b> cambia la messa a fuoco. <b>J</b> apre il diario con obiettivi e salvataggio. I comandi touch compaiono sugli schermi piccoli e si possono attivare dal diario; tieni premuto <b>Corri</b> insieme a una direzione.</p>
+<p>
+<b>Belle e Komor</b> ti aspettano per parlare e, se vuoi, allenarti. <b>Aralia</b>, davanti al laboratorio a nord-ovest, e la porta di casa tua ripristinano PS e PP. Con <b>⇄</b> puoi cambiare starter fuori dalla lotta.</p>
+<p>Gli incontri selvatici sono spostati nell’area di prova all’uscita nord, verso il Percorso 1: il prato nel paese della vecchia demo è stato rimosso.</p>
+<p class="fine">L’aspetto del paese usa i dati originali; dialoghi e collocazione dei personaggi sono adattati alla demo. Le lotte usano Pokémon Showdown in modalità quinta generazione, con 559 mosse e 164 abilità collegate ai dati della ROM. Dal Laboratorio lotte puoi configurare squadre e mosse per prove libere.</p>
+<button onclick="this.closest('dialog').close()">Esplora Soffiolieve →</button>
+</dialog>
+<dialog id="lab">
+<div class="lab-title">
+<div>
+<span class="eyebrow">LABORATORIO DI ARALIA</span>
+<h2>Ogni mossa ha una storia.</h2>
+</div>
+<button onclick="this.closest('dialog').close()" aria-label="Chiudi laboratorio">✕</button>
+</div>
+<p>Regole di Pokémon Nero · 559 mosse · 164 abilità · 649 Pokémon.<br>Le combinazioni sono libere per provare gli effetti, anche fuori dall’apprendimento normale.</p>
+<label>Scenario <select id="labPreset">
+<option value="standard">Allenamento</option>
+<option value="states">Iperveleno, Parassiseme e Sostituto</option>
+<option value="weather">Meteo e mosse caricate</option>
+<option value="abilities">Inversione e Magispecchio</option>
+</select>
+</label>
+<div class="lab-grid">
+<div id="p1Setup">
+<h3>Il tuo Pokémon</h3>
+</div>
+<div id="p2Setup">
+<h3>Avversario</h3>
+</div>
+</div>
+<div class="lab-options">
+<label>Meteo iniziale <select id="labWeather">
+<option value="">Nessuno</option>
+<option value="raindance">Pioggia</option>
+<option value="sunnyday">Sole</option>
+<option value="sandstorm">Sabbia</option>
+<option value="hail">Grandine</option>
+</select>
+</label>
+<label>
+<input id="reserves" type="checkbox" checked> Aggiungi due riserve per provare i cambi</label>
+</div>
+<p class="fine">Le abilità e le mosse sono risolte dal simulatore Gen 5; numeri e nomi vengono dalla ROM. I Pokémon usano le sequenze originali della ROM; gli effetti delle mosse usano texture ed emissioni originali, con proiezione HD-2D adattata. Alcune funzioni visive native non sono ancora riprodotte. Musica, versi ed effetti ROM sono attivabili da ♫ Audio. Le prove non modificano il tuo compagno nel paese.</p>
+<button id="launchLab">Inizia la prova →</button>
+</dialog>
+<section id="battle" hidden>
+<div class="battle-top">
+<span>UNIMA / CAMPO DI LOTTA</span>
+<button id="animationSpeed" title="Rallenta le animazioni per osservarle">Animazioni ×1</button>
+<button id="exitBattle" hidden>Torna al villaggio →</button>
+</div>
+<canvas id="arena">
+</canvas>
+<div id="moveCaption" hidden>
+</div>
+<div id="enemyCard" class="stat enemy">
+</div>
+<div id="playerCard" class="stat player">
+</div>
+<div class="battle-panel">
+<div id="log" aria-live="polite">
+</div>
+<div>
+<div id="moves">
+</div>
+<div class="actions">
+<button id="switchMon">Cambio ⇄</button>
+<button id="potion">Pozione <span>×3</span>
+</button>
+<button id="run">Fuga ↗</button>
+</div>
+</div>
+</div>
+</section>
+<script src="assets/scene.js">
+</script>
+<script src="assets/sprites.js">
+</script>
+<script src="world3d.js">
+</script>
+<script src="assets/battle-data.js">
+</script>
+<script src="battle-sim.js">
+</script>
+<script src="engine.js">
+</script>
+<script src="assets/audio-catalog.js">
+</script>
+<script src="assets/audio-data.js">
+</script>
+<script src="native-audio.js">
+</script>
+<script src="assets/native-audio-bank.js">
+</script>
+<script src="audio-engine.js">
+</script>
+<script src="assets/move-fx-data.js">
+</script>
+<script src="assets/visual-camera.js">
+</script>
+<script src="native-visual.js">
+</script>
+<script src="particle-spl.js">
+</script>
+<script src="move-fx.js">
+</script>
+<script src="pokemon-anim.js">
+</script>
+<script src="assets/form-sprites.js">
+</script>
+<script src="input.js">
+</script>
+<script src="journey-state.js">
+</script>
+<script src="game.js">
+</script>
+<script src="battle-events.js">
+</script>
+<script src="battle-context.js">
+</script>
+<script src="battle-ui.js">
+</script>
+<script src="animation-preview.js">
+</script>
+<script src="journey.js">
+</script>
+</body>
+</html>

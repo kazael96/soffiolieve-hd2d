@@ -1,0 +1,78 @@
+/* Original Nitro SPA textures and script spawn order. HD-2D projection is adapted.
+ * This is deliberately not presented as a complete native battle-animation VM. */
+(()=>{
+ const data=window.ROM_MOVE_FX,images=new Map();let active=null,playbackSpeed=1,generation=0;
+ const rand=(n)=>{let x=Math.sin(n*127.1+311.7)*43758.5453123;return x-Math.floor(x)},clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ const rgb=v=>[(v&31)*255/31,(v>>5&31)*255/31,(v>>10&31)*255/31];
+ function image(t){if(!t)return null;let im=images.get(t.name);if(!im){im=new Image();im.src='assets/move-fx/'+t.name;images.set(t.name,im)}return im}
+ function life(e){return Math.min(240,Math.max(1,e.delay)+Math.max(1,e.emitterLife||1)+Math.max(1,e.life||20)+1+Math.max(0,e.child?.life||0))}
+ function timeline(move,variant=0,depth=0,side='p1',context={}){
+  const v=move?.variants[Math.min(variant,move.variants.length-1)],events=[],audio=[],visual=[];let at=0,end=0,skipBytes=0;
+  for(const [op,a] of v?.commands||[]){
+   if(skipBytes>0){skipBytes-=2+a.length*4;continue}
+   if(op===72){skipBytes=Math.max(0,a[0]);continue}
+   if(op===59&&[19,39].includes(a[0])){let x=a[0]===19?(side==='p2'?1:0):(context.layout??0),y=a[2],condition=[x===y,x!==y,x<y,x>y,x<=y,x>=y][a[1]];if(condition)skipBytes=Math.max(0,a[3]);continue}
+   if(op===77)break;
+   if(op===74&&depth<4){let child=data.moves[a[0]];if(child&&child.id!==move.id){let t=timeline(child,0,depth+1,side,context);for(let e of t.events)events.push({...e,start:e.start+at,end:e.end+at});for(let e of t.audio)audio.push({...e,start:e.start+at});for(let e of t.visual||[])visual.push({...e,start:e.start+at,end:e.end+at});end=Math.max(end,at+t.frames);at=end;break}}
+   if(op===11)for(let e of events)if(e.spa.id===a[0]&&e.end>at)e.end=at;
+   if(window.NativeVisual?.supported.has(op)){let event={op,args:a,start:at,end:at+window.NativeVisual.duration(op,a)};visual.push(event);end=Math.max(end,event.end);if(op===36)backgroundImage(a[0])}
+   if(op===54){let raw=[a[0],a[1],2,0,0,a[4],a[5],a[6],a[7]];audio.push({kind:'panControl',channel:a[0],start:at,raw,from:a[2],to:a[3]});end=Math.max(end,window.NativeAudio?.controlEnd(raw,at)??at)}
+   if(op===52&&a[0]>0){let start=at+Math.max(0,a[3]||0);audio.push({kind:'sfx',id:a[0],channel:a[1],target:a[2],start,raw:a});end=Math.max(end,start+1)}
+   if(op===55){audio.push({kind:'control',channel:a[0],start:at,raw:a});end=Math.max(end,window.NativeAudio?.controlEnd(a,at)??at)}
+   if(op===67){let start=at+Math.max(0,a[6]||0);audio.push({kind:'cry',target:a[0],start,raw:a});end=Math.max(end,start+1)}
+
+   if(op===57){at+=clamp(a[0],0,300);continue}
+   if(op===56){at=Math.max(at,end);continue}
+   if([7,8,9,10,12,13,14,15,16,17].includes(op)){
+    const spa=data.spas[a[0]],sourceEmitter=spa?.emitters[a[1]];if(!sourceEmitter)continue;let params=[1,1,1,1];if([7,9,10].includes(op))params=a.slice(7,11).map(v=>v?v/4096:1);else if(op===8)params=a.slice(11,15).map(v=>v?v/4096:1);else if([12,13,14,15].includes(op)){let explicit=op===13||op===15;params=[op===14?.75:1,(a[explicit?10:8]||4096)/4096,op===14?.75:1,(a[explicit?11:9]||4096)/4096]}const e={...sourceEmitter,radius:sourceEmitter.radius*params[0],length:sourceEmitter.length*params[0],life:Math.floor(sourceEmitter.life*params[1]),scale:sourceEmitter.scale*params[2],radialVelocity:sourceEmitter.radialVelocity*params[3],axialVelocity:sourceEmitter.axialVelocity*params[3]};
+    const target=[7,9,10].includes(op)?a[2]:[12,14].includes(op)?a[4]:11;
+    const travel=[12,13,14,15].includes(op),trajectoryFrames=travel?Math.max(1,(a[op===13||op===15?8:6]||4096)>>12):0,length=Math.max(life(e),trajectoryFrames),event={op,args:a,spa,e,emitterIndex:a[1],sourceEmitter,start:at,end:at+length,target,travel,trajectoryFrames,spawnScale:1,offset:[0,0,0],scale:[1,1,1],opacity:1};
+    // Target-attached commands carry three fx32 position and scale components.
+    // Target codes are mapped to the corresponding HD-2D billboard anchor.
+    if([7,9,10].includes(op)){event.offset=[0,(a[4]||0)/4096,0];event.scale=[1,1,1];event.opacity=1}
+    else if(op===8){event.offset=a.slice(2,5).map(v=>v/4096);event.scale=[1,1,1];event.opacity=1}
+    if(travel){event.offset=[0,(a[op===13||op===15?7:5]||0)/4096,0];event.scale=[1,1,1]}if(target===18&&!travel){events.push({...event,target:14},{...event,target:16})}else events.push(event);end=Math.max(end,event.end);
+    image(spa.textures[e.texture]);for(let k of e.textureKeys||[])image(spa.textures[k]);if(e.child)image(spa.textures[e.child.texture]);
+   }
+   // Sprite deformation task opcodes. Retained as script events, projected onto billboards.
+   if(!window.NativeVisual&&[18,19,21,22,23].includes(op)){let duration=12;events.push({pose:true,op,args:a,start:at,end:at+duration});end=Math.max(end,at+duration)}
+  }
+  // Native resource/sound-only scripts keep a short action window, without invented particles.
+  return{events,audio,visual,frames:Math.max(28,end,at),nativeFrames:Math.max(28,end,at)};
+ }
+ function cancel(){window.ParticleSPL?.clear();window.AudioEngine?.cancelMove();generation++;if(active){clearTimeout(active.timer);active.resolve();active=null}}
+ function preload(moveId){let m=data?.moves[moveId],pending=[];for(let variant of m?.variants||[])for(let [op,a]of variant.commands)if(op===36){let im=backgroundImage(a[0]);if(!im.complete)pending.push(new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}))}for(let id of m?.spas||[])for(let t of data.spas[id]?.textures||[]){let im=image(t);if(!im.complete)pending.push(new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}))}return Promise.race([Promise.all(pending),new Promise(resolve=>setTimeout(resolve,1000))])}
+ async function play(moveId,side='p1',options={}){
+  cancel();const token=generation,move=data?.moves[moveId];if(!move)return;const choice=window.BattleContext?.choose(move,options.context||{});if(choice&&options.variant===undefined)options.variant=choice.variant;
+  await Promise.all([preload(moveId),window.AudioEngine?.preloadMove(moveId,options.cryIds,options.variant||0,playbackSpeed,side)]);if(token!==generation)return;
+  const sequence=timeline(move,options.variant||0,0,side,options.context||{}),speed=playbackSpeed;
+  return new Promise(resolve=>{const x=active={moveId,side,targetSide:options.targetSide||(side==='p1'?'p2':'p1'),miss:!!options.miss,hiddenSides:options.hiddenSides||[],sequence,speed,start:performance.now(),resolve};window.AudioEngine?.beginMove(sequence.audio,{moveId,variant:options.variant||0,side,targetSide:x.targetSide,speed,cryIds:options.cryIds,miss:options.miss});x.timer=setTimeout(()=>{if(active===x){active=null;window.AudioEngine?.cancelMove();resolve()}},sequence.frames/speed*1000/60+30)});
+ }
+ function frame(){return active?(active.preview?active.previewFrame:(performance.now()-active.start)*.06*active.speed):0}
+ async function preview(moveId,side='p1',variant=0){cancel();await preload(moveId);let sequence=timeline(data.moves[moveId],variant,0,side);active={moveId,side,targetSide:side==='p1'?'p2':'p1',sequence,preview:true,previewFrame:sequence.frames*.5,speed:1,resolve(){}};return sequence.frames}
+ function point(side,W,H){let s=Math.min(W/1000,H/650),p=side==='p1'?{x:W*.31,y:H*.66-80*s}:{x:W*.69,y:H*.43-60*s},pose=window.NativeVisual?.sprite(active?.sequence.visual||[],frame(),side,active?.side,active?.targetSide);if(pose){p.x+=pose.x*s;p.y+=pose.y*s}return p}
+ function keys(values,t,times){if(!values)return 1;let a=times?.[0]??.15,b=times?.[1]??.8;if(t<a)return values[0]+(values[1]-values[0])*t/Math.max(.001,a);if(t>b)return values[1]+(values[2]-values[1])*(t-b)/Math.max(.001,1-b);return values[1]}
+ function emitterPoint(ev,t,from,to,s){if(ev.op===16){let a=ev.args,center=a[2]===1?from:to,period=Math.max(1,a[6]),phase=Math.max(0,t-Math.max(0,a[8]))/(period*(Math.max(0,a[7])+1))*Math.PI*2;return{x:center.x+Math.cos(phase)*a[3]/4096*4*s,y:center.y-a[5]/4096*4*s+Math.sin(phase)*a[4]/4096*1.5*s}}if(!ev.travel)return [9,14,15].includes(ev.target)?from:to;let a=ev.args,explicit=ev.op===13||ev.op===15,startCode=explicit?14:a[3],endCode=explicit?a[6]:a[4],start=[9,14,15].includes(startCode)?from:to,end=[9,14,15].includes(endCode)?from:to;if(explicit)start={x:from.x+a[3]/4096*4*s,y:from.y-a[4]/4096*4*s+a[5]/4096*1.5*s};let p=clamp(t/Math.max(1,ev.trajectoryFrames),0,1),u=(1-Math.cos(p*Math.PI))*.5,height=[1,4].includes(a[2])?0:(a[explicit?9:7]||0)/4096,wave=a[2]>=5?Math.sin(p*Math.PI*Math.max(1,a[explicit?12:10]||1)):Math.sin(p*Math.PI);return{x:start.x+(end.x-start.x)*u,y:start.y+(end.y-start.y)*u-height*wave*4*s}}
+ function renderParticle(c,e,spa,appearance,motion,origin,s,transform){let tex=spa.textures[appearance.texture],im=image(tex);if(!im?.complete||!im.naturalWidth||appearance.scale<=0||motion.dead)return;let source=tint(im,tex,appearance.color),p=motion.p,flags=e.texturePositionFlags||0,tile=e.textureLoopFlags||0,tilesX=1<<(tile&3),tilesY=1<<(tile>>2&3);if(tilesX>1||tilesY>1){let key=tex.name+':'+appearance.color+':'+tilesX+':'+tilesY,atlas=tiled.get(key);if(!atlas){atlas=document.createElement('canvas');atlas.width=tex.w;atlas.height=tex.h;let cx=atlas.getContext('2d');for(let y=0;y<tilesY;y++)for(let x=0;x<tilesX;x++)cx.drawImage(source,x*tex.w/tilesX,y*tex.h/tilesY,tex.w/tilesX,tex.h/tilesY);tiled.set(key,atlas);if(tiled.size>256)tiled.delete(tiled.keys().next().value)}source=atlas}
+  let size=clamp(appearance.scale*14*s,0,240*s),aspect=e.aspect||1,drawType=e.flags>>4&3,rotation=appearance.angle;if(drawType===1||drawType===3)rotation+=Math.atan2(-motion.v[1]+motion.v[2]*.375,motion.v[0]);let x=origin.x+(p[0]+e.position[0]+transform.offset[0]+e.offset[0]/4096)*4*s,y=origin.y-(p[1]+e.position[1]+transform.offset[1]+e.offset[1]/4096)*4*s+(p[2]+e.position[2]+transform.offset[2])*1.5*s;
+  c.save();c.translate(x,y);c.rotate(rotation);c.globalAlpha=clamp(appearance.alpha*transform.opacity,0,1);c.scale(transform.scale[0]*(flags&1?-1:1),transform.scale[1]*(flags&2?-1:1));c.imageSmoothingEnabled=false;let w=size*2*aspect,h=size*2*tex.h/tex.w;if(drawType>=2&&!(e.flags&0x80000))h*=.45;c.drawImage(source,-w/2,-h/2,w,h);c.restore();
+ }
+ const tiled=new Map();
+ const tints=new Map();function tint(im,tex,color){if(color===32767||color===undefined)return im;let key=tex.name+':'+color;if(tints.has(key))return tints.get(key);let cs=Array.isArray(color)?color:rgb(color),can=document.createElement('canvas');can.width=tex.w;can.height=tex.h;let cx=can.getContext('2d');cx.drawImage(im,0,0);let pixels=cx.getImageData(0,0,tex.w,tex.h);for(let i=0;i<pixels.data.length;i+=4)for(let j=0;j<3;j++)pixels.data[i+j]*=cs[j]/255;cx.putImageData(pixels,0,0);tints.set(key,can);if(tints.size>512)tints.delete(tints.keys().next().value);return can}
+ function draw(c,W,H){const x=active,S=window.ParticleSPL;if(!x||!S)return;const f=frame(),s=Math.min(W/1000,H/650),from=point(x.side,W,H),to=point(x.targetSide,W,H);let total=0;
+  for(let n=0;n<x.sequence.events.length;n++){let ev=x.sequence.events[n];if(ev.pose||f<ev.start||f>ev.end)continue;let e=ev.e,attached=[9,14,15].includes(ev.target);if(x.miss&&!ev.travel&&!attached)continue;let ef=f-ev.start-e.delay,maxLife=e.life+1+(e.child?.life||0),interval=Math.max(1,e.interval||1),emitterLife=Math.max(1,e.emitterLife||1),rate=clamp(e.rate||0,0,48),first=Math.max(0,Math.ceil((ef-maxLife)/interval)),last=Math.min(Math.floor(ef/interval),Math.ceil(emitterLife/interval)-1),parents=[],children=[];
+   for(let b=first;b<=last&&total<2500;b++){let count=Math.floor((b+1)*rate)-Math.floor(b*rate);for(let i=0;i<count&&total<2500;i++){let age=ef-b*interval,index=n*100003+b*97+i,seed=index*19+x.moveId,duration=S.life(e,seed),birth=b*interval;if(age<0)continue;let origin=emitterPoint(ev,e.flags&32768?ef:birth,from,to,s),appearance=S.animation(e,Math.min(age,duration),duration,seed),motion=S.motion(e,Math.min(age,duration),seed);if(age<=duration&&!(e.flags&0x400000)){parents.push([e,appearance,motion,origin]);total++}
+    for(let cb of S.children(e,duration,age)){if(total>=2500)break;let pa=S.animation(e,cb.birth,duration,seed),pm=S.motion(e,cb.birth,seed),childSeed=seed+cb.birth*8191+cb.index*67+1,child=S.child(e,pm,pa,cb.birth,childSeed),resource=child.resource,ca=S.animation(resource,cb.age,Math.max(1,resource.life),childSeed),cm=S.motion(resource,cb.age,childSeed,child.initialState),co=emitterPoint(ev,resource.flags&32768?ef:birth+cb.birth,from,to,s);children.push([resource,ca,cm,co]);total++}
+   }}let layers=e.flags&0x200000?[children,parents]:[parents,children];for(let layer of layers)for(let [resource,appearance,motion,origin]of layer)renderParticle(c,resource,ev.spa,appearance,motion,origin,s,ev);
+  }
+ }
+ function pose(side){if(window.NativeVisual)return window.NativeVisual.sprite(active?.sequence.visual||[],frame(),side,active?.side,active?.targetSide,!active?.hiddenSides?.includes(side));if(!active)return{x:0,y:0,alpha:1,scale:1};let f=frame(),x=0,y=0,scale=1;for(let e of active.sequence.events){if(!e.pose||f<e.start||f>e.end)continue;let a=e.args,target=a[0]===14?active.side:active.targetSide;if(side!==target||active.miss&&target===active.targetSide)continue;let p=(f-e.start)/(e.end-e.start),wave=Math.sin(p*Math.PI);if(e.op===18){x+=wave*(active.side==='p1'?1:-1)*clamp(Math.abs(a[2])/4096*14,4,40)}else if(e.op===21){x+=Math.sin(p*Math.PI*2*Math.max(1,a[4]))*clamp(Math.abs(a[2])/4096*8,2,14)}else if(e.op===19){y-=wave*16;scale+=wave*.05}else{y-=wave*5}}return{x,y,alpha:1,scale}}
+ const backgrounds=new Map(),tintedBackgrounds=new Map();
+ function backgroundImage(id){let im=backgrounds.get(id);if(!im){im=new Image();im.src='assets/battle-backgrounds/'+id+'.png';backgrounds.set(id,im)}return im}
+ function visualState(){let events=active?.sequence.visual||[],f=frame();return{camera:window.NativeVisual?.camera(events,f,active?.side,active?.targetSide)||{x:0,y:0,zoom:1},background:window.NativeVisual?.background(events,f,active?.side)||{},hud:window.NativeVisual?.hud(events,f,active?.side,active?.targetSide)}}
+ function drawBackground(c,W,H){let b=visualState().background;if(!b.visible||b.id===null)return;let im=backgroundImage(b.id);if(!im.complete||!im.naturalWidth)return;let source=im;
+  if(b.tint>0){let key=b.id+':'+b.color+':'+Math.round(b.tint*16),cache=tintedBackgrounds.get(key);if(!cache){cache=document.createElement('canvas');cache.width=im.naturalWidth;cache.height=im.naturalHeight;let cx=cache.getContext('2d');cx.drawImage(im,0,0);let cs=rgb(b.color);cx.globalCompositeOperation='source-atop';cx.fillStyle='rgba('+cs.join(',')+','+b.tint+')';cx.fillRect(0,0,cache.width,cache.height);tintedBackgrounds.set(key,cache)}source=cache}
+  let scale=Math.max(W/256,H/192),tw=im.naturalWidth*scale,th=im.naturalHeight*scale,ox=(-b.x*scale%tw+tw)%tw,oy=(-b.y*scale%th+th)%th;c.save();c.imageSmoothingEnabled=false;for(let x=ox-tw;x<W;x+=tw)for(let y=oy-th;y<H;y+=th)c.drawImage(source,x,y,tw,th);c.restore();
+ }
+ window.MoveFX={play,draw,pose,cancel,preload,visualState,drawBackground,preview,idleTick(side){return active?.preview?window.NativeVisual?.idleTick(active.sequence.visual,frame(),side,active.side,active.targetSide):null},setPreviewFrame(f){if(active?.preview)active.previewFrame=clamp(+f,0,active.sequence.frames)},get speed(){return playbackSpeed},set speed(v){playbackSpeed=v===.5?.5:1},get active(){return active},get coverage(){return data?.coverage},timeline};
+})();

@@ -1,0 +1,60 @@
+const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d'),arena=$('arena'),ac=arena.getContext('2d');
+let W,H,t=0,last=0,keys={},player={x:-2,y:0},partner=makeMon('Snivy'),enemy,battling=false,busy=false,finished=false,trainer=false,potions=3,steps=0,cooldown=0,facing=3,moving=false,rival='Belle';
+const renderer=new VillageRenderer($('stage'));
+function menuOpen(){return !!document.querySelector('dialog[open]');}
+const controls=VillageInput.attach({target:window,document,buttons:document.querySelectorAll('[data-key]'),enabled:()=>!battling&&!menuOpen()});
+function resetInput(){controls.reset();keys={};document.querySelectorAll('[data-key]').forEach(button=>button.classList.remove('held'));}
+
+const npcs=[{name:'Belle',x:-4,y:-.5,frame:3},{name:'Komor',x:4,y:-7,frame:3},{name:'Aralia',x:-5,y:-9.3,frame:3}];
+const spriteEffectBuffers={},battleImages={};for(let name of ['Snivy','Tepig','Oshawott','Patrat','Lillipup'])for(let side of ['front','back']){let im=new Image();im.src='assets/'+name+'-'+side+'.png';battleImages[name+'-'+side]=im}
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;arena.width=W;arena.height=H;ctx.imageSmoothingEnabled=false;ac.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
+function ellipse(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill()}
+function poly(c,pts,color){c.fillStyle=color;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fill()}
+function blocked(x,z){if(x< -11.6||x>7.6||z< -25.5||z>9.4)return true;let grid=ROM_SCENE.permissionGrids.find(g=>x>=g.x-16&&x<g.x+16&&z>=g.z-16&&z<g.z+16);if(!grid)return true;let gx=Math.floor(x-grid.x)+16,gz=Math.floor(z-grid.z)+16,index=8+(gz*32+gx)*8;return (grid.bytes[index+2]&1)!==0;}
+function drawWorld(){canvas.dataset.position=JSON.stringify({x:player.x,y:player.y,t});canvas.dataset.facing=String(facing);canvas.dataset.moving=String(moving);canvas.dataset.assets=renderer.ready?'ready':'loading';ctx.clearRect(0,0,W,H);let a=1-Math.exp(-.035);let cx=Math.max(-2.5,Math.min(2.5,player.x*.4)),cz=Math.max(-7,Math.min(1.5,player.y*.35));renderer.center[0]+=(cx-renderer.center[0])*a;renderer.center[1]+=(cz-renderer.center[1])*a;let frame=facing+(moving?(Math.floor(t*9)%4===1?1:Math.floor(t*9)%4===3?2:0):0);renderer.draw(t,[...npcs.map(n=>({name:n.name,x:n.x,z:n.y,frame:n.frame})),{name:'Alcide',x:player.x,z:player.y,frame}]);
+ let near=npcs.filter(n=>Math.hypot(n.x-player.x,n.y-player.y)<2.2).sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0];let hint=near?'E · '+near.name:Math.hypot(player.x+1,player.y+2.5)<1.3?'E · Casa tua':Math.hypot(player.x+6.5,player.y+9)<2?'E · Laboratorio':'';$('context').textContent=hint;$('context').hidden=!hint;
+ for(let i=0;i<15;i++){let x=(i*173+t*13)%W,y=(i*97+Math.sin(t*.4+i)*16)%H;ellipse(ctx,x,y,1.4,.8,'#fff5cf55')}
+}
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').style.display='none',4000)}function refresh(){ $('partnerName').innerHTML=`${partner.name} <em>Lv. ${partner.level}</em>`;$('mini').style.backgroundImage='url(assets/pokemon/'+partner.spriteId+'-front.png)';$('partnerHp').textContent=`${partner.hp} / ${partner.max} PS ${partner.status}`}
+function interact(){
+ if(battling||menuOpen())return;
+ const near=npcs.filter(n=>Math.hypot(player.x-n.x,player.y-n.y)<2.2).sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y))[0];
+ if(near){window.Journey?.talk(near.name);return;}
+ if(Math.hypot(player.x+1,player.y+2.5)<1.3){window.Journey?.heal();toast('Mamma: «Riposati un po’ prima di ripartire!» PS, PP e pozioni ripristinati.');return;}
+ toast('Avvicinati a Belle, Komor o Aralia e premi E. Nel diario trovi il prossimo incontro.');
+}
+addEventListener('keydown',event=>{
+ if(event.repeat||event.ctrlKey||event.metaKey||event.altKey||event.target.closest?.('input,select,textarea,dialog,[contenteditable="true"]')||menuOpen())return;
+ const key=event.key.toLowerCase();
+ if(key==='e'){event.preventDefault();interact();}
+ if(key==='j'){event.preventDefault();window.Journey?.openJournal();}
+ if(key==='v'&&!battling){renderer.cinema=!renderer.cinema;$('focusPreference').checked=!renderer.cinema;window.Journey?.save();toast(renderer.cinema?'Luce cinematografica attiva':'Messa a fuoco uniforme');}
+});
+$('interact').onclick=interact;
+$('help').onclick=()=>{if(battling||menuOpen())return;resetInput();$('modal').showModal();};
+$('team').onclick=()=>{if(battling||menuOpen())return;const names=['Snivy','Tepig','Oshawott'];partner=makeMon(names[(names.indexOf(partner.name)+1)%3]);refresh();window.Journey?.save();toast(partner.name+' è pronto a partire!');};
+function monster(c,name,x,y,size,back=false,tick=performance.now()*.06,graphicOverride){let info=GEN5.species.find(p=>p.en===name),form=window.ROM_FORM_SPRITES?.[name.toLowerCase().replace(/[^a-z0-9]/g,'')],baseId=info?.id||form?.species||495,id=graphicOverride||form?.graphic||baseId,key=id+'-'+(back?'back':'front'),im=battleImages[key];if(!im){im=battleImages[key]=new Image();im.src='assets/pokemon/'+baseId+'-'+(back?'back':'front')+'.png'}ellipse(c,x,y,35*size,8*size,'#14392b4f');if(window.ROM_SPRITE_ANIM?.draw(c,id,back,x,y,size,tick))return;if(im.complete&&im.naturalWidth){let h=80*size,w=h*im.naturalWidth/im.naturalHeight;c.save();c.imageSmoothingEnabled=false;c.drawImage(im,x-w/2,y-h,w,h);c.restore()}}
+function drawArena(){
+ ac.fillStyle='#17382f';ac.fillRect(0,0,W,H);ac.save();let native=window.MoveFX?.visualState(),camera=native?.camera||{x:0,y:0,zoom:1},background=native?.background||{},bs=Math.min(W/1000,H/650);
+ ac.translate(W*.5+camera.x*bs,H*.5+camera.y*bs);ac.scale(camera.zoom,camera.zoom);ac.translate(-W*.5,-H*.5);
+ let g=ac.createLinearGradient(0,0,0,H);g.addColorStop(0,'#9ab9ad');g.addColorStop(.45,'#d0d4a1');g.addColorStop(1,'#63866b');ac.fillStyle=g;ac.fillRect(-W,-H,W*3,H*3);
+ if(!background.hideSky)for(let i=-4;i<22;i++){ac.fillStyle=i%2?'#73957c':'#7fa087';ac.beginPath();ac.moveTo(i*W/15-100,H*.52);ac.lineTo(i*W/15,H*.12+(i%3)*30);ac.lineTo(i*W/15+110,H*.52);ac.fill()}
+ if(!background.hideGround){ellipse(ac,W*.69,H*.43,W*.19,H*.055,'#a7b679');ellipse(ac,W*.31,H*.66,W*.22,H*.065,'#a7b679')}
+ if(background.worldTint>0){let col=background.worldColor;ac.fillStyle='rgba('+[(col&31)*255/31,(col>>5&31)*255/31,(col>>10&31)*255/31].join(',')+','+background.worldTint+')';ac.fillRect(-W,-H,W*3,H*3)}
+ window.MoveFX?.drawBackground(ac,W,H);let size=Math.min(W/1000,H/650);combatant(ac,enemy.name,W*.69,H*.43,size*1.7,false,'p2');combatant(ac,partner.name,W*.31,H*.66,size*2.3,true,'p1');window.MoveFX?.draw(ac,W,H);
+ if(!background.visible){let fog=ac.createLinearGradient(0,0,0,H*.6);fog.addColorStop(0,'#e8e3b53a');fog.addColorStop(1,'#e8e3b500');ac.fillStyle=fog;ac.fillRect(0,0,W,H*.6)}
+ ac.restore();for(let side of ['p1','p2']){let card=$(side==='p1'?'playerCard':'enemyCard'),hud=native?.hud?.[side];card.style.visibility=hud?.visible===false?'hidden':'';card.style.transform=hud?.x?'translateX('+(hud.x*Math.min(W/256,H/192))+'px)':''}arena.dataset.combatants=JSON.stringify(Object.fromEntries(['p1','p2'].map(side=>[side,{hidden:!!visualState[side].hidden,substitute:!!visualState[side].substitute,minimized:!!visualState[side].minimized}])));arena.dataset.visual=JSON.stringify({move:window.MoveFX?.active?.moveId,camera,background});
+}
+function frame(now){keys=controls.state();let dt=Math.min(.04,(now-last)/1000||0);last=now;t+=dt;cooldown=Math.max(0,cooldown-dt);moving=false;if(!battling&&!menuOpen()){let dx=(keys.d||keys.ArrowRight?1:0)-(keys.a||keys.ArrowLeft?1:0),dy=(keys.s||keys.ArrowDown?1:0)-(keys.w||keys.ArrowUp?1:0);if(dx||dy){const previousX=player.x,previousY=player.y;facing=Math.abs(dx)>Math.abs(dy)?dx>0?9:6:dy>0?3:0;let len=Math.hypot(dx,dy),speed=keys.Shift?6.5:3.5,nx=player.x+dx/len*speed*dt,ny=player.y+dy/len*speed*dt;let can=(x,z)=>!blocked(x-.18,z-.18)&&!blocked(x+.18,z+.18);if(can(nx,player.y))player.x=nx;if(can(player.x,ny))player.y=ny;moving=player.x!==previousX||player.y!==previousY;if(player.y<-16.5&&cooldown===0){steps+=speed*dt;if(steps>2.4){steps=0;if(Math.random()<.5)startBattle()}}}}drawWorld();if(battling)drawArena();requestAnimationFrame(frame)}refresh();requestAnimationFrame(frame);toast('Soffiolieve · E per parlare · J per il diario');
+
+
+
+
+
+
+function changeViewZoom(delta){if(battling||menuOpen())return;renderer.zoom=Math.max(.9,Math.min(2,Math.round((renderer.zoom+delta)*100)/100));$('zoomValue').value=Math.round(renderer.zoom*100)+'%';window.Journey?.save()}
+$('zoomIn').onclick=()=>changeViewZoom(.1);$('zoomOut').onclick=()=>changeViewZoom(-.1);
+addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea,dialog')||e.ctrlKey||e.metaKey)return;if(['+','=','-','_'].includes(e.key)){e.preventDefault();changeViewZoom(e.key==='-'||e.key==='_'?-.1:.1)}});
+$('world').addEventListener('wheel',e=>{if(battling||menuOpen())return;e.preventDefault();changeViewZoom(e.deltaY<0?.1:-.1)},{passive:false});
+
+function combatant(c,name,x,y,size,back,side){let state=visualState[side],now=performance.now(),pose=window.MoveFX?.pose(side)||{x:0,y:0,alpha:1,scale:1};if(state.idleClock===undefined){state.idleClock=0;state.idleUpdated=now}if(!pose.pauseAnimation)state.idleClock+=(now-state.idleUpdated)*.06;state.idleUpdated=now;let idleTick=window.MoveFX?.idleTick(side)??state.idleClock,graphic=state.substitute&&!state.attacking?800:undefined;if(state.substitute&&!state.attacking)size*=.7;else if(state.minimized)size*=.5;if(state.hidden&&!window.MoveFX?.active)return;c.save();c.globalAlpha=pose.alpha??1;let battleScale=Math.min(W/1000,H/650);x+=(pose.x||0)*battleScale;y+=(pose.y||0)*battleScale;size*=pose.scale??1;if(state.faint){let f=Math.min(1,(now-state.faint)/420);c.globalAlpha*=1-f;y+=f*40*size;if(f>=1){c.restore();return}}if(state.enter){let f=Math.min(1,(now-state.enter)/300);c.globalAlpha*=f;size*=.7+.3*f}if(state.hit&&now-state.hit<240){let f=(now-state.hit)/240;x+=Math.sin(f*30)*7*(1-f);c.filter='brightness('+(1+Math.max(0,1-f)*1.5)+')'}c.translate(x,y);c.rotate(pose.rotation||0);c.scale(pose.scaleX??1,pose.scaleY??1);if(!pose.suppressSecondaryPass&&c.globalAlpha>0&&c.globalAlpha<1&&window.ROM_SPRITE_ANIM?.cache){let form=window.ROM_FORM_SPRITES?.[name.toLowerCase().replace(/[^a-z0-9]/g,'')],id=graphic||form?.graphic||GEN5.species.find(p=>p.en===name)?.id||495,key=id+'-'+(back?'back':'front');if(ROM_SPRITE_ANIM.cache[key]?.ready){let mask=spriteEffectBuffers['mask-'+side];if(!mask){mask=spriteEffectBuffers['mask-'+side]=document.createElement('canvas');mask.width=mask.height=512}let mx=mask.getContext('2d');mx.globalCompositeOperation='source-over';mx.clearRect(0,0,512,512);ROM_SPRITE_ANIM.draw(mx,id,back,256,430,size,idleTick);mx.globalCompositeOperation='source-in';mx.fillStyle='#000';mx.fillRect(0,0,512,512);c.save();c.globalAlpha=NativeVisual.secondaryAlpha(c.globalAlpha);c.drawImage(mask,-256,-430);c.restore()}}if(pose.tint>0){let buffer=spriteEffectBuffers[side];if(!buffer){buffer=spriteEffectBuffers[side]=document.createElement('canvas');buffer.width=buffer.height=512}let bx=buffer.getContext('2d');bx.globalCompositeOperation='source-over';bx.clearRect(0,0,512,512);monster(bx,name,256,430,size,back,idleTick,graphic);bx.globalCompositeOperation='source-atop';let col=pose.color;bx.fillStyle='rgba('+[(col&31)*255/31,(col>>5&31)*255/31,(col>>10&31)*255/31].join(',')+','+pose.tint+')';bx.fillRect(0,0,512,512);c.drawImage(buffer,-256,-430)}else monster(c,name,0,0,size,back,idleTick,graphic);c.restore()}
