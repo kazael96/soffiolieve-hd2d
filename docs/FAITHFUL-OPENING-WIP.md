@@ -151,3 +151,38 @@ aggiunta arbitrariamente) e nomi tasche dal bank55. Nomi oggetti dal bank54.
 Prova manuale aggiornata: casa propria -> paese -> casa Belle, discussione
 con il padre, uscita, cammino fino a Komor, attivazione ingresso laboratorio.
 Nessun blocco riscontrato in questi passaggi. Proseguire con Aralia e Percorso1.
+
+
+## Checkpoint 26 ottobre, 00:30: animazione cattura originale
+
+Aggiunti `tools/extract-capture.py`, `capture-data.js`, `native-capture.js`
+e 17 celle originali della Poké Ball. Archivio IRBI a/0/9/5: celle129,
+animazioni130, grafica137, palette138; gli indici BW2 sono diversi.
+Conferma diretta overlay94 base0x021f6460, tabella comandi offset0x13928,
+handler BallAdd69 a0x021fc048. Effetto0x23a da a/0/6/7 membro9,
+118 istruzioni (incluse diramazioni fallimento), hash721b4c13e2881f6c612c6a8ac3acfad6a9b7ca1d04d7e589c5e9440b4f62c35d.
+L'opcode10 ha dieci parametri, espanso sui quattro emettitori della risorsa32.
+Le particelle specifiche della Poké Ball sono6,32,58,60,61 già nel pacchetto.
+
+Il tutorial ora riproduce lancio, assorbimento, chiusura, rimbalzi, tre scosse,
+chiusura finale e stelle. La sprite catturata resta nascosta fino al rientro.
+Compilazione dei salti e del flag yield originale; attese distinte tra camera,
+particelle e trasformazioni, con cancellazione del precedente movimento camera.
+La proiezione della scena rimane l'adattamento HD-2D, non il renderer NDS.
+
+Aggiunti cinque suoni originali1383,1384,1387,1396,1970, render DualRip lossless.
+`preloadEvents` e riproduzione degli eventi senza banca precalcolata rispettano
+volume/pitch/pan e successione sullo stesso canale; nessuna sostituzione sintetica.
+Verifica browser su pagina temporanea `work/fidelity/preview/qa-capture.html`:
+cattura riuscita e fallita completate, nove eventi audio caricati, nessun errore.
+Fotogrammi ispezionati manualmente; corretta ombra inizialmente fuori posizione.
+Questa pagina di verifica non fa parte della pubblicazione.
+
+25 test Node, tre Python e tutte le nove partite simulate della storia passano.
+La prova manuale della storia è nel dialogo di Aralia nel laboratorio.
+Le catture normali usano ancora la vecchia formula e pausa: verificare la formula
+IRBI prima di collegare il nuovo effetto (la fonte BW2 usa una radice quarta,
+mentre la vecchia implementazione usa esponente3/16). Verificare anche il risultato
+nativo shakes: valore2 percorre comunque la terza scossa visibile.
+Non dichiarare conclusa la fedeltà: mancano ancora scelte/UI, camera e vari effetti,
+frequenza incontri, animazioni di ambiente e prove visive dell'intero finale.

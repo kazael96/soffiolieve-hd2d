@@ -64,7 +64,7 @@ async function playCatchingTutorial(){
    message:async text=>{log(text);},
    move:async(id,side)=>{captureVisualContext();if(window.MoveFX)await MoveFX.play(id,side,{cryIds:{p1:572,p2:504},targetSide:side==='p1'?'p2':'p1'});},
    refresh:async()=>{snapshotPartner();repaintCards();await animationPause(700);},
-   pause:animationPause,ball:()=>animationPause(850)
+   pause:animationPause,ball:async()=>{await MoveFX.capture({shakes:3,caught:true,cryIds:{p1:572,p2:504}});visualState.p2.hidden=true;}
   });
  }finally{window.MoveFX?.cancel();busy=false;updateBattle();}
 }
