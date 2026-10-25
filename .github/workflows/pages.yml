@@ -38,6 +38,8 @@ jobs:
           assert (target/'assets/animated/800-front.png').is_file()
           print('Verified original demo package and extracted static site')
           PY
+      - name: Correct player facing
+        run: python3 patches/fix-player-facing.py _site/game.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
