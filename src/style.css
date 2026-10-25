@@ -17,7 +17,7 @@
 
 #audioControls{position:relative;flex-shrink:0;color:#fff3cf;font-size:12px}#audioControls summary{cursor:pointer;list-style:none;border:1px solid #eee3c548;border-radius:9px;padding:10px 12px;background:#1b403b44}#audioControls .audio-panel{position:absolute;right:0;top:46px;width:240px;padding:18px;display:flex;flex-direction:column;gap:13px;background:#163f38f5;border:1px solid #cfdfb77a;border-radius:13px;box-shadow:0 14px 45px #102e3266;z-index:15}#audioControls label{display:flex;justify-content:space-between;gap:12px;align-items:center}#audioControls input{width:145px;accent-color:#b7db89}#audioControls small{font-size:11px;line-height:1.4;color:#e1e8ce}#audioMeter{width:100%;height:8px}body:has(#battle:not([hidden])) header{z-index:7;background:none;pointer-events:none}body:has(#battle:not([hidden])) header>*{visibility:hidden}body:has(#battle:not([hidden])) #audioControls{visibility:visible;pointer-events:auto;position:fixed;right:24px;top:63px}body:has(#battle:not([hidden])) #audioControls *{visibility:visible}@media(max-width:760px){#audioControls summary{font-size:10px;padding:9px 7px}#audioControls .audio-panel{right:-40px}body:has(#battle:not([hidden])) #audioControls{right:20px;top:64px}body:has(#battle:not([hidden])) #audioControls .audio-panel{right:0}}
 
-/* Chapter 01: a compact journal leaves the village in view. */
+/* A compact exploration journal leaves the village in view. */
 button:focus-visible,summary:focus-visible{outline:2px solid #f2d99c;outline-offset:4px}
 #openJournal{position:fixed;top:110px;left:24px;z-index:2;width:228px;text-align:left;padding:13px 16px;background:#173e36e8;border:1px solid #d7d8ad66;border-radius:12px;box-shadow:0 8px 24px #102e3226}
 #openJournal .eyebrow{display:flex;justify-content:space-between;align-items:center;color:#e9d6a8}
@@ -79,3 +79,6 @@ body.touch-enabled #context{bottom:226px}body.touch-enabled footer{display:none}
 }
 @media(prefers-reduced-motion:reduce){.hp i{transition:none}}
 #animationInspector{position:absolute;bottom:3%;left:5%;right:5%;z-index:5;background:#123e36f5;border:1px solid #c9d6ab80;border-radius:18px;padding:20px;color:#e6edce;display:flex;flex-wrap:wrap;gap:15px;align-items:center}#animationInspector[hidden]{display:none}#animationInspector label{display:flex;align-items:center;gap:8px}#animationInspector input{width:210px;accent-color:#b9d88d}#animationInspector select{max-width:180px}#animationInspector small{width:100%;font-size:12px}#battle[data-preview=true] .battle-panel{display:none}#inspectAnimation{margin:12px 8px 12px 0}
+
+[hidden]{display:none!important}
+.starter-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.starter-choices button{display:flex;flex-direction:column;align-items:center;padding:10px 4px;font-size:12px}.starter-choices img{width:80px;height:80px;image-rendering:pixelated;object-fit:contain}#partyList{display:grid;gap:10px;margin-bottom:20px}

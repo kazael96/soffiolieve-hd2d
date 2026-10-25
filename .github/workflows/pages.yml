@@ -29,8 +29,10 @@ jobs:
           for file in src/*.js; do node --check "$file"; done
       - name: Build verified site from editable sources
         run: python3 scripts/build-site.py site.zip _site
-      - name: Check published files and chapter routes
-        run: node tests/check-built-site.cjs _site
+      - name: Check published files and original opening
+        run: |
+          node tests/check-built-site.cjs _site
+          node tests/check-story-runtime.cjs _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

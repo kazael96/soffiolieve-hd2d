@@ -1,75 +1,72 @@
-# Soffiolieve HD-2D — demo 0.9
+# Soffiolieve HD-2D — demo 0.10
 
-Demo browser amatoriale non ufficiale ambientata a **Soffiolieve**, in Unima.
+Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
+Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo ad Accumula**.
+La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Questa versione
 
-- Orientamento corretto di Alcide in tutte e quattro le direzioni.
-- Diario con un breve capitolo: parla con Belle e Komor, poi torna da Aralia.
-- Dialoghi prima delle lotte: allenarsi con i rivali è facoltativo.
-- Salvataggio locale di posizione, compagno, PS/PP, stato, pozioni, incontri e preferenze.
-- Tastiera e tocchi indipendenti, corsa con Shift o pulsante dedicato e rilascio dei comandi quando si lascia la pagina.
-- Interfaccia compatta, messa a fuoco sul personaggio e sagoma discreta quando un edificio lo nasconde.
+- Camera di Alcide, scelta fra Snivy, Tepig e Oshawott al livello 5.
+- Lotte iniziali con Belle e Komor nell’ordine originale, con i rispettivi starter. Si prosegue anche perdendo.
+- Mamma e Interpoké, casa di Belle, laboratorio di Aralia, Pokédex e Mappa Città.
+- Partenza sul Percorso 1, dimostrazione di cattura con Minccino e Patrat, cinque Poké Ball.
+- Incontri nell’erba alta, catture, squadra fino a sei Pokémon, esperienza e apprendimento per livello.
+- Pozione della viandante, confronto delle catture e chiamata di Aralia, conclusione all’ingresso di Accumula.
+- Interni e terreno convertiti dalla ROM italiana fornita dall’utente; sprite e motore della demo conservati.
 
-## Comandi
+Il capitolo inventato della 0.9 è stato rimosso. Questa è una prima implementazione
+della sequenza originale: **dialoghi sintetizzati e regia semplificata**. Non è
+una replica completa della cartuccia; i limiti sono descritti in
+[docs/ORIGINAL-OPENING.md](docs/ORIGINAL-OPENING.md).
 
-WASD o frecce per muoversi, Shift per correre, E per interagire, J per il diario,
-V per cambiare messa a fuoco, +/− per lo zoom. Il diario permette di mostrare
-i controlli su schermo anche su desktop. Su mobile, tieni premuti una direzione
-e **Corri** insieme. Il pulsante ⇄ cambia il compagno come nella demo precedente.
+## Comandi e salvataggi
 
-Il viaggio viene salvato ogni cinque secondi e dopo le interazioni, fuori dalle
-lotte. Ricaricare durante una lotta ripristina l'ultimo punto precedente alla
-lotta. Il laboratorio non sostituisce il compagno del paese nel salvataggio.
-Non c'è sincronizzazione tra browser o dispositivi. **Ricomincia** nel diario
-chiede conferma prima di sostituire i progressi; non cancella le preferenze audio.
+WASD/frecce: muovi; Shift: corri; E: parla, apri il regalo, usa porte e scale;
+J: diario, salvataggio e impostazioni; V: messa a fuoco; +/−: zoom.
+Il pulsante della squadra sceglie chi mandare in testa. Nei combattimenti sono
+disponibili mosse, cambi, pozioni e, contro i selvatici, Poké Ball e fuga.
+Il Laboratorio lotte rimane una prova separata e non modifica la squadra della storia.
 
-## Sorgenti e risorse
+Il salvataggio è locale al browser, ogni cinque secondi e dopo gli eventi, fuori
+dalle lotte. Ricaricare durante una lotta ripristina il punto precedente.
+La storia usa una nuova chiave: il salvataggio della 0.9 resta disponibile nei
+dati del browser ma non viene interpretato come progressione di Pokémon Nero.
+Le preferenze di visualizzazione vengono recuperate. Ricomincia richiede conferma.
 
-`src/` contiene HTML, CSS e JavaScript modificabili del gioco. Questi file sono
-la fonte della pubblicazione; non modificare `_site/`, che è una cartella generata.
-Gli asset, i dati generati dalla ROM e il bundle del simulatore `battle-sim.js`
-rimangono nel [pacchetto v0.8](https://github.com/kazael96/soffiolieve-hd2d/releases/tag/v0.8).
-Il file ROM originale non è incluso.
+## Build e pubblicazione
 
-`scripts/build-site.py` verifica il pacchetto con SHA-256
-`2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6`,
-estrae il sito e vi applica i sorgenti. Aggiunge un identificatore basato sul
-contenuto agli URL JavaScript/CSS, così una nuova pubblicazione non riutilizza
-vecchio codice dalla cache. `build.json` espone versione e hash dei sorgenti.
-
-I vecchi `site-part-*.zip` sono incompleti e non partecipano alla pubblicazione.
-`patches/fix-player-facing.py` documenta la precedente correzione della v0.8:
-la v0.9 la incorpora direttamente in `src/game.js` e non riapplica lo script.
-Per i limiti delle animazioni e dell'audio, consulta ANIMAZIONI.txt, AUDIO.txt e
-THIRD_PARTY_NOTICES.txt nel pacchetto. La progressione è adattata a questa demo,
-non una riproduzione completa della storia di Pokémon Nero.
-
-## Sviluppo locale
-
-Servono Python 3.11+ e Node.js 20+. Dalla cartella del repository:
+`src/` contiene i sorgenti pubblicati e i nuovi asset di questo tratto.
+Gli asset precedenti e il simulatore `battle-sim.js` provengono dalla
+[release v0.8](https://github.com/kazael96/soffiolieve-hd2d/releases/tag/v0.8).
+La build verifica lo SHA-256 originale:
+`2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6`.
+I vecchi `site-part-*.zip` non sono usati. La ROM non è inclusa né richiesta per giocare.
 
 ```sh
 curl -L --fail https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
+node --test tests/*.test.cjs
+python -m unittest discover -s tests -p 'test_*.py'
 python scripts/build-site.py site.zip _site
+node tests/check-built-site.cjs _site
+node tests/check-story-runtime.cjs _site
 python -m http.server 4174 --bind 127.0.0.1 --directory _site
 ```
 
-Apri http://127.0.0.1:4174. Per ricostruire scegli una nuova cartella di output
-oppure rimuovi consapevolmente quella generata: lo script non sovrascrive cartelle
-esistenti. Non servono dipendenze da installare per build e test.
+La destinazione della build deve essere nuova. Il workflow esegue i test,
+controlla gli asset e il percorso e pubblica su GitHub Pages da `main`.
+Gli URL JavaScript/CSS cambiano con il contenuto; `build.json` riporta versione,
+revisione e hash. La patch storica `patches/fix-player-facing.py` resta conservata;
+l’orientamento corretto è già incorporato nei sorgenti.
 
-## Test e pubblicazione
+## Rigenerare i nuovi asset localmente
+
+`tools/extract-opening.py` legge una ROM IRBI fornita localmente e usa
+[apicula](https://github.com/scurest/apicula) per convertire i modelli.
+Servono Python con `ndspy`, `numpy` e `Pillow`. Nessun eseguibile della ROM viene
+copiato nel sito. Gli archivi intermedi restano in `_extract/`, esclusa da Git.
 
 ```sh
-node --test tests/*.test.cjs
-python -m unittest discover -s tests -p 'test_*.py'
+python tools/extract-opening.py --rom "percorso/Pokemon.nds" --apicula "percorso/apicula.exe" --output src --work-dir _extract
 ```
-
-I test coprono input, 72 combinazioni di movimento, pause/collisioni, progressione,
-salvataggi non validi, verifica dell'archivio e versionamento della cache.
-Il workflow Pages esegue questi controlli e verifica la sintassi di tutti i
-sorgenti JavaScript prima della build e della pubblicazione su `main`.
-I test automatici non sostituiscono le prove su telefoni reali e sui diversi browser.

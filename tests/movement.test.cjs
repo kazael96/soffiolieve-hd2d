@@ -9,7 +9,7 @@ const code=source.slice(source.indexOf('function frame(now)'),source.indexOf('}r
 function frame(keys,{battling=false,modal=false,blocked=()=>false}={}){
   const state={Math,last:0,t:0,cooldown:0,moving:false,facing:3,keys:{},controls:{state:()=>keys},
     player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,drawWorld(){},drawArena(){},
-    requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
+    window:{Journey:{step(){}}},requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
   vm.runInNewContext(code+';frame(40)',state);return state;
 }
 test('72 movement cases keep the correct facing, speed and normalized diagonals',()=>{

@@ -12,7 +12,7 @@
 <canvas id="world">
 </canvas>
 <header>
-<a class="brand">◈ <span>UNIMA<span class="sub">UN NUOVO INIZIO</span>
+<a class="brand">◈ <span>UNIMA<span class="sub">POKÉMON NERO</span>
 </span>
 </a>
 <div class="place">SOFFIOLIEVE <small>Primavera · Luce del pomeriggio</small>
@@ -39,10 +39,10 @@
 </button>
 </header>
 <button id="openJournal" aria-label="Apri diario di viaggio">
-<span class="eyebrow">DIARIO DI VIAGGIO <span id="questCount">0/3</span>
+<span class="eyebrow">POKÉMON NERO · L’INIZIO
 </span>
-<span id="questSummary">Parla con Belle, vicino a casa.</span>
-<span class="journal-hint">Apri diario · J</span>
+<span id="questSummary">Apri il regalo di Aralia.</span>
+<span class="journal-hint">Diario · J</span>
 </button>
 <div class="companion">
 <div id="mini">
@@ -54,12 +54,12 @@
 <span id="partnerHp">
 </span>
 </div>
-<button id="team" aria-label="Cambia compagno" title="Cambia compagno">⇄</button>
+<button id="team" aria-label="Apri squadra" title="Apri squadra">⇄</button>
 </div>
 <footer>
 <div>
 <kbd>W A S D</kbd> / <kbd>↑ ↓ ← →</kbd> Muoviti <b>·</b> <kbd>E</kbd> Interagisci <b>·</b> <kbd>Shift</kbd> Corri</div>
-<span>SOFFIOLIEVE <b>●</b> DEMO 0.9</span>
+<span>SOFFIOLIEVE <b>●</b> DEMO 0.10</span>
 </footer>
 <div id="zoomControls" role="group" aria-label="Zoom visuale">
 <button id="zoomOut" aria-label="Riduci zoom">−</button>
@@ -85,31 +85,13 @@
 <dialog id="journal" aria-labelledby="journalTitle">
 <div class="journal-heading">
 <div>
-<span class="eyebrow">SOFFIOLIEVE / CAPITOLO 01</span>
-<h2 id="journalTitle">Il vento di casa.</h2>
+<span class="eyebrow">SOFFIOLIEVE → ACCUMULA</span>
+<h2 id="journalTitle">Il primo viaggio</h2>
 </div>
 <button id="closeJournal" aria-label="Chiudi diario">✕</button>
 </div>
-<p id="questObjective">
-</p>
-<ol class="journey-steps">
-<li>
-<strong>Belle</strong>
-<span>Vicino a casa, nel centro del paese.</span>
-<small id="visitBelle">Da incontrare</small>
-</li>
-<li>
-<strong>Komor</strong>
-<span>Sul sentiero a est, oltre la casa con il tetto blu.</span>
-<small id="visitKomor">Da incontrare</small>
-</li>
-<li>
-<strong>Aralia</strong>
-<span>Davanti al laboratorio, a nord-ovest.</span>
-<small id="visitAralia">Da incontrare</small>
-</li>
-</ol>
-<p class="fine">Le lotte con Belle e Komor sono facoltative. Parla con entrambi, poi torna da Aralia per completare il primo incontro.</p>
+<p id="storyObjective"></p>
+<p id="storyBag" class="fine"></p>
 <fieldset>
 <legend>Come vuoi esplorare?</legend>
 <label>
@@ -125,8 +107,8 @@
 <button id="resetJourney">Ricomincia</button>
 </div>
 <div id="resetConfirmation" hidden>
-<p>Vuoi ricominciare? Posizione, compagno e incontri salvati verranno sostituiti.</p>
-<button id="cancelReset">Continua il viaggio</button>
+<p>Vuoi ricominciare? Il salvataggio di questa storia verrà sostituito. Ripartirai dalla camera di Alcide.</p>
+<button id="cancelReset">Continua a esplorare</button>
 <button id="confirmReset">Sì, ricomincia</button>
 </div>
 </dialog>
@@ -140,28 +122,27 @@
 </h2>
 <p id="dialogueText">
 </p>
+<div id="starterChoices" class="starter-choices" hidden></div>
 <div class="dialogue-actions">
-<button id="dialogueContinue">A presto!</button>
-<button id="dialogueBattle">Allenati</button>
+<button id="dialogueContinue">Torna al paese</button>
+<button id="dialogueBattle" hidden>Continua</button>
 </div>
 </dialog>
 <dialog id="modal">
-<span class="eyebrow">SOFFIOLIEVE / DEMO 0.9</span>
-<h2>Il vento di casa.</h2>
-<p>Geometrie, texture del paese e sprite letti dalla ROM italiana di Pokémon Nero, con illuminazione calda, profondità e ombre morbide.</p>
-<p>
-<b>WASD o frecce</b> per muoverti, <b>Shift</b> per correre, <b>E</b> per interagire. <b>♫ Audio</b> attiva musica, versi ed effetti originali; i volumi sono regolabili separatamente. <b>Rotellina o + / −</b> per lo zoom (90–200%). <b>V</b> cambia la messa a fuoco. <b>J</b> apre il diario con obiettivi e salvataggio. I comandi touch compaiono sugli schermi piccoli e si possono attivare dal diario; tieni premuto <b>Corri</b> insieme a una direzione.</p>
-<p>
-<b>Belle e Komor</b> ti aspettano per parlare e, se vuoi, allenarti. <b>Aralia</b>, davanti al laboratorio a nord-ovest, e la porta di casa tua ripristinano PS e PP. Con <b>⇄</b> puoi cambiare starter fuori dalla lotta.</p>
-<p>Gli incontri selvatici sono spostati nell’area di prova all’uscita nord, verso il Percorso 1: il prato nel paese della vecchia demo è stato rimosso.</p>
-<p class="fine">L’aspetto del paese usa i dati originali; dialoghi e collocazione dei personaggi sono adattati alla demo. Le lotte usano Pokémon Showdown in modalità quinta generazione, con 559 mosse e 164 abilità collegate ai dati della ROM. Dal Laboratorio lotte puoi configurare squadre e mosse per prove libere.</p>
-<button onclick="this.closest('dialog').close()">Esplora Soffiolieve →</button>
+<span class="eyebrow">POKÉMON NERO / DEMO 0.10</span>
+<h2>Da Soffiolieve ad Accumula</h2>
+<p>Scegli il tuo primo Pokémon nella camera di Alcide, affronta Belle e Komor, visita Aralia e attraversa il Percorso 1. La demo termina all’ingresso di Accumula.</p>
+<p><b>WASD o frecce</b>: muoviti. <b>E</b>: interagisci con personaggi, porte e scale. <b>J</b>: obiettivo, salvataggio e impostazioni. <b>Shift</b>: corri. <b>V</b>: messa a fuoco. <b>+ / −</b>: zoom.</p>
+<p>Il salvataggio avviene fuori dalle lotte. Ricaricare durante una lotta ripristina la situazione precedente. Il Laboratorio lotte è una modalità di prova separata dalla storia.</p>
+<p class="fine">Mappe e sprite originali con resa HD-2D. Eventi nell’ordine del gioco; dialoghi sintetizzati e scene ancora semplificate.</p>
+<button onclick="this.closest('dialog').close()">Continua</button>
 </dialog>
+<dialog id="partyDialog" aria-labelledby="partyTitle"><h2 id="partyTitle">La tua squadra</h2><div id="partyList"></div><button onclick="this.closest('dialog').close()">Chiudi</button></dialog>
 <dialog id="lab">
 <div class="lab-title">
 <div>
-<span class="eyebrow">LABORATORIO DI ARALIA</span>
-<h2>Ogni mossa ha una storia.</h2>
+<span class="eyebrow">PROVE LIBERE DI LOTTA</span>
+<h2>Laboratorio lotte</h2>
 </div>
 <button onclick="this.closest('dialog').close()" aria-label="Chiudi laboratorio">✕</button>
 </div>
@@ -218,6 +199,7 @@
 </div>
 <div class="actions">
 <button id="switchMon">Cambio ⇄</button>
+<button id="catchBall" hidden>Poké Ball</button>
 <button id="potion">Pozione <span>×3</span>
 </button>
 <button id="run">Fuga ↗</button>
@@ -229,6 +211,10 @@
 </script>
 <script src="assets/sprites.js">
 </script>
+<script src="opening-sprites.js"></script>
+<script src="opening-assets.js"></script>
+<script src="opening-data.js"></script>
+<script src="story-state.js"></script>
 <script src="world3d.js">
 </script>
 <script src="assets/battle-data.js">
@@ -275,7 +261,7 @@
 </script>
 <script src="animation-preview.js">
 </script>
-<script src="journey.js">
+<script src="story.js">
 </script>
 </body>
 </html>

@@ -1,0 +1,23 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const Story=require('../src/story-state.js');
+test('all three choices preserve the original rival order and elemental matchups',()=>{
+ for(const [starter,belle,komor] of [['Snivy','Oshawott','Tepig'],['Tepig','Snivy','Oshawott'],['Oshawott','Tepig','Snivy']]){
+  const s=Story.fresh();assert.equal(Story.advance(s,'route'),false);assert.equal(Story.choose(s,starter),true);
+  assert.equal(s.phase,'belle');assert.equal(Story.choose(s,'Tepig'),false);
+  assert.equal(Story.rivalStarter(starter,'Belle'),belle);assert.equal(Story.rivalStarter(starter,'Komor'),komor);
+  for(const phase of Story.phases.slice(1,-1)){assert.equal(s.phase,phase);assert.equal(Story.advance(s,phase),true);assert.equal(Story.advance(s,phase),false);}
+  assert.equal(s.phase,'arrival');assert.equal(Story.advance(s,'route'),false);
+ }
+});
+test('story saves are separate from the removed custom chapter',()=>{
+ const values=new Map([['soffiolieve-journey-v1','{"version":1,"complete":true}']]);const storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};
+ assert.equal(Story.read(storage).phase,'gift');const s=Story.fresh();Story.choose(s,'Snivy');
+ s.party=[{name:'Snivy',level:5,xp:135,hp:20,status:'',pp:[{id:33,left:35}]}];
+ assert.equal(Story.write(storage,s),true);assert.deepEqual(Story.read(storage),s);assert.ok(values.has('soffiolieve-journey-v1'));
+});
+test('corrupt saves, unknown scenes and impossible starter state cannot resume',()=>{
+ assert.equal(Story.normalize({version:1,phase:'arrival',scene:'town',starter:'Snivy',party:[]}),null);
+ assert.equal(Story.normalize({...Story.fresh(),scene:'missing'}),null);
+ assert.equal(Story.read({getItem:()=>'{bad'}).phase,'gift');assert.equal(Story.read(null).phase,'gift');
+ assert.equal(Story.write(null,Story.fresh()),false);
+});

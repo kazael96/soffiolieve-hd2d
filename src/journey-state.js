@@ -1,16 +1,15 @@
 /* Small, versioned save format. No transient laboratory/battle state is stored. */
 (function (root) {
-  const KEY = 'soffiolieve-journey-v1';
+  const KEY = 'soffiolieve-demo-v2';
+  const LEGACY_KEY = 'soffiolieve-journey-v1';
   const starters = ['Snivy', 'Tepig', 'Oshawott'];
   const finite = (value, fallback, min, max) => Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : fallback;
-  function fresh() { return {version:1, visits:{Belle:false, Komor:false}, complete:false,
+  function fresh() { return {version:2,
     player:{x:-2,y:0}, facing:3, starter:'Snivy', hp:null, status:'', pp:[], potions:3,
     zoom:1.4, cinema:true, touch:false}; }
   function normalize(value) {
-    if (!value || value.version !== 1) return null;
+    if (!value || ![1,2].includes(value.version)) return null;
     const state = fresh();
-    state.visits = {Belle:value.visits?.Belle === true, Komor:value.visits?.Komor === true};
-    state.complete = value.complete === true && state.visits.Belle && state.visits.Komor;
     state.player = {x:finite(value.player?.x,-2,-11.4,7.4),y:finite(value.player?.y,0,-25.3,9.2)};
     state.facing = [0,3,6,9].includes(value.facing) ? value.facing : 3;
     state.starter = starters.includes(value.starter) ? value.starter : 'Snivy';
@@ -24,20 +23,11 @@
     state.touch = value.touch === true;
     return state;
   }
-  function meet(state, name) {
-    if (name === 'Belle' || name === 'Komor') state.visits[name] = true;
-    if (name === 'Aralia' && state.visits.Belle && state.visits.Komor) state.complete = true;
-    return state;
-  }
-  function objective(state) {
-    if (!state.visits.Belle) return 'Parla con Belle, vicino a casa.';
-    if (!state.visits.Komor) return 'Incontra Komor, a est del paese.';
-    if (!state.complete) return 'Raggiungi Aralia, davanti al laboratorio a nord-ovest.';
-    return 'Primo incontro completato. Esplora Soffiolieve con il tuo compagno.';
-  }
   function read(storage) {
     try {
-      const raw = storage.getItem(KEY);
+      // Import exploration data only; the removed custom chapter is not story progress.
+      // Leave the original v0.9 record untouched for recovery.
+      const raw = storage.getItem(KEY) ?? storage.getItem(LEGACY_KEY);
       if (!raw) return {state:fresh(), restored:false};
       const state = normalize(JSON.parse(raw));
       return state ? {state,restored:true} : {state:fresh(),restored:false,error:'invalid'};
@@ -47,7 +37,7 @@
     try { storage.setItem(KEY, JSON.stringify(normalize(state))); return true; }
     catch { return false; }
   }
-  const api = {KEY, starters, fresh, normalize, meet, objective, read, write};
+  const api = {KEY, LEGACY_KEY, starters, fresh, normalize, read, write};
   root.JourneyState = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

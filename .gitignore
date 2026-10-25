@@ -2,3 +2,6 @@ _site/
 _release/
 site.zip
 __pycache__/
+
+_extract/
+*.nds
