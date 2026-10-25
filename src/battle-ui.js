@@ -60,9 +60,11 @@ $('catchBall').onclick=throwStoryBall;
 async function playCatchingTutorial(){
  if(storyBattle!=='tutorial'||!session)return;busy=true;updateBattle();
  try{
-  log('Minccino usa Botta e indebolisce Patrat.');captureVisualContext();
-  if(window.MoveFX)await MoveFX.play(1,'p1',{cryIds:{p1:572,p2:504}});
-  session.active('p2').sethp(1);snapshotPartner();repaintCards();await animationPause(700);
-  log('Aralia lancia una Poké Ball…');await animationPause(850);log('Patrat è stato catturato!');session.battle.win('p1');snapshotPartner();
+  await runOpeningCaptureTutorial(session,{
+   message:async text=>{log(text);},
+   move:async(id,side)=>{captureVisualContext();if(window.MoveFX)await MoveFX.play(id,side,{cryIds:{p1:572,p2:504},targetSide:side==='p1'?'p2':'p1'});},
+   refresh:async()=>{snapshotPartner();repaintCards();await animationPause(700);},
+   pause:animationPause,ball:()=>animationPause(850)
+  });
  }finally{window.MoveFX?.cancel();busy=false;updateBattle();}
 }

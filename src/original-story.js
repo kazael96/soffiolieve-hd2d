@@ -182,8 +182,8 @@
       }
       case 'TrainerBattleIsVictory':m.set(a[0],native.won?1:0);break;
       case 'CallTrainerBattleEnd':break;
-      case 'CallWildBattleEnd':{
-        await new Promise(async resolve=>{pendingBattle=resolve;await startBattle(false,{story:'tutorial',p1:[{name:'Minccino',level:7}],p2:[{name:'Patrat',level:2}]});await playCatchingTutorial();});break;
+      case 'CallCaptureDemo':{
+        await new Promise(async resolve=>{pendingBattle=resolve;await startBattle(false,{story:'tutorial',p1:[{...newStoryMon('Minccino',7),...ORIGINAL_EVENTS.captureTutorial.player}],p2:[{...newStoryMon('Patrat',2),...ORIGINAL_EVENTS.captureTutorial.enemy}]});await playCatchingTutorial();});break;
       }
       case 'RTReserveScript':queued=v[0];break;
       case 'RTGetTextFile':m.set(a[0],textBank);break;
@@ -199,10 +199,11 @@
       }
       case 'ItemGetPocket':m.set(a[1],[442,621,626].includes(v[0])?4:v[0]===17?1:0);break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
-        const item={4:'Poké Ball',17:'Pozione',442:'Mappa Città',621:'Interpoké',626:'Interpoké'}[v[1]];if(!item)throw Error('Item name '+v[1]);
-        m.words[a[0]]=c.name==='WordSetItemNameEx'?(v[2]>1?`${v[2]} ${v[1]===17?'Pozioni':item}`:`una ${item}`):item;break;
+        const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
+        const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
+        m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetItemPocketName':m.words[a[0]]=[442,621,626].includes(v[1])?'Strumenti base':v[1]===17?'Rimedi':'Strumenti';break;
+      case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
       case 'MapReplaceSetEvent':native.roomMess=true;applyRoom();break;
@@ -238,7 +239,7 @@
       case 'UnknownBW0240':native.itemEffect=v[0];break;
       case 'func_ov036_021a6ec4':native.followActor=v[0];break;
       case 'func_ov036_021a7340':native.storyEffect=v;break;
-      case 'func_ov036_021ab1e0':native.battleBackground=v[0];break;
+      case 'CallWildBattleEnd':await fade(0,8);break;
       case 'CallXTransceiver':await phoneCall(v[0],m);break;
       default:return false;
     }

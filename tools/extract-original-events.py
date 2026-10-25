@@ -145,6 +145,17 @@ def extract(rom_path):
     rom = ndspy.rom.NintendoDSRom.fromFile(rom_path)
     if rom.idCode != b'IRBI':
         raise ValueError('Expected Italian Pokemon Black (IRBI)')
+    # The published BW command reference incorrectly gives 0x17d one argument.
+    # Verify the actual handler: it reads no operand and calls the capture demo.
+    overlays=rom.loadArm9Overlays([10,21,93])
+    for overlay,start,end,expected in [
+        (21,0x21b4fdc,0x21b500a,'b03ff7e103aae5d1c04cc7f0e0f8a02bbc4c29b90e57887d379b2ffe39f29027'),
+        (10,0x216e84c,0x216e990,'fa868a628eac4700d414c5b9db5b1708da1ebe6b2bb69bdeddeb2598c23437c3'),
+        (93,0x21e90e8,0x21e94b4,'dd0dd39ed27074a4d8b343dd2e5b213864ed3586268a275f3dc23da8929b8d06'),
+    ]:
+        native=overlays[overlay]
+        actual=hashlib.sha256(native.data[start-native.ramAddress:end-native.ramAddress]).hexdigest()
+        if actual!=expected:raise ValueError(f'Unexpected IRBI capture program in overlay {overlay}')
     def narc(path):
         return ndspy.narc.NARC(rom.getFileByName(path)).files
     headers = narc('a/0/1/2')[0]
@@ -171,6 +182,19 @@ def extract(rom_path):
     result['phoneTexts'] = messages(narc('a/0/0/2')[192])
     system=narc('a/0/0/2')
     result['progressTexts']={str(bank):messages(system[bank]) for bank in [15,204]}
+    items=messages(system[54])
+    result['itemNames']={str(item):items[item] for item in [4,17,442,621,626]}
+    result['pocketNames']=messages(system[55])
+    # IRBI overlay93, BtlvCore_CmdCaptureDemo at 0x021e90e8: Pound,
+    # gauge set to maxHP/6, Leer, Defense-down, demonstration text, ball.
+    # This is a scripted presentation in the original too, not a normal turn.
+    battle_moves,battle_effects=messages(system[13]),messages(system[14])
+    result['captureTutorial']={'hpDivisor':6,'playerMove':1,'enemyMove':43,
+        'player':{'name':'Minccino','level':7,'moves':[1,45]},
+        'enemy':{'name':'Patrat','level':2,'moves':[33,43]},
+        'messages':{'playerMove':battle_moves[3],'enemyMove':battle_moves[130],
+                    'defenseDown':battle_effects[93],'advice':messages(system[20])[0],
+                    'ball':messages(system[20])[1],'caught':messages(system[15])[65]}}
     return result
 
 

@@ -64,8 +64,8 @@ una registrazione del gioco DS.
    L'apprendimento permette di scegliere la mossa da dimenticare. Restano
    evoluzioni, deposito oltre sei Pokémon, premi in denaro e presentazione
    dell'esperienza nella schermata lotta (oggi avviene dopo averla chiusa).
-5. Il tutorial cattura indebolisce artificialmente Patrat a1PS. Sostituirlo con
-   la sequenza originale, verificando danno, specie/livelli e lancio.
+5. Il tutorial ora segue la sequenza nativa verificata (vedere sotto), ma
+   mancano ancora cursore automatico, interfaccia Borsa e animazione della Ball.
 6. Incontri casuali ancora all'8% approssimativo. `field_encount.c` della fonte
    primaria descrive il contatore crescente; verificare contro IRBI.
 7. Mancano movimenti autonomi degli NPC, alcune interazioni opzionali e la
@@ -123,3 +123,31 @@ Rigenerazione: tools/extract-opening-trainers.py --rom <IRBI> --output src/openi
 Corretto anche il menu squadra: PS massimi calcolati con i dati individuali
 e soprannome visualizzato. Pubblicazione resta quella su main769d32d;
 questo ramo non è ancora la demo pubblica né una ricostruzione completa.
+
+## Checkpoint 25 ottobre, 23:50: tutorial verificato nei programmi IRBI
+
+Trovata EVCMD_TABLE in overlay10 (base0x02155060), offset0x1b4bc.
+Il comando0x17d punta a overlay21 0x021b4fdc e **non legge argomenti**:
+chiama EventCaptureDemo_Create a0x0216e84c. La firma BW della fonte SDK
+indicava erroneamente un u16 e consumava il successivo EVCameraInit0x13f.
+Corretto il nome in CallCaptureDemo, firma senza argomenti; rigenerazione
+ora contiene1799 istruzioni. CallWildBattleEnd0x179 esegue solo il rientro
+nel campo. Aggiunti hash dei tre tratti nativi verificati all'estrattore.
+
+Il setup nativo usa Minccino7 (Botta1, Ruggito45), Patrat2 (Azione33,
+Fulmisguardo43), parametri temporanei generati. BtlvCore_CmdCaptureDemo in
+overlay93, base0x021b6000, funzione0x021e90e8, è una sequenza dimostrativa:
+Botta, barra Patrat impostata a floor(maxHP/6), Fulmisguardo, Difesa di
+Minccino -1, consiglio, Poké Ball e cattura garantita. Quindi simulare un
+normale turno casuale sarebbe meno fedele: non si tratta di danno calcolato.
+Messaggi estratti dai bank13/14/15/20; la pausa dopo il consiglio è60frame.
+Il controller è condiviso dal browser e dal test che verifica ordine,
+mosse, PS, Difesa, consiglio e conclusione. L'animazione della Ball è
+ancora assente (pausa), da implementare con risorse originali.
+
+Corretti anche WordSetItemNameEx (rispetta withArticle; niente quantità
+aggiunta arbitrariamente) e nomi tasche dal bank55. Nomi oggetti dal bank54.
+
+Prova manuale aggiornata: casa propria -> paese -> casa Belle, discussione
+con il padre, uscita, cammino fino a Komor, attivazione ingresso laboratorio.
+Nessun blocco riscontrato in questi passaggi. Proseguire con Aralia e Percorso1.

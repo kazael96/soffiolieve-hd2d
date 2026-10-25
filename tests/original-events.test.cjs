@@ -16,7 +16,11 @@ test('Every extracted branch and movement pointer resolves; no guessed instructi
    if(c.name==='ActorCmdExec')assert.equal(p.movements[c.args[1]].at(-1)[0],254);
   }
  }
- assert.equal(instructions,1798);
+ assert.equal(instructions,1799);
+ const route=data.scripts[634].code;
+ assert.equal(route[158].name,'CallCaptureDemo');
+ assert.equal(route[158].args.length,0,'IRBI handler reads no operand');
+ assert.equal(route[route[158].end].name,'EVCameraInit','Camera command must not be consumed as an argument');
 });
 
 test('Original Italian location and event text are retained, including placeholders and paging',()=>{

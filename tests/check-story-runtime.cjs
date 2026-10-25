@@ -57,6 +57,15 @@ async function drain(c,promise,starter=0,outcome='play'){
    assert.equal(mon.max,s.active().maxhp,name+' max HP');
    for(const stat of ['atk','def','spe','spa','spd'])assert.equal(mon.stats[stat],s.active().storedStats[stat],name+' '+nature+' '+stat);
   }
+  const tutorial=c.ORIGINAL_EVENTS.captureTutorial;
+  const demo=new c.GEN5.Session([tutorial.player],[tutorial.enemy],{seed:[1,2,3,4]}),events=[];
+  await c.runOpeningCaptureTutorial(demo,{message:async text=>events.push(text),move:async(id,side)=>events.push([id,side]),refresh:async()=>{},pause:async ms=>assert.equal(ms,2000),ball:async()=>events.push('ball')});
+  assert.equal(demo.active('p2').hp,Math.floor(demo.active('p2').maxhp/6));
+  assert.equal(demo.active().boosts.def,-1);assert.equal(demo.battle.ended,true);
+  assert.deepEqual(events.filter(Array.isArray),[[1,'p1'],[43,'p2']]);
+  assert.ok(events.includes('La Difesa di Minccino diminuisce!'));
+  assert.ok(events.includes('La Prof.ssa Aralia usa una Poké Ball!'));
+  assert.ok(events.indexOf('ball')>events.findIndex(x=>typeof x==='string'&&x.startsWith('Usa la Poké Ball')));
   const mon=c.newStoryMon('Snivy',12,()=>.1);mon.nickname='Foglia';
   j.state.starter='Snivy';j.state.phase='route';j.state.party=[j.pack(mon,c.OPENING_DATA.Snivy.growth[13]-1)];
   const before=JSON.parse(JSON.stringify(j.state.party[0]));

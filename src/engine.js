@@ -39,3 +39,14 @@ function configureOpeningBattle(session,options={}){
   this.battle.choose(side,'move '+(best[this.battle.random(best.length)].i+1));
  };
 }
+async function runOpeningCaptureTutorial(session,view){
+ const data=ORIGINAL_EVENTS.captureTutorial,player=session.active(),enemy=session.active('p2');
+ const message=(key,name)=>view.message(messagePages(data.messages[key],[name]).join('\n'));
+ await message('playerMove',player.species.name);await view.move(data.playerMove,'p1');
+ // The cartridge demonstrates a fixed gauge change, independently of damage RNG.
+ enemy.sethp(Math.floor(enemy.maxhp/data.hpDivisor));await view.refresh();
+ await message('enemyMove',enemy.species.name);await view.move(data.enemyMove,'p2');
+ player.boosts.def=-1;await view.refresh();await message('defenseDown',player.species.name);
+ await message('advice');await view.pause(2000);await message('ball');await view.ball();
+ await message('caught',enemy.species.name);session.battle.win('p1');await view.refresh();
+}
