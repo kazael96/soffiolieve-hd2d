@@ -169,6 +169,8 @@ def extract(rom_path):
     result['scripts']['862'] = program(scripts[862], [0, 5], table)
     result['texts']['283'] = messages(text[283])
     result['phoneTexts'] = messages(narc('a/0/0/2')[192])
+    system=narc('a/0/0/2')
+    result['progressTexts']={str(bank):messages(system[bank]) for bank in [15,204]}
     return result
 
 

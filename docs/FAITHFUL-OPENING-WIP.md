@@ -38,12 +38,14 @@ eventi della città. Il nome inglese è Accumula; Soffiolieve non è Albanova.
 21 test Node passati, inclusi i 72 casi di movimento originari. Il controllo
 runtime esegue nove percorsi completi: tre starter per vittoria, sconfitta e
 lotte reali simulate. Controlla variabili, flag, strumenti, non duplicazione
-Pozione e checkpoint finale. Il test attraversa alcune porte chiamando il
-cambio mappa: **non prova il cammino libero reale**.
+Pozione e checkpoint finale. Sono verificati anche tutti i 14 collegamenti
+porta/scala con direzione, collisioni del punto di arrivo e pausa contro
+rientri involontari. La scala camera/piano terra è stata percorsa manualmente
+nel browser. Gli altri collegamenti richiedono ancora prova manuale.
 
 Nel browser sono stati provati introduzione, scelta di Snivy, lotta con Belle,
-ritorno alla camera in disordine, dialoghi e cura di Komor. La seconda lotta
-è ancora in corso. Il controllo separato dei fondali mostra i modelli e le
+ritorno alla camera in disordine, dialoghi e cura di Komor. La seconda lotta è stata completata; verificati ricaricamento del checkpoint,
+scala camera/piano terra, uscita degli amici e dialoghi di Mamma. Il controllo separato dei fondali mostra i modelli e le
 piattaforme originali, senza errori WebGL. Non è un confronto completo con
 una registrazione del gioco DS.
 
@@ -57,10 +59,11 @@ una registrazione del gioco DS.
 3. Scelta starter ancora con pulsanti generici; mancano la schermata originale
    e le sue animazioni. Camera, paging dei dialoghi e tempi Interpoké non sono
    ancora identici. Il fondale lotta usa il modello statico, senza BCA animata.
-4. Le caratteristiche dei Pokémon sono ancora fisse (IV15, natura neutra,
-   maschio), non conservate nel salvataggio; mancano EV, scelta delle mosse,
-   evoluzioni, deposito oltre sei Pokémon. Non limitare arbitrariamente il
-   giocatore per aggirare queste differenze.
+4. IV, natura, sesso e abilità sono ora generati per starter/selvatici e
+   conservati con EV, soprannomi e mosse. Cure e salvataggi li preservano.
+   L'apprendimento permette di scegliere la mossa da dimenticare. Restano
+   evoluzioni, deposito oltre sei Pokémon, premi in denaro e presentazione
+   dell'esperienza nella schermata lotta (oggi avviene dopo averla chiusa).
 5. Il tutorial cattura indebolisce artificialmente Patrat a1PS. Sostituirlo con
    la sequenza originale, verificando danno, specie/livelli e lancio.
 6. Incontri casuali ancora all'8% approssimativo. `field_encount.c` della fonte
@@ -98,3 +101,25 @@ e [pokebw2 966de38](https://github.com/fuddlesworth/pokebw2/tree/966de38c585822f
 Copie selettive in work/fidelity (fldmmdl_drawdata.c, field_encount.c,
 map_attr.c, btlv_field.c, btlv_stage.c, btlv_effect.c, zone_data.py).
 Non assumere che nomi o strutture BW2 siano validi per BW: confrontare i byte.
+
+## Checkpoint 25 ottobre, 23:20
+
+Statistiche confrontate con il motore GEN5 per cinque specie e tre nature,
+con IV/EV distinti; test del livello13 di Snivy, Crescita al posto della
+mossa scelta, conservazione delle altre mosse, cura e ricarica del salvataggio.
+I vecchi salvataggi v2 senza IV/natura mantengono i valori precedenti.
+
+Le sei squadre iniziali sono estratte da IRBI a/0/9/2 e a/0/9/3
+(trainer53-55,59-61), non derivate solo dal tipo dello starter: IV0, abilità,
+livello, natura deterministica, sesso, felicità255. Algoritmo PID da
+TrainerUtil_LoadParty e NitroSDK MATH_Rand32 (fonte primaria sopra).
+AIflag4 è verificata direttamente nel programma IRBI a/1/7/1 membro4,
+SHA256 1445323f99bfae12e70184f3b76b4d902e0532c0f479a78c95e6475fa4183cbd:
+bonus alle mosse dannose al primo turno, probabilità di favorire mosse di
+stato quando il giocatore ha <=50% e <=25% PS. Ora applicata alle lotte
+iniziali; il laboratorio conserva la sua logica libera.
+Rigenerazione: tools/extract-opening-trainers.py --rom <IRBI> --output src/opening-trainers.js.
+
+Corretto anche il menu squadra: PS massimi calcolati con i dati individuali
+e soprannome visualizzato. Pubblicazione resta quella su main769d32d;
+questo ramo non è ancora la demo pubblica né una ricostruzione completa.

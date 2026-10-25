@@ -49,7 +49,7 @@
     }
   }
   function messagePages(text,words){
-    return text.replace(/\{(?:0100|0101|0102|0109|0112|0200|0201):([0-9]+)\}/g,(_,i)=>words[i]??'')
+    return text.replace(/\{(?:0100|0101|0102|0107|0109|010c|0112|0200|0201|0202|0204|0206):([0-9]+)\}/g,(_,i)=>words[i]??'')
       .replace(/\{(?:ff00|bd02)(?::[^}]*)?\}/g,'').replace(/\\n/g,'\n')
       .split(/\{be0[01]\}/).map(p=>p.replace(/^\n+|\n+$/g,'')).filter(Boolean);
   }

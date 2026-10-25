@@ -8,7 +8,7 @@ function environment(){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0]};
  const source=fs.readFileSync(path.join(site,'game.js'),'utf8');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
@@ -18,7 +18,7 @@ function environment(){
  for(const file of ['original-events.js','field-event-vm.js','phone-assets.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
-  const {config}=c.lastBattle;const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.Journey.attachBattle(s,config.story);
+  const {config}=c.lastBattle;if(config.trainerId){const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
   if(winner==='play')for(let i=0;i<50&&!s.battle.ended;i++)s.act('move 1');else s.battle.win(winner);
   assert.ok(s.battle.ended);c.Journey.afterBattle(s,config.story,null,false);return s;
  };
@@ -43,11 +43,63 @@ async function drain(c,promise,starter=0,outcome='play'){
  assert.equal(c.$('world').dataset.eventError,undefined,c.$('world').dataset.eventError);return messages;
 }
 (async()=>{
+ {
+  const c=environment(),j=c.Journey,n=c.NativeStory;n.state.intro=true;
+  const moves=[{category:'Physical'},{category:'Status'}],score=(turn,hp,roll)=>Array.from(c.openingMoveScores(moves,turn,hp,100,()=>roll));
+  assert.deepEqual(score(1,100,255),[101,100],'Original rivals attack on turn one');
+  assert.deepEqual(score(2,51,255),[100,100]);assert.deepEqual(score(2,50,255),[100,101]);
+  assert.deepEqual(score(2,25,255),[100,102]);assert.deepEqual(score(2,25,0),[100,100]);
+
+  for(const name of ['Snivy','Tepig','Oshawott','Patrat','Lillipup'])for(const nature of ['Adamant','Modest','Timid']){
+   const ivs={hp:0,atk:31,def:12,spe:23,spa:7,spd:29},evs={hp:5,atk:16,def:0,spe:9,spa:4,spd:1};
+   const mon=c.makeMon(name,12,{ivs,evs,nature});
+   const s=new c.GEN5.Session([{name,level:12,ivs,evs,nature}],[{name:'Patrat',level:2}],{seed:[1,2,3,4]});
+   assert.equal(mon.max,s.active().maxhp,name+' max HP');
+   for(const stat of ['atk','def','spe','spa','spd'])assert.equal(mon.stats[stat],s.active().storedStats[stat],name+' '+nature+' '+stat);
+  }
+  const mon=c.newStoryMon('Snivy',12,()=>.1);mon.nickname='Foglia';
+  j.state.starter='Snivy';j.state.phase='route';j.state.party=[j.pack(mon,c.OPENING_DATA.Snivy.growth[13]-1)];
+  const before=JSON.parse(JSON.stringify(j.state.party[0]));
+  const s=new c.GEN5.Session(j.configs(),[{name:'Lillipup',level:4}],{seed:[1,2,3,4]});j.attachBattle(s,'wild');s.battle.win('p1');
+  await drain(c,j.afterBattle(s,'wild',null,false));
+  const grown=j.state.party[0];assert.equal(grown.level,13);assert.equal(grown.pp[0].id,74,'Choose which move is replaced');
+  assert.deepEqual(Array.from(grown.pp.slice(1),x=>x.id),before.pp.slice(1).map(x=>x.id),'Other moves remain unchanged');
+  assert.equal(grown.evs.atk,1,'Original Lillipup EV yield');assert.equal(grown.nickname,'Foglia');
+  grown.hp=1;grown.pp[0].left=0;j.heal();j.save(true);
+  const restored=JSON.parse(JSON.stringify(c.StoryState.read(c.localStorage).party[0]));
+  for(const key of ['ivs','nature','gender','abilityId','nickname'])assert.deepEqual(restored[key],before[key],key+' survives healing/save');
+  assert.equal(restored.hp,c.makeMon(restored.name,restored.level,restored).max);
+  assert.equal(restored.pp[0].left,c.GEN5.moves.find(m=>m.id===74).pp);
+  console.log('PASS individual stats, EVs, chosen move replacement, healing and persistence');
+ }
+ {
+  const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;
+  Object.assign(n.state.vars,{16513:2,16517:1,16504:1,16505:1,16512:2,16508:1});j.state.phase='route';
+  const directions=[[0,-1],[0,1],[-1,0],[1,0]],dirs={1:1,2:0,3:3,4:2};let count=0;
+  for(const [zone,data] of Object.entries(c.ORIGINAL_EVENTS.zones))for(const w of data.warps){
+   if(!c.ORIGINAL_EVENTS.zones[w.zone])continue;
+   await n.changeZone(+zone,5,6);j.step(1,false);
+   const [ox,oz]=[389,317].includes(+zone)?[784,752]:[16,16],dir=dirs[w.a],[dx,dz]=directions[dir];
+   const cx=w.x/16-ox,cz=w.z/16-oz;
+   c.player={x:cx-dx*.9,y:cz-dz*.9};
+   assert.equal(n.tryWarp(-dx,-dz,c.player.x-dx*.3,c.player.y-dz*.3),false,'Wrong direction '+zone);
+   const transition=n.tryWarp(dx,dz,c.player.x+dx*.3,c.player.y+dz*.3);assert.ok(transition,'Entrance '+zone+' -> '+w.zone);
+   await drain(c,transition);assert.equal(n.state.zone,w.zone);
+   const dest=c.ORIGINAL_EVENTS.zones[w.zone].warps[w.warp],out=directions[dirs[dest.a]],origin=[389,317].includes(w.zone)?[784,752]:[16,16];
+   assert.equal(c.player.x,dest.x/16-origin[0]-out[0]);assert.equal(c.player.y,dest.z/16-origin[1]-out[1]);
+   assert.equal(c.blocked(c.player.x-.18,c.player.y-.18)||c.blocked(c.player.x+.18,c.player.y+.18),false,'Arrival must be walkable '+w.zone);
+   assert.equal(n.tryWarp(out[0],out[1],c.player.x+out[0]*.4,c.player.y+out[1]*.4),false,'Arrival cooldown');count++;
+  }
+  assert.equal(count,14);console.log('PASS all 14 original door/stair transitions, direction, collision and re-entry cooldown');
+ }
  for(const [starter,name] of ['Snivy','Tepig','Oshawott'].entries())for(const outcome of ['p1','p2','play']){
   const c=environment(),n=c.NativeStory,j=c.Journey;
   await drain(c,n.run(4,782),starter,outcome);assert.equal(n.state.vars[16513],1);assert.equal(c.npcs.find(n=>n.name==='Belle').hidden,undefined);
   await drain(c,n.run(8,782),starter,outcome);assert.equal(j.state.starter,name);assert.equal(n.state.vars[16513],2);assert.equal(n.state.roomMess,true);assert.equal(j.state.phase,'mother');
-  await n.changeZone(390,3,3);await drain(c,n.run(0,780),starter,outcome);assert.equal(n.state.vars[16517],1);assert.equal(n.state.phone,true);
+  c.player={x:-7.2,y:-13.5};j.step(1,false);
+  assert.equal(c.blocked(c.player.x+.18,c.player.y+.18),false,'Approach to original stairs is walkable');
+  const stairs=n.tryWarp(1,0,-7.1,-13.5);assert.ok(stairs,'Solid stair tile must transition before collision');
+  await drain(c,stairs,starter,outcome);assert.equal(n.state.zone,390);assert.equal(n.state.vars[16517],1);assert.equal(n.state.phone,true);
   await n.changeZone(392,5,9);await drain(c,n.run(2,784),starter,outcome);assert.equal(n.state.vars[16504],1);
   await n.changeZone(396,4,11);await drain(c,n.run(0,792),starter,outcome);assert.equal(n.state.vars[16505],1);assert.equal(n.state.pokedex,true);
   await n.changeZone(389,777,741);await drain(c,n.run(11,778),starter,outcome);assert.equal(n.state.vars[16512],2);assert.equal(n.state.map,true);

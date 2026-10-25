@@ -159,10 +159,10 @@
       case 'CallPoke3Select':m.set(a[0],await chooseStarter());break;
       case 'CallPokeNameInput':await nickname();m.set(a[0],0);break;
       case 'PokePartyGetParam':m.set(a[0],state.party[v[1]].nickname?1:0);break;
-      case 'PokePartyAdd':{const name=m.host.speciesName(v[1]);state.starter=name;state.party=[journey.pack(makeMon(name,v[3]),OPENING_DATA[name].growth[v[3]])];journey.displayPartner();m.set(a[0],1);break;}
+      case 'PokePartyAdd':{const name=m.host.speciesName(v[1]);state.starter=name;state.party=[journey.pack(newStoryMon(name,v[3]),OPENING_DATA[name].growth[v[3]])];journey.displayPartner();m.set(a[0],1);break;}
       case 'PokePartyRecoverAll':journey.heal();break;
-      case 'PokePartyIsFullHP':m.set(a[0],state.party[v[1]].hp===makeMon(state.party[v[1]].name,state.party[v[1]].level).max?1:0);break;
-      case 'PokePartyIsFullPP':m.set(a[0],1);break;
+      case 'PokePartyIsFullHP':m.set(a[0],state.party[v[1]].hp===journey.unpack(state.party[v[1]]).max?1:0);break;
+      case 'PokePartyIsFullPP':m.set(a[0],journey.unpack(state.party[v[1]]).moves.every(move=>move.left===move.pp)?1:0);break;
       case 'PokePartyGetCount':m.set(a[0],state.party.length);break;
       case 'TrainerCardGetSex':m.set(a[0],0);break;
       case 'ActorCmdExec':move(v[0],ORIGINAL_EVENTS.scripts[m.bank].movements[a[1]]);break;
@@ -176,8 +176,9 @@
       case 'PlayerGetDir':m.set(a[0],frames.indexOf(facing));break;
       case 'VMSleep':await new Promise(resolve=>setTimeout(resolve,v[0]*1000/30));break;
       case 'CallTrainerBattle':{
-        const kind=v[0]>=59?'Belle':'Komor';state.phase=kind==='Belle'?'belle':'komor';rival=kind;
-        await new Promise(resolve=>{pendingBattle=resolve;startBattle(true,{story:kind,p1:journey.configs(),p2:[{name:StoryState.rivalStarter(state.starter,kind),level:5}]});});break;
+        const trainer=OPENING_TRAINERS[v[0]];if(!trainer)throw Error('Trainer outside opening '+v[0]);
+        const kind=trainer.name;state.phase=kind==='Belle'?'belle':'komor';rival=kind;journey.update();
+        await new Promise(resolve=>{pendingBattle=resolve;startBattle(true,{story:kind,trainerId:v[0],aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party)});});break;
       }
       case 'TrainerBattleIsVictory':m.set(a[0],native.won?1:0);break;
       case 'CallTrainerBattleEnd':break;
@@ -266,6 +267,32 @@
     for(const init of data().init||[]){const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
     captureActors();
   }
+  const warpDirections={1:1,2:0,3:3,4:2};
+  async function enterWarp(w){
+    sceneChanging=true;resetInput();
+    try{
+      const dest=ORIGINAL_EVENTS.zones[w.zone],dw=dest.warps[w.warp],out=warpDirections[dw.a],inward=out^1;
+      await fade(1,8);await changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16));face(255,inward);
+      move(255,[[8+inward,1]]);await fade(0,8);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
+      sceneChanging=false;warpCooldown=.8;
+      const next=data().onEnter?.find(e=>value(e.var)===e.value);
+      if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);
+      else journey.save(true);
+    }catch(error){sceneChanging=false;failed=error;$('world').dataset.eventError=error.message;console.error(error);await showPage(error.message);}
+  }
+  function tryWarp(dx,dz,x,z){
+    if(eventRunning||sceneChanging||journey.processing||warpCooldown||failed)return false;
+    const dir=Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0,[ux,uz]=directions[dir];
+    for(const w of data().warps){
+      if(warpDirections[w.a]!==dir||!ORIGINAL_EVENTS.zones[w.zone])continue;
+      const cx=w.x/16-origin()[0],cz=w.z/16-origin()[1];
+      const before=(player.x-cx)*ux+(player.y-cz)*uz,after=(x-cx)*ux+(z-cz)*uz,lateral=Math.abs((player.x-cx)*uz-(player.y-cz)*ux);
+      // The door/stair tile may be solid. Its boundary is an event checked
+      // before collision, exactly when the player attempts to enter it.
+      if(before>=-1.05&&before<.5&&after>=-.68&&lateral<w.width*.5)return enterWarp(w);
+    }
+    return false;
+  }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
     const n=npcs.find(n=>Math.abs(n.x-player.x)<1.6&&Math.abs(n.y-player.y)<1.6&&Math.floor(n.x+origin()[0])===front.x&&Math.floor(n.y+origin()[1])===front.z);
@@ -276,21 +303,16 @@
   function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;run(t.script-1);}}
   function step(dt,moved){
     try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    warpCooldown=Math.max(0,warpCooldown-dt);if(eventRunning||sceneChanging||battling||menuOpen()||failed)return;
+    warpCooldown=Math.max(0,warpCooldown-dt);if(eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed)return;
     if(!native.intro&&renderer.ready){run(4,782);return;}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
     journey.update();journey.encounter(dt,moved);if(key===lastTile)return;lastTile=key;
     if(native.zone===317&&p.z<=671&&!native.arrived){native.arrived=true;state.phase='arrival';journey.update();showPage('Quattroventi\nFine della demo.');return;}
     for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){run(trigger.script-1);return;}
-    if(!warpCooldown)for(let i=0;i<data().warps.length;i++){
-      const w=data().warps[i];if(Math.abs(player.x-(w.x/16-origin()[0]))>.55||Math.abs(player.y-(w.z/16-origin()[1]))>.55)continue;
-      const dest=ORIGINAL_EVENTS.zones[w.zone];if(!dest)continue;const dw=dest.warps[w.warp];sceneChanging=true;
-      changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16)).then(()=>{sceneChanging=false;const next=data().onEnter?.find(e=>value(e.var)===e.value);if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))run(next.entry);});return;
-    }
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,occupied:(x,z)=>npcs.some(n=>!n.hidden&&Math.abs(n.x-x)<.55&&Math.abs(n.y-z)<.55),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed;}};
+  window.NativeStory={showPage,choice,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>!n.hidden&&Math.abs(n.x-x)<.55&&Math.abs(n.y-z)<.55),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();pendingMessage?.();});

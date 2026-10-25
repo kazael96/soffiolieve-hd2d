@@ -80,7 +80,7 @@ print('textures',len(textures),'models',len(models))
 p=narc('a/0/1/6');g=narc('a/0/1/7');data={}
 for name,id in [('Snivy',495),('Tepig',498),('Oshawott',501),('Patrat',504),('Lillipup',506)]:
     f=struct.unpack_from('<6B2BBBH3H10BHHBBHHH',p[id]);growth=f[17]
-    data[name]={'catchRate':f[8],'yield':f[28],'growth':list(struct.unpack('<'+str(len(g[growth])//4)+'I',g[growth]))}
+    data[name]={'catchRate':f[8],'yield':f[28],'evYield':{stat:(f[10]>>(2*i))&3 for i,stat in enumerate(['hp','atk','def','spe','spa','spd'])},'growth':list(struct.unpack('<'+str(len(g[growth])//4)+'I',g[growth]))}
 header=narc('a/0/1/2')[0];eid=struct.unpack_from('<H',header,317*48+20)[0]&8191;e=narc('a/1/2/6')[eid]
 print('encounter',eid,len(e),e[:60].hex())
 print([(k,v['yield'],v['catchRate'],v['growth'][:8]) for k,v in data.items()])
