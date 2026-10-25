@@ -99,7 +99,12 @@ def extract(rom, output):
     effect = ndspy.narc.NARC(rom.getFileByName('a/0/6/7')).files[9]
     if hashlib.sha256(effect).hexdigest() != '721b4c13e2881f6c612c6a8ac3acfad6a9b7ca1d04d7e589c5e9440b4f62c35d':
         raise ValueError('Unexpected IRBI capture effect')
-    result = {'id':570,'source':'IRBI a/0/6/7:9; a/0/9/5:129,130,137,138',
+    overlay = rom.loadArm9Overlays([93])[93]
+    catch_code = overlay.data[0x021cba34-overlay.ramAddress:0x021cbbf4-overlay.ramAddress]
+    catch_hash = hashlib.sha256(catch_code).hexdigest()
+    if catch_hash != '8ae492569c1d0d13c563c6a70c10141ab4a25f6335cca3474a9caa4b2e72fd86':
+        raise ValueError('Unexpected IRBI capture calculation')
+    result = {'captureRulesSource':{'overlay':93,'address':'0x021cba34','sha256':catch_hash},'id':570,'source':'IRBI a/0/6/7:9; a/0/9/5:129,130,137,138',
               'sha256':hashlib.sha256(effect).hexdigest(), 'cells':paths,
               'sequences':sequences,'commands':program(effect),
               'particleMap':{3:6,29:32,46:58,47:59,48:60,49:61},

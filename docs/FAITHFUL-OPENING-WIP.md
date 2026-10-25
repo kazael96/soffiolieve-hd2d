@@ -186,3 +186,31 @@ mentre la vecchia implementazione usa esponente3/16). Verificare anche il risult
 nativo shakes: valore2 percorre comunque la terza scossa visibile.
 Non dichiarare conclusa la fedeltà: mancano ancora scelte/UI, camera e vari effetti,
 frequenza incontri, animazioni di ambiente e prove visive dell'intero finale.
+
+
+## Checkpoint 26 ottobre, 00:40: calcolo catture IRBI
+
+Verificato CheckBallCapture direttamente in overlay93,0x021cba34–0x021cbbf4,
+hash8ae492569c1d0d13c563c6a70c10141ab4a25f6335cca3474a9caa4b2e72fd86.
+Due chiamate a FX_Sqrt0x0207c734, divisore FX_Div0x0207c6e8, tre confronti
+RNG65536: soglia alla radice quarta, non l'esponente3/16 precedentemente usato.
+Riprodotti anche gli arrotondamenti Nitro a12bit con BigInt, senza troncare
+prima il tasso di cattura. 63 vettori di riferimento ottenuti separatamente
+con Python integer sqrt/division, più test del numero di estrazioni casuali.
+Un Patrat sano a PS pieni ha soglia49802 su65536, tre controlli.
+La cattura critica è impossibile con <=30 specie catturate, quindi nell'apertura.
+
+Le catture normali ora usano l'effetto originale, testi bank15:61–65,
+conservano il Pokémon nascosto dopo il successo e mostrano la fuga prima del
+turno avversario in caso di fallimento. I dati individuali rimangono conservati.
+Non viene aggiunta esperienza per la cattura (comportamento quinta generazione).
+28 test Node passano; build completa `work/fidelity/build-0036`, revision
+4baf327a50453284, supera dipendenze, hash e percorso raggiungibile.
+
+ATTENZIONE per il prossimo intervento sugli incontri: i riferimenti BW2 NON
+corrispondono all'IRBI. Nel codice italiano non c'è la tabella crescente a12
+configurazioni. a/1/2/6:77 contiene direttamente tasso8. Verificato nel codice
+0x021aa2e0–0x021aa32a: primo passo dopo reset tasso1, poi tasso della zona;
+random=floor(GFL_RandomLC(65535)/656), confronto <=tasso. Contatore aggiornato
+0x021aa628, reset0x021aa5f8. Disassemblato in work/fidelity/irbi-encounters.txt.
+Non applicare il sistema BW2 descritto nei precedenti appunti.

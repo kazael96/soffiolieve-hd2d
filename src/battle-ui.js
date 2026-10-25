@@ -42,13 +42,11 @@ async function throwStoryBall(){
  if(!session||busy||finished||storyBattle!=='wild'||!Journey.state.pokeballs||Journey.state.party.length>=6)return;
  busy=true;Journey.state.pokeballs--;updateBattle();const start=session.battle.log.length;captureVisualContext();
  try{
-  const target=session.active('p2'),rate=OPENING_DATA[target.species.name].catchRate,status=['slp','frz'].includes(target.status)?2.5:target.status?1.5:1;
-  const a=Math.floor((3*target.maxhp-2*target.hp)*rate/(3*target.maxhp)*status),threshold=a>=255?65536:Math.floor(65536/Math.pow(255/Math.max(1,a),.1875));
-  const caught=a>=255||[0,1,2].every(()=>session.battle.random(65536)<threshold);
-  log('Lanci una Poké Ball…');await animationPause(750);
-  if(caught){capturedMon={...session.snapshot('p2'),ivs:{...target.set.ivs},evs:{...target.set.evs},nature:target.set.nature,gender:target.gender,happiness:target.happiness};session.battle.win('p1');log(target.species.name+' è stato catturato!');}
+  const target=session.active('p2'),result=CaptureRules.roll(target,OPENING_DATA[target.species.name].catchRate,n=>session.battle.random(n)),caught=result.caught;
+  log('Alcide usa una Poké Ball!');await MoveFX.capture({...result,cryIds:{p1:partner.spriteId,p2:enemy.spriteId}});
+  if(caught){capturedMon={...session.snapshot('p2'),ivs:{...target.set.ivs},evs:{...target.set.evs},nature:target.set.nature,gender:target.gender,happiness:target.happiness};session.battle.win('p1');visualState.p2.hidden=true;log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][65],[target.species.name]).join('\n'));}
   else{
-   log('Il Pokémon è uscito dalla Poké Ball!');
+   log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][61+result.shakes],[]).join('\n'));
    const run=session.battle.runAction;session.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoFlee')return;return run.call(this,action);};
    try{session.act('fleeAttempt');}finally{session.battle.runAction=run;}
    await playBattleEvents(session.battle.log.slice(start));
