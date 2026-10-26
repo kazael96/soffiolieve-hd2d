@@ -22,12 +22,14 @@ addEventListener('keydown',event=>{
  if(event.repeat||event.ctrlKey||event.metaKey||event.altKey||event.target.closest?.('input,select,textarea,dialog,[contenteditable="true"]')||menuOpen())return;
  const key=event.key.toLowerCase();
  if(key==='e'){event.preventDefault();interact();}
- if(key==='j'){event.preventDefault();window.Journey?.openJournal();}
+ if(key==='x'||key==='j'){event.preventDefault();window.Journey?.openJournal();}
  if(key==='v'&&!battling){renderer.cinema=!renderer.cinema;$('focusPreference').checked=!renderer.cinema;window.Journey?.save();toast(renderer.cinema?'Luce cinematografica attiva':'Messa a fuoco uniforme');}
 });
 $('interact').onclick=interact;
 $('help').onclick=()=>{if(battling||menuOpen())return;resetInput();$('modal').showModal();};
 $('team').onclick=()=>window.Journey?.openTeam();
+$('menuTeam').onclick=()=>{$('journal').close();window.Journey?.openTeam();};
+$('menuHelp').onclick=()=>{$('journal').close();resetInput();$('modal').showModal();};
 function monster(c,name,x,y,size,back=false,tick=performance.now()*.06,graphicOverride){let info=GEN5.species.find(p=>p.en===name),form=window.ROM_FORM_SPRITES?.[name.toLowerCase().replace(/[^a-z0-9]/g,'')],baseId=info?.id||form?.species||495,id=graphicOverride||form?.graphic||baseId,key=id+'-'+(back?'back':'front'),im=battleImages[key];if(!im){im=battleImages[key]=new Image();im.src='assets/pokemon/'+baseId+'-'+(back?'back':'front')+'.png'}ellipse(c,x,y,35*size,8*size,'#14392b4f');if(window.ROM_SPRITE_ANIM?.draw(c,id,back,x,y,size,tick))return;if(im.complete&&im.naturalWidth){let h=80*size,w=h*im.naturalWidth/im.naturalHeight;c.save();c.imageSmoothingEnabled=false;c.drawImage(im,x-w/2,y-h,w,h);c.restore()}}
 function drawArena(){
  ac.fillStyle='#17382f';ac.fillRect(0,0,W,H);ac.save();let native=window.MoveFX?.visualState(),camera=native?.camera||{x:0,y:0,zoom:1},background=native?.background||{},bs=Math.min(W/1000,H/650);
@@ -38,7 +40,7 @@ function drawArena(){
  if(!background.visible){let fog=ac.createLinearGradient(0,0,0,H*.6);fog.addColorStop(0,'#e8e3b53a');fog.addColorStop(1,'#e8e3b500');ac.fillStyle=fog;ac.fillRect(0,0,W,H*.6)}
  ac.restore();for(let side of ['p1','p2']){let card=$(side==='p1'?'playerCard':'enemyCard'),hud=native?.hud?.[side];card.style.visibility=hud?.visible===false?'hidden':'';card.style.transform=hud?.x?'translateX('+(hud.x*Math.min(W/256,H/192))+'px)':''}arena.dataset.combatants=JSON.stringify(Object.fromEntries(['p1','p2'].map(side=>[side,{hidden:!!visualState[side].hidden,substitute:!!visualState[side].substitute,minimized:!!visualState[side].minimized}])));arena.dataset.visual=JSON.stringify({move:window.MoveFX?.active?.moveId,camera,background});
 }
-function frame(now){keys=controls.state();let dt=Math.min(.04,(now-last)/1000||0);last=now;t+=dt;cooldown=Math.max(0,cooldown-dt);moving=false;let distance=0;if(!battling&&!menuOpen()&&!window.Journey?.locked){let dx=(keys.d||keys.ArrowRight?1:0)-(keys.a||keys.ArrowLeft?1:0),dy=(keys.s||keys.ArrowDown?1:0)-(keys.w||keys.ArrowUp?1:0);if(dx||dy){const previousX=player.x,previousY=player.y;facing=Math.abs(dx)>Math.abs(dy)?dx>0?9:6:dy>0?3:0;let len=Math.hypot(dx,dy),speed=keys.Shift?6.5:3.5,nx=player.x+dx/len*speed*dt,ny=player.y+dy/len*speed*dt;let can=(x,z)=>!blocked(x-.18,z-.18)&&!blocked(x+.18,z+.18)&&!window.NativeStory?.occupied(x,z);if(!window.NativeStory?.tryWarp(dx,dy,nx,ny)){if(can(nx,player.y))player.x=nx;if(can(player.x,ny))player.y=ny;}moving=player.x!==previousX||player.y!==previousY;distance=Math.hypot(player.x-previousX,player.y-previousY);}}window.Journey?.step(dt,moving,distance);drawWorld();if(battling)drawArena();requestAnimationFrame(frame)}refresh();requestAnimationFrame(frame);toast('Pokémon Nero · E per interagire · J per il diario');
+function frame(now){keys=controls.state();let dt=Math.min(.04,(now-last)/1000||0);last=now;t+=dt;cooldown=Math.max(0,cooldown-dt);moving=false;let distance=0;if(!battling&&!menuOpen()&&!window.Journey?.locked){let dx=(keys.d||keys.ArrowRight?1:0)-(keys.a||keys.ArrowLeft?1:0),dy=(keys.s||keys.ArrowDown?1:0)-(keys.w||keys.ArrowUp?1:0);if(dx||dy){const previousX=player.x,previousY=player.y;facing=Math.abs(dx)>Math.abs(dy)?dx>0?9:6:dy>0?3:0;let len=Math.hypot(dx,dy),speed=keys.Shift?6.5:3.5,nx=player.x+dx/len*speed*dt,ny=player.y+dy/len*speed*dt;let can=(x,z)=>!blocked(x-.18,z-.18)&&!blocked(x+.18,z+.18)&&!window.NativeStory?.occupied(x,z);if(!window.NativeStory?.tryWarp(dx,dy,nx,ny)){if(can(nx,player.y))player.x=nx;if(can(player.x,ny))player.y=ny;}moving=player.x!==previousX||player.y!==previousY;distance=Math.hypot(player.x-previousX,player.y-previousY);}}window.Journey?.step(dt,moving,distance);drawWorld();if(battling)drawArena();requestAnimationFrame(frame)}refresh();requestAnimationFrame(frame);
 
 
 
