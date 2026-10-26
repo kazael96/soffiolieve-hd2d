@@ -48,6 +48,21 @@ async function drain(c,promise,starter=0,outcome='play'){
 }
 (async()=>{
  {
+  const c=environment(),j=c.Journey;c.NativeStory.state.intro=true;j.state.starter='Snivy';j.state.phase='route';
+  j.state.party=[j.pack(c.newStoryMon('Snivy',10),1000),j.pack(c.newStoryMon('Patrat',4),100)];c.potions=2;j.state.pokeballs=5;
+  const max=c.makeMon('Snivy',10,j.state.party[0]).max;j.state.party[0].hp=max-25;
+  assert.equal(j.usePotion(0),20);assert.equal(c.potions,1);assert.equal(j.state.party[0].hp,max-5);
+  assert.equal(j.usePotion(0),5);assert.equal(c.potions,0);assert.equal(j.usePotion(0),0);
+  c.potions=1;j.state.party[1].hp=0;assert.equal(j.usePotion(1),0);assert.equal(c.potions,1);
+  assert.equal(j.giveItem(17,0),true);assert.equal(c.potions,0);assert.equal(j.state.party[0].heldItem,17);
+  assert.equal(j.giveItem(4,0),true);assert.equal(c.potions,1);assert.equal(j.state.pokeballs,4);
+  assert.equal(j.takeItem(0),4);assert.equal(j.state.pokeballs,5);
+  assert.equal(j.discardItem(4,0),false);assert.equal(j.discardItem(4,6),false);assert.equal(j.discardItem(4,1),true);assert.equal(j.state.pokeballs,4);
+  assert.equal(j.moveParty(0,1),true);assert.equal(j.state.party[0].name,'Patrat');assert.equal(j.state.party[1].name,'Snivy');
+  const saved=c.StoryState.read(c.localStorage);assert.equal(saved.party[0].name,'Patrat');assert.equal(saved.pokeballs,4);
+  console.log('PASS field menu healing, ineffective targets, held-item exchange, discard, party order and persistence');
+ }
+ {
   const c=environment(),j=c.Journey,n=c.NativeStory;n.state.intro=true;n.state.pokedex=true;j.state.starter='Snivy';j.state.phase='route';j.state.party=[j.pack(c.newStoryMon('Snivy',5),135)];c.StoryState.register(j.state,'Snivy',true);
   for(let i=0;i<2;i++){
    const s=new c.GEN5.Session(j.configs(),[{name:'Patrat',level:3}],{seed:[1,2,3,4]});j.attachBattle(s,'wild');

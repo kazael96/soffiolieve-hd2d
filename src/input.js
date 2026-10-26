@@ -2,7 +2,7 @@
 (function (root) {
   const codeKeys = {KeyW:'w', KeyA:'a', KeyS:'s', KeyD:'d',
     ArrowUp:'ArrowUp', ArrowDown:'ArrowDown', ArrowLeft:'ArrowLeft', ArrowRight:'ArrowRight',
-    ShiftLeft:'Shift', ShiftRight:'Shift'};
+    ShiftLeft:'Shift', ShiftRight:'Shift', KeyB:'Shift'};
   function keyName(event) {
     if (codeKeys[event.code]) return codeKeys[event.code];
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Shift'].includes(event.key)) return event.key;

@@ -24,8 +24,8 @@
     if(Number.isFinite(v.player?.x)&&Number.isFinite(v.player?.y))s.player={x:Math.max(-31,Math.min(15,v.player.x)),y:Math.max(-83,Math.min(15,v.player.y))};
     s.facing=[0,3,6,9].includes(v.facing)?v.facing:3;
     const names=[...starters,'Patrat','Lillipup'];
-    s.party=Array.isArray(v.party)?v.party.filter(p=>names.includes(p?.name)).slice(0,6).map(p=>({name:p.name,nickname:typeof p.nickname==='string'?p.nickname.slice(0,10):'',...traits(p),level:Math.max(2,Math.min(100,Math.floor(p.level)||5)),xp:Math.max(0,Math.floor(p.xp)||0),hp:Number.isInteger(p.hp)?Math.max(0,Math.min(999,p.hp)):null,status:['par','brn','psn','tox','slp','frz'].includes(p.status)?p.status:'',pp:Array.isArray(p.pp)?p.pp.filter(m=>Number.isInteger(m?.id)&&Number.isInteger(m?.left)).map(m=>({id:m.id,left:Math.max(0,Math.min(99,m.left))})).slice(0,4):[]})):[];
-    if(s.phase!=='gift'&&(!s.party.length||s.party[0].name!==s.starter))return null;
+    s.party=Array.isArray(v.party)?v.party.filter(p=>names.includes(p?.name)).slice(0,6).map(p=>({name:p.name,nickname:typeof p.nickname==='string'?p.nickname.slice(0,10):'',...([0,4,17].includes(p.heldItem)?{heldItem:p.heldItem}:{}),...traits(p),level:Math.max(2,Math.min(100,Math.floor(p.level)||5)),xp:Math.max(0,Math.floor(p.xp)||0),hp:Number.isInteger(p.hp)?Math.max(0,Math.min(999,p.hp)):null,status:['par','brn','psn','tox','slp','frz'].includes(p.status)?p.status:'',pp:Array.isArray(p.pp)?p.pp.filter(m=>Number.isInteger(m?.id)&&Number.isInteger(m?.left)).map(m=>({id:m.id,left:Math.max(0,Math.min(99,m.left))})).slice(0,4):[]})):[];
+    if(s.phase!=='gift'&&(!s.party.length||!s.party.some(p=>p.name===s.starter)))return null;
     const valid=list=>Array.isArray(list)?[...new Set(list.filter(n=>names.includes(n)))]:[];
     s.dex={seen:valid(v.dex?.seen),caught:valid(v.dex?.caught)};
     for(const p of s.party)register(s,p.name,true);

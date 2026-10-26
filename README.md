@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.13
+# Soffiolieve HD-2D — demo 0.14
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -8,6 +8,13 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 ## Questa versione
 
+La 0.14 aggiunge il menu X con grafica italiana originale, squadra riordinabile,
+borsa collegata a cure e strumenti tenuti, salvataggio e opzioni. I comandi di
+lotta seguono la disposizione LOTTA / BORSA / FUGA / POKÉMON e i pannelli PS
+nascondono i dati dell'avversario che l'originale non mostra. Alcune schermate
+secondarie sono ancora adattate: dettagli e limiti in
+[NATIVE-MENUS-014](docs/NATIVE-MENUS-014.md).
+
 - Camera di Alcide, scelta fra Snivy, Tepig e Oshawott al livello 5.
 - Lotte iniziali con Belle e Komor nell’ordine originale, con i rispettivi starter. Si prosegue anche perdendo.
 - Mamma e Interpoké, casa di Belle, laboratorio di Aralia, Pokédex e Mappa Città.
@@ -16,7 +23,7 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 - Pozione della viandante, confronto delle catture e chiamata di Aralia, conclusione all’ingresso di Quattroventi.
 - Interni e terreno convertiti dalla ROM italiana fornita dall’utente; sprite e motore della demo conservati.
 
-La 0.13 esegue i programmi degli eventi e i dialoghi italiani originali del tratto,
+La 0.14 esegue i programmi degli eventi e i dialoghi italiani originali del tratto,
 con movimenti sincronizzati, camera riordinata/disordinata, scelta originale dello
 starter, Interpoké animato, Pokédex e Mappa Città consultabili. Incontri, catture,
 statistiche individuali, premi delle lotte e movimenti ambientali sono stati
@@ -25,12 +32,12 @@ confrontati con i dati e le routine IRBI.
 **La fedeltà non è ancora completa.** Restano transizioni, effetti, interfacce e
 altre differenze elencate in [docs/ORIGINAL-OPENING.md](docs/ORIGINAL-OPENING.md).
 
-La 0.13 aggiunge apertura/chiusura delle porte, fumo nella camera e ricezione
+La 0.14 aggiunge apertura/chiusura delle porte, fumo nella camera e ricezione
 animata del Pokédex con modelli, tracce scheletriche, trasparenze, particelle e
 suoni estratti dalla ROM. I tempi assoluti e la proiezione delle particelle
 richiedono ancora un confronto video con la console.
 
-La 0.13 elimina gli elementi HUD aggiunti dal porting: il campo resta libero. Squadra, audio e salvataggi sono accessibili dal menu X (anche J); su touch restano i soli tasti A/B/X e la croce direzionale.
+La 0.14 elimina gli elementi HUD aggiunti dal porting: il campo resta libero. Squadra, audio e salvataggi sono accessibili dal menu X (anche J); su touch restano i soli tasti A/B/X e la croce direzionale.
 
 ## Comandi e salvataggi
 

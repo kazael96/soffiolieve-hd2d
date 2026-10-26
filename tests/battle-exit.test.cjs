@@ -24,3 +24,9 @@ test('a failed escape keeps the battle active, and a real victory keeps its resu
  await c.turn(0);assert.equal(c.finished,true);assert.equal(c.escapedBattle,false);
  assert.deepEqual(music,['victoryWild']);assert.ok(logs.includes('Hai vinto la lotta!'));
 });
+
+test('healing a reserve does not replace the active Pokemon HP panel',async()=>{
+ const {c}=environment();c.partner={hp:20,max:26};
+ await c.playBattleEvents(['|-heal|p1: Patrat|18/18|[from] item: Potion']);
+ assert.equal(c.partner.hp,20);assert.equal(c.partner.max,26);
+});
