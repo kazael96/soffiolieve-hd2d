@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.14
+# Soffiolieve HD-2D — demo 0.15
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -8,12 +8,9 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 ## Questa versione
 
-La 0.14 aggiunge il menu X con grafica italiana originale, squadra riordinabile,
-borsa collegata a cure e strumenti tenuti, salvataggio e opzioni. I comandi di
-lotta seguono la disposizione LOTTA / BORSA / FUGA / POKÉMON e i pannelli PS
-nascondono i dati dell'avversario che l'originale non mostra. Alcune schermate
-secondarie sono ancora adattate: dettagli e limiti in
-[NATIVE-MENUS-014](docs/NATIVE-MENUS-014.md).
+La 0.15 ricostruisce le schermate principali con fondi, font e controlli estratti dalla ROM italiana: Squadra, Borsa, Riepilogo, Opzioni, Scheda Allenatore, tastiera dei soprannomi, Salva e Pokédex con ricerca. Le lotte usano pannelli delle mosse, colori PP, cursori, Borsa e selettore squadra originali. I tasti touch A/B e la croce funzionano anche nei menu.
+
+Prove, risorse certificate e differenze residue: [INTERFACES-015](docs/INTERFACES-015.md).
 
 - Camera di Alcide, scelta fra Snivy, Tepig e Oshawott al livello 5.
 - Lotte iniziali con Belle e Komor nell’ordine originale, con i rispettivi starter. Si prosegue anche perdendo.
