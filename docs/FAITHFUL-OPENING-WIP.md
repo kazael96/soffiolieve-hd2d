@@ -398,3 +398,14 @@ Publication status and final validation are recorded after release verification;
 this checkpoint by itself does not claim that Pages has been updated.
 
 Final local validation:53 Node tests,3 Python tests,46 JS syntax checks; clean build revision93d41cdc53076b6c; all hashes/dependencies/asset checks,62 interactions,14 transitions and9 complete story runs pass. Publication is pending at this commit.
+
+
+### Published 0.12 verification — 26 October 2026
+
+PR #2 merged as cb1f3beb55c2fafbb46ce8a64d77a1c2cf428de8.
+Actions run40292825773 succeeded (test, build, integration, deploy).
+Live check2026-10-26T08:33:11Z:version0.12,revision93d41cdc53076b6c;
+all53 manifest files and26 new assets match their expected hashes.
+Served JS/CSS sources match the verified checkout after CRLF normalization.
+Public browser reloaded with0.12 badge and bedroom opening; no console errors observed.
+Full nine story runs remain local/headless; no physical-phone or full emulator comparison.
