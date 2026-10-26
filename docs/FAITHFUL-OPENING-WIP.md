@@ -239,3 +239,38 @@ Dialoghi manuali laboratorio: soprannome rifiutato; risposta NO alla missione
 Pokédex verificata fino alla ripetizione originale della domanda, poi SÌ.
 La partita aperta nel browser è ancora nel dialogo di consegna del Pokédex;
 ricaricare al prossimo checkpoint prima del tutorial per usare il codice nuovo.
+
+## Checkpoint 26 ottobre, 01:50: scelta originale del primo Pokémon
+
+Sostituite le tre schede generiche con l'applicazione PSEL: regalo e biglietto,
+scatola che si apre, tre Poké Ball, sprite che avanzano con due salti, descrizione
+del tipo, zoom alla conferma, ritorno con NO, inquadratura finale. Dati IRBI,
+non quelli di Nero2: overlay2230x021b94a0, archivio a/2/0/5(40file).
+Prima scena29/30/31/32, camera33; selezione34/35, camera36; ball37/38/39.
+Le tabelle originali sono verificate nell'estrattore. Camera FOV~40gradi ricavata
+dai valori1398/3850(ARM9). Le curve contengono angoli Euler e posizioni float.
+
+`tools/extract-starter.py` ricava GLB con animazioni articolari e texture,
+curve, posizioni delle ball, spostamenti/salti sprite, sfondi/palette/cursore.
+Il nuovo renderer preserva skinning, interpolazione quaternion e texture animate.
+Decodificate separatamente le tracce alpha BMA31/38: dissolvenza biglietto/luce,
+luce della ball. Opaque/translucent separati: la luce non scrive più profondità
+coprendo erroneamente le ball. Nuovi asset circa440KB, nessuna ROM distribuita.
+Suoni originali1352,1356,1956,1957 aggiunti ai24suoni di campo;1976 era già presente.
+Cursore originale con spostamento NANR (16frame) e posizioni IRBI(67,39),(128,13),(189,39).
+
+Prove visive: pagina QA dedicata Snivy→NO→Oshawott→SÌ; poi vera partita separata
+in `qa-opening.html` (salvataggioQA, non quello principale), interazione regalo,
+Tepig scelto con freccia/Invio→Esc→frecciaOshawott→Invio→SÌ. Tornato al messaggio
+originale «Alcide riceve Oshawott!», nessun errore browser. Risolto il problema
+che faceva perdere alla tastiera il controllo della finestra dopo NO.
+34 test Node,3Python e nove percorsi storia passano. Build completa
+`work/fidelity/build-0148`, revisione e525dfe0f26d81d3 (include ultimo cursore).
+Il browser della partitaQA ha la revisione precedente al cursore; provarlo ancora.
+La scansione temporale PSEL usa30aggiornamenti/sec e mezzo frame animazione per
+aggiornamento: verificare la frequenza dell'applicazione nativa prima di chiamare
+i tempi perfettamente identici. Test mobile/audio della scelta ancora da eseguire.
+
+La partita principale nel tab8 è fuori dal laboratorio, prima di Mamma/Mappa Città.
+Riprendere quella per il percorso manuale/tutorial/cattura/fine demo. Non confondere
+il salvataggio principale con qa-opening(tab11). La pubblicazione è ancora0.10.

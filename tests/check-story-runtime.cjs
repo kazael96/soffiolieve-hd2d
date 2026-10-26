@@ -13,6 +13,7 @@ function environment(){
  const source=fs.readFileSync(path.join(site,'game.js'),'utf8');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
  vm.runInContext(fs.readFileSync(path.join(site,'story.js'),'utf8'),c,{filename:'story.js'});
+ c.StarterSelection={choose:async({text})=>{assert.match(text(18,'Snivy'),/Snivy/);return c.testStarter||0;}};
  c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
  for(const file of ['original-events.js','field-event-vm.js','phone-assets.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
@@ -26,7 +27,7 @@ function environment(){
 }
 
 async function drain(c,promise,starter=0,outcome='play'){
- let done=false,error;Promise.resolve(promise).then(()=>done=true,e=>{done=true;error=e;});
+ c.testStarter=starter;let done=false,error;Promise.resolve(promise).then(()=>done=true,e=>{done=true;error=e;});
  const messages=[];
  for(let frame=0;!done&&frame<30000;frame++){
   await Promise.resolve();c.Journey.step(1/30,false);

@@ -79,15 +79,13 @@
     return new Promise(resolve=>labels.forEach((label,i)=>{const b=document.createElement('button');b.textContent=label;if(['Snivy','Tepig','Oshawott'].includes(label)){const image=document.createElement('img');image.src='assets/pokemon/'+{Snivy:495,Tepig:498,Oshawott:501}[label]+'-front.png';image.alt='';b.append(image);}b.onclick=()=>{d.close();resolve(i);};box.append(b);}));
   }
   async function chooseStarter(){
-    await message(430,12);
-    for(;;){
-      $('dialogueText').textContent=ORIGINAL_EVENTS.texts[430][19];
-      const selected=await choice(['Snivy','Tepig','Oshawott']);
-      vm.words[1]=['Snivy','Tepig','Oshawott'][selected];
-      await message(430,[18,17,16][selected]);
-      $('dialogueText').textContent=ORIGINAL_EVENTS.texts[430][20];
-      if(await choice(['SÌ','NO'])===0)return selected;
-    }
+    resetInput();
+    const selected=await StarterSelection.choose({text:(index,name)=>{
+      const words={...vm.words};if(name)words[1]=name;
+      return messagePages(ORIGINAL_EVENTS.texts[430][index],words).join('\n');
+    }});
+    if(!Number.isInteger(selected)||selected<0||selected>2)throw Error('Invalid original starter selection');
+    vm.words[1]=['Snivy','Tepig','Oshawott'][selected];return selected;
   }
   async function nickname(){
     const box=$('starterChoices'),input=document.createElement('input'),ok=document.createElement('button');
