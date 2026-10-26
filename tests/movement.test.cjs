@@ -8,7 +8,7 @@ const source=fs.readFileSync(path.join(__dirname,'../src/game.js'),'utf8');
 const code=source.slice(source.indexOf('function frame(now)'),source.indexOf('}refresh();requestAnimationFrame(frame)')+1);
 function frame(keys,{battling=false,modal=false,blocked=()=>false}={}){
   const state={Math,last:0,t:0,cooldown:0,moving:false,facing:3,keys:{},controls:{state:()=>keys},
-    player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,drawWorld(){},drawArena(){},
+    player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,document:{querySelector:()=>modal?{}:null},renderer:{ready:true},worldDraws:0,drawWorld(){state.worldDraws++;},drawArena(){},
     window:{Journey:{step(dt,moved,distance){state.travel=distance;}}},requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
   vm.runInNewContext(code+';frame(40)',state);return state;
 }
@@ -38,4 +38,7 @@ test('collisions stop walking animation, and modals/battles stop displacement',(
     const state=frame({d:true},options);assert.equal(state.player.x,-2);assert.equal(state.player.y,0);assert.equal(state.moving,false);
   }
   assert.equal(frame({a:true,d:true}).moving,false);
+  assert.equal(frame({}, {modal:true}).worldDraws,0,'Native menus preserve the paused field frame');
+  assert.equal(frame({}, {battling:true}).worldDraws,0,'Battles do not redraw the hidden field');
+  assert.equal(frame({}).worldDraws,1);
 });

@@ -63,6 +63,13 @@ async function drain(c,promise,starter=0,outcome='play'){
   console.log('PASS field menu healing, ineffective targets, held-item exchange, discard, party order and persistence');
  }
  {
+  const c=environment(),j=c.Journey;c.NativeStory.state.intro=true;
+  assert.equal(j.save(true),true);const before=c.StoryState.read(c.localStorage).money;
+  j.state.money+=100;c.localStorage.setItem=()=>{throw Error('quota');};
+  assert.equal(j.save(true),false);assert.equal(c.StoryState.read(c.localStorage).money,before);assert.match(c.$('saveStatus').textContent,/non disponibile/);
+  console.log('PASS failed storage writes never report a successful save or overwrite the last valid record');
+ }
+ {
   const c=environment(),j=c.Journey,n=c.NativeStory;n.state.intro=true;n.state.pokedex=true;j.state.starter='Snivy';j.state.phase='route';j.state.party=[j.pack(c.newStoryMon('Snivy',5),135)];c.StoryState.register(j.state,'Snivy',true);
   for(let i=0;i<2;i++){
    const s=new c.GEN5.Session(j.configs(),[{name:'Patrat',level:3}],{seed:[1,2,3,4]});j.attachBattle(s,'wild');
@@ -105,8 +112,9 @@ async function drain(c,promise,starter=0,outcome='play'){
   let answer=n.choice(['SÌ','NO']),box=c.$('starterChoices');key(box,'ArrowDown',box.children[0]);key(box,'Enter');assert.equal(await answer,1);assert.equal(box.onkeydown,null);
   answer=n.choice(['Azione','Fulmisguardo','Annulla']);key(box,'Escape',box.children[0]);assert.equal(await answer,2);
   j.state.party=[j.pack(c.newStoryMon('Snivy',5),135),j.pack(c.newStoryMon('Patrat',3),27)];
-  let named=n.nickname(1);box.children[0].value='Vedetta';key(box,'Enter',box.children[0]);assert.equal(await named,0);assert.equal(j.state.party[1].nickname,'Vedetta');assert.equal(j.state.party[0].nickname,'');
-  named=n.nickname(1);box.children[0].value='Scarta';key(box,'Escape',box.children[0]);assert.equal(await named,1);assert.equal(j.state.party[1].nickname,'Vedetta');
+  let named=n.nickname(1);box.children[0].value='Vedetta';key(box,'Enter',box.children[0]);assert.equal(await named,1);assert.equal(j.state.party[1].nickname,'Vedetta');assert.equal(j.state.party[0].nickname,'');
+  named=n.nickname(1);box.children[0].value='Scarta';key(box,'Escape',box.children[0]);assert.equal(await named,0);assert.equal(j.state.party[1].nickname,'Vedetta');
+  named=n.nickname(1);box.children[0].value='';key(box,'Enter',box.children[0]);assert.equal(await named,0);assert.equal(j.state.party[1].nickname,'Vedetta','Native empty OK preserves previous nickname');
   console.log('PASS keyboard choices, cancellation and nicknames target the correct party slot');
  }
  {

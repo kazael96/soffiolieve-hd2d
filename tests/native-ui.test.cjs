@@ -9,3 +9,8 @@ test('game option validation keeps explicit off/mono/set values and rejects corr
  assert.deepEqual(normalize({textSpeed:3,animations:false,battleStyle:'set',sound:'mono'}),{textSpeed:3,animations:false,battleStyle:'set',sound:'mono'});
  assert.deepEqual(normalize({textSpeed:0,battleStyle:'invalid',sound:'invalid'}),{textSpeed:2,animations:true,battleStyle:'switch',sound:'stereo'});
 });
+test('registered shortcuts discard unsupported actions, deduplicate and keep IR saving preference',()=>{
+ const result=normalize({registered:['item:442','pokemon','item:442','javascript:alert(1)',null,'bag'],autoSaveIR:false});
+ assert.deepEqual(result.registered,['item:442','pokemon','bag']);assert.equal(result.autoSaveIR,false);
+ assert.equal('autoSaveIR' in normalize({autoSaveIR:'false'}),false);
+});
