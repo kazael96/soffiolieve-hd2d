@@ -3,8 +3,8 @@ const {toggle}=require('../src/pokedex-search.js');
 const {wrapQuantity}=require('../src/native-ui.js');
 test('native search retains two unordered types and toggles either selection off',()=>{
  let q=toggle({order:0},'types',12);q=toggle(q,'types',4);assert.equal(q.typeA,12);assert.equal(q.typeB,4);
- q=toggle(q,'types',12);assert.equal(q.typeA,null);assert.equal(q.typeB,4);
- q=toggle(q,'types',7);assert.equal(q.typeA,7);assert.equal(q.typeB,4);
+ q=toggle(q,'types',12);assert.equal(q.typeA,4);assert.equal(q.typeB,null);
+ q=toggle(q,'types',7);assert.equal(q.typeA,4);assert.equal(q.typeB,7);
  q=toggle(q,'types',9);assert.equal(q.typeA,7);assert.equal(q.typeB,9);
 });
 test('shape zero is a selectable native criterion, order cannot be unset',()=>{

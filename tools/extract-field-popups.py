@@ -23,6 +23,10 @@ def extract(rom,out):
  for i,(im,box)in enumerate(gfx.cells(f,3,2,4)):
   name=f'ready-marker-{i}.png';im.save(dest/name);group['cells'].append({'src':'assets/field-popups/'+name,'origin':box[:2],'size':box[2:]})
  groups['readyMarkers']=group
+ common=archive('a/0/8/3');group={'source':{'archive':'a/0/8/3','char':20,'cells':23,'animation':26,'palette':19},'cells':[],'animations':gfx.animations(common[26])}
+ for i,(im,box)in enumerate(gfx.cells(common,20,23,19)):
+  name=f'quantity-control-{i}.png';im.save(dest/name);group['cells'].append({'src':'assets/field-popups/'+name,'origin':box[:2],'size':box[2:]})
+ groups['quantityControls']=group
  banks=ndspy.narc.NARC(rom.getFileByName('a/0/0/2')).files;b3=text.messages(banks[3])
  data={'source':'Pokemon Black Italian IRBI; overlay70 itemmenu.c and overlay21 shortcut_menu.c','images':images,'groups':groups,
  'bagQuantity':{'physicalScreen':'bottom','imagePosition':[128,96],'clip':[0,0,256,192],'textWindow':[136,104,88,16],'textFont':0,'initialQuantity':1,'minimum':1,'quantityFormat':b3[131],'messages':{str(i):b3[i]for i in(53,54,55)},'keys':{'UP':1,'DOWN':-1,'RIGHT':10,'LEFT':-10,'A':'confirm quantity then Yes/No','B':'cancel to Bag'},'boundary':'wrap >maximum to1; <1 to maximum','touch':{'increase':[234,92,22,24],'decrease':[234,116,22,24],'confirm':[128,96,104,48],'cancel':[224,168,24,24]},'touchRepeat':{'delayFrames':30,'accelerateAfterFrames':120,'acceleratedStep':10},'source':'70:021b7704,021b775c,021b7c90,021b7ce8..021b7e28,021bb0b8,021bb154,021b9b0c'},
@@ -53,6 +57,10 @@ def extract(rom,out):
  data['fonts']={'height':15,'glyphs':metrics,'variants':variants,'source':'Native Font0 a/0/2/3 member0, all mapped glyphs; a/1/2/8 NCLR0 first two banks transferred to BG banks11/12; fg1 shadow2 bg15; proven by template bytes+0x17=0x18,+0x18=0x2f decoded at ARM9:0201ff18..0201ff66 and printer020204a4..020204c4'}
  data['ready']['appendCancelRow']=False
  data['ready']['cancelRowEvidence']='021c57bc reads count;021c57c4 allocates count;021c57d0..57ec inserts count shortcuts only;021c5848 passes unchanged count to ListMenu'
+ data['bagQuantity']['arrows']={'group':'quantityControls','up':{'anchor':[232,97],'initialAnimation':3,'changeAnimation':11},'down':{'anchor':[232,119],'initialAnimation':2,'changeAnimation':10},'source':'70:021b9358..021b939e loader,021ba6e6..021ba7790 constructor; tables021bb958/021bb95c;021b7dfc..021b7e0a change animation','visibility':'Both initially hidden;021b7c90 shows both;021b7cc4 hides both','press':'Change animation restarts only when numerical quantity actually changes; continuous held touch during delay does not restart it'}
+ data['bagQuantity']['touchRepeat'].update({'firstChangeTick':1,'repeatEveryTickFrom':31,'acceleratedStepFromTick':121,'reset':'No arrow touched resets counter to0; moving between arrows without leaving both regions preserves counter','keyboardSuppressedWhileArrowTouched':True,'source':'70:021b7d16..021b7d82'})
+ data['ready']['reorder']={'endDestination':255,'emptySlotSentinel':25,'operation':'Remove selected nativeID first; destination255 finds first empty slot and appends. Otherwise if original sourceIndex<destinationIndex decrement destination once, shift entries, insert nativeID there. Return final insertion index.','endMarker':'DOWN on final row in reorder toggles marker after last row; another DOWN wraps to first row. UP from first row wraps to final row with end marker; UP from end marker clears marker without moving row.','source':'21:021c5324..021c541a,021c5520..021c5536; ARM9:0200c480..0200c4e4'}
+ data['limits']=['Ready source NSCR preserves its original palette indices; native BG runtime transfers/remaps listed banks.']
  (out/'field-popup-assets.js').write_text('window.FIELD_POPUP_ASSETS='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
 
 if __name__=='__main__':

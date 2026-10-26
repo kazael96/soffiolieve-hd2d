@@ -100,15 +100,8 @@ def extract(rom,out):
  atlas.save(dest/'font-options.png');data['optionFont']={'src':'assets/dex-search/font-options.png','height':15,'glyphs':metrics,'colors':{'foreground':pal[14],'shadow':pal[15]},'source':{'font':'a/0/2/3:0','palette':'a/1/5/9:73','slot':1,'packed':'0x39e0','nativeLiteral':'0x021BEBA8'}}
  data['provenance']['submenus']='overlay210 0x021C0134..0x021C0444, overlay67 frame_list 0x021B7654..0x021B9244'
  data['limitations'][0]='Native submenu vertical rows, control rectangles, text alignment, glyphs, shape sprites and selection palette endpoints are exported. Exact touch-drag inertia and page-transition easing are not ported.'
+ data['helpLayout']={'window':1,'BG':7,'physicalScreen':'top','rect':[8,24,240,24],'textOrigin':[8,28],'packed':'0x440','wrap':False,'clipWidth':240,'textPriority':0,'rowBG':5,'rowPriority':2,'drawAfterRows':True,'native':'overlay210 0x021BE7F8..0x021BE82E;windowtable0x021C0800; BG7template0x021C0694 priority0,BG5template0x021C06D4 priority2','note':'Long Italian help may extend over left side of row background. It is above row BG; do not wrap to112px or let row background erase it.'}
  (out/'dex-search-assets.js').write_text('window.DEX_SEARCH_ASSETS='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
  print('Exported',len(images),'images;',len(text),'messages;',len(scoped),'species; sort member IDs',sortfiles)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('rom');p.add_argument('--output',default=str(Path(__file__).resolve().parents[1]/'src'));a=p.parse_args();extract(ndspy.rom.NintendoDSRom.fromFile(a.rom),Path(a.output))
-
-
-
-
-
-
-
-

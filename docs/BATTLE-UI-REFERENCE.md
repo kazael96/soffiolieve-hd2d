@@ -244,6 +244,17 @@ campioni e la cadenza sono provati; un totale in millisecondi indipendente
 dall'ordine dei task non è assunto. Il catalogo `moves.pressed.timing`
 contiene questi dati anziché una durata inventata.
 
+Aggiornamento0.17: chiuso anche l'ordine dei task. ARM9
+02030DAC–02030E28 ordina priorità **unsigned crescenti**: controllerpress0
+prima della palette0xFFFFFFFE. La nuova palette riceve skipflag a02030D78–D9C;
+runner02030CE0–02030D04 azzera quel flag senza eseguire la callback nello
+stesso passaggio. Dalla prima callback0220653C fase0, i coefficienti
+visibili per tick sono **0,2,4,6,8,8,6,4,2,0**. Al tick10 il controller
+osserva il completamento del ritorno e sblocca. È quindi provato il numero
+di tick relativo alla prima callback; l'attesa input→prima callback è
+separata. Il catalogo riporta `visibleCoefficientTicks` e
+`unlockAfterControllerTicks:10`, senza fissare millisecondi arbitrari.
+
 ### Borsa del campo: LCD e descrizione completa
 
 Catalogo dedicato: `assets/field-bag/provenance.json`, riproducibile con
@@ -349,3 +360,13 @@ Nessun indice di Nero 2 viene assunto automaticamente: le costanti di
 [pokebw2](https://github.com/fuddlesworth/pokebw2/blob/main/include/constants/arc.h)
 sono state consultate come orientamento, mentre tutti gli asset di questo
 checkpoint provengono dalla NARC IRBI verificata.
+
+## Original battle narrative catalog (IRBI)
+
+`src/battle-narrative-assets.js` exposes `window.BATTLE_NARRATIVE`, extracted by `tools/extract-battle-narrative.py` directly from a/0/0/2. Bank13 has1680 messages: complete original move-use phrases in triplets, indexed `3*moveID+side`. Bank14 has1159 Pokémon-specific battle messages; bank15 has200 general battle/trainer messages. Side offsets are0 own,1 wild opponent,2 trainer opponent. Exact original text, formatting tokens and native line breaks are preserved; substitutions and control-token handling belong to the renderer.
+
+Stats are original sentence templates, not name-plus-arrow displays. The catalog provides +1,+2,+3,-1,-2,-3,max,min families with seven stats in native order Attack, Defense, SpecialAttack, SpecialDefense, Speed, accuracy, evasion. Bank14 family bases are27,48,69,90,111,132,153,174. Within a family the message is `base+statIndex*3+side`. Examples:14:93 `La Difesa di {0102:0} diminuisce!`,14:95 `La Difesa di {0102:0} nemico diminuisce!`; a two-stage decrease says `diminuisce di molto`, and a three-or-more decrease says `cala a picco`. Limits have their own `non può ... di più` sentences.
+
+The `events` map covers80 common visible events, including KO, immunity, miss, failed move, critical/effectiveness, poison/toxic/burn/paralysis/freeze/sleep/confusion, recovery, recoil, item recovery and initial trainer/wild/switch text. Bank15 also contains multiple contextual withdrawal/send-out variants; the catalog's named switch entries select the basic original variants, without claiming the complete original game-state selector has been ported. All source banks are available for further exact choices.
+
+Existing native font0 message atlas already supports this text. Unsupported arrow/minus status summaries should be replaced with these sentences, not with new glyphs. Literal `\\n` is a line-break escape in decoded bank strings. `{be..}` and other native pacing controls must not appear visibly; retain their meaning separately or omit the control from displayed text. The compact provenance companion records the ROM archive SHA256 and mapping formulas.
