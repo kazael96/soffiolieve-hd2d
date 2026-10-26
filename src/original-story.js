@@ -8,7 +8,7 @@
   const names={7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
-  let eventRunning=false,queued=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
+  let eventRunning=false,queued=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
@@ -67,8 +67,9 @@
   function showPage(text,speaker=''){
     const d=$('dialogue');$('speakerName').textContent=speaker;$('dialogueTitle').textContent='';$('dialogueText').textContent=text;
     $('dialoguePortrait').hidden=true;$('dialogueBattle').hidden=true;$('starterChoices').hidden=true;$('dialogueContinue').hidden=false;
+    const printing=window.NativeSettings?.message($('dialogueText'),text);
     $('dialogueContinue').textContent='▼';if(!d.open)d.showModal();resetInput();
-    return new Promise(resolve=>{pendingMessage=()=>{pendingMessage=null;d.close();resolve();};$('dialogueContinue').onclick=pendingMessage;});
+    return new Promise(resolve=>{pendingMessage=()=>{if(printing&&!printing.done){printing.finish();return;}printing?.cancel();pendingMessage=null;d.close();resolve();};$('dialogueContinue').onclick=pendingMessage;});
   }
   async function message(bank,index,machine=vm){
     const text=ORIGINAL_EVENTS.texts[bank]?.[index];if(text===undefined)throw Error(`Missing original message ${bank}:${index}`);
@@ -79,7 +80,8 @@
     const d=$('dialogue'),box=$('starterChoices');resetInput();$('dialogueContinue').hidden=true;box.hidden=false;box.replaceChildren();if(!d.open)d.showModal();
     return new Promise(resolve=>{
       let selected=0,finished=false;const buttons=[];
-      const finish=i=>{if(finished)return;finished=true;box.onkeydown=null;d.close();resetInput();resolve(i);};
+      const finish=i=>{if(finished)return;finished=true;pendingCancel=null;box.onkeydown=null;d.close();resetInput();resolve(i);};
+      pendingCancel=()=>{const cancel=labels.findLastIndex(s=>/^(NO|Annulla)$/i.test(s));if(cancel>=0)finish(cancel);};
       labels.forEach((label,i)=>{const b=document.createElement('button');b.textContent=label;b.type='button';if(['Snivy','Tepig','Oshawott'].includes(label)){const image=document.createElement('img');image.src='assets/pokemon/'+{Snivy:495,Tepig:498,Oshawott:501}[label]+'-front.png';image.alt='';b.append(image);}b.onclick=()=>finish(i);buttons.push(b);box.append(b);});
       box.onkeydown=e=>{
         if(e.ctrlKey||e.altKey||e.metaKey)return;
@@ -107,7 +109,7 @@
     input.maxLength=10;input.value=pokemon.nickname||'';input.setAttribute('aria-label','Soprannome del Pokémon');ok.textContent='Conferma';cancel.textContent='Annulla';ok.type=cancel.type='button';
     box.replaceChildren(input,ok,cancel);box.hidden=false;$('dialogueContinue').hidden=true;$('dialogueText').textContent=messagePages(POKEDEX_ASSETS.labels.namePrompt,[pokemon.nickname||pokemon.name]).join('\n');d.showModal();input.focus();
     return new Promise(resolve=>{
-      const finish=result=>{box.onkeydown=null;d.close();resetInput();resolve(result);};
+      const finish=result=>{pendingCancel=null;box.onkeydown=null;d.close();resetInput();resolve(result);};pendingCancel=()=>finish(false);
       ok.onclick=()=>{pokemon.nickname=input.value.trim();journey.displayPartner();finish(0);};cancel.onclick=()=>finish(1);
       box.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel.onclick();}else if(e.key==='Enter'&&e.target===input){e.preventDefault();e.stopPropagation();ok.onclick();}};
     });
@@ -362,6 +364,6 @@
   window.NativeStory={showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>NpcWalk.occupies(n,x,z)),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
-  $('dialogue').addEventListener('cancel',e=>{e.preventDefault();pendingMessage?.();});
+  $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});
 })();
 

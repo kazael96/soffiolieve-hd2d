@@ -6,7 +6,7 @@ function makeMon(name,level=8,options={}){
  const nature=GEN5.dex.natures.get(options.nature||'Serious'),abilityId=options.abilityId||p.abilities[0];
  const value=key=>{const base=Math.floor((2*p.baseStats[key]+ivs[key]+Math.floor(evs[key]/4))*level/100);if(key==='hp')return base+level+10;return Math.floor((base+5)*(nature.plus===key?110:nature.minus===key?90:100)/100);};
  const learned=options.moves||options.pp?.map(m=>m.id)||p.learnset.filter(m=>m.level<=level).map(m=>m.id).filter((id,i,a)=>a.lastIndexOf(id)===i).slice(-4),moves=learned.map(id=>GEN5.moves.find(m=>m.id===id)).filter(Boolean);
- return {name:p.en,nickname:options.nickname||'',spriteId:p.id,level,max:value('hp'),hp:value('hp'),stats:Object.fromEntries(stats.map(k=>[k,value(k)])),ivs,evs,nature:nature.name,gender:options.gender||'M',happiness:options.happiness??70,type:p.types.map(t=>ROM_BATTLE.typeNames[t]).join('/'),ability:ROM_BATTLE.abilities[abilityId],abilityId,status:'',stage:{},moves:moves.map(m=>({...m,left:m.pp,cat:['Stato','Fisica','Speciale'][m.category]}))};
+ return {name:p.en,nickname:options.nickname||'',heldItem:options.heldItem||0,spriteId:p.id,level,max:value('hp'),hp:value('hp'),stats:Object.fromEntries(stats.map(k=>[k,value(k)])),ivs,evs,nature:nature.name,gender:options.gender||'M',happiness:options.happiness??70,type:p.types.map(t=>ROM_BATTLE.typeNames[t]).join('/'),ability:ROM_BATTLE.abilities[abilityId],abilityId,status:'',stage:{},moves:moves.map(m=>({...m,left:m.pp,cat:['Stato','Fisica','Speciale'][m.category]}))};
 }
 function newStoryMon(name,level,random=Math.random){
  const p=GEN5.species.find(s=>s.en===name),natures=GEN5.dex.natures.all();

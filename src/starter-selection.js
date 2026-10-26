@@ -36,16 +36,17 @@
     function animate(ticks,update){return new Promise(resolve=>animation={time:0,duration:ticks/30,update,resolve});}
     function motion(from,to){return animate(Math.abs(to-from)*2,k=>cameraFrame=from+(to-from)*k);}
     function key(event){
+      const nativeKey=event.key==='a'?'z':event.key==='b'?'Escape':event.key;
       if(event.repeat||event.ctrlKey||event.altKey||event.metaKey)return;
-      if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter',' ','Escape','z','x'].includes(event.key)){event.preventDefault();event.stopImmediatePropagation();}
-      if(stage==='letter'&&['Enter',' ','Escape','z','x'].includes(event.key))continueWait?.();
+      if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter',' ','Escape','z','x'].includes(nativeKey)){event.preventDefault();event.stopImmediatePropagation();}
+      if(stage==='letter'&&['Enter',' ','Escape','z','x'].includes(nativeKey))continueWait?.();
       else if(stage==='select'){
-        if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){const i=selected<0?1:(selected+(['ArrowLeft','ArrowUp'].includes(event.key)?2:1))%3;setSelection(i,true);}
-        else if(['Enter',' ','z'].includes(event.key)){if(selected<0)setSelection(1,true);else selectionWait?.(selected);}
+        if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(nativeKey)){const i=selected<0?1:(selected+(['ArrowLeft','ArrowUp'].includes(nativeKey)?2:1))%3;setSelection(i,true);}
+        else if(['Enter',' ','z'].includes(nativeKey)){if(selected<0)setSelection(1,true);else selectionWait?.(selected);}
       }else if(stage==='confirm'){
-        if(['Escape','x'].includes(event.key))confirmationWait?.(false);
-        else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){const buttons=[...actions.children],i=buttons.indexOf(document.activeElement);buttons[(i+1)%2].focus();}
-        else if(['Enter',' ','z'].includes(event.key))confirmationWait?.(document.activeElement!==actions.lastElementChild);
+        if(['Escape','x'].includes(nativeKey))confirmationWait?.(false);
+        else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(nativeKey)){const buttons=[...actions.children],i=buttons.indexOf(document.activeElement);buttons[(i+1)%2].focus();}
+        else if(['Enter',' ','z'].includes(nativeKey))confirmationWait?.(document.activeElement!==actions.lastElementChild);
       }
     }
     window.addEventListener('keydown',key,true);dialog.addEventListener('cancel',e=>e.preventDefault());

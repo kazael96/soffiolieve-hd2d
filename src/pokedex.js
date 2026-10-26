@@ -2,10 +2,10 @@
 (() => {
   const images=new Map();
   const image=src=>{if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=src;}));return images.get(src);};
-  function text(ctx,atlas,value,x,y,white=false,align='left'){
-    const f=POKEDEX_ASSETS.font,glyphs=[...value].map(c=>f.glyphs[c]||f.glyphs['?']),width=glyphs.reduce((n,g)=>n+g[3],0);
+  function text(ctx,atlas,value,x,y,white=false,align='left',font=POKEDEX_ASSETS.font){
+    const f=font,glyphs=[...value].map(c=>f.glyphs[c]||f.glyphs['?']),width=glyphs.reduce((n,g)=>n+g[3],0);
     if(align==='center')x-=Math.floor(width/2);else if(align==='right')x-=width;
-    for(const [sx,sy,left,advance] of glyphs){ctx.drawImage(atlas,sx,sy+(white?f.variantOffset:0),12,15,x+left,y,12,15);x+=advance;}
+    for(const [sx,sy,left,advance] of glyphs){const w=f.cellWidth||12,h=f.height||15;ctx.drawImage(atlas,sx,sy+(white?f.variantOffset:0),w,h,x+left,y,w,h);x+=advance;}
   }
   async function entry(name,{caught=true,registration=false}={}){
     const data=POKEDEX_ASSETS.species[name];if(!data)throw Error('Specie fuori dal Pokédex della demo: '+name);
@@ -44,7 +44,7 @@
       const b=document.createElement('button');b.textContent=`${String(data.number).padStart(3,'0')} ${name}${state.dex.caught.includes(name)?' ●':''}`;
       b.onclick=async()=>{b.disabled=true;try{await entry(name,{caught:state.dex.caught.includes(name)});}catch(e){console.error(e);toast('Impossibile aprire questa scheda. Riprova.');}finally{b.disabled=false;b.focus();}};list.append(b);
     }
-    const close=document.createElement('button');close.textContent='Chiudi';close.onclick=()=>dialog.close();dialog.append(close);dialog.addEventListener('close',()=>{dialog.remove();resetInput();});document.body.append(dialog);dialog.showModal();close.focus();
+    const close=document.createElement('button');close.textContent='Chiudi';close.onclick=()=>dialog.close();dialog.append(close);dialog.addEventListener('close',()=>{dialog.remove();resetInput();});document.body.append(dialog);dialog.showModal();close.focus();await new Promise(resolve=>dialog.addEventListener('close',resolve,{once:true}));
   }
   window.NativeText={draw:text,load:()=>image('assets/pokedex/font.png?v='+POKEDEX_ASSETS.revision)};
   window.Pokedex={entry,browse};
