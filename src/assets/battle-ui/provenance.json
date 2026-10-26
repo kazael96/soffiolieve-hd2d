@@ -2677,7 +2677,25 @@
           0
         ],
         "samplesPerLeg": 5,
-        "note": "Initial palette sample applied synchronously by020216BC, subsequent samples once per palette task update at delay0. Controller polls completion and schedules reverse; whole-button wall time also includes task scheduling order, so no single exact millisecond total is asserted."
+        "note": "Controller0 runs before paletteFFFFFFFE. New palette task skips the creation pass, giving visible0/2/4/6/8 then8/6/4/2/0. At tick10 controller observes return complete and unlocks. Caller input-to-first-callback latency is separate; no arbitrary fixed millisecond delay is part of this native trace.",
+        "taskOrderSource": "ARM9 02030DAC–02030E28 unsigned ascending priority;02030D78–D9C newtask skipflag;02030CE0–02030D04 skipflag clears without callback",
+        "controllerPriority": 0,
+        "palettePriority": 4294967294,
+        "visibleCoefficientTicks": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          8,
+          6,
+          4,
+          2,
+          0
+        ],
+        "unlockAfterControllerTicks": 10,
+        "timeOrigin": "First press controller callback0220653C phase0 (not raw input timestamp)",
+        "verified": true
       }
     },
     "keyCursor": {
