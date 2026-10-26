@@ -218,6 +218,32 @@ di queste parti presentandoli come definitivi.
 
 ## Riproduzione
 
+### Finestra messaggi e cadenza pressione: composizione risolta0.16
+
+ARM9 `02045460–0204566C`, invocata daov93 `021EB034`, monta gli otto
+tilechar89 attorno alla finestra:0/1/2 riga superiore,3/4 lati,5/6/7
+riga inferiore. Cornice esterna **[0,144,256,48]**, interno
+**[8,152,240,32]**; fonte esportata `message-window-original.png`.
+Non va ridotta a una percentuale arbitraria della vista. Il testo rimane
+font0 con origine globale8,152 e colori palette90 già verificati.
+
+`021ED674–021ED68C` chiama0207D5BC; il corpo ARM di questa funzione
+conferma BLDCNT targetA2(BG1),targetB0x3D e BLDALPHA EVA31/EVB7.
+EVA effettiva è limitata16 dall'hardwareDS. Il nero dell'interno lascia
+quindi7/16della scena sottostante; per canale5bit il blend è saturato
+`min(31,source+scene*7/16)`, non una mediaRGBA normalizzata.
+Il PNG conserva i pixel sorgente; il blend va applicato separatamente.
+
+Pressione mosse: ARM9 `02021974–02021990` configura step2/delay0;
+`02021AEC–02021B3C` esegue l'aggiornamento a ogni palette tick;
+`02021C62/02021C98` incrementa/decrementa il coefficiente. Le sequenze
+sono **0,2,4,6,8** e **8,6,4,2,0**, cinque campioni per semionda.
+Il primo campione viene applicato sincronamente da020216BC; il controller
+ov94 0220653C attende la fine prima di iniziare il ritorno. Il numero di
+campioni e la cadenza sono provati; un totale in millisecondi indipendente
+dall'ordine dei task non è assunto. Il catalogo `moves.pressed.timing`
+contiene questi dati anziché una durata inventata.
+
 ### Borsa del campo: LCD e descrizione completa
 
 Catalogo dedicato: `assets/field-bag/provenance.json`, riproducibile con

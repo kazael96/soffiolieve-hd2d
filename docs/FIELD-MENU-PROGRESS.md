@@ -76,3 +76,50 @@ No registration path/ID was found for generic Party or Save in their native
 screens. A generic whitelist of Pokemon/Dex/Bag/Trainer/Save/Options therefore
 must not be represented as fully native behavior: native shortcuts target
 specific supported pages. Key items use separate encoded item mappings.
+
+## Discard quantity and multiple Ready shortcuts (0.16)
+
+`tools/extract-field-popups.py` emits `FIELD_POPUP_ASSETS`, original tilemaps,
+Ready marker cells/animations, original Italian bank173 labels and bank3
+discard messages. No browser UI/runtime is modified by this exporter.
+
+Bag overlay70:021bb0b8 loads a/0/8/8 NSCR35, places it on BG3 at tile16,12
+(128,96), and remaps its tiles to palette3. Its matching native resource
+triplet is NCGR33/NSCR35/NCLR34. Image width136 extends beyond LCD256 by8px;
+clip the original panel rather than rescale it. Quantity window at021b9b0c
+is BG3 tile17,13 width11 height2 = [136,104,88,16]. Bank3 message131 is the
+original three-digit formatted quantity; messages53/55/54 are prompt,
+confirmation and completion.021b7704 initializes count1.021b7ce8 uses UP+1,
+DOWN-1, RIGHT+10, LEFT-10, wrapping above maximum to1 and below1 to maximum.
+Touch rectangles from021bb854: increase [234,92,22,24], decrease
+[234,116,22,24]. Held touch repeats after30 frames and changes by10 after120.
+021bb86c defines confirm [128,96,104,48] and cancel [224,168,24,24]. A opens
+Yes/No after quantity; B returns to the Bag. These are not invented OK/EXIT
+buttons. Quantity arrow graphics reuse the Bag sprite resources, but their
+precise object association has not yet been certified.
+
+Ready menu constructor overlay21:021c4e60 opens NARC128=a/1/2/8, uses BG1
+NCGR5/NSCR7/NCLR6 and objects NCGR3/NCER2/NANR1/NCLR4. It overlays the field
+on the physical TOP LCD; Nintendo manual p16 screenshot confirms the field
+behind this panel. BG palette loading021c4ec6..4ed6 copies the first64 bytes
+of NCLR0 to offset0x160, banks11 and12.021c4f14..4f26 copies the first32
+bytes of NCLR6 to offset0x140, bank10. Header row11 is explicitly remapped
+to bank10; normal/highlight window rows use banks11/12. These palette
+changes must be composed by the renderer, not replaced by generic buttons.
+
+021c52ce creates BG1 list window [8,96,240,96], palette11. Template021da96c
+has visible row count5, itemX13 local (screen21), top margin8 (screen104),
+font0 and16px line height. Native SELECT>SPOSTA header is already embedded
+in NSCR7. Marker X table021da940 is [128,10,246]; initial Y96 is updated by
+021c58dc to the current row. NCER origins and NANR timing are preserved in
+the catalogue.021c5660 resets the window to palette11 and remaps the current
+selection row to palette12, including during reordering.
+
+Native capacity25. UP/DOWN navigate. A and Y use selected entry; SELECT
+toggles reorder when more than one entry is registered. Reordering remembers
+source position, allows destination selection, and0200c480 changes the saved
+order. A places the entry; B cancels the reorder. B returns native -2 in
+ARM9:0202008e..009e, and X explicitly produces -2 in021c5492. Reorder edge
+scroll has a special destination0xff path not fully transcribed here.
+
+Ready Font0 correction: packed template byte+0x17=0x18 means foreground1 and topY8; byte+0x18=0x2f means fill15 and shadow2. ARM9:0201ff18..0201ff66 decodes these fields,020204a4..020204c4 passes them to the printer. Both font atlases now use fg1/shadow2 with native normal/highlight banks11/12. Earlier fg14/shadow15 was incorrect and has been replaced. All mapped Font0 glyphs are exported.

@@ -29,3 +29,23 @@ Catalog species attributes and sort orders cover Snivy495, Tepig498, Oshawott501
 ## Verification
 
 Exporter asserts ROM ID IRBI, overlay bases and exact six-member sort lookup. All11 generated PNGs are decoded by Pillow and reopened for integrity; native initial composition and option backgrounds were inspected in `work/dex-search-sheet.png`. Native dumps and alternative research remain under work. Runtime composition, scrolling and option animations still require integration and visual QA.
+
+## Revision 0.16: native criterion lists
+
+The earlier generic-grid limitation is resolved for layout/resources. These are **vertical frame_list menus**, not grids. Configs in overlay210: Ordina0x021C0B20, Nome0x021C0B70, Tipi0x021C0B48, Colore0x021C0B98, Sagoma0x021C0BC0. Constructor0x021B7654 belongs to shared overlay67. Forty-byte config records and native eight-byte control records are retained in `submenus`.
+
+The row starts x128,y0; its width128. Ordina6 options, Nome26, Tipi17, Colore10 use24px rows with source NSCR97/NCGR81. Sagoma14 uses40px rows, NSCR98/NCGR81. MAIN BG1 displays current/following entries; SUB BG5 displays preceding entries: subY=192+(entryIndex-mainFirstIndex)*rowHeight, clipped to LCD. Previous SUB history therefore includes8 full24px rows, or four full40px rows plus a clipped row. The lower selection capacity is6 for Ordina,7 for other24px lists,4 for Sagoma. Native control rectangles only cover x152..231 of each row, despite128px-wide graphics. Exported controls include dragstrip x232..255,y8..160 and native PageUp/PageDown bottom buttons. Action4/5 are PageUp/PageDown, verified overlay67 0x021B7CE4/0x021B7D08. Ordina uses action8 and returns immediately; other criteria toggle while staying in the same screen.
+
+Each submenu retains its already-exported left background (orderChoice/nameChoice/typeChoice/colorChoice/shapeChoice). `mainBase` remains underneath. Left criterion title is native window12, localcenter40 (global64), y64; selected criterion value window13, localcenter48 (global64), y88. Subtop title/help use windows0/1, with correct bank277 help IDs in the catalog. Native title/value packed color is0x3C40; do not automatically apply the row font palette to these windows.
+
+Option text is original font0 with packed0x39E0, foreground14 and shadow15; native literal0x021BEBA8. NCLR73 slot1 colors are gray222/gray131. `optionFont` includes all supported actual bank277 glyphs, including sort arrows. Row text window offset24,0 withsize88×24, centered local44, y4: globalcenter196, rowY+4. Rows source palette1 are normal. Focused row uses palettes2 and3 and a native64-frame RGB555 cosine blend, manager0x0202E9C0. `optionRow-normal/pulseA/pulseB` and equivalent shapeRow endpoints are original source pixels. Pulse metadata includes phase increment1024 over65536 and fixed-point blend formula. Exact drag inertia/page easing has not been ported.
+
+Seventeen scoped OBJ cells are exported:14 `shapes` from char82/NCER85/NANR101/NCLR76, and3 `optionObjects` fromchar78/NCER84/NANR100/NCLR75. Their NCER origins and NANR timings are retained. All shape animations are static cell sequences, duration4. Shape actor anchor x204,rowY+20 (0x021BFA8C). Red selected checkmark is optionObjects cell2 atx140,rowY+rowHeight/2 (0x021BF6B0/0x021BF914). Thumb cell0 anchorx252,y12..156; track cell1 anchor252,84, source actor table0x021C08AC. Apply NCER origins when painting every OBJ.
+
+**Correction:** Sagoma criteria values are **0..13**, not1..14. Native0x021BE190 stores row+scrollStart directly; these match a/0/9/8 member2 values. Sprite cell equals criterion value. No textual numeric shape label should replace the original silhouettes. No extra unset row exists in any original option list: click an already-selected criterion to clear it. Tipi is one17-option list, not successive TypeA/TypeB screens. Native0x021BE0B0..0x021BE104 adds/removes the clicked type and retains up to two; selecting a third shifts second->first and stores the new second.
+
+Integration limitation remains native easing/touch inertia and precise full transition blending. Native geometry, source palettes, row state endpoints, button rectangles, selection interaction and static OBJ sequences are now available to replace the generic grid.
+
+Sagoma left-value exception: original selected silhouette actor7 anchor(64,104), visible only if set, routine0x021BF518..550. It replaces the textual value window used by other criteria.
+
+
