@@ -46,5 +46,6 @@
     }
     const close=document.createElement('button');close.textContent='Chiudi';close.onclick=()=>dialog.close();dialog.append(close);dialog.addEventListener('close',()=>{dialog.remove();resetInput();});document.body.append(dialog);dialog.showModal();close.focus();
   }
+  window.NativeText={draw:text,load:()=>image('assets/pokedex/font.png?v='+POKEDEX_ASSETS.revision)};
   window.Pokedex={entry,browse};
 })();

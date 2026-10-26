@@ -47,7 +47,7 @@ vm.runInNewContext(fs.readFileSync(path.join(site,'opening-sprites.js'),'utf8'),
 const opening=assets.window.OPENING_ASSETS;
 for(const texture of Object.values(opening.textures))assert.ok(fs.existsSync(path.join(site,texture.src)),texture.src);
 for(const frames of Object.values(assets.window.OPENING_SPRITES))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame.split('?')[0])),frame);
-for(const file of ['phone-assets.js','field-audio.js','battle-fields.js','starter-assets.js','pokedex-assets.js'])vm.runInNewContext(fs.readFileSync(path.join(site,file),'utf8'),assets);
+for(const file of ['phone-assets.js','field-audio.js','battle-fields.js','starter-assets.js','pokedex-assets.js','townmap-assets.js'])vm.runInNewContext(fs.readFileSync(path.join(site,file),'utf8'),assets);
 for(const frames of Object.values(assets.window.PHONE_ASSETS.portraits))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame)),frame);
 for(const record of Object.values(assets.window.FIELD_AUDIO))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
 for(const record of Object.values(assets.window.BATTLE_FIELDS.textures))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
@@ -81,3 +81,7 @@ assert.ok(html.includes('pokedex.css'), 'Pokedex stylesheet must be loaded');
 assert.equal(assets.window.POKEDEX_ASSETS.species.Patrat.number,10);
 assert.equal(assets.window.POKEDEX_ASSETS.species.Lillipup.number,12);
 console.log('PASS original Pokedex entry graphics, font, footprint/type assets and regional numbers');
+
+for(const file of ['map','info',...assets.window.TOWNMAP_ASSETS.cells.map((_,i)=>'cell-'+i)])assert.ok(fs.existsSync(path.join(site,'assets/townmap/'+file+'.png')),file);
+assert.ok(html.includes('townmap.css'),'Town map stylesheet must be loaded');
+console.log('PASS original Unova map, information panel and all marker cells');
