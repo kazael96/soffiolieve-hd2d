@@ -300,10 +300,13 @@
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
     const n=npcs.find(n=>Math.abs(n.x-player.x)<1.6&&Math.abs(n.y-player.y)<1.6&&Math.floor(n.x+origin()[0])===front.x&&Math.floor(n.y+origin()[1])===front.z);
     if(n)return {kind:'actor',n,script:n.script};
-    const b=data().background.find(b=>b.x===front.x&&b.z===front.z);if(b)return {kind:'background',script:b.script};
+    // Background records use grid X/Z followed by vertical height. Directions
+    // 0..3 are N/E/W/S; 4 is any, 5 horizontal and 6 vertical.
+    const dir=frames.indexOf(facing),allowed=[[0],[3],[2],[1],[0,1,2,3],[2,3],[0,1]];
+    const b=data().background.find(b=>b.condition<2&&b.x===front.x&&b.z===front.z&&allowed[b.direction]?.includes(dir));if(b)return {kind:'background',script:b.script};
     return null;
   }
-  function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;run(t.script-1);}}
+  function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;return run(t.script-1);}}
   function step(dt,moved,distance=0){
     try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     warpCooldown=Math.max(0,warpCooldown-dt);if(eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed)return;

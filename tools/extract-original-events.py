@@ -15,7 +15,7 @@ import ndspy.rom
 SELECTED = {
     317: list(range(9)), 389: [*range(14),15,16], 390: [0, 1, 4],
     391: list(range(9)), 392: list(range(5)), 393: [0], 394: [0, 1],
-    395: [0], 396: [0, 9, 10, 4, 5, 6, 7, 8, 12],
+    395: [0], 396: [0, 2, 9, 10, 4, 5, 6, 7, 8, 12],
 }
 FORMATS = {'u8': 'B', 'u16': 'H', 'u32': 'I', 'any': 'H', 'var': 'H'}
 
@@ -123,7 +123,7 @@ def entities(data):
     pos = 8
     result = {'background': [], 'actors': [], 'warps': [], 'triggers': []}
     layouts = [
-        ('background', '<4H3i', ['script', 'condition', 'direction', 'rail', 'x', 'y', 'z']),
+        ('background', '<4H3i', ['script', 'condition', 'direction', 'rail', 'x', 'z', 'y']),
         ('actors', '<12HIHHi', ['id', 'model', 'movement', 'type', 'flag', 'script', 'direction',
                               'p0', 'p1', 'p2', 'width', 'height', 'rail', 'x', 'z', 'y']),
         ('warps', '<HHBBH6H', ['zone', 'warp', 'a', 'transition', 'rail', 'x', 'y', 'z', 'width', 'height', 'b']),

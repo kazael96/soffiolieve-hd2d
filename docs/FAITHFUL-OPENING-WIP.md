@@ -338,3 +338,8 @@ La fuga corretta provata visivamente contro LillipupLv2: nessun testo vittoria.
 - Diary can open scoped Pokédex entries. Caught-only data remain hidden for species merely seen. Browser menu shell and text-entry field remain web adaptations, not the original DS lower-screen menu/keyboard. Entry sprite uses existing native animation player; entry transition/glow/background scrolling not yet reproduced.
 - Browser QA on isolated save: original Patrat panel, correct footprint, registration text, nickname YES → Vedetta via Enter, correct party slot and caught list. No console errors. 41 Node tests + runtime first/duplicate catch and tutorial exclusion pass; all nine original event flows still pass.
 - Main browser playthrough completed original capture comparison and phone call, then reached Quattroventi end boundary without block (main save on tab8). Full playthrough precedes this new Pokédex code; local QA used tab10 `/qa-dex.html` with isolated save key.
+
+
+### 03:30 Rome — background interactions repaired
+
+The background-event record's second coordinate is the north/south grid coordinate, but the host treated its third (height) as that coordinate. Normalized extraction to X/Z/Y like actors and triggers; added native directional restrictions (N/E/W/S/any/horizontal/vertical), and extracted the missing laboratory machine event792:2. The program set is now1813 instructions. Runtime executes62 sign/furniture interactions and rejects wrong directions; browser confirms Percorso1 sign at grid787,687 now reads its original text. This also restores room TV/console descriptions and town house/laboratory signs. Hidden item8123 is west of the scope and remains excluded.

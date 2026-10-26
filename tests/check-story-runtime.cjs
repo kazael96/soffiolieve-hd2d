@@ -59,6 +59,21 @@ async function drain(c,promise,starter=0,outcome='play'){
   console.log('PASS first capture registration, duplicate catch, original nickname prompt and tutorial exclusion');
  }
  {
+  const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;let count=0;
+  const allowed=[[0],[3],[2],[1],[0,1,2,3],[2,3],[0,1]],vectors=[[0,-1],[0,1],[-1,0],[1,0]];
+  for(const [zone,data] of Object.entries(c.ORIGINAL_EVENTS.zones))for(const b of data.background){
+   if(b.condition>=2||b.script>=2000)continue;
+   assert.ok(c.ORIGINAL_EVENTS.scripts[data.script].supportedEntries.includes(b.script-1),'Background script extracted '+zone+':'+b.script);
+   n.state.zone=+zone;c.npcs.splice(0);const [ox,oz]=[317,389].includes(+zone)?[784,752]:[16,16];
+   for(let dir=0;dir<4;dir++){
+    const [dx,dz]=vectors[dir];c.player={x:b.x+.5-ox-dx,y:b.z+.5-oz-dz};c.facing=[0,3,6,9][dir];
+    if(!allowed[b.direction].includes(dir)){assert.equal(j.hint(),'','Wrong side '+zone+':'+b.script+':'+dir);continue;}
+    assert.equal(j.hint(),'E · Interagisci');const pages=await drain(c,n.interact());assert.ok(pages.length,'Original background text '+zone+':'+b.script);count++;
+   }
+  }
+  assert.equal(count,62);console.log('PASS 62 original sign/furniture interactions and forbidden approach directions');
+ }
+ {
   const c=environment(),n=c.NativeStory;
   c.startBattle=async()=>{throw Error('Test battle setup failure');};
   for(const [name,args] of [['CallTrainerBattle',[59]],['CallCaptureDemo',[]]]){
