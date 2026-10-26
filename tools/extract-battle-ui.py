@@ -75,7 +75,20 @@ def extract(rom,output):
    pos=(x//8)*32+y*4+(x%8)//2;ci=(msg_raw[pos]>>(4*(x%2)))&15
    if ci:strip.putpixel((x,y),(*msg_pal[ci],255))
  strip.save(dest/'message-tiles-89.png')
+ outer=Image.new('RGBA',(256,48));outer.paste((*msg_pal[12],255),(8,8,248,40))
+ # ARM9 02045460–0204566C emits eight frame tiles around Window[1,19,30,4].
+ for ty in range(6):
+  for tx in range(32):
+   tile=(0 if tx==0 else 2 if tx==31 else 1)if ty==0 else(5 if tx==0 else 7 if tx==31 else 6)if ty==5 else(3 if tx==0 else 4 if tx==31 else None)
+   if tile is None:continue
+   for yy in range(8):
+    for xx in range(8):
+     ci=(msg_raw[tile*32+yy*4+xx//2]>>(4*(xx%2)))&15
+     if ci:outer.putpixel((tx*8+xx,ty*8+yy),(*msg_pal[ci],255))
+ outer.save(dest/'message-window-original.png')
  result['messageWindow']={'source':'IRBI ov93 021EAF64 palette90;021EAFBE char89;021EB00A–021EB01A WindowCreate;021EB03A fill12','bg':1,'screen':'main/top','tilePosition':[1,19],'tileSize':[30,4],'pixelRect':[8,152,240,32],'palette':90,'paletteBank':0,'fillIndex':12,'fillColor':msg_pal[12],'paletteColors':msg_pal,'tiles':{'path':'assets/battle-ui/message-tiles-89.png','char':89,'size':[64,8]},'font':0,'fontSource':'ov93 021E8EA8 passes ctx+B0 loaded as font0 into021EAE7C controller+24','note':'Window interior and source tiles are certified. Tile-frame assembly, exact glyph color and baseline still require printer trace; do not invent a field-style bevel.'}
+ result['messageWindow']['outerFrame']={'path':'assets/battle-ui/message-window-original.png','rect':[0,144,256,48],'source':'ARM9 02045460–0204566C invokedov93 021EB034; tiles0/1/2 top,3/4 sides,5/6/7 bottom','size':[256,48],'tileGrid':[32,6],'interior':[8,8,240,32],'verified':True}
+ result['messageWindow']['blend']={'source':'ov93 021ED674–021ED68C ->0207D5BC','targetA':2,'targetB':61,'evaRegister':31,'effectiveEva':16,'evb':7,'denominator':16,'blackInteriorSceneFraction':0.4375,'note':'DS coefficients clamp to16; blend is additive saturated per5bit channel, min31(src+scene*7/16), not normalized RGBA alpha. Source PNG retains native opaque pixels; apply blend separately.'}
  # IRBI ov94 02204BC0 +02204F7E load a/0/1/1 palette by move type,
  # first16 colors into BG palette bank9+i. Source111 is scrolled to256,192.
  overlay=bytes(rom.loadArm9Overlays([94])[94].data);obase=0x21f6460
@@ -112,6 +125,7 @@ def extract(rom,output):
  result['moves']['emptyPanel']=panels.pop('empty')
  result['moves']['emptyPanel']['source']='IRBI ov94 02204F48: moveID0 selects palette193; suppresses move name/type/PP'
  result['moves']['pressed']={'source':'IRBI ov94 02206478,0220653C','paletteBanks':[9,10,11,12],'paletteMaskTable':'0220A350','blendColorBGR555':32767,'coefficientSequence':[0,8,0],'coefficientDenominator':16,'note':'Native task fades selected sub-BG palette bank toward white and back. Exact frame duration not yet certified.'}
+ result['moves']['pressed']['timing']={'source':'ARM9 02021974 step2 delay0;02021AEC delay comparison;02021C62/98 coefficientstep;ov94 0220653C controller','coefficientStep':2,'delayTicks':0,'outboundSamples':[0,2,4,6,8],'returnSamples':[8,6,4,2,0],'samplesPerLeg':5,'note':'Initial palette sample applied synchronously by020216BC, subsequent samples once per palette task update at delay0. Controller polls completion and schedules reverse; whole-button wall time also includes task scheduling order, so no single exact millisecond total is asserted.'}
  result['moves']['keyCursor']={'source':'IRBI ov94 022033E2,022063CC','char':119,'palette':116,'cellmap':120,'animation':121,'cells':groups['119']['cells'],'animations':mg.animations(files[121]),'note':'Original magenta/white corner brackets. Cell OAM origins retained; external actor positioning must use original touch rectangles.'}
  result['moves']['touchRects']={'source':'IRBI ov94 MoveScreenMain02202FF0/02203140 buttonset0220A29C ->rects0220A3CC','encoding':'top,bottom,left,right; right255 is native right-screen sentinel','moves':[[0,32,128,48],[128,32,127,48],[0,80,128,48],[128,80,127,48]],'cancel':[176,144,79,48],'raw':list(struct.iter_unpack('<4B',overlay[0x220a3cc-obase:0x220a3cc-obase+28]))}
  result['moves']['keyCursor']['actorSequences']=list(struct.unpack_from('<6I',overlay,0x220a480-obase))
