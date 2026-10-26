@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.15
+# Soffiolieve HD-2D — demo 0.16
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -7,6 +7,10 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Questa versione
+
+La 0.16 corregge gli elenchi e le sagome della ricerca Pokédex, la selezione combinata di due tipi, il grafico dei versi da PCM originale, le maschere habitat e il loro lampeggio. Aggiunge il pannello quantità originale della Borsa con comandi ±1/±10, il menu Y sullo schermo superiore con riordino e i font, gli stati e la pressione originali della squadra in lotta.
+
+Le verifiche e i limiti della conversione sono in [docs/FEDELTA-016.md](docs/FEDELTA-016.md).
 
 La 0.15 ricostruisce le schermate principali con fondi, font e controlli estratti dalla ROM italiana: Squadra, Borsa, Riepilogo, Opzioni, Scheda Allenatore, tastiera dei soprannomi, Salva e Pokédex con ricerca. Le lotte usano pannelli delle mosse, colori PP, cursori, Borsa e selettore squadra originali. I tasti touch A/B e la croce funzionano anche nei menu.
 

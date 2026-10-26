@@ -1,5 +1,6 @@
 /* Native-resolution menu compositor. Graphics/text are converted from IRBI. */
 (function(root){
+  function wrapQuantity(value,delta,maximum){return value+delta>maximum?1:value+delta<1?maximum:value+delta;}
   function nextButton(buttons,current,dx,dy){
     const from=buttons[current];if(!from)return 0;
     const candidates=buttons.map((b,i)=>({b,i,x:b.x+b.w/2-from.x-from.w/2,y:b.y+b.h/2-from.y-from.h/2})).filter(c=>!c.b.disabled&&(dx?c.x*dx>0:c.y*dy>0));
@@ -35,7 +36,7 @@
       this.title=title;this.render=render;this.back=back;this.buttons=buttons;this.selected=Math.max(0,buttons.findIndex(b=>!b.disabled));
       this.dialog.setAttribute('aria-label',title);this.canvas.setAttribute('aria-label',title);
       this.stage.querySelectorAll('button').forEach(b=>b.remove());
-      buttons.forEach((b,i)=>{const el=document.createElement('button');el.type='button';el.className='native-hit';el.textContent=b.label;el.setAttribute('aria-label',b.label);el.disabled=!!b.disabled;Object.assign(el.style,{left:b.x/2.56+'%',top:b.y/1.92+'%',width:b.w/2.56+'%',height:b.h/1.92+'%'});el.onclick=()=>this.activate(i);el.onfocus=()=>{this.selected=i;this.draw();};b.element=el;this.stage.append(el);});
+      buttons.forEach((b,i)=>{const el=document.createElement('button');el.type='button';el.className='native-hit';el.textContent=b.label;el.setAttribute('aria-label',b.label);el.disabled=!!b.disabled;Object.assign(el.style,{left:b.x/2.56+'%',top:b.physicalScreen==='top'?'calc('+b.y/1.92+'% - 100% - 4px)':b.y/1.92+'%',width:b.w/2.56+'%',height:b.h/1.92+'%'});el.onclick=()=>this.activate(i);el.onfocus=()=>{this.selected=i;this.draw();};b.element=el;this.stage.append(el);});
       if(!this.dialog.open)this.dialog.showModal();resetInput();this.focus();
     }
     focus(){this.buttons[this.selected]?.element.focus();this.draw();}
@@ -53,7 +54,7 @@
     if(preparation)return preparation;
     preparation=(async()=>{screen=new Screen();await screen.ready();
       const records=root.MENU_ASSETS?.images||{};await Promise.all(Object.entries(records).map(async([key,value])=>{assets[key]=await image(typeof value==='string'?value:value.src||value.url);}));
-      assets.main=assets.background;assets.mainButtons=assets.buttons6;
+      for(const [key,v] of Object.entries(FIELD_POPUP_ASSETS.images))assets['field-'+key]=await image(v.src);assets.readyFonts=await Promise.all(['normal','highlight'].map(k=>image(FIELD_POPUP_ASSETS.fonts.variants[k].src)));assets.readyMarkers=await Promise.all(FIELD_POPUP_ASSETS.groups.readyMarkers.cells.map(v=>image(v.src)));assets.main=assets.background;assets.mainButtons=assets.buttons6;
       await Promise.all(Object.entries(root.MENU_ASSETS?.groups||{}).map(async([key,group])=>{if(group.cells[0])assets['icon-'+key]=await image(group.cells[0].src);}));
       await Promise.all(Object.entries(root.MENU_ASSETS?.pokemonIcons||{}).map(async([id,record])=>{assets['pokemon-'+id]=await image(record.cells[0].src);}));
       assets['icon-options']=assets['icon-pokedex'];assets['icon-pokedex']=assets['icon-xtransceiverMale'];
@@ -157,19 +158,25 @@
     if(battling||menuOpen()||root.NativeStory?.locked)return;
     const registry={pokemon:['POKÉMON',()=>team({back:()=>screen.close()})],pokedex:['POKÉDEX',()=>{screen.close();return Pokedex.browse();}],bag:['BORSA',()=>bag(0,{back:()=>screen.close()})],trainer:[Journey.state.playerName,()=>NativeTrainerCard.open(screen,()=>screen.close())],'trainer:back':['Scheda allenatore: retro',()=>NativeTrainerCard.open(screen,()=>screen.close(),true)],save:['SALVA',saveMenu],options:['OPZIONI',()=>NativeOptions.open(screen,()=>screen.close())],'item:442':['Mappa Città',()=>{screen.close();return TownMap.open();}],'summary:info':['Info',()=>summary(0,0,()=>screen.close())],'summary:moves':['Mosse',()=>summary(0,1,()=>screen.close())],'summary:ribbons':['Fiocchi',()=>summary(0,2,()=>screen.close())]};
     for(const mode of ['info','zona','verso','forme'])registry['pokedex:'+mode]=['Pokédex: '+mode,()=>{const name=Journey.state.dex.seen.find(n=>POKEDEX_ASSETS.species[n]);screen.close();return name?NativePokedexDetails.open(name,{mode}):Pokedex.browse();}];
-      registry['pokedex:search']=['Pokédex: ricerca',()=>NativePokedexSearch.open(screen,result=>{if(Array.isArray(result)&&result.length){screen.close();void Pokedex.entry(DEX_SEARCH_ASSETS.species[result[0]].name);}else screen.close();})];
+      registry['pokedex:search']=['Pokédex: ricerca',()=>{screen.close();return NativePokedexBrowser.open({searchInitially:true});}];
       const ids=(NativeSettings.state.registered||[]).filter(id=>registry[id]&&(id!=='item:442'||Journey.state.original?.map)&&(!id.startsWith('summary:')||Journey.state.party.length));await prepare();
     if(ids.length===1)return registry[ids[0]][1]();
     if(!ids.length)return notice('Puoi assegnare strumenti e funzioni al pulsante Y dalla Borsa.',()=>screen.close());
-    actionList('Y',ids.map(id=>registry[id]),()=>screen.close());
+    const nativeLabels={'item:442':1,'summary:info':7,'summary:moves':8,'summary:ribbons':9,bag:10,pokedex:15,'pokedex:search':16,'pokedex:info':17,'pokedex:zona':18,'pokedex:verso':19,'pokedex:forme':20,trainer:21,'trainer:back':22,options:24};for(const [id,index]of Object.entries(nativeLabels))registry[id][0]=FIELD_POPUP_ASSETS.ready.labels[index].replace(/\{ff00:\d+\}/g,'');
+    const popup=FIELD_POPUP_ASSETS.ready,frame=assets['field-readyBackground'],field=document.createElement('canvas');field.width=256;field.height=192;const fc=field.getContext('2d');drawWorld();for(const id of ['stage','world']){const source=document.getElementById(id);if(source)fc.drawImage(source,0,0,256,192);}let cursor=0,first=0,moving=null,original=[...ids];
+    function renderReady(){const rows=ids.slice(first,first+popup.visibleRows),back=()=>{if(moving!=null){ids.splice(0,ids.length,...original);cursor=moving;moving=null;first=Math.min(first,cursor);renderReady();}else screen.close();};const move=delta=>{const next=Math.max(0,Math.min(ids.length-1,cursor+delta));if(moving!=null){const [id]=ids.splice(cursor,1);ids.splice(next,0,id);}cursor=next;if(cursor<first)first=cursor;if(cursor>=first+popup.visibleRows)first=cursor-popup.visibleRows+1;renderReady();};const activate=()=>{if(moving!=null){NativeSettings.set({registered:ids});moving=null;original=[...ids];renderReady();}else{screen.close();registry[ids[cursor]][1]();}};
+      screen.show('Comandi rapidi Y',c=>background(c,'main'),rows.map((id,i)=>({...rect(registry[id][0],8,96+i*16,240,16,()=>{cursor=first+i;activate();}),physicalScreen:'top'})).concat([{...rect('SELECT: sposta',184,88,64,8,()=>{if(moving==null){moving=cursor;original=[...ids];}else{NativeSettings.set({registered:ids});moving=null;original=[...ids];}renderReady();}),physicalScreen:'top'}]),back,{drawFocus:false,top:c=>{c.drawImage(field,0,0);c.drawImage(frame,0,88,256,104,0,88,256,104);c.fillStyle='#000';c.fillRect(8,96,240,96);rows.forEach((id,i)=>{const y=104+i*16;if(first+i===cursor){c.fillStyle='rgb(0,0,213)';c.fillRect(8,y-2,240,16);}NativeText.draw(c,assets.readyFonts[first+i===cursor?1:0],registry[id][0],21,y,false,'left',FIELD_POPUP_ASSETS.fonts);});if(moving!=null){const group=FIELD_POPUP_ASSETS.groups.readyMarkers,tick=Math.floor(performance.now()*60/1000);for(let j=0;j<3;j++){const anim=group.animations[j],duration=anim.frames.reduce((n,f)=>n+f[1],0);let phase=tick%duration,frame=anim.frames[0];for(const f of anim.frames){frame=f;if(phase<f[1])break;phase-=f[1];}const cell=group.cells[frame[0]],y=96+(cursor-first)*16;c.drawImage(assets.readyMarkers[frame[0]],popup.markerAnchorsX[j]+cell.origin[0]+frame[2],y+cell.origin[1]+frame[3]);}}},key:key=>{if(key==='arrowup'||key==='arrowdown'){move(key==='arrowup'?-1:1);return true;}if(['select','shift','f1'].includes(key)){if(moving==null){moving=cursor;original=[...ids];}else{NativeSettings.set({registered:ids});moving=null;original=[...ids];}renderReady();return true;}if(['a','z','enter',' ','y'].includes(key)){activate();return true;}if(['b','escape','x'].includes(key)){back();return true;}return false;}});
+    }
+    renderReady();const animateReady=()=>{if(!screen.dialog.open||screen.title!=='Comandi rapidi Y')return;screen.draw();requestAnimationFrame(animateReady);};requestAnimationFrame(animateReady);
   }
   function useItem(id,pocket){if(id===442)return external(()=>TownMap.open(),()=>bag(pocket));if(id===17)return team({select:i=>{const result=Journey.usePotion(i);notice(result?MENU_ASSETS.texts['157'][44].replace('{0102:0}',Journey.state.party[i].nickname||Journey.state.party[i].name).replace('{0202:1}',result):'Non avrebbe alcun effetto.',()=>bag(pocket));},back:()=>bag(pocket)});notice('Non è il momento di usarlo!',()=>bag(pocket));}
   function discard(id,pocket,count=1){
-    const maximum=id===4?Journey.state.pokeballs:potions,change=delta=>discard(id,pocket,Math.max(1,Math.min(maximum,count+delta)));
-    screen.show('BUTTA',c=>{drawBag(c,pocket);box(c,24,66,208,82);screen.text(ORIGINAL_EVENTS.itemNames[id],128,72,false,'center');screen.text('× '+count,128,96,false,'center');screen.text('-',48,96);screen.text('+',205,96);screen.text('OK',76,125,false,'center');screen.text('ESCI',184,125,false,'center');},[
-      rect('Diminuisci quantità',28,92,40,24,()=>change(-1)),rect('Aumenta quantità',188,92,40,24,()=>change(1)),
-      rect('OK',32,120,88,28,()=>confirm('Vuoi buttare '+count+' '+ORIGINAL_EVENTS.itemNames[id]+'?',()=>{Journey.discardItem(id,count);bag(pocket);},()=>bag(pocket))),rect('ESCI',136,120,88,28,()=>bag(pocket))
-    ],()=>bag(pocket),{top:c=>drawBagTop(c,pocket,inventory(pocket).findIndex(item=>item.id===id)),topLabel:'Descrizione dello strumento',key:key=>{if(['arrowup','arrowdown'].includes(key)){change(key==='arrowup'?1:-1);return true;}return false;}});
+    const maximum=id===4?Journey.state.pokeballs:potions,a=FIELD_POPUP_ASSETS.bagQuantity,t=MENU_ASSETS.texts['3'],item=ORIGINAL_EVENTS.itemNames[id];
+    const change=delta=>discard(id,pocket,wrapQuantity(count,delta,maximum));
+    const accept=()=>confirm(NativeTextLayout.format(t[55],[item,count]),()=>{Journey.discardItem(id,count);notice(NativeTextLayout.format(t[54],[item,count]),()=>bag(pocket));},()=>bag(pocket));
+    screen.show('BUTTA',c=>{drawBag(c,pocket);c.drawImage(assets['field-bagQuantity'],...a.imagePosition);screen.text('x'+count,a.textWindow[0],a.textWindow[1]);c.drawImage(assets.messageFrame,0,144);NativeTextLayout.wrap(NativeTextLayout.format(t[53],[item]),POKEDEX_ASSETS.font,240).slice(0,2).forEach((line,i)=>screen.text(line,8,152+i*16));},[
+      rect('Aumenta quantità',...a.touch.increase,()=>change(1)),rect('Diminuisci quantità',...a.touch.decrease,()=>change(-1)),rect('Conferma quantità',...a.touch.confirm,accept),rect('Annulla',...a.touch.cancel,()=>bag(pocket))
+    ],()=>bag(pocket),{drawFocus:false,top:c=>drawBagTop(c,pocket,inventory(pocket).findIndex(item=>item.id===id)),key:key=>{const delta={arrowup:1,arrowdown:-1,arrowright:10,arrowleft:-10}[key];if(delta){change(delta);return true;}if(['a','z','enter',' '].includes(key)){accept();return true;}return false;}});
   }
   function snapshot(){const copy=canvas=>{const image=document.createElement('canvas');image.width=256;image.height=192;image.getContext('2d').drawImage(canvas,0,0);return image;};return {lower:copy(screen.canvas),upper:screen.upper.hidden?null:copy(screen.upper)};}
   function confirm(text,yes,no){
@@ -180,5 +187,5 @@
   function options(draft={...NativeSettings.state},focus=0){return NativeOptions.open(screen,main,draft,focus);}
   function trainerCard(){return NativeTrainerCard.open(screen,main);}
   root.NativeUI={Screen,nextButton,open,prepare,confirm,register,useRegistered,team:async()=>{if(battling||root.NativeStory?.locked||!Journey.state.starter)return;await prepare();team({back:()=>screen.close()});},main,bag,summary};
-  if(typeof module!=='undefined')module.exports={nextButton};
+  if(typeof module!=='undefined')module.exports={nextButton,wrapQuantity};
 })(typeof window!=='undefined'?window:globalThis);

@@ -36,9 +36,79 @@ def extract(rom,out):
  data['provenance']['searchInitialControls']='overlay210 table0x021C0A60; constructor0x021BFDC6 -> 0x02025C50; 10 records of12 bytes'
  data['provenance']['listShortcut']='overlay209 0x021BD254 -> 0x02012BF8/0x02012BE0 with ID15'
  data['criteria']['searchShortcutId']=16
+ # Native frame_list submenus, not a generic grid.
+ from PIL import Image
+ data['criteria']['shapeRange']=[0,13]
+ data['submenus']={};data['groups']={}
+ for key,addr,count,background,msgStart in [('order',0x21c0b20,6,'orderChoice',25),('initial',0x21c0b70,26,'nameChoice',51),('types',0x21c0b48,17,'typeChoice',31),('color',0x21c0b98,10,'colorChoice',96),('shape',0x21c0bc0,14,'shapeChoice',None)]:
+  cfg=list(a[addr-0x21bc140:addr-0x21bc140+40]);ptr=struct.unpack_from('<I',a,addr-0x21bc140+28)[0];controls=[]
+  for i in range(20):
+   row=list(a[ptr-0x21bc140+8*i:ptr-0x21bc140+8*(i+1)])
+   if row[0]==255:break
+   y0,y1,x0,x1=row[:4];action=struct.unpack('<I',bytes(row[4:]))[0]
+   controls.append({'index':i,'rect':[x0,y0,x1-x0+1,y1-y0+1],'nativeAction':action,'role':{0:'selectVisibleRow',1:'dragScroll',4:'pageUp',5:'pageDown',8:'selectVisibleRowAndReturn'}[action]})
+  data['submenus'][key]={'configAddress':hex(addr),'nativeConfig':cfg,'count':count,'background':background,'rowSize':[cfg[4]*8,cfg[5]*8],'rowX':cfg[2]*8,'rowY':cfg[3]*8,'mainBG':cfg[0],'subBG':cfg[1],'visibleSelectableRows':cfg[25],'textWindowLocal':[cfg[6]*8,cfg[7]*8,cfg[8]*8,cfg[9]*8],'controlsAddress':hex(ptr),'controls':controls,'messageIds':list(range(msgStart,msgStart+count))if msgStart is not None else [],'selectReturnsImmediately':key=='order','toggleExistingSelectionOff':key!='order','sourceRowScreen':98 if key=='shape'else 97,'rowText':None if key=='shape'else{'font':0,'packed':'0x39e0','align':'center','centerX':196,'localY':4},'subRowRule':'Previous entries before main first: subY = 192 + (entryIndex - mainFirstIndex) * rowHeight; clip to 0..191'}
+ for label,screen,height in [('optionRow',97,24),('shapeRow',98,40)]:
+  for state,slot in [('normal',1),('pulseA',2),('pulseB',3)]:
+   ff=list(f);scr=bytearray(f[screen])
+   for pos in range(36,len(scr),2):
+    val=struct.unpack_from('<H',scr,pos)[0];struct.pack_into('<H',scr,pos,(val&4095)|(slot<<12))
+   ff[screen]=scr;im=menu.layer(ff,81,screen,73).crop((0,0,128,height));name=label+'-'+state;im.save(dest/(name+'.png'));images[name]={'src':'assets/dex-search/'+name+'.png','size':[128,height],'source':{'archive':'a/1/5/9','char':81,'screen':screen,'palette':73,'paletteSlot':slot}}
+ for label,char,cer,palette,anr in [('shapes',82,85,76,101),('optionObjects',78,84,75,100)]:
+  group={'source':{'archive':'a/1/5/9','char':char,'cells':cer,'palette':palette,'animation':anr},'cells':[],'animations':menu.animations(f[anr])}
+  for i,(im,box)in enumerate(menu.cells(f,char,cer,palette)):
+   name=label+'-'+str(i);im.save(dest/(name+'.png'));group['cells'].append({'src':'assets/dex-search/'+name+'.png','origin':box[:2],'size':box[2:]})
+  data['groups'][label]=group
+ data['submenus']['shape']['sprite']={'group':'shapes','cellEqualsCriterionValue':True,'anchorX':204,'anchorLocalY':20,'native':'overlay210 0x021BFA8C'}
+ data['rowSelectionMark']={'group':'optionObjects','cell':2,'anchorX':140,'anchorLocalYFormula':'rowHeight / 2','native':'overlay210 0x021BF6B0 (24px rows), 0x021BF914 (40px rows)'}
+ data['scrollObjects']={'group':'optionObjects','thumbCell':0,'trackCell':1,'thumbAnchorX':252,'thumbAnchorYRange':[12,156],'trackAnchor':[252,84],'nativeActorTable':'overlay210 0x021C08AC records0/1'}
+ for key,helpId,labelId in [('order',4,12),('initial',5,13),('types',6,14),('color',8,15),('shape',7,16)]:
+  v=data['submenus'][key];v['helpMessageId']=helpId;v['labelMessageId']=labelId;v['leftTitle']={'window':12,'center':[64,64],'align':'center','nativeColorPacked':'0x3c40'};v['leftValue']={'window':13,'center':[64,88],'align':'center','nativeColorPacked':'0x3c40'}
+ data['submenus']['shape']['leftValue']={'spriteGroup':'shapes','anchor':[64,104],'visibleWhenCriterionSet':True,'native':'overlay210 0x021BF518..0x021BF550'}
+ data['criteria']['typeSelectionInteraction']='Single native list: click absent type adds it; click selected type removes it; if two types exist, a third replaces older slot and shifts current second to first.'
+ data['pulse']={'sourcePalette':73,'slots':[2,3],'nativeRoutine':'0x0202E9C0','periodFrames':64,'phaseIncrement':1024,'phaseWrap':65536,'blendFx12':'(cosFx12(phase) + 4096) / 2','colorRule':'per RGB555 component: a + (((b-a)*blendFx12)>>12)','normalSlot':1,'nativePaletteLoad':'overlay210 0x021C0186 -> 0x021B794C -> 0x0202E92C'}
+ # Original ARM9 FX_SinCosTable odd entries (cosine), 64 native phases.
+ import importlib
+ compression=importlib.import_module('ndspy.codeCompression')
+ arm=compression.decompress(rom.arm9)
+ # Shared palette manager 0x0202E9EC loads its exact interleaved LUT pointer.
+ lut=struct.unpack_from('<I',arm,0x0202EA80-rom.arm9RamAddress)[0]
+ blends=[]
+ for phase in range(0,65536,1024):
+  value=struct.unpack_from('<h',arm,lut-rom.arm9RamAddress+((phase>>4)*2+1)*2)[0]
+  blends.append((value+4096)//2)
+ assert len(blends)==64 and blends[0]==4096 and blends[32]==0
+ data['pulse']['blendSamplesPhaseZero']=blends
+ data['pulse']['sineCosineLutAddress']=hex(lut)
+ # Font0 raster, original NCLR73 slot1 fg14/shadow15. Add all actual search glyphs.
+ font=files('a/0/2/3')[0];glyph,widths,off=struct.unpack_from('<3I',font,0x20);mapping={}
+ while off and off+12<len(font):
+  first,last,kind,_,nxt=struct.unpack_from('<4HI',font,off);at=off+12
+  if kind==0:
+   start=struct.unpack_from('<H',font,at)[0];mapping.update({chr(c):start+c-first for c in range(first,last+1)})
+  elif kind==1:mapping.update({chr(c):struct.unpack_from('<H',font,at+(c-first)*2)[0]for c in range(first,last+1)})
+  elif kind==2:
+   count=struct.unpack_from('<H',font,at)[0];mapping.update({chr(c):g for c,g in struct.iter_unpack('<HH',font[at+2:at+2+count*4])})
+  off=nxt
+ chars=[c for c in sorted(set(''.join(text)+''.join(chr(c)for c in range(32,256))))if c in mapping and mapping[c]!=65535];rows=(len(chars)+15)//16;atlas=Image.new('RGBA',(192,rows*15));metrics={};pal=menu.pal(f[73])[16:32]
+ for i,ch in enumerate(chars):
+  cell=font[glyph+8+mapping[ch]*48:glyph+8+(mapping[ch]+1)*48];left,w,advance=cell[:3];metrics[ch]=[i%16*12,i//16*15,left,advance]
+  for y in range(15):
+   for x in range(12):
+    pos=y*12+x;ci=(cell[3+pos//4]>>(6-(pos%4)*2))&3
+    if ci in(1,2):atlas.putpixel((i%16*12+x,i//16*15+y),(*pal[14 if ci==1 else 15],255))
+ atlas.save(dest/'font-options.png');data['optionFont']={'src':'assets/dex-search/font-options.png','height':15,'glyphs':metrics,'colors':{'foreground':pal[14],'shadow':pal[15]},'source':{'font':'a/0/2/3:0','palette':'a/1/5/9:73','slot':1,'packed':'0x39e0','nativeLiteral':'0x021BEBA8'}}
+ data['provenance']['submenus']='overlay210 0x021C0134..0x021C0444, overlay67 frame_list 0x021B7654..0x021B9244'
+ data['limitations'][0]='Native submenu vertical rows, control rectangles, text alignment, glyphs, shape sprites and selection palette endpoints are exported. Exact touch-drag inertia and page-transition easing are not ported.'
  (out/'dex-search-assets.js').write_text('window.DEX_SEARCH_ASSETS='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
  print('Exported',len(images),'images;',len(text),'messages;',len(scoped),'species; sort member IDs',sortfiles)
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('rom');p.add_argument('--output',default=str(Path(__file__).resolve().parents[1]/'src'));a=p.parse_args();extract(ndspy.rom.NintendoDSRom.fromFile(a.rom),Path(a.output))
+
+
+
+
+
+
 
 

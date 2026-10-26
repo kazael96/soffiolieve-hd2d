@@ -370,21 +370,1252 @@
       ]
     }
   ],
-  "geometrySource": "ov198 0220B4C4 references table02211976/77 (width,height), table begins02211974; source panel copy0220B020 ->0220B360",
+  "geometrySource": "ov198 0220B4C4 references table02211976/77 (width,height), table begins02211974; source panel copy0220B020 ->0220B360; final0220B61E–0220B62E passes tablex/y intoBG6 copy02041010",
   "font": {
-    "createdIndex": 3,
     "textBank": 18,
-    "source": "02210610–0221063C r1=3 fontLoad; bank18",
-    "sourceAtlas": "assets/battle-ui/font-3.png",
-    "slotRoleVerified": false,
-    "note": "Several slot printers use root context+0xC font handle; creation of font3 alone does not prove its use for slot names/HP. Do not infer its active palette from field font5."
-  },
-  "inferredVisualStates": {
-    "source": "Visual inspection only; roles not yet traced",
-    "normal": "panel-0-0.png",
-    "selected": "panel-0-1.png",
-    "selectedVariant": "panel-0-2.png",
-    "empty": "panel-0-3.png"
+    "variants": {
+      "name": {
+        "index": 0,
+        "path": "assets/battle-party/font-0-slot.png",
+        "cellWidth": 12,
+        "height": 15,
+        "glyphs": {
+          " ": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "!": [
+            12,
+            0,
+            2,
+            5
+          ],
+          "\"": [
+            24,
+            0,
+            0,
+            6
+          ],
+          "#": [
+            36,
+            0,
+            0,
+            6
+          ],
+          "$": [
+            48,
+            0,
+            1,
+            7
+          ],
+          "%": [
+            60,
+            0,
+            0,
+            6
+          ],
+          "&": [
+            72,
+            0,
+            0,
+            6
+          ],
+          "'": [
+            84,
+            0,
+            1,
+            5
+          ],
+          "(": [
+            96,
+            0,
+            1,
+            5
+          ],
+          ")": [
+            108,
+            0,
+            1,
+            5
+          ],
+          "*": [
+            120,
+            0,
+            0,
+            6
+          ],
+          "+": [
+            132,
+            0,
+            0,
+            6
+          ],
+          ",": [
+            144,
+            0,
+            1,
+            5
+          ],
+          "-": [
+            156,
+            0,
+            0,
+            5
+          ],
+          ".": [
+            168,
+            0,
+            1,
+            5
+          ],
+          "/": [
+            180,
+            0,
+            0,
+            6
+          ],
+          "0": [
+            0,
+            15,
+            0,
+            6
+          ],
+          "1": [
+            12,
+            15,
+            1,
+            5
+          ],
+          "2": [
+            24,
+            15,
+            0,
+            6
+          ],
+          "3": [
+            36,
+            15,
+            0,
+            6
+          ],
+          "4": [
+            48,
+            15,
+            0,
+            6
+          ],
+          "5": [
+            60,
+            15,
+            0,
+            6
+          ],
+          "6": [
+            72,
+            15,
+            0,
+            6
+          ],
+          "7": [
+            84,
+            15,
+            0,
+            6
+          ],
+          "8": [
+            96,
+            15,
+            0,
+            6
+          ],
+          "9": [
+            108,
+            15,
+            0,
+            6
+          ],
+          ":": [
+            120,
+            15,
+            1,
+            5
+          ],
+          ";": [
+            132,
+            15,
+            1,
+            5
+          ],
+          "<": [
+            144,
+            15,
+            1,
+            5
+          ],
+          "=": [
+            156,
+            15,
+            0,
+            6
+          ],
+          ">": [
+            168,
+            15,
+            1,
+            5
+          ],
+          "?": [
+            180,
+            15,
+            0,
+            6
+          ],
+          "@": [
+            0,
+            30,
+            0,
+            6
+          ],
+          "A": [
+            12,
+            30,
+            0,
+            6
+          ],
+          "B": [
+            24,
+            30,
+            0,
+            6
+          ],
+          "C": [
+            36,
+            30,
+            0,
+            6
+          ],
+          "D": [
+            48,
+            30,
+            0,
+            6
+          ],
+          "E": [
+            60,
+            30,
+            0,
+            6
+          ],
+          "F": [
+            72,
+            30,
+            0,
+            6
+          ],
+          "G": [
+            84,
+            30,
+            0,
+            6
+          ],
+          "H": [
+            96,
+            30,
+            0,
+            6
+          ],
+          "I": [
+            108,
+            30,
+            1,
+            6
+          ],
+          "J": [
+            120,
+            30,
+            0,
+            6
+          ],
+          "K": [
+            132,
+            30,
+            0,
+            6
+          ],
+          "L": [
+            144,
+            30,
+            0,
+            6
+          ],
+          "M": [
+            156,
+            30,
+            0,
+            6
+          ],
+          "N": [
+            168,
+            30,
+            0,
+            6
+          ],
+          "O": [
+            180,
+            30,
+            0,
+            6
+          ],
+          "P": [
+            0,
+            45,
+            0,
+            6
+          ],
+          "Q": [
+            12,
+            45,
+            0,
+            6
+          ],
+          "R": [
+            24,
+            45,
+            0,
+            6
+          ],
+          "S": [
+            36,
+            45,
+            0,
+            6
+          ],
+          "T": [
+            48,
+            45,
+            0,
+            6
+          ],
+          "U": [
+            60,
+            45,
+            0,
+            6
+          ],
+          "V": [
+            72,
+            45,
+            0,
+            6
+          ],
+          "W": [
+            84,
+            45,
+            0,
+            6
+          ],
+          "X": [
+            96,
+            45,
+            0,
+            6
+          ],
+          "Y": [
+            108,
+            45,
+            0,
+            6
+          ],
+          "Z": [
+            120,
+            45,
+            0,
+            6
+          ],
+          "[": [
+            132,
+            45,
+            1,
+            5
+          ],
+          "\\": [
+            144,
+            45,
+            0,
+            6
+          ],
+          "]": [
+            156,
+            45,
+            1,
+            5
+          ],
+          "^": [
+            168,
+            45,
+            1,
+            6
+          ],
+          "_": [
+            180,
+            45,
+            0,
+            6
+          ],
+          "`": [
+            0,
+            60,
+            1,
+            5
+          ],
+          "a": [
+            12,
+            60,
+            0,
+            6
+          ],
+          "b": [
+            24,
+            60,
+            0,
+            6
+          ],
+          "c": [
+            36,
+            60,
+            0,
+            6
+          ],
+          "d": [
+            48,
+            60,
+            0,
+            6
+          ],
+          "e": [
+            60,
+            60,
+            0,
+            6
+          ],
+          "f": [
+            72,
+            60,
+            0,
+            5
+          ],
+          "g": [
+            84,
+            60,
+            0,
+            6
+          ],
+          "h": [
+            96,
+            60,
+            0,
+            6
+          ],
+          "i": [
+            108,
+            60,
+            0,
+            3
+          ],
+          "j": [
+            120,
+            60,
+            0,
+            6
+          ],
+          "k": [
+            132,
+            60,
+            0,
+            6
+          ],
+          "l": [
+            144,
+            60,
+            0,
+            4
+          ],
+          "m": [
+            156,
+            60,
+            0,
+            6
+          ],
+          "n": [
+            168,
+            60,
+            0,
+            6
+          ],
+          "o": [
+            180,
+            60,
+            0,
+            6
+          ],
+          "p": [
+            0,
+            75,
+            0,
+            6
+          ],
+          "q": [
+            12,
+            75,
+            0,
+            6
+          ],
+          "r": [
+            24,
+            75,
+            0,
+            6
+          ],
+          "s": [
+            36,
+            75,
+            0,
+            6
+          ],
+          "t": [
+            48,
+            75,
+            0,
+            6
+          ],
+          "u": [
+            60,
+            75,
+            0,
+            6
+          ],
+          "v": [
+            72,
+            75,
+            0,
+            6
+          ],
+          "w": [
+            84,
+            75,
+            0,
+            6
+          ],
+          "x": [
+            96,
+            75,
+            0,
+            6
+          ],
+          "y": [
+            108,
+            75,
+            0,
+            6
+          ],
+          "z": [
+            120,
+            75,
+            0,
+            6
+          ],
+          "{": [
+            132,
+            75,
+            1,
+            6
+          ],
+          "|": [
+            144,
+            75,
+            1,
+            4
+          ],
+          "}": [
+            156,
+            75,
+            1,
+            6
+          ],
+          "~": [
+            168,
+            75,
+            1,
+            7
+          ],
+          "¡": [
+            180,
+            75,
+            1,
+            4
+          ],
+          "§": [
+            0,
+            90,
+            1,
+            6
+          ],
+          "¨": [
+            12,
+            90,
+            1,
+            8
+          ],
+          "ª": [
+            24,
+            90,
+            0,
+            6
+          ],
+          "«": [
+            36,
+            90,
+            0,
+            6
+          ],
+          "°": [
+            48,
+            90,
+            1,
+            5
+          ],
+          "±": [
+            60,
+            90,
+            1,
+            11
+          ],
+          "´": [
+            72,
+            90,
+            1,
+            5
+          ],
+          "¶": [
+            84,
+            90,
+            1,
+            9
+          ],
+          "º": [
+            96,
+            90,
+            0,
+            6
+          ],
+          "»": [
+            108,
+            90,
+            0,
+            6
+          ],
+          "¿": [
+            120,
+            90,
+            0,
+            6
+          ],
+          "À": [
+            132,
+            90,
+            0,
+            6
+          ],
+          "Á": [
+            144,
+            90,
+            0,
+            6
+          ],
+          "Â": [
+            156,
+            90,
+            0,
+            6
+          ],
+          "Ã": [
+            168,
+            90,
+            0,
+            6
+          ],
+          "Ä": [
+            180,
+            90,
+            0,
+            6
+          ],
+          "Å": [
+            0,
+            105,
+            0,
+            6
+          ],
+          "Æ": [
+            12,
+            105,
+            0,
+            10
+          ],
+          "Ç": [
+            24,
+            105,
+            0,
+            6
+          ],
+          "È": [
+            36,
+            105,
+            0,
+            6
+          ],
+          "É": [
+            48,
+            105,
+            0,
+            6
+          ],
+          "Ê": [
+            60,
+            105,
+            0,
+            6
+          ],
+          "Ë": [
+            72,
+            105,
+            0,
+            6
+          ],
+          "Ì": [
+            84,
+            105,
+            1,
+            6
+          ],
+          "Í": [
+            96,
+            105,
+            1,
+            6
+          ],
+          "Î": [
+            108,
+            105,
+            1,
+            6
+          ],
+          "Ï": [
+            120,
+            105,
+            1,
+            6
+          ],
+          "Ð": [
+            132,
+            105,
+            0,
+            6
+          ],
+          "Ñ": [
+            144,
+            105,
+            0,
+            6
+          ],
+          "Ò": [
+            156,
+            105,
+            0,
+            6
+          ],
+          "Ó": [
+            168,
+            105,
+            0,
+            6
+          ],
+          "Ô": [
+            180,
+            105,
+            0,
+            6
+          ],
+          "Õ": [
+            0,
+            120,
+            0,
+            6
+          ],
+          "Ö": [
+            12,
+            120,
+            0,
+            6
+          ],
+          "×": [
+            24,
+            120,
+            1,
+            11
+          ],
+          "Ø": [
+            36,
+            120,
+            0,
+            7
+          ],
+          "Ù": [
+            48,
+            120,
+            0,
+            6
+          ],
+          "Ú": [
+            60,
+            120,
+            0,
+            6
+          ],
+          "Û": [
+            72,
+            120,
+            0,
+            6
+          ],
+          "Ü": [
+            84,
+            120,
+            0,
+            6
+          ],
+          "Ý": [
+            96,
+            120,
+            0,
+            6
+          ],
+          "Þ": [
+            108,
+            120,
+            0,
+            6
+          ],
+          "ß": [
+            120,
+            120,
+            0,
+            6
+          ],
+          "à": [
+            132,
+            120,
+            0,
+            6
+          ],
+          "á": [
+            144,
+            120,
+            0,
+            6
+          ],
+          "â": [
+            156,
+            120,
+            0,
+            6
+          ],
+          "ã": [
+            168,
+            120,
+            0,
+            6
+          ],
+          "ä": [
+            180,
+            120,
+            0,
+            6
+          ],
+          "å": [
+            0,
+            135,
+            0,
+            6
+          ],
+          "æ": [
+            12,
+            135,
+            0,
+            10
+          ],
+          "ç": [
+            24,
+            135,
+            0,
+            6
+          ],
+          "è": [
+            36,
+            135,
+            0,
+            6
+          ],
+          "é": [
+            48,
+            135,
+            0,
+            6
+          ],
+          "ê": [
+            60,
+            135,
+            0,
+            6
+          ],
+          "ë": [
+            72,
+            135,
+            0,
+            6
+          ],
+          "ì": [
+            84,
+            135,
+            1,
+            4
+          ],
+          "í": [
+            96,
+            135,
+            1,
+            4
+          ],
+          "î": [
+            108,
+            135,
+            0,
+            4
+          ],
+          "ï": [
+            120,
+            135,
+            0,
+            4
+          ],
+          "ð": [
+            132,
+            135,
+            0,
+            6
+          ],
+          "ñ": [
+            144,
+            135,
+            0,
+            6
+          ],
+          "ò": [
+            156,
+            135,
+            0,
+            6
+          ],
+          "ó": [
+            168,
+            135,
+            0,
+            6
+          ],
+          "ô": [
+            180,
+            135,
+            0,
+            6
+          ],
+          "õ": [
+            0,
+            150,
+            0,
+            6
+          ],
+          "ö": [
+            12,
+            150,
+            0,
+            6
+          ],
+          "÷": [
+            24,
+            150,
+            1,
+            11
+          ],
+          "ø": [
+            36,
+            150,
+            0,
+            6
+          ],
+          "ù": [
+            48,
+            150,
+            0,
+            6
+          ],
+          "ú": [
+            60,
+            150,
+            0,
+            6
+          ],
+          "û": [
+            72,
+            150,
+            0,
+            6
+          ],
+          "ü": [
+            84,
+            150,
+            0,
+            6
+          ],
+          "ý": [
+            96,
+            150,
+            0,
+            6
+          ],
+          "þ": [
+            108,
+            150,
+            0,
+            6
+          ],
+          "ÿ": [
+            120,
+            150,
+            0,
+            6
+          ],
+          "Œ": [
+            132,
+            150,
+            0,
+            10
+          ],
+          "œ": [
+            144,
+            150,
+            0,
+            10
+          ],
+          "Ş": [
+            156,
+            150,
+            0,
+            6
+          ],
+          "ş": [
+            168,
+            150,
+            0,
+            6
+          ],
+          "…": [
+            180,
+            150,
+            1,
+            12
+          ],
+          "♀": [
+            0,
+            165,
+            1,
+            9
+          ],
+          "♂": [
+            12,
+            165,
+            1,
+            7
+          ]
+        },
+        "paletteBank": 9,
+        "indices": [
+          15,
+          14,
+          0
+        ],
+        "foreground": [
+          238,
+          238,
+          238
+        ],
+        "shadow": [
+          131,
+          131,
+          131
+        ],
+        "verified": true
+      },
+      "levelAndHp": {
+        "index": 3,
+        "path": "assets/battle-party/font-3-slot.png",
+        "cellWidth": 11,
+        "height": 8,
+        "glyphs": {
+          " ": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "/": [
+            11,
+            0,
+            1,
+            8
+          ],
+          "0": [
+            22,
+            0,
+            0,
+            8
+          ],
+          "1": [
+            33,
+            0,
+            1,
+            8
+          ],
+          "2": [
+            44,
+            0,
+            0,
+            8
+          ],
+          "3": [
+            55,
+            0,
+            0,
+            8
+          ],
+          "4": [
+            66,
+            0,
+            0,
+            8
+          ],
+          "5": [
+            77,
+            0,
+            0,
+            8
+          ],
+          "6": [
+            88,
+            0,
+            0,
+            8
+          ],
+          "7": [
+            99,
+            0,
+            0,
+            8
+          ],
+          "8": [
+            110,
+            0,
+            0,
+            8
+          ],
+          "9": [
+            121,
+            0,
+            0,
+            8
+          ],
+          "?": [
+            132,
+            0,
+            1,
+            8
+          ],
+          "F": [
+            143,
+            0,
+            1,
+            7
+          ],
+          "I": [
+            154,
+            0,
+            0,
+            10
+          ],
+          "L": [
+            165,
+            0,
+            0,
+            9
+          ],
+          "M": [
+            0,
+            8,
+            1,
+            7
+          ],
+          "N": [
+            11,
+            8,
+            0,
+            12
+          ],
+          "♀": [
+            22,
+            8,
+            1,
+            7
+          ],
+          "♂": [
+            33,
+            8,
+            1,
+            7
+          ]
+        },
+        "paletteBank": 9,
+        "indices": [
+          15,
+          14,
+          0
+        ],
+        "foreground": [
+          238,
+          238,
+          238
+        ],
+        "shadow": [
+          131,
+          131,
+          131
+        ],
+        "verified": true
+      }
+    },
+    "nameSource": "ov93 021E9920–26 ctx+B0(font0)->partyRoot+C;ov1980220BE44–48",
+    "levelHpSource": "02210638 font3->manager1E9C;0220C040/042,0220C090/128",
+    "paletteSource": "table02211ADA windows BG5 bank9; palette a1/0/0:19 bank9; packed0x3DC0"
   },
   "fainted": {
     "source": "0220B560–0220B580 HP0 overrides original tile palette with7+(state&1)",
@@ -404,12 +1635,402 @@
         "paletteBank": 8,
         "sourceRect": [
           0,
-          0,
+          48,
           128,
           48
         ]
       }
+    },
+    "byColumn": {
+      "0-7": {
+        "path": "assets/battle-party/panel-ko-col0-bank7.png",
+        "column": 0,
+        "paletteBank": 7,
+        "row": 0
+      },
+      "0-8": {
+        "path": "assets/battle-party/panel-ko-col0-bank8.png",
+        "column": 0,
+        "paletteBank": 8,
+        "row": 1
+      },
+      "1-7": {
+        "path": "assets/battle-party/panel-ko-col1-bank7.png",
+        "column": 1,
+        "paletteBank": 7,
+        "row": 0
+      },
+      "1-8": {
+        "path": "assets/battle-party/panel-ko-col1-bank8.png",
+        "column": 1,
+        "paletteBank": 8,
+        "row": 1
+      }
     }
   },
-  "notes": "This archive is distinct from field party ov91/a0/7/6. Original native map sources and cropped128x48 panel sources; final slot-table consumer and normal/selected state roles still to certify. Visual state inferences are explicitly separated from proven palette override."
+  "notes": "Font0 names, font3 level/HP and bank9 palette are now traced. Normal/reserve/empty/pressed selectors are native; row2 remains unassigned. Background and cards use BG7/BG6 respectively.",
+  "textWindows": [
+    {
+      "bg": 5,
+      "rect": [
+        0,
+        0,
+        120,
+        40
+      ],
+      "paletteBank": 9
+    },
+    {
+      "bg": 5,
+      "rect": [
+        128,
+        8,
+        120,
+        40
+      ],
+      "paletteBank": 9
+    },
+    {
+      "bg": 5,
+      "rect": [
+        0,
+        48,
+        120,
+        40
+      ],
+      "paletteBank": 9
+    },
+    {
+      "bg": 5,
+      "rect": [
+        128,
+        56,
+        120,
+        40
+      ],
+      "paletteBank": 9
+    },
+    {
+      "bg": 5,
+      "rect": [
+        0,
+        96,
+        120,
+        40
+      ],
+      "paletteBank": 9
+    },
+    {
+      "bg": 5,
+      "rect": [
+        128,
+        104,
+        120,
+        40
+      ],
+      "paletteBank": 9
+    }
+  ],
+  "textLayout": {
+    "name": {
+      "font": 0,
+      "localOrigin": [
+        32,
+        7
+      ],
+      "source": "0220D7CC–0220D7DA"
+    },
+    "level": {
+      "font": 3,
+      "localOrigin": [
+        8,
+        32
+      ],
+      "message": 11,
+      "source": "0220D888–0220D8AC ->0220BFD0",
+      "condition": "Only when02027644 returns8 (status label occupies this area otherwise)"
+    },
+    "hp": {
+      "font": 3,
+      "slashCenter": [
+        92,
+        32
+      ],
+      "currentRight": "92-floor(widthOfSlash/2)",
+      "maximumLeft": "92-floor(widthOfSlash/2)+widthOfSlash",
+      "source": "0220D85E–0220D86A ->0220C06C;0220C128–0220C1F4"
+    },
+    "hpBar": {
+      "rect": [
+        64,
+        27,
+        48,
+        2
+      ],
+      "source": "0220D86E–0220D87A ->0220C1F8; two horizontal lines atY24+3 and24+4"
+    }
+  },
+  "states": {
+    "verified": true,
+    "source": "02210A00 species0=>empty;02210E4C active predicate;0220B770–0220B7B8;0220B400 columns;0220B6AC press task",
+    "active": {
+      "column": 0,
+      "row": 0
+    },
+    "reserve": {
+      "column": 1,
+      "row": 0
+    },
+    "empty": {
+      "column": 1,
+      "row": 3
+    },
+    "pressed": {
+      "row": 1,
+      "note": "Pressed persists five update intervals including phase0→first phase1; phase2 then waits two updates before unlock. Simulation tick counts, not a scheduler-independent wall-clock guarantee.",
+      "pressedHoldTicks": 5,
+      "source": "0220B6CC row1 at phase0; phase1 counter0..4 restoresrow0 when4 at0220B6E6–0220B70C",
+      "recoveryTicks": 2
+    },
+    "row2": {
+      "roleVerified": false
+    },
+    "fainted": "HP0 palette7+(row&1) overrides source palette; source row retained"
+  },
+  "panelBg": 6,
+  "backgroundBg": 7,
+  "statusLabels": {
+    "archive": "a/0/8/3",
+    "char": 12,
+    "cellmap": 13,
+    "palette": 11,
+    "animation": 16,
+    "cells": [
+      {
+        "path": "assets/battle-party/status-0.png",
+        "cell": 0,
+        "bounds": [
+          -16,
+          -8,
+          23,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-1.png",
+        "cell": 1,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-2.png",
+        "cell": 2,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-3.png",
+        "cell": 3,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-4.png",
+        "cell": 4,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-5.png",
+        "cell": 5,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-6.png",
+        "cell": 6,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      },
+      {
+        "path": "assets/battle-party/status-7.png",
+        "cell": 7,
+        "bounds": [
+          -15,
+          -8,
+          19,
+          6
+        ]
+      }
+    ],
+    "animations": [
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            0,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            1,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            2,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            3,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            4,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            5,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            6,
+            4,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "kind": 65536,
+        "mode": 1,
+        "loop": 0,
+        "frames": [
+          [
+            7,
+            4,
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "positions": [
+      [
+        28,
+        40
+      ],
+      [
+        156,
+        48
+      ],
+      [
+        28,
+        88
+      ],
+      [
+        156,
+        96
+      ],
+      [
+        28,
+        136
+      ],
+      [
+        156,
+        144
+      ]
+    ],
+    "source": "0220E2F0–0220E34A load12/11/13/16;0220EA4A–0220EA58 position at02211CCC ->0220E874",
+    "sequenceMap": {
+      "sleep": 1,
+      "burn": 2,
+      "poison": 3,
+      "toxic": 3,
+      "paralysis": 4,
+      "freeze": 5,
+      "fainted": 6,
+      "none": 8
+    },
+    "mappingSource": "ARM9 02027644–0202768E;0220E874 uses enum directly as sequence,8 skips visible status",
+    "note": "Original status label OBJ source cells with signed origins. Position is actor anchor; apply NCER origin. Lv is omitted when status enum !=8."
+  }
 }
