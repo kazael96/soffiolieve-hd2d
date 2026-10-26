@@ -15,7 +15,7 @@
 </canvas>
 <canvas id="world">
 </canvas>
-<header>
+<header hidden aria-hidden="true">
 <a class="brand">◈ <span>UNIMA<span class="sub">POKÉMON NERO</span>
 </span>
 </a>
@@ -23,32 +23,12 @@
 </div>
 <button id="openLab" aria-label="Apri laboratorio lotte">⚗ <span>Laboratorio lotte</span>
 </button>
-<details id="audioControls">
-<summary id="audioLabel">♫ Audio spento</summary>
-<div class="audio-panel">
-<button id="audioToggle" aria-pressed="false">Attiva audio</button>
-<label>Musica <input id="volume-music" type="range" min="0" max="100" aria-label="Volume musica">
-</label>
-<label>Effetti <input id="volume-sfx" type="range" min="0" max="100" aria-label="Volume effetti">
-</label>
-<label>Versi <input id="volume-cry" type="range" min="0" max="100" aria-label="Volume versi">
-</label>
-<meter id="audioMeter" min="0" max="1" value="0" aria-label="Livello audio">
-</meter>
-<small id="audioStatus" role="status">
-</small>
-</div>
-</details>
+
 <button id="help" aria-label="Apri guida">? <span>Guida</span>
 </button>
 </header>
-<button id="openJournal" aria-label="Apri diario di viaggio">
-<span class="eyebrow">POKÉMON NERO · L’INIZIO
-</span>
-<span id="questSummary">Apri il regalo di Aralia.</span>
-<span class="journal-hint">Diario · J</span>
-</button>
-<div class="companion">
+<span id="questSummary" hidden></span>
+<div class="companion" hidden aria-hidden="true">
 <div id="mini">
 </div>
 <div>
@@ -60,12 +40,12 @@
 </div>
 <button id="team" aria-label="Apri squadra" title="Apri squadra">⇄</button>
 </div>
-<footer>
+<footer hidden aria-hidden="true">
 <div>
 <kbd>W A S D</kbd> / <kbd>↑ ↓ ← →</kbd> Muoviti <b>·</b> <kbd>E</kbd> Interagisci <b>·</b> <kbd>Shift</kbd> Corri</div>
-<span>SOFFIOLIEVE <b>●</b> DEMO 0.12</span>
+<span>SOFFIOLIEVE <b>●</b> DEMO 0.13</span>
 </footer>
-<div id="zoomControls" role="group" aria-label="Zoom visuale">
+<div hidden id="zoomControls" role="group" aria-label="Zoom visuale">
 <button id="zoomOut" aria-label="Riduci zoom">−</button>
 <output id="zoomValue">140%</output>
 <button id="zoomIn" aria-label="Aumenta zoom">+</button>
@@ -82,22 +62,39 @@
 <button data-key="ArrowRight" aria-label="Vai a est">→</button>
 </div>
 <div class="touch-actions">
-<button data-key="Shift" aria-label="Tieni premuto per correre">Corri</button>
-<button id="interact" aria-label="Interagisci">Parla · E</button>
+<button id="openJournal" aria-label="Apri menu">X</button>
+<button data-key="Shift" aria-label="Tieni premuto per correre">B</button>
+<button id="interact" aria-label="Interagisci">A</button>
 </div>
 </div>
 <dialog id="journal" aria-labelledby="journalTitle">
 <div class="journal-heading">
 <div>
-<span class="eyebrow">SOFFIOLIEVE → ACCUMULA</span>
-<h2 id="journalTitle">Il primo viaggio</h2>
+
+<h2 id="journalTitle">Menu</h2>
 </div>
 <button id="closeJournal" aria-label="Chiudi diario">✕</button>
 </div>
-<p id="storyObjective"></p>
+<p id="storyObjective" hidden></p>
 <p id="storyBag" class="fine"></p>
 <fieldset>
-<legend>Come vuoi esplorare?</legend>
+<details id="audioControls">
+<summary id="audioLabel">♫ Audio spento</summary>
+<div class="audio-panel">
+<button id="audioToggle" aria-pressed="false">Attiva audio</button>
+<label>Musica <input id="volume-music" type="range" min="0" max="100" aria-label="Volume musica">
+</label>
+<label>Effetti <input id="volume-sfx" type="range" min="0" max="100" aria-label="Volume effetti">
+</label>
+<label>Versi <input id="volume-cry" type="range" min="0" max="100" aria-label="Volume versi">
+</label>
+<meter id="audioMeter" min="0" max="1" value="0" aria-label="Livello audio">
+</meter>
+<small id="audioStatus" role="status">
+</small>
+</div>
+</details>
+<legend>Opzioni</legend>
 <label>
 <input type="checkbox" id="touchPreference"> Mostra sempre i comandi su schermo</label>
 <label>
@@ -107,6 +104,8 @@
 </p>
 <p class="fine">Il salvataggio è locale a questo browser. Riprendi dall’ultimo punto salvato fuori dalla lotta. La modalità privata o la cancellazione dei dati del sito possono rimuoverlo.</p>
 <div class="journal-actions">
+<button id="menuTeam">Pokémon</button>
+<button id="menuHelp">Comandi</button>
 <button id="openTownMap" hidden>Mappa Città</button>
 <button id="openPokedex" hidden>Pokédex</button>
 <button id="saveNow">Salva adesso</button>
@@ -135,7 +134,7 @@
 </div>
 </dialog>
 <dialog id="modal">
-<span class="eyebrow">POKÉMON NERO / DEMO 0.12</span>
+<span class="eyebrow">POKÉMON NERO / DEMO 0.13</span>
 <h2>Da Soffiolieve ad Quattroventi</h2>
 <p>Scegli il tuo primo Pokémon nella camera di Alcide, affronta Belle e Komor, visita Aralia e attraversa il Percorso 1. La demo termina all’ingresso di Quattroventi.</p>
 <p><b>WASD o frecce</b>: muoviti. <b>E</b>: interagisci con personaggi, porte e scale. <b>J</b>: obiettivo, salvataggio e impostazioni. <b>Shift</b>: corri. <b>V</b>: messa a fuoco. <b>+ / −</b>: zoom.</p>

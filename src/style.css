@@ -99,3 +99,16 @@ body.touch-enabled #context{bottom:226px}body.touch-enabled footer{display:none}
 #phoneScene img{position:absolute;height:100%;left:50%;transform:translateX(-50%);image-rendering:pixelated}
 #phoneScene figcaption{position:absolute;top:0;left:0;right:0;padding:3px 8px;background:#132d36bd;color:white;font-size:12px}
 @media(max-height:650px){#phoneScene{padding-top:8px;grid-template-rows:repeat(2,minmax(0,calc((100dvh - 175px)/2)));grid-template-columns:repeat(2,minmax(0,220px))}}
+
+/* Original field view: no permanent web HUD; physical controls live off screen. */
+#context{display:none!important}
+#openJournal{position:static;inset:auto;width:auto;padding:10px 15px;background:#ffffff12;border:1px solid #ffffff35;border-radius:7px;box-shadow:none;text-align:center}
+#journal #audioControls{position:static;margin:10px 0}
+#journal #audioControls .audio-panel{position:static;width:auto;box-shadow:none;background:transparent;border:0;padding:12px 0}
+#journal #audioMeter,#journal #audioStatus{display:none}
+#touch .touch-actions{align-items:center}
+
+.companion{display:none!important}
+.battle-top>span{display:none}
+
+#animationSpeed{display:none}
