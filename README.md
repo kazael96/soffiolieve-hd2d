@@ -8,7 +8,7 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 ## Questa versione
 
-La 0.17 completa il contesto della squadra in lotta con Scambia, INFO, MOSTRA MOSSE e dettaglio delle mosse, usando dati vivi della lotta. Corregge frecce e ripetizione della quantità, riordino del menu Y, selezione dei tipi, scorrimento della ricerca e composizione RGB555 di messaggi e habitat. Integra font, lampeggio e ritaglio originali della lista Pokédex e luminosità selettiva delle pagine.
+La 0.17 completa il contesto della squadra in lotta con Scambia, INFO, MOSTRA MOSSE e dettaglio delle mosse, usando dati vivi della lotta. Corregge frecce e ripetizione della quantità, riordino del menu Y, selezione dei tipi, scorrimento della ricerca e composizione RGB555 di messaggi e habitat. Integra font, lampeggio e ritaglio originali della lista Pokédex e luminosità selettiva delle pagine. Usa i messaggi originali per mosse, statistiche, KO e stati comuni.
 
 Verifiche e limiti: [docs/FEDELTA-017.md](docs/FEDELTA-017.md).
 
