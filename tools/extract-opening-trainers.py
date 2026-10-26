@@ -3,6 +3,7 @@ import argparse
 import json
 import hashlib
 import struct
+import importlib.util
 from pathlib import Path
 import ndspy.narc
 import ndspy.rom
@@ -17,6 +18,13 @@ if rom.idCode != b'IRBI':
 def narc(name):
     return ndspy.narc.NARC(rom.getFileByName(name)).files
 headers, parties, personal = narc('a/0/9/2'), narc('a/0/9/3'), narc('a/0/1/6')
+spec = importlib.util.spec_from_file_location('field_messages', Path(__file__).with_name('extract-original-events.py'))
+field_messages = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(field_messages)
+trainer_texts = field_messages.messages(narc('a/0/0/2')[189])
+message_table = list(struct.iter_unpack('<HH', narc('a/0/9/0')[0]))
+message_offsets = narc('a/0/9/1')[0]
+assert len(trainer_texts) == len(message_table) == 1762
 ai = narc('a/1/7/1')[4]
 assert hashlib.sha256(ai).hexdigest() == '1445323f99bfae12e70184f3b76b4d902e0532c0f479a78c95e6475fa4183cbd', 'Unexpected initial-rival AI program'
 # Its first 102 bytes are: damaging moves +1 on turn zero; non-damaging
@@ -48,6 +56,10 @@ for trainer_id in (53, 54, 55, 59, 60, 61):
     result[trainer_id] = {'name':'Belle' if trainer_class == 38 else 'Komor',
                          'trainerClass':trainer_class,
                          'aiFlags':struct.unpack_from('<I',header,12)[0],
-                         'moneyMultiplier':header[17], 'party':[mon]}
+                         'moneyMultiplier':header[17], 'party':[mon],
+                         'messages':{kind:trainer_texts[index] for index,(who,kind) in enumerate(message_table) if who==trainer_id}}
+    first = struct.unpack_from('<H', message_offsets, trainer_id * 2)[0] // 4
+    assert message_table[first][0] == trainer_id
+    assert set(result[trainer_id]['messages']) == {1,17,20}
 args.output.write_text('window.OPENING_TRAINERS='+json.dumps(result,separators=(',',':'))+';\n',encoding='utf8',newline='\n')
 print(json.dumps(result,indent=2))

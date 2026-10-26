@@ -78,6 +78,7 @@
     if(kind==='tutorial'){displayPartner();window.NativeStory?.battleDone(s,kind);return;}
     for(const m of s.battle.p1.pokemon){const id=m.storyId;if(id!==undefined)state.party[id]={...state.party[id],hp:m.hp,status:m.status,pp:m.moveSlots.map(move=>({id:GEN5.byMoveKey[move.id]?.id||0,left:move.pp}))};}
     if(captured)state.party.push(pack(captured,OPENING_DATA[captured.name].growth[captured.level]));else if(!escaped&&s.battle.winner==='Alcide')await gainXP(s,kind);
+    if(s.openingTrainer&&s.battle.winner==='Alcide')for(const page of messagePages(s.openingTrainer.messages[1],[]))await NativeStory.showPage(page,s.openingTrainer.name);
     lead=Math.max(0,state.party.findIndex(p=>p.hp>0));displayPartner();
     if(window.NativeStory?.battleDone(s,kind))return;
     if(state.party.every(p=>p.hp===0)){heal();window.NativeStory?.blackout();}

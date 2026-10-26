@@ -290,3 +290,23 @@ Rimosso anche l'esecutore Promise async in CallCaptureDemo e la mancata attesa
 dell'avvio in CallTrainerBattle: gli errori asincroni ora raggiungono il gestore
 dell'evento, liberando la callback pendente. Test di regressione su errore in
 avvio e animazione; nove percorsi originali ancora passano. Non ancora pubblicato.
+
+## Checkpoint 26 ottobre, 02:45: battute dei rivali e percorso manuale
+
+Estratti messaggi allenatori IRBI banca189, mappatura a/0/9/0 e offset a/0/9/1.
+I sei primi rivali hanno messaggi17,20,1. La routine overlay93 021ce7f0
+controlla nell'ordine18,17,19,20 e consuma tutte le condizioni soddisfatte,
+mostrando l'ultima. Il messaggio20 richiede più di un Pokémon iniziale: non va
+forzato in queste lotte. Primo danno sopravvissuto:17, una sola volta; vittoria
+del giocatore: messaggio1 dopo XP. Nuovo opening-battle-rules.js con test.
+Browser qa-trainer.html: Belle dice «Aaah! Cosa?! Non la passerai liscia!» al
+secondo turno dopo il primo Azione, correttamente. 36testNode e novepartitepassano.
+
+Partita principale tab8: catturato PatratLv3 indebolito, squadra2/PokéBall4;
+parlato a entrambi i personaggi del Percorso1 e ottenuta una Pozione.
+Posizione9.60255,-48.6524; seconda lotta PatratLv4, fuga riuscita, ancora
+pulsanteContinua. Rilevato messaggio/musica vittoria errati dopo fuga: correggere.
+Per procedere usare sentiero x4.5 evitando cartello/vegetazione a x6..9.
+Ricerca ricompense: formula IRBI verificata in overlay93 021d7ebc (ultimoLv
+*moneyMultiplier*4 =500perprimi6rivali). Perdita senza medaglie: routine021d7ef8
+e tabella021f032d, ancora da leggere. Denaro iniziale ancora da verificare.
