@@ -13,14 +13,14 @@
     if(i===times.length-1||channel.mode==='STEP')return values[i];
     return interpolate(values[i],values[i+1],Math.max(0,(time-times[i])/(times[i+1]-times[i])),channel.path==='rotation');
   }
-  function camera(curve,frame,aspect=4/3){
+  function camera(curve,frame,aspect=4/3,perspective=STARTER_ASSETS.perspective){
     const i=Math.max(0,Math.min(curve.length-1,Math.floor(frame))),j=Math.min(curve.length-1,i+1),v=interpolate(curve[i],curve[j],frame-i);
     const pitch=v[0]*Math.PI/180,yaw=v[1]*Math.PI/180,roll=v[2]*Math.PI/180;
     // Camera's local +Z points backwards. Nitro's curve stores XYZ Euler angles.
     const rx=trs(undefined,[Math.sin(pitch/2),0,0,Math.cos(pitch/2)]),ry=trs(undefined,[0,Math.sin(yaw/2),0,Math.cos(yaw/2)]),rz=trs(undefined,[0,0,Math.sin(roll/2),Math.cos(roll/2)]),rotation=mul(rz,mul(ry,rx));
     const view=[rotation[0],rotation[4],rotation[8],0,rotation[1],rotation[5],rotation[9],0,rotation[2],rotation[6],rotation[10],0,0,0,0,1];
     for(let r=0;r<3;r++)view[12+r]=-view[r]*v[3]-view[4+r]*v[4]-view[8+r]*v[5];
-    const p=STARTER_ASSETS.perspective,f=p.cos/p.sin,n=p.near,z=p.far;
+    const p=perspective,f=p.cos/p.sin,n=p.near,z=p.far;
     return mul([f/aspect,0,0,0,0,f,0,0,0,0,(z+n)/(n-z),-1,0,0,2*z*n/(n-z),0],view);
   }
   async function loadGLB(url){
@@ -29,24 +29,24 @@
     const length=header.getUint32(12,true),doc=JSON.parse(new TextDecoder().decode(new Uint8Array(raw,20,length))),data=new DataView(raw,28+length);
     const cache=new Map();function accessor(index){if(cache.has(index))return cache.get(index);const a=doc.accessors[index],v=doc.bufferViews[a.bufferView],sizes={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16},size=sizes[a.type],types={5126:['getFloat32',4,1],5125:['getUint32',4,4294967295],5123:['getUint16',2,65535],5121:['getUint8',1,255]},[getter,bytes,denom]=types[a.componentType],stride=v.byteStride||size*bytes,offset=(v.byteOffset||0)+(a.byteOffset||0);
       const values=Array.from({length:a.count},(_,i)=>Array.from({length:size},(_,j)=>data[getter](offset+i*stride+j*bytes,true)/(a.normalized?denom:1)));cache.set(index,values);return values;}
-    const animations=doc.animations.flatMap(animation=>[
+    const animationSets=(doc.animations||[]).map(animation=>[
       ...animation.channels.filter(c=>c.target.node!==undefined).map(c=>{const s=animation.samplers[c.sampler];return {node:c.target.node,path:c.target.path,times:accessor(s.input).flat(),values:accessor(s.output),mode:s.interpolation||'LINEAR'};}),
       ...(animation.extensions?.EXT_property_animation?.channels||[]).map(c=>{const s=animation.samplers[c.sampler];return {property:c.target,times:accessor(s.input).flat(),values:accessor(s.output),mode:s.interpolation||'LINEAR'};})
     ]);
     const images=await Promise.all(doc.images.map(record=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('Texture iniziale non disponibile: '+record.uri));image.src=new URL(record.uri,new URL(url,location.href)).href;})));
-    return {doc,accessor,animations,images};
+    return {doc,accessor,animationSets,animations:animationSets.flat(),images};
   }
   class Scene {
-    constructor(canvas){
-      this.canvas=canvas;const gl=this.gl=canvas.getContext('webgl',{alpha:false,antialias:true});if(!gl)throw Error('WebGL non disponibile');
+    constructor(canvas,assets=STARTER_ASSETS){
+      this.assets=assets;this.canvas=canvas;const gl=this.gl=canvas.getContext('webgl',{alpha:!!assets.transparent,antialias:true});if(!gl)throw Error('WebGL non disponibile');
       const compile=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;};
       this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,`attribute vec3 p;attribute vec2 uv;attribute vec4 color;attribute vec4 joint;attribute vec4 weight;uniform mat4 bones[24];uniform mat4 camera;uniform vec3 offset;uniform vec2 texOffset;varying vec2 tex;varying vec4 tint;void main(){mat4 skin=bones[int(joint.x)]*weight.x+bones[int(joint.y)]*weight.y+bones[int(joint.z)]*weight.z+bones[int(joint.w)]*weight.w;vec4 world=skin*vec4(p,1.);world.xyz+=offset;gl_Position=camera*world;tex=uv+texOffset;tint=color;}`));
       gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,`precision mediump float;uniform sampler2D image;uniform float opacity;varying vec2 tex;varying vec4 tint;void main(){vec4 c=texture2D(image,tex)*tint;c.a*=opacity;if(c.a<.02)discard;gl_FragColor=c;}`));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
       this.locations=Object.fromEntries(['bones[0]','camera','offset','image','texOffset','opacity'].map(n=>[n,gl.getUniformLocation(this.program,n)]));this.attributes=['p','uv','color','joint','weight'].map(n=>gl.getAttribLocation(this.program,n));this.models={};
-      this.ready=Promise.all(Object.entries(STARTER_ASSETS.models).map(async([name,url])=>{const model=await loadGLB(url),{doc,accessor,images}=model;
+      this.ready=Promise.all(Object.entries(assets.models).map(async([name,url])=>{const model=await loadGLB(url),{doc,accessor,images}=model;
         model.textures=doc.textures.map(t=>{const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,images[t.source]);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);const sampler=doc.samplers?.[t.sampler]||{};gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,sampler.wrapS||gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,sampler.wrapT||gl.REPEAT);return texture;});
         model.groups=[];doc.nodes.forEach((node,ni)=>{if(node.mesh===undefined)return;for(const primitive of doc.meshes[node.mesh].primitives){const a=primitive.attributes,p=accessor(a.POSITION),uv=a.TEXCOORD_0===undefined?p.map(()=>[0,0]):accessor(a.TEXCOORD_0),colors=a.COLOR_0===undefined?p.map(()=>[1,1,1,1]):accessor(a.COLOR_0),joints=a.JOINTS_0===undefined?p.map(()=>[0,0,0,0]):accessor(a.JOINTS_0),weights=a.WEIGHTS_0===undefined?p.map(()=>[1,0,0,0]):accessor(a.WEIGHTS_0),mat=doc.materials[primitive.material],factor=mat.pbrMetallicRoughness?.baseColorFactor||[1,1,1,1],indices=primitive.indices===undefined?p.map((_,i)=>i):accessor(primitive.indices).flat();
-          const packed=new Float32Array(indices.flatMap(i=>[...p[i],...uv[i],...factor.map((f,j)=>(j===3?1:f)*(colors[i][j]??1)),...joints[i],...weights[i]]));const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,packed,gl.STATIC_DRAW);model.groups.push({node:ni,skin:node.skin,material:primitive.material,texture:mat.pbrMetallicRoughness?.baseColorTexture?.index,alpha:factor[3],alphaTrack:STARTER_ASSETS.materialAlpha[name]?.[mat.name],blend:mat.alphaMode==='BLEND'||!!STARTER_ASSETS.materialAlpha[name]?.[mat.name],doubleSided:!!mat.doubleSided,buffer,count:indices.length});}
+          const packed=new Float32Array(indices.flatMap(i=>[...p[i],...uv[i],...factor.map((f,j)=>(j===3?1:f)*(colors[i][j]??1)),...joints[i],...weights[i]]));const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,packed,gl.STATIC_DRAW);model.groups.push({node:ni,skin:node.skin,material:primitive.material,texture:mat.pbrMetallicRoughness?.baseColorTexture?.index,alpha:factor[3],alphaTrack:assets.materialAlpha[name]?.[mat.name],blend:mat.alphaMode==='BLEND'||!!assets.materialAlpha[name]?.[mat.name],doubleSided:!!mat.doubleSided,buffer,count:indices.length});}
         });this.models[name]=model;
       }));
     }
@@ -60,10 +60,10 @@
         gl.uniform2fv(this.locations.texOffset,properties[`/materials/${group.material}/pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform/offset`]||[0,0]);gl.bindTexture(gl.TEXTURE_2D,m.textures[group.texture]);gl.drawArrays(gl.TRIANGLES,0,group.count);
       }
     }
-    draw(name,frame,{cameraFrame=frame,selected=-1,ballFrame=0}={}){
-      const gl=this.gl,w=this.canvas.width,h=this.canvas.height;gl.viewport(0,0,w,h);gl.clearColor(1,1,1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);gl.uniform1i(this.locations.image,0);gl.uniformMatrix4fv(this.locations.camera,false,new Float32Array(camera(STARTER_ASSETS.curves[name],cameraFrame,w/h)));for(const blend of [false,true]){gl.depthMask(!blend);this.drawModel(name,frame,[0,0,0],blend);if(name==='selection')for(let i=0;i<3;i++)this.drawModel('ball',i===selected?ballFrame:0,STARTER_ASSETS.ballPositions[i],blend);}gl.depthMask(true);
+    draw(name,frame,{cameraFrame=frame,selected=-1,ballFrame=0,extra=[]}={}){
+      const gl=this.gl,w=this.canvas.width,h=this.canvas.height;gl.viewport(0,0,w,h);const clear=this.assets.transparent?0:1;gl.clearColor(clear,clear,clear,clear);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);gl.uniform1i(this.locations.image,0);gl.uniformMatrix4fv(this.locations.camera,false,new Float32Array(camera(this.assets.curves[name],cameraFrame,w/h,this.assets.perspective)));for(const blend of [false,true]){gl.depthMask(!blend);this.drawModel(name,frame,[0,0,0],blend);for(const other of extra)this.drawModel(other,frame,[0,0,0],blend);if(name==='selection')for(let i=0;i<3;i++)this.drawModel('ball',i===selected?ballFrame:0,this.assets.ballPositions[i],blend);}gl.depthMask(true);
     }
     destroy(){const gl=this.gl;for(const m of Object.values(this.models)){for(const t of m.textures)gl.deleteTexture(t);for(const g of m.groups)gl.deleteBuffer(g.buffer);}gl.deleteProgram(this.program);}
   }
-  window.StarterScene={Scene,interpolate,sample,camera};
+  window.StarterScene={Scene,interpolate,sample,camera,loadGLB,identity:I,mul,trs};
 })();

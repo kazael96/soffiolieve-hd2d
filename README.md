@@ -1,7 +1,7 @@
-# Soffiolieve HD-2D — demo 0.11
+# Soffiolieve HD-2D — demo 0.12
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo ad Quattroventi**.
+Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
 La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
@@ -16,7 +16,7 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 - Pozione della viandante, confronto delle catture e chiamata di Aralia, conclusione all’ingresso di Quattroventi.
 - Interni e terreno convertiti dalla ROM italiana fornita dall’utente; sprite e motore della demo conservati.
 
-La 0.11 esegue i programmi degli eventi e i dialoghi italiani originali del tratto,
+La 0.12 esegue i programmi degli eventi e i dialoghi italiani originali del tratto,
 con movimenti sincronizzati, camera riordinata/disordinata, scelta originale dello
 starter, Interpoké animato, Pokédex e Mappa Città consultabili. Incontri, catture,
 statistiche individuali, premi delle lotte e movimenti ambientali sono stati
@@ -24,6 +24,11 @@ confrontati con i dati e le routine IRBI.
 
 **La fedeltà non è ancora completa.** Restano transizioni, effetti, interfacce e
 altre differenze elencate in [docs/ORIGINAL-OPENING.md](docs/ORIGINAL-OPENING.md).
+
+La 0.12 aggiunge apertura/chiusura delle porte, fumo nella camera e ricezione
+animata del Pokédex con modelli, tracce scheletriche, trasparenze, particelle e
+suoni estratti dalla ROM. I tempi assoluti e la proiezione delle particelle
+richiedono ancora un confronto video con la console.
 
 ## Comandi e salvataggi
 
