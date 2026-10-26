@@ -61,7 +61,7 @@ def extract(rom,output):
         else:raise ValueError('Unknown font map')
         off=nxt
     assert font[glyph:glyph+8]==bytes([12,15,48,0,16,13,2,0])
-    chars=sorted(set(''.join(chr(c) for c in range(32,256))+''.join(labels.values())+''.join(str(v) for r in records.values() for v in r.values())+''.join(unknown.values())))
+    chars=sorted(set('♂♀'+''.join(chr(c) for c in range(32,256))+''.join(labels.values())+''.join(str(v) for r in records.values() for v in r.values())+''.join(unknown.values())))
     chars=[c for c in chars if c in mapping and mapping[c]!=65535];metrics={};pal=palette(fonts[5]);atlas=Image.new('RGBA',(16*12,((len(chars)+15)//16)*15*2))
     rows=(len(chars)+15)//16
     for i,ch in enumerate(chars):
