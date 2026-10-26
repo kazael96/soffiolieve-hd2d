@@ -1,21 +1,22 @@
 /* Original one-screen registration layout, backed by the player's seen/caught record. */
 (() => {
   const images=new Map();
-  const image=src=>{if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=src;}));return images.get(src);};
+  const image=src=>{if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=NativeTextLayout.resource(src);}));return images.get(src);};
   function text(ctx,atlas,value,x,y,white=false,align='left',font=POKEDEX_ASSETS.font){
     const f=font,glyphs=[...value].map(c=>f.glyphs[c]||f.glyphs['?']),width=glyphs.reduce((n,g)=>n+g[3],0);
     if(align==='center')x-=Math.floor(width/2);else if(align==='right')x-=width;
-    for(const [sx,sy,left,advance] of glyphs){const w=f.cellWidth||12,h=f.height||15;ctx.drawImage(atlas,sx,sy+(white?f.variantOffset:0),w,h,x+left,y,w,h);x+=advance;}
+    for(const [sx,sy,left,advance] of glyphs){const w=f.cellWidth||12,h=f.height||15;ctx.drawImage(atlas,sx,sy+(f.sourceOffset||0)+(white?f.variantOffset:0),w,h,x+left,y,w,h);x+=advance;}
   }
   async function entry(name,{caught=true,registration=false}={}){
+    if(!registration&&window.NativePokedexDetails)return NativePokedexDetails.open(name,{caught});
     const data=POKEDEX_ASSETS.species[name];if(!data)throw Error('Specie fuori dal Pokédex della demo: '+name);
     const [background,font,foot,mark,...types]=await Promise.all(['entry','font',`foot-${data.id}`,'caught',...data.types.map(t=>'type-'+t)].map(n=>image('assets/pokedex/'+n+'.png?v='+POKEDEX_ASSETS.revision)));
     const sprite=await image(`assets/pokemon/${data.id}-front.png`),animated=window.ROM_SPRITE_ANIM?.load(data.id+'-front');if(animated)await animated.promise;
-    const dialog=document.createElement('dialog');dialog.id='pokedexEntry';dialog.setAttribute('aria-label',registration?'Registrazione Pokédex':'Pokédex');
+    const dialog=document.createElement('dialog');dialog.id='pokedexEntry';dialog.className='native-screen';dialog.setAttribute('aria-label',registration?'Registrazione Pokédex':'Pokédex');
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=192;canvas.setAttribute('role','img');
     const record=caught?data:POKEDEX_ASSETS.unknown;
     canvas.setAttribute('aria-label',`${String(data.number).padStart(3,'0')} ${name}. ${record.category}. Altezza ${record.height}. Peso ${record.weight}. ${record.description.replaceAll('\\n',' ')}`);
-    const button=document.createElement('button');button.textContent='Continua';dialog.append(canvas,button);document.body.append(dialog);dialog.showModal();button.focus();
+    const button=document.createElement('button');button.textContent='Continua';button.className='native-hit';button.setAttribute('aria-label','Continua');Object.assign(button.style,{inset:'0',width:'100%',height:'100%'});const stage=document.createElement('div');stage.className='native-stage';stage.append(canvas,button);dialog.append(stage);document.body.append(dialog);dialog.showModal();button.focus();
     let request=0;const start=performance.now(),ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
     function draw(now){
       ctx.clearRect(0,0,256,192);ctx.drawImage(background,0,0);
@@ -36,6 +37,7 @@
   async function browse(){
     if(battling||window.NativeStory?.locked||!NativeStory.state.pokedex)return;
     $('journal').close();resetInput();
+    if(window.NativePokedexBrowser)return NativePokedexBrowser.open();
     const state=Journey.state,dialog=document.createElement('dialog');dialog.id='pokedexList';dialog.setAttribute('aria-label','Pokédex');
     const title=document.createElement('h2');title.textContent='Pokédex';const total=document.createElement('p');total.textContent=`Visti: ${state.dex.seen.length} · Catturati: ${state.dex.caught.length}`;dialog.append(title,total);
     const list=document.createElement('div');list.className='pokedex-species';dialog.append(list);

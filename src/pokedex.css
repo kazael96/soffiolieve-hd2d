@@ -1,6 +1,6 @@
-#pokedexEntry {padding:12px;max-width:min(94vw,800px);background:#151b1b;border:1px solid #657b73;border-radius:8px;text-align:center}
-#pokedexEntry canvas {display:block;width:min(768px,85vw,calc((100dvh - 130px)*4/3));height:auto;image-rendering:pixelated}
-#pokedexEntry button {margin-top:12px;min-width:120px}
+#pokedexEntry:not(.native-screen) {padding:12px;max-width:min(94vw,800px);background:#151b1b;border:1px solid #657b73;border-radius:8px;text-align:center}
+#pokedexEntry:not(.native-screen) canvas {display:block;width:min(768px,85vw,calc((100dvh - 130px)*4/3));height:auto;image-rendering:pixelated}
+#pokedexEntry:not(.native-screen) button {margin-top:12px;min-width:120px}
 #pokedexList {max-width:min(90vw,460px)}
 .pokedex-species {display:grid;gap:8px;margin:18px 0}
 .pokedex-species button {text-align:left}

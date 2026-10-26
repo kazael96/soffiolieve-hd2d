@@ -105,12 +105,13 @@
   }
   async function nickname(index=0){
     const pokemon=state.party[index];if(!pokemon)throw Error('Pokémon da rinominare non disponibile');
+    if(window.NativeNaming){const result=await NativeNaming.open(pokemon);if(result===null)return 0;pokemon.nickname=result;journey.displayPartner();return 1;}
     const box=$('starterChoices'),input=document.createElement('input'),ok=document.createElement('button'),cancel=document.createElement('button'),d=$('dialogue');
     input.maxLength=10;input.value=pokemon.nickname||'';input.setAttribute('aria-label','Soprannome del Pokémon');ok.textContent='Conferma';cancel.textContent='Annulla';ok.type=cancel.type='button';
     box.replaceChildren(input,ok,cancel);box.hidden=false;$('dialogueContinue').hidden=true;$('dialogueText').textContent=messagePages(POKEDEX_ASSETS.labels.namePrompt,[pokemon.nickname||pokemon.name]).join('\n');d.showModal();input.focus();
     return new Promise(resolve=>{
-      const finish=result=>{pendingCancel=null;box.onkeydown=null;d.close();resetInput();resolve(result);};pendingCancel=()=>finish(false);
-      ok.onclick=()=>{pokemon.nickname=input.value.trim();journey.displayPartner();finish(0);};cancel.onclick=()=>finish(1);
+      const finish=result=>{pendingCancel=null;box.onkeydown=null;d.close();resetInput();resolve(result);};pendingCancel=()=>finish(0);
+      ok.onclick=()=>{const result=input.value.trim(),changed=!!result&&result!==(pokemon.nickname||pokemon.name);if(changed){pokemon.nickname=result;journey.displayPartner();}finish(changed?1:0);};cancel.onclick=()=>finish(0);
       box.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel.onclick();}else if(e.key==='Enter'&&e.target===input){e.preventDefault();e.stopPropagation();ok.onclick();}};
     });
   }
@@ -187,7 +188,7 @@
       case 'CallPoke3Select':m.set(a[0],await chooseStarter());break;
       case 'CallPokeNameInput':m.set(a[0],await nickname(v[1]));break;
       case 'PokePartyGetParam':m.set(a[0],state.party[v[1]].nickname?1:0);break;
-      case 'PokePartyAdd':{const name=m.host.speciesName(v[1]);state.starter=name;state.party=[journey.pack(newStoryMon(name,v[3]),OPENING_DATA[name].growth[v[3]])];StoryState.register(state,name,true);journey.displayPartner();m.set(a[0],1);break;}
+      case 'PokePartyAdd':{const name=m.host.speciesName(v[1]);state.starter=name;state.party=[journey.record(newStoryMon(name,v[3]),OPENING_DATA[name].growth[v[3]])];StoryState.register(state,name,true);journey.displayPartner();m.set(a[0],1);break;}
       case 'PokePartyRecoverAll':journey.heal();break;
       case 'PokePartyIsFullHP':m.set(a[0],state.party[v[1]].hp===journey.unpack(state.party[v[1]]).max?1:0);break;
       case 'PokePartyIsFullPP':m.set(a[0],journey.unpack(state.party[v[1]]).moves.every(move=>move.left===move.pp)?1:0);break;
@@ -348,6 +349,7 @@
   }
   function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;return run(t.script-1);}}
   function step(dt,moved,distance=0){
+    if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
     fieldModels?.tick(dt);
     try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;

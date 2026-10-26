@@ -6,6 +6,7 @@
   function keyName(event) {
     if (codeKeys[event.code]) return codeKeys[event.code];
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Shift'].includes(event.key)) return event.key;
+    if(/^b$/i.test(event.key||''))return 'Shift';
     return /^[wasd]$/i.test(event.key || '') ? event.key.toLowerCase() : null;
   }
   function create() {

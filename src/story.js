@@ -2,12 +2,14 @@
 (() => {
   let storage;try{storage=localStorage;}catch{storage=null;}
   const state=StoryState.read(storage),preferences=JourneyState.read(storage).state;
+  if(window.TrainerProfile&&!state.trainer)state.trainer=TrainerProfile.create();
   const outdoor={...ROM_SCENE,instances:[...ROM_SCENE.instances,...OPENING_ASSETS.scenes.north.instances],permissionGrids:[...ROM_SCENE.permissionGrids,...OPENING_ASSETS.scenes.north.permissionGrids]};
   let processing=false,continuation=null,lead=0,battleSlots=[],participants=new Set(),lastSave='';
   const lastPreferences={zoom:preferences.zoom,cinema:preferences.cinema,touch:preferences.touch};
   const encounterState=new RouteEncounter(OPENING_ENCOUNTER_RULES.rate);
   const phaseIndex=()=>StoryState.phases.indexOf(state.phase);
-  function pack(m,xp=0){return {name:m.name,nickname:m.nickname||'',heldItem:m.heldItem||0,level:m.level,xp,hp:m.hp,status:m.status||'',ivs:m.ivs,evs:m.evs,nature:m.nature,gender:m.gender,abilityId:m.abilityId,happiness:m.happiness,pp:m.moves.map(m=>({id:m.id,left:m.left}))};}
+  function pack(m,xp=0){return {name:m.name,...(m.met?{met:m.met}:{}),personality:m.personality??0,nickname:m.nickname||'',heldItem:m.heldItem||0,level:m.level,xp,hp:m.hp,status:m.status||'',ivs:m.ivs,evs:m.evs,nature:m.nature,gender:m.gender,abilityId:m.abilityId,happiness:m.happiness,pp:m.moves.map(m=>({id:m.id,left:m.left}))};}
+  function record(m,xp=0){return {...pack(m,xp),met:{date:new Date().toISOString(),zone:state.original?.zone||391,level:m.level}};}
   function unpack(p){const m=makeMon(p.name,p.level,p);if(p.hp!==null)m.hp=Math.min(m.max,p.hp);m.status=p.status;for(const move of m.moves){const old=p.pp.find(x=>x.id===move.id);if(old)move.left=Math.min(move.pp,old.left);}return m;}
   function displayPartner(){partner=state.party.length?unpack(state.party[lead]||state.party[0]):makeMon('Snivy',5);document.querySelector('.companion').hidden=!state.starter;refresh();}
   function update(){
@@ -20,11 +22,12 @@
     $('openLab').disabled=!state.starter;
   }
   function save(force=false){
-    if(battling||window.NativeStory?.locked)return;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);
-    if(force||encoded!==lastSave){const ok=StoryState.write(storage,state);$('saveStatus').textContent=ok?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(ok)lastSave=encoded;}
+    if(battling||window.NativeStory?.locked)return false;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);let saved=encoded===lastSave;
+    if(force||encoded!==lastSave){saved=StoryState.write(storage,state);$('saveStatus').textContent=saved?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(saved)lastSave=encoded;}
     Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});
     const changed=Object.fromEntries(Object.keys(lastPreferences).filter(k=>preferences[k]!==lastPreferences[k]).map(k=>[k,preferences[k]]));
     if(Object.keys(changed).length){const latest=JourneyState.read(storage).state;Object.assign(latest,changed);if(JourneyState.write(storage,latest))Object.assign(lastPreferences,changed);}
+    return saved;
   }
   function setScene(name,x,y){state.scene=name;renderer.scene=name==='town'?outdoor:OPENING_ASSETS.scenes[name==='bedroom'&&state.original?.roomMess?'bedroomMess':name];player={x,y};facing=3;resetInput();encounterState.distance=0;cooldown=3;renderer.center=[name==='town'?x*.7:-10,name==='town'?y+1.5:-10];actors();update();save();}
   function say(speaker,text,done=null,title=speaker){
@@ -83,7 +86,7 @@
     if(kind==='tutorial'){displayPartner();window.NativeStory?.battleDone(s,kind);return;}
     for(const m of s.battle.p1.pokemon){const id=m.storyId;if(id!==undefined)state.party[id]={...state.party[id],hp:m.hp,status:m.status,pp:m.moveSlots.map(move=>({id:GEN5.byMoveKey[move.id]?.id||0,left:move.pp}))};}
     if(captured){
-      const first=StoryState.register(state,captured.name,true),index=state.party.length;state.party.push(pack(captured,OPENING_DATA[captured.name].growth[captured.level]));
+      const first=StoryState.register(state,captured.name,true),index=state.party.length;state.party.push(record(captured,OPENING_DATA[captured.name].growth[captured.level]));
       if(first&&state.original?.pokedex){await progressText(15,66,[captured.name]);await Pokedex.entry(captured.name,{registration:true});}
       await NativeStory.showPage(messagePages(POKEDEX_ASSETS.labels.nickname,[captured.name]).join('\n'));
       if(await NativeStory.choice(['SÌ','NO'])===0)await NativeStory.nickname(index);
@@ -129,7 +132,7 @@
   function giveItem(id,index){const p=state.party[index];if(battling||!p||![4,17].includes(id)||(id===4?state.pokeballs:potions)<=0)return false;if(id===4)state.pokeballs--;else potions--;if(p.heldItem===4)state.pokeballs++;else if(p.heldItem===17)potions++;p.heldItem=id;save(true);return true;}
   function takeItem(index){const p=state.party[index],id=p?.heldItem;if(battling||!id)return 0;if(id===4)state.pokeballs++;else if(id===17)potions++;p.heldItem=0;save(true);return id;}
   function discardItem(id,count){if(battling||![4,17].includes(id)||!Number.isInteger(count)||count<=0)return false;const have=id===4?state.pokeballs:potions;if(count>have)return false;if(id===4)state.pokeballs-=count;else potions-=count;save(true);return true;}
-  window.Journey={giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,unpack,setScene,update,displayPartner,encounter};
+  window.Journey={giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
   potions=state.potions;renderer.scene=state.scene==='town'?outdoor:OPENING_ASSETS.scenes[state.scene==='bedroom'&&state.original?.roomMess?'bedroomMess':state.scene];player={...state.player};facing=state.facing;
   if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
   renderer.center=state.scene==='town'?[player.x*.7,player.y+1.5]:[-10,-10];displayPartner();actors();update();
