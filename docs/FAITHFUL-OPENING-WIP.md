@@ -352,3 +352,8 @@ The background-event record's second coordinate is the north/south grid coordina
 - Native touch hit check has an unusual flat-ended capsule: ARM9 02051eb4 excludes the capsule radius outside the segment. Verified directly in IRBI; tests guard the adjacent Soffiolieve/Route1/Quattroventi hit regions. Original zoom sound1608/1609 exported; field audio now26 entries. Full audio packaging command needs all FIVE SSEQ roots: audio, zone-audio, capture-audio, starter-audio, townmap-audio.
 - Browser: opened actual inventory item, viewed Soffiolieve/Laboratorio, zoomed, clicked Route1, used arrow to Quattroventi, selected unvisited Levantopoli and confirmed landmarks hidden. No console errors. 3 map tests pass. Lower-screen action bar is adapted to web buttons/select; original ten-update zoom timing uses30Hz and still needs emulator timing comparison.
 - Main keyboard and on-screen buttons tested all four directions, with position/facing observed. Main save has arrived, two party members and4 balls. Its money remains3000 because the two rival wins happened before prize-money code; migration intentionally doesn't invent retroactive awards.
+
+### 04:22 Rome — keyboard and preference fixes
+
+Choice dialogs focus their first option and support arrows, Enter/Space and Escape to cancel. Nickname input supports Enter and Escape and returns the original input result. Browser QA: arrows choose NO then YES, Enter opens input, Sentinella assigned to captured Patrat only. Runtime regression covers cancellation and unchanged old nickname. Preference autosaves now merge only locally changed fields into latest storage, preserving other tabs' touch/cinema settings. Runtime regression passes; full story flows remain green.
+

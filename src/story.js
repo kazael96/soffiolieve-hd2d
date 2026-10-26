@@ -4,6 +4,7 @@
   const state=StoryState.read(storage),preferences=JourneyState.read(storage).state;
   const outdoor={...ROM_SCENE,instances:[...ROM_SCENE.instances,...OPENING_ASSETS.scenes.north.instances],permissionGrids:[...ROM_SCENE.permissionGrids,...OPENING_ASSETS.scenes.north.permissionGrids]};
   let processing=false,continuation=null,lead=0,battleSlots=[],participants=new Set(),lastSave='';
+  const lastPreferences={zoom:preferences.zoom,cinema:preferences.cinema,touch:preferences.touch};
   const encounterState=new RouteEncounter(OPENING_ENCOUNTER_RULES.rate);
   const phaseIndex=()=>StoryState.phases.indexOf(state.phase);
   function pack(m,xp=0){return {name:m.name,nickname:m.nickname||'',level:m.level,xp,hp:m.hp,status:m.status||'',ivs:m.ivs,evs:m.evs,nature:m.nature,gender:m.gender,abilityId:m.abilityId,happiness:m.happiness,pp:m.moves.map(m=>({id:m.id,left:m.left}))};}
@@ -21,7 +22,9 @@
   function save(force=false){
     if(battling||window.NativeStory?.locked)return;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);
     if(force||encoded!==lastSave){const ok=StoryState.write(storage,state);$('saveStatus').textContent=ok?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(ok)lastSave=encoded;}
-    Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});JourneyState.write(storage,preferences);
+    Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});
+    const changed=Object.fromEntries(Object.keys(lastPreferences).filter(k=>preferences[k]!==lastPreferences[k]).map(k=>[k,preferences[k]]));
+    if(Object.keys(changed).length){const latest=JourneyState.read(storage).state;Object.assign(latest,changed);if(JourneyState.write(storage,latest))Object.assign(lastPreferences,changed);}
   }
   function setScene(name,x,y){state.scene=name;renderer.scene=name==='town'?outdoor:OPENING_ASSETS.scenes[name==='bedroom'&&state.original?.roomMess?'bedroomMess':name];player={x,y};facing=3;resetInput();encounterState.distance=0;cooldown=3;renderer.center=[name==='town'?x*.7:-10,name==='town'?y+1.5:-10];actors();update();save();}
   function say(speaker,text,done=null,title=speaker){

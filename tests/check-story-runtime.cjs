@@ -74,6 +74,25 @@ async function drain(c,promise,starter=0,outcome='play'){
   assert.equal(count,62);console.log('PASS 62 original sign/furniture interactions and forbidden approach directions');
  }
  {
+  const c=environment(),j=c.Journey,other=c.JourneyState.fresh();other.touch=true;other.cinema=false;c.JourneyState.write(c.localStorage,other);
+  j.save(true);assert.equal(c.JourneyState.read(c.localStorage).state.touch,true,'Unchanged tab must not overwrite another tab settings');
+  c.renderer.zoom=1.8;j.save(true);const settings=c.JourneyState.read(c.localStorage).state;
+  assert.equal(settings.zoom,1.8);assert.equal(settings.touch,true);assert.equal(settings.cinema,false,'Only the changed preference is written');
+  c.$('touchPreference').checked=true;c.$('touchPreference').onchange();assert.equal(c.JourneyState.read(c.localStorage).state.touch,true);
+  c.$('touchPreference').checked=false;c.$('touchPreference').onchange();assert.equal(c.JourneyState.read(c.localStorage).state.touch,false);
+  console.log('PASS exploration preferences persist without background-tab overwrites');
+ }
+ {
+  const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;
+  const key=(box,value,target)=>box.onkeydown({key:value,target,preventDefault(){},stopPropagation(){}});
+  let answer=n.choice(['SÌ','NO']),box=c.$('starterChoices');key(box,'ArrowDown',box.children[0]);key(box,'Enter');assert.equal(await answer,1);assert.equal(box.onkeydown,null);
+  answer=n.choice(['Azione','Fulmisguardo','Annulla']);key(box,'Escape',box.children[0]);assert.equal(await answer,2);
+  j.state.party=[j.pack(c.newStoryMon('Snivy',5),135),j.pack(c.newStoryMon('Patrat',3),27)];
+  let named=n.nickname(1);box.children[0].value='Vedetta';key(box,'Enter',box.children[0]);assert.equal(await named,0);assert.equal(j.state.party[1].nickname,'Vedetta');assert.equal(j.state.party[0].nickname,'');
+  named=n.nickname(1);box.children[0].value='Scarta';key(box,'Escape',box.children[0]);assert.equal(await named,1);assert.equal(j.state.party[1].nickname,'Vedetta');
+  console.log('PASS keyboard choices, cancellation and nicknames target the correct party slot');
+ }
+ {
   const c=environment(),n=c.NativeStory;
   c.startBattle=async()=>{throw Error('Test battle setup failure');};
   for(const [name,args] of [['CallTrainerBattle',[59]],['CallCaptureDemo',[]]]){

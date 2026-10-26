@@ -75,8 +75,21 @@
     for(const page of messagePages(text,machine.words))await showPage(page);
   }
   async function choice(labels){
-    const d=$('dialogue'),box=$('starterChoices');$('dialogueContinue').hidden=true;box.hidden=false;box.replaceChildren();if(!d.open)d.showModal();
-    return new Promise(resolve=>labels.forEach((label,i)=>{const b=document.createElement('button');b.textContent=label;if(['Snivy','Tepig','Oshawott'].includes(label)){const image=document.createElement('img');image.src='assets/pokemon/'+{Snivy:495,Tepig:498,Oshawott:501}[label]+'-front.png';image.alt='';b.append(image);}b.onclick=()=>{d.close();resolve(i);};box.append(b);}));
+    const d=$('dialogue'),box=$('starterChoices');resetInput();$('dialogueContinue').hidden=true;box.hidden=false;box.replaceChildren();if(!d.open)d.showModal();
+    return new Promise(resolve=>{
+      let selected=0,finished=false;const buttons=[];
+      const finish=i=>{if(finished)return;finished=true;box.onkeydown=null;d.close();resetInput();resolve(i);};
+      labels.forEach((label,i)=>{const b=document.createElement('button');b.textContent=label;b.type='button';if(['Snivy','Tepig','Oshawott'].includes(label)){const image=document.createElement('img');image.src='assets/pokemon/'+{Snivy:495,Tepig:498,Oshawott:501}[label]+'-front.png';image.alt='';b.append(image);}b.onclick=()=>finish(i);buttons.push(b);box.append(b);});
+      box.onkeydown=e=>{
+        if(e.ctrlKey||e.altKey||e.metaKey)return;
+        const current=buttons.indexOf(e.target);if(current>=0)selected=current;
+        if(['ArrowUp','ArrowLeft','ArrowDown','ArrowRight','Enter',' ','Escape'].includes(e.key)){e.preventDefault();e.stopPropagation();}
+        if(['ArrowUp','ArrowLeft','ArrowDown','ArrowRight'].includes(e.key)){selected=(selected+(['ArrowUp','ArrowLeft'].includes(e.key)?buttons.length-1:1))%buttons.length;buttons[selected].focus();void AudioEngine.playSound(1352);}
+        else if(e.key==='Enter'||e.key===' ')finish(selected);
+        else if(e.key==='Escape'){const cancel=labels.findLastIndex(s=>/^(NO|Annulla)$/i.test(s));if(cancel>=0)finish(cancel);}
+      };
+      buttons[0]?.focus();
+    });
   }
   async function chooseStarter(){
     resetInput();
@@ -89,11 +102,14 @@
   }
   async function nickname(index=0){
     const pokemon=state.party[index];if(!pokemon)throw Error('Pokémon da rinominare non disponibile');
-    const box=$('starterChoices'),input=document.createElement('input'),ok=document.createElement('button');
-    input.maxLength=10;input.value=pokemon.nickname||'';input.setAttribute('aria-label','Soprannome del Pokémon');ok.textContent='Conferma';
-    box.replaceChildren(input,ok);box.hidden=false;$('dialogueContinue').hidden=true;$('dialogueText').textContent=messagePages(POKEDEX_ASSETS.labels.namePrompt,[pokemon.nickname||pokemon.name]).join('\n');$('dialogue').showModal();input.focus();
-    input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok.click();}};
-    await new Promise(resolve=>{ok.onclick=()=>{pokemon.nickname=input.value.trim();journey.displayPartner();$('dialogue').close();resolve();};});
+    const box=$('starterChoices'),input=document.createElement('input'),ok=document.createElement('button'),cancel=document.createElement('button'),d=$('dialogue');
+    input.maxLength=10;input.value=pokemon.nickname||'';input.setAttribute('aria-label','Soprannome del Pokémon');ok.textContent='Conferma';cancel.textContent='Annulla';ok.type=cancel.type='button';
+    box.replaceChildren(input,ok,cancel);box.hidden=false;$('dialogueContinue').hidden=true;$('dialogueText').textContent=messagePages(POKEDEX_ASSETS.labels.namePrompt,[pokemon.nickname||pokemon.name]).join('\n');d.showModal();input.focus();
+    return new Promise(resolve=>{
+      const finish=result=>{box.onkeydown=null;d.close();resetInput();resolve(result);};
+      ok.onclick=()=>{pokemon.nickname=input.value.trim();journey.displayPartner();finish(0);};cancel.onclick=()=>finish(1);
+      box.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel.onclick();}else if(e.key==='Enter'&&e.target===input){e.preventDefault();e.stopPropagation();ok.onclick();}};
+    });
   }
   function move(id,sequence){
     if(!actor(id))throw Error('Missing original actor '+id);
@@ -157,7 +173,7 @@
       case 'MsgInfo':case 'MsgSystem':case 'MsgPlaceSign':await message(textBank,v[0],m);break;
       case 'YesNoWin':m.set(a[0],await choice(['SÌ','NO']));break;
       case 'CallPoke3Select':m.set(a[0],await chooseStarter());break;
-      case 'CallPokeNameInput':await nickname();m.set(a[0],0);break;
+      case 'CallPokeNameInput':m.set(a[0],await nickname(v[1]));break;
       case 'PokePartyGetParam':m.set(a[0],state.party[v[1]].nickname?1:0);break;
       case 'PokePartyAdd':{const name=m.host.speciesName(v[1]);state.starter=name;state.party=[journey.pack(newStoryMon(name,v[3]),OPENING_DATA[name].growth[v[3]])];StoryState.register(state,name,true);journey.displayPartner();m.set(a[0],1);break;}
       case 'PokePartyRecoverAll':journey.heal();break;
