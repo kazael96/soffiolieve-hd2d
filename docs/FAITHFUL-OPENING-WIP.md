@@ -310,3 +310,7 @@ Per procedere usare sentiero x4.5 evitando cartello/vegetazione a x6..9.
 Ricerca ricompense: formula IRBI verificata in overlay93 021d7ebc (ultimoLv
 *moneyMultiplier*4 =500perprimi6rivali). Perdita senza medaglie: routine021d7ef8
 e tabella021f032d, ancora da leggere. Denaro iniziale ancora da verificare.
+
+Fuga: rimossi testo e musica vittoria per l’uscita senza combattimento; test
+sulla vera funzione turn e il riproduttore eventi, sia fuga riuscita sia fallita
+sia vittoria normale. La prova manuale aveva evidenziato il difetto.
