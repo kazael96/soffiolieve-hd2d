@@ -2033,6 +2033,42 @@
     "font": 0,
     "fontSource": "ov93 021E8EA8 passes ctx+B0 loaded as font0 into021EAE7C controller+24",
     "note": "Original text window and font0 colors/origin certified. Frame assembly remains separate from interior; blending hardware changes displayed background intensity.",
+    "outerFrame": {
+      "path": "assets/battle-ui/message-window-original.png",
+      "rect": [
+        0,
+        144,
+        256,
+        48
+      ],
+      "source": "ARM9 02045460–0204566C invokedov93 021EB034; tiles0/1/2 top,3/4 sides,5/6/7 bottom",
+      "size": [
+        256,
+        48
+      ],
+      "tileGrid": [
+        32,
+        6
+      ],
+      "interior": [
+        8,
+        8,
+        240,
+        32
+      ],
+      "verified": true
+    },
+    "blend": {
+      "source": "ov93 021ED674–021ED68C ->0207D5BC",
+      "targetA": 2,
+      "targetB": 61,
+      "evaRegister": 31,
+      "effectiveEva": 16,
+      "evb": 7,
+      "denominator": 16,
+      "blackInteriorSceneFraction": 0.4375,
+      "note": "DS coefficients clamp to16; blend is additive saturated per5bit channel, min31(src+scene*7/16), not normalized RGBA alpha. Source PNG retains native opaque pixels; apply blend separately."
+    },
     "textColorIndices": [
       1,
       9,
@@ -2621,7 +2657,28 @@
         0
       ],
       "coefficientDenominator": 16,
-      "note": "Native task fades selected sub-BG palette bank toward white and back. Exact frame duration not yet certified."
+      "note": "Native task fades selected sub-BG palette bank toward white and back. Exact frame duration not yet certified.",
+      "timing": {
+        "source": "ARM9 02021974 step2 delay0;02021AEC delay comparison;02021C62/98 coefficientstep;ov94 0220653C controller",
+        "coefficientStep": 2,
+        "delayTicks": 0,
+        "outboundSamples": [
+          0,
+          2,
+          4,
+          6,
+          8
+        ],
+        "returnSamples": [
+          8,
+          6,
+          4,
+          2,
+          0
+        ],
+        "samplesPerLeg": 5,
+        "note": "Initial palette sample applied synchronously by020216BC, subsequent samples once per palette task update at delay0. Controller polls completion and schedules reverse; whole-button wall time also includes task scheduling order, so no single exact millisecond total is asserted."
+      }
     },
     "keyCursor": {
       "source": "IRBI ov94 022033E2,022063CC",
