@@ -35,8 +35,11 @@ class BuildTests(unittest.TestCase):
                 html=(target/'index.html').read_text(encoding='utf-8')
                 self.assertIn(f'game.js?v={manifest["revision"]}',html)
                 self.assertIn(f'style.css?v={manifest["revision"]}',html)
+                self.assertIn(f'data-build="{manifest["revision"]}"',html)
                 self.assertEqual((target/'assets/animated/800-front.png').read_bytes(),b'test asset')
                 for name, digest in manifest['files'].items():
+                    self.assertEqual(hashlib.sha256((target/name).read_bytes()).hexdigest(),digest)
+                for name, digest in manifest['assets'].items():
                     self.assertEqual(hashlib.sha256((target/name).read_bytes()).hexdigest(),digest)
                 with self.assertRaisesRegex(ValueError,'already exists'):
                     builder.build(archive,target)

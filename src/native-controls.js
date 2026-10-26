@@ -1,5 +1,6 @@
 /* A/B/X equivalents across original-event dialogs and native menu screens. */
 (() => {
+  const registered=document.getElementById('registeredTool');if(registered){registered.hidden=!(NativeSettings.state.registered||[]).length;registered.onclick=()=>NativeUI.useRegistered();}
   const sound=()=>{if(!AudioEngine.enabled)void AudioEngine.enable();};
   addEventListener('pointerdown',sound,{once:true});
   addEventListener('keydown',e=>{if(!e.ctrlKey&&!e.altKey&&!e.metaKey)sound();},{once:true});

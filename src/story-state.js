@@ -15,6 +15,8 @@
     if(['M','F','N'].includes(p.gender))result.gender=p.gender;
     if(Number.isInteger(p.abilityId))result.abilityId=Math.max(1,Math.min(164,p.abilityId));
     if(Number.isInteger(p.happiness))result.happiness=Math.max(0,Math.min(255,p.happiness));
+    if(Number.isInteger(p.personality)&&p.personality>=0&&p.personality<=0xffffffff)result.personality=p.personality;
+    if(p.met&&Number.isFinite(Date.parse(p.met.date))&&Number.isInteger(p.met.zone)&&Number.isInteger(p.met.level))result.met={date:new Date(p.met.date).toISOString(),zone:p.met.zone,level:Math.max(1,Math.min(100,p.met.level))};
     return result;
   }
   function normalize(v){
@@ -33,6 +35,7 @@
     s.dex.seen=[...new Set([...s.dex.seen,...s.dex.caught])];
     s.pokeballs=Math.max(0,Math.min(5,Math.floor(v.pokeballs)||0));s.potions=Math.max(0,Math.min(20,Math.floor(v.potions)||0));s.routePotion=v.routePotion===true;
     s.playerName=typeof v.playerName==='string'?v.playerName.slice(0,10):'Alcide';
+    if(v.trainer&&root.TrainerProfile){const profile=root.TrainerProfile.normalize(v.trainer);if(profile)s.trainer=profile;}
     s.money=Number.isFinite(v.money)?Math.max(0,Math.min(9999999,Math.floor(v.money))):3000;
     if(v.original&&Number.isInteger(v.original.zone)&&[317,389,390,391,392,393,394,395,396].includes(v.original.zone)){s.original=structuredClone(v.original);s.original.flags=(s.original.flags||[]).filter(Number.isInteger);s.original.vars=Object.fromEntries(Object.entries(s.original.vars||{}).filter(([k,n])=>Number.isInteger(+k)&&Number.isInteger(n)));}
     return s;

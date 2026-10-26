@@ -6,6 +6,7 @@ const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const site=path.resolve(process.argv[2]||'_site');
 const html=fs.readFileSync(path.join(site,'index.html'),'utf8');
+assert.equal(fs.readdirSync(site).some(name=>/^qa(?:[-.]|$)/i.test(name)),false,'Local QA fixtures must not be published');
 assert.equal(fs.existsSync(path.join(site,'qa.html')),false,'Local QA pages must not be published');
 assert.equal(fs.existsSync(path.join(site,'qa-battle.html')),false,'Local QA pages must not be published');
 for(const name of fs.readdirSync(site).filter(n=>/\.(js|html|css)$/.test(n))){
@@ -18,6 +19,7 @@ const manifest=JSON.parse(fs.readFileSync(path.join(site,'build.json'),'utf8'));
 for(const [name,hash] of Object.entries(manifest.files)){
   assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(site,name))).digest('hex'),hash,name);
 }
+for(const [name,hash] of Object.entries(manifest.assets||{}))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(site,name))).digest('hex'),hash,name);
 const raw=fs.readFileSync(path.join(site,'assets/scene.js'),'utf8');
 const scene=JSON.parse(raw.slice(raw.indexOf('=')+1).replace(/;\s*$/,''));
 const source=fs.readFileSync(path.join(site,'game.js'),'utf8');

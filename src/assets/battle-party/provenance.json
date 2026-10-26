@@ -1,0 +1,415 @@
+{
+  "source": "IRBI ov198 02210508–022105A0",
+  "archive": "a/1/0/0",
+  "archiveSHA256": "c7577997f076c1f0fcd81ba9248a3384ff085a6a8384ab5eb62dfa95c1c39271",
+  "bg": 7,
+  "images": {
+    "0": {
+      "path": "assets/battle-party/map-0.png",
+      "char": 18,
+      "screen": 0,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "1": {
+      "path": "assets/battle-party/map-1.png",
+      "char": 18,
+      "screen": 1,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "2": {
+      "path": "assets/battle-party/map-2.png",
+      "char": 18,
+      "screen": 2,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "3": {
+      "path": "assets/battle-party/map-3.png",
+      "char": 18,
+      "screen": 3,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "4": {
+      "path": "assets/battle-party/map-4.png",
+      "char": 18,
+      "screen": 4,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "5": {
+      "path": "assets/battle-party/map-5.png",
+      "char": 18,
+      "screen": 5,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "6": {
+      "path": "assets/battle-party/map-6.png",
+      "char": 18,
+      "screen": 6,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "7": {
+      "path": "assets/battle-party/map-7.png",
+      "char": 18,
+      "screen": 7,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "8": {
+      "path": "assets/battle-party/map-8.png",
+      "char": 18,
+      "screen": 8,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "9": {
+      "path": "assets/battle-party/map-9.png",
+      "char": 18,
+      "screen": 9,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "10": {
+      "path": "assets/battle-party/map-10.png",
+      "char": 18,
+      "screen": 10,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "11": {
+      "path": "assets/battle-party/map-11.png",
+      "char": 18,
+      "screen": 11,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "12": {
+      "path": "assets/battle-party/map-12.png",
+      "char": 18,
+      "screen": 12,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "13": {
+      "path": "assets/battle-party/map-13.png",
+      "char": 18,
+      "screen": 13,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "14": {
+      "path": "assets/battle-party/map-14.png",
+      "char": 18,
+      "screen": 14,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "15": {
+      "path": "assets/battle-party/map-15.png",
+      "char": 18,
+      "screen": 15,
+      "palette": 19,
+      "size": [
+        256,
+        192
+      ]
+    },
+    "16": {
+      "path": "assets/battle-party/map-16.png",
+      "char": 18,
+      "screen": 16,
+      "palette": 19,
+      "size": [
+        256,
+        488
+      ]
+    },
+    "17": {
+      "path": "assets/battle-party/map-17.png",
+      "char": 18,
+      "screen": 17,
+      "palette": 19,
+      "size": [
+        256,
+        504
+      ]
+    }
+  },
+  "panels": [
+    {
+      "path": "assets/battle-party/panel-0-0.png",
+      "sourceRect": [
+        0,
+        0,
+        128,
+        48
+      ],
+      "sourceBuffer": 476,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-0-1.png",
+      "sourceRect": [
+        0,
+        48,
+        128,
+        48
+      ],
+      "sourceBuffer": 668,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-0-2.png",
+      "sourceRect": [
+        0,
+        96,
+        128,
+        48
+      ],
+      "sourceBuffer": 860,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-0-3.png",
+      "sourceRect": [
+        0,
+        144,
+        128,
+        48
+      ],
+      "sourceBuffer": 1052,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-1-0.png",
+      "sourceRect": [
+        128,
+        0,
+        128,
+        48
+      ],
+      "sourceBuffer": 1244,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-1-1.png",
+      "sourceRect": [
+        128,
+        48,
+        128,
+        48
+      ],
+      "sourceBuffer": 1436,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-1-2.png",
+      "sourceRect": [
+        128,
+        96,
+        128,
+        48
+      ],
+      "sourceBuffer": 1628,
+      "stateRoleVerified": false
+    },
+    {
+      "path": "assets/battle-party/panel-1-3.png",
+      "sourceRect": [
+        128,
+        144,
+        128,
+        48
+      ],
+      "sourceBuffer": 1820,
+      "stateRoleVerified": false
+    }
+  ],
+  "buttonRecords": [
+    [
+      0,
+      0,
+      16,
+      6
+    ],
+    [
+      16,
+      1,
+      16,
+      6
+    ],
+    [
+      0,
+      6,
+      16,
+      6
+    ],
+    [
+      16,
+      7,
+      16,
+      6
+    ],
+    [
+      0,
+      12,
+      16,
+      6
+    ],
+    [
+      16,
+      13,
+      16,
+      6
+    ]
+  ],
+  "buttonRecordEncoding": "xTile,yTile,wTile,hTile",
+  "slots": [
+    {
+      "id": 0,
+      "rect": [
+        0,
+        0,
+        128,
+        48
+      ]
+    },
+    {
+      "id": 1,
+      "rect": [
+        128,
+        8,
+        128,
+        48
+      ]
+    },
+    {
+      "id": 2,
+      "rect": [
+        0,
+        48,
+        128,
+        48
+      ]
+    },
+    {
+      "id": 3,
+      "rect": [
+        128,
+        56,
+        128,
+        48
+      ]
+    },
+    {
+      "id": 4,
+      "rect": [
+        0,
+        96,
+        128,
+        48
+      ]
+    },
+    {
+      "id": 5,
+      "rect": [
+        128,
+        104,
+        128,
+        48
+      ]
+    }
+  ],
+  "geometrySource": "ov198 0220B4C4 references table02211976/77 (width,height), table begins02211974; source panel copy0220B020 ->0220B360",
+  "font": {
+    "createdIndex": 3,
+    "textBank": 18,
+    "source": "02210610–0221063C r1=3 fontLoad; bank18",
+    "sourceAtlas": "assets/battle-ui/font-3.png",
+    "slotRoleVerified": false,
+    "note": "Several slot printers use root context+0xC font handle; creation of font3 alone does not prove its use for slot names/HP. Do not infer its active palette from field font5."
+  },
+  "inferredVisualStates": {
+    "source": "Visual inspection only; roles not yet traced",
+    "normal": "panel-0-0.png",
+    "selected": "panel-0-1.png",
+    "selectedVariant": "panel-0-2.png",
+    "empty": "panel-0-3.png"
+  },
+  "fainted": {
+    "source": "0220B560–0220B580 HP0 overrides original tile palette with7+(state&1)",
+    "variants": {
+      "7": {
+        "path": "assets/battle-party/panel-ko-bank7.png",
+        "paletteBank": 7,
+        "sourceRect": [
+          0,
+          0,
+          128,
+          48
+        ]
+      },
+      "8": {
+        "path": "assets/battle-party/panel-ko-bank8.png",
+        "paletteBank": 8,
+        "sourceRect": [
+          0,
+          0,
+          128,
+          48
+        ]
+      }
+    }
+  },
+  "notes": "This archive is distinct from field party ov91/a0/7/6. Original native map sources and cropped128x48 panel sources; final slot-table consumer and normal/selected state roles still to certify. Visual state inferences are explicitly separated from proven palette override."
+}

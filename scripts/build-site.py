@@ -39,20 +39,23 @@ def build(archive, target):
         # A content hash changes script/CSS URLs on every source update.
         hashes = {p.relative_to(site).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in sorted(site.glob('*')) if p.suffix in ('.js', '.css', '.html')}
-        revision = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()[:16]
+        asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                        for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
+        revision = hashlib.sha256(json.dumps({'files': hashes, 'assets': asset_hashes}, sort_keys=True).encode()).hexdigest()[:16]
         index = site / 'index.html'
         html = index.read_text(encoding='utf-8')
+        html = html.replace('<html lang="it">', f'<html lang="it" data-build="{revision}">')
         html = re.sub(r'((?:src|href)=")([^"?]+\.(?:js|css))"',
                       lambda match: f'{match[1]}{match[2]}?v={revision}"', html)
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.14', 'revision': revision,
-            'archive_sha256': digest, 'files': hashes,
+            'version': '0.15', 'revision': revision,
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes,
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)
-    print(f"Built Soffiolieve 0.14 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.15 ({revision}) in {target}")
 
 
 if __name__ == '__main__':
