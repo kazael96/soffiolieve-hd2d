@@ -11,7 +11,7 @@
   function displayPartner(){partner=state.party.length?unpack(state.party[lead]||state.party[0]):makeMon('Snivy',5);document.querySelector('.companion').hidden=!state.starter;refresh();}
   function update(){
     $('questSummary').textContent=$('storyObjective').textContent=StoryState.objectives[state.phase];
-    $('storyBag').textContent=`Poké Ball: ${state.pokeballs} · Pozioni: ${potions}`+(phaseIndex()>=4?' · Interpoké':'')+(phaseIndex()>=6?' · Pokédex':'')+(phaseIndex()>=7?' · Mappa Città':'');
+    $('storyBag').textContent=`Denaro: $${state.money} · Poké Ball: ${state.pokeballs} · Pozioni: ${potions}`+(phaseIndex()>=4?' · Interpoké':'')+(phaseIndex()>=6?' · Pokédex':'')+(phaseIndex()>=7?' · Mappa Città':'');
     $('world').dataset.chapter=state.phase;$('world').dataset.scene=state.scene;
     document.querySelector('.place').firstChild.textContent=state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):'SOFFIOLIEVE';
     $('openLab').disabled=!state.starter;
@@ -78,7 +78,14 @@
     if(kind==='tutorial'){displayPartner();window.NativeStory?.battleDone(s,kind);return;}
     for(const m of s.battle.p1.pokemon){const id=m.storyId;if(id!==undefined)state.party[id]={...state.party[id],hp:m.hp,status:m.status,pp:m.moveSlots.map(move=>({id:GEN5.byMoveKey[move.id]?.id||0,left:move.pp}))};}
     if(captured)state.party.push(pack(captured,OPENING_DATA[captured.name].growth[captured.level]));else if(!escaped&&s.battle.winner==='Alcide')await gainXP(s,kind);
-    if(s.openingTrainer&&s.battle.winner==='Alcide')for(const page of messagePages(s.openingTrainer.messages[1],[]))await NativeStory.showPage(page,s.openingTrainer.name);
+    if(s.openingTrainer&&s.battle.winner==='Alcide'){
+      for(const page of messagePages(s.openingTrainer.messages[1],[]))await NativeStory.showPage(page,s.openingTrainer.name);
+      const reward=OpeningBattleRules.prize(s.openingTrainer);state.money=Math.min(9999999,state.money+reward);
+      if(reward)await progressText(15,58,[state.playerName,reward]);
+    }else if(!escaped&&!captured&&s.battle.winner!=='Alcide'&&!s.noBlackout){
+      await progressText(15,54,[state.playerName]);const lost=OpeningBattleRules.loss(state.party,state.money);state.money-=lost;
+      if(lost)await progressText(15,kind==='wild'?55:56,[state.playerName,lost]);await progressText(15,57,[state.playerName]);
+    }
     lead=Math.max(0,state.party.findIndex(p=>p.hp>0));displayPartner();
     if(window.NativeStory?.battleDone(s,kind))return;
     if(state.party.every(p=>p.hp===0)){heal();window.NativeStory?.blackout();}

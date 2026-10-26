@@ -5,7 +5,7 @@
   const starters=['Snivy','Tepig','Oshawott'];
   const scenes=['bedroom','home','bianca','biancaRoom','komorHome','komorRoom','lab','town'];
   const objectives={gift:'Apri il regalo di Aralia nella tua camera.',belle:'Affronta Belle nella tua prima lotta.',komor:'Ora tocca alla lotta con Komor.',mother:'Scendi al piano terra e parla con Mamma.',biancaHouse:'Raggiungi Belle a casa sua, a sud-ovest.',lab:'Incontra Aralia nel laboratorio.',map:'Parla con Mamma fuori dal laboratorio.',routeStart:'Raggiungi Belle e Komor all’uscita nord.',tutorial:'Segui Aralia sul Percorso 1.',route:'Attraversa il Percorso 1 verso Quattroventi.',arrival:'Sei arrivato a Quattroventi. Fine della demo.'};
-  function fresh(){return {version:2,playerName:'Alcide',phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],pokeballs:0,potions:0,routePotion:false};}
+  function fresh(){return {version:2,playerName:'Alcide',phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],pokeballs:0,potions:0,money:3000,routePotion:false};}
   function advance(s,expected){if(s.phase!==expected)return false;s.phase=phases[phases.indexOf(expected)+1]||expected;return true;}
   function choose(s,name){if(s.phase!=='gift'||!starters.includes(name))return false;s.starter=name;s.phase='belle';return true;}
   function rivalStarter(name,rival){return (rival==='Belle'?{Snivy:'Oshawott',Tepig:'Snivy',Oshawott:'Tepig'}:{Snivy:'Tepig',Tepig:'Oshawott',Oshawott:'Snivy'})[name];}
@@ -28,6 +28,7 @@
     if(s.phase!=='gift'&&(!s.party.length||s.party[0].name!==s.starter))return null;
     s.pokeballs=Math.max(0,Math.min(5,Math.floor(v.pokeballs)||0));s.potions=Math.max(0,Math.min(20,Math.floor(v.potions)||0));s.routePotion=v.routePotion===true;
     s.playerName=typeof v.playerName==='string'?v.playerName.slice(0,10):'Alcide';
+    s.money=Number.isFinite(v.money)?Math.max(0,Math.min(9999999,Math.floor(v.money))):3000;
     if(v.original&&Number.isInteger(v.original.zone)&&[317,389,390,391,392,393,394,395,396].includes(v.original.zone)){s.original=structuredClone(v.original);s.original.flags=(s.original.flags||[]).filter(Number.isInteger);s.original.vars=Object.fromEntries(Object.entries(s.original.vars||{}).filter(([k,n])=>Number.isInteger(+k)&&Number.isInteger(n)));}
     return s;
   }

@@ -21,3 +21,8 @@ test('corrupt saves, unknown scenes and impossible starter state cannot resume',
  assert.equal(Story.read({getItem:()=>'{bad'}).phase,'gift');assert.equal(Story.read(null).phase,'gift');
  assert.equal(Story.write(null,Story.fresh()),false);
 });
+test('money persists, is bounded and older opening saves retain their progress',()=>{
+ const s=Story.fresh();assert.equal(s.money,3000);s.money=3500;assert.equal(Story.normalize(s).money,3500);
+ s.money=-10;assert.equal(Story.normalize(s).money,0);s.money=10000000;assert.equal(Story.normalize(s).money,9999999);
+ delete s.money;assert.equal(Story.normalize(s).money,3000);assert.equal(Story.normalize(s).phase,'gift');
+});

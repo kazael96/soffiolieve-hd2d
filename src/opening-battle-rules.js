@@ -15,5 +15,9 @@
     }
     return result;
   }
-  const api={hint};root.OpeningBattleRules=api;if(typeof module!=='undefined')module.exports=api;
+  // IRBI 021d7ebc; the opening rivals each award 5 * 25 * 4 = 500.
+  function prize(trainer){return trainer?trainer.party.at(-1).level*trainer.moneyMultiplier*4:0;}
+  // IRBI 021d7ef8 / 021f032d: zero badges -> multiplier 2.
+  function loss(party,cash,noBlackout=false){return noBlackout?0:Math.min(cash,Math.max(1,...party.map(p=>p.level))*8);}
+  const api={hint,prize,loss};root.OpeningBattleRules=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

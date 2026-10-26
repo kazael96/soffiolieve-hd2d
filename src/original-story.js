@@ -177,7 +177,7 @@
         const trainer=OPENING_TRAINERS[v[0]];if(!trainer)throw Error('Trainer outside opening '+v[0]);
         const kind=trainer.name;state.phase=kind==='Belle'?'belle':'komor';rival=kind;journey.update();
         const completed=new Promise(resolve=>pendingBattle=resolve);
-        try{await startBattle(true,{story:kind,trainerId:v[0],aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party)});await completed;}finally{pendingBattle=null;}break;
+        try{await startBattle(true,{story:kind,trainerId:v[0],noBlackout:!!(v[2]&1),aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party)});await completed;}finally{pendingBattle=null;}break;
       }
       case 'TrainerBattleIsVictory':m.set(a[0],native.won?1:0);break;
       case 'CallTrainerBattleEnd':break;

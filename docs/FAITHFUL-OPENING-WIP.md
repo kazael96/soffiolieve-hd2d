@@ -314,3 +314,18 @@ e tabella021f032d, ancora da leggere. Denaro iniziale ancora da verificare.
 Fuga: rimossi testo e musica vittoria per l’uscita senza combattimento; test
 sulla vera funzione turn e il riproduttore eventi, sia fuga riuscita sia fallita
 sia vittoria normale. La prova manuale aveva evidenziato il difetto.
+
+## Checkpoint 26 ottobre, 02:45: denaro e sconfitte iniziali
+
+Ricompensa500 dei primi rivali dalla formula native021d7ebc e dati allenatori.
+Terzo parametro CallTrainerBattle=1 verificato: overlay21 021ae9bc passa il
+parametro a0216e708; a0216e782..794 imposta flag0x100. Esclude costo/blackout
+per queste prime lotte. In selvatici: perdita8*massimo livello con zero medaglie,
+limitata al denaro posseduto (tabella021f032d=[2,4,6,9,12,16,20,25,30]).
+Messaggi banca15 54..58, soldi nel diario e nel salvataggio. Denaro iniziale3000
+confermato da walkthrough Marriland: https://www.neoseeker.com/pokemon-black/faqs/210051-pokemon-bw-b.html
+(non ancora individuata la routine IRBI che assegna il valore iniziale).
+Salvataggi precedenti senza money ricevono3000, senza inventare ricompense
+retroattive per battaglie di cui non conosciamo il risultato.
+40testNode; nove partite complete con vittorie/sconfitte verificano4000/3000.
+La fuga corretta provata visivamente contro LillipupLv2: nessun testo vittoria.

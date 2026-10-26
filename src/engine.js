@@ -27,6 +27,7 @@ function openingMoveScores(moves,turn,hp,maxhp,random){
 }
 function configureOpeningBattle(session,options={}){
  session.openingTrainer=options.trainerId?OPENING_TRAINERS[options.trainerId]:null;
+ session.noBlackout=!!options.noBlackout;
  session.trainerHints=new Set();
  if(options.aiFlags!==16)return;
  const fallback=session.ai.bind(session);

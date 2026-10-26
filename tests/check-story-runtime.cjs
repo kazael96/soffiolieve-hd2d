@@ -8,7 +8,7 @@ function environment(){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0]};
  const source=fs.readFileSync(path.join(site,'game.js'),'utf8');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
@@ -19,7 +19,7 @@ function environment(){
  for(const file of ['original-events.js','field-event-vm.js','phone-assets.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
-  const {config}=c.lastBattle;if(config.trainerId){const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
+  const {config}=c.lastBattle;if(config.trainerId){assert.equal(config.noBlackout,true);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
   if(winner==='play')for(let i=0;i<50&&!s.battle.ended;i++)s.act('move 1');else s.battle.win(winner);
   assert.ok(s.battle.ended);c.Journey.afterBattle(s,config.story,null,false);return s;
  };
@@ -143,6 +143,7 @@ async function drain(c,promise,starter=0,outcome='play'){
   c.player={x:6.5,y:-73.5};await drain(c,n.run(4,634),starter,outcome);assert.equal(n.state.vars[16508],2);assert.equal(j.state.phase,'route','Comparison is not arrival');
   c.player={x:6.5,y:-80.5};j.step(1/30,true);c.continue();j.save(true);assert.equal(j.state.phase,'arrival');
   const saved=c.StoryState.read(c.localStorage);assert.equal(saved.original.arrived,true);assert.equal(saved.starter,name);assert.equal(saved.original.vars[16508],2);
+  if(outcome==='p1')assert.equal(saved.money,4000);if(outcome==='p2')assert.equal(saved.money,3000);
   console.log('PASS original scenes',name,outcome);
  }
 })().catch(error=>{console.error(error);process.exitCode=1;});
