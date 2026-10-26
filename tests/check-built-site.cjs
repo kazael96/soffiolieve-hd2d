@@ -47,7 +47,7 @@ vm.runInNewContext(fs.readFileSync(path.join(site,'opening-sprites.js'),'utf8'),
 const opening=assets.window.OPENING_ASSETS;
 for(const texture of Object.values(opening.textures))assert.ok(fs.existsSync(path.join(site,texture.src)),texture.src);
 for(const frames of Object.values(assets.window.OPENING_SPRITES))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame.split('?')[0])),frame);
-for(const file of ['phone-assets.js','field-audio.js','battle-fields.js','starter-assets.js'])vm.runInNewContext(fs.readFileSync(path.join(site,file),'utf8'),assets);
+for(const file of ['phone-assets.js','field-audio.js','battle-fields.js','starter-assets.js','pokedex-assets.js'])vm.runInNewContext(fs.readFileSync(path.join(site,file),'utf8'),assets);
 for(const frames of Object.values(assets.window.PHONE_ASSETS.portraits))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame)),frame);
 for(const record of Object.values(assets.window.FIELD_AUDIO))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
 for(const record of Object.values(assets.window.BATTLE_FIELDS.textures))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
@@ -75,3 +75,9 @@ assert.ok(can(3.5,-18),'Blocked Route 1 transition');
 console.log('PASS: original room assets, every required door/NPC and the full walking route to Accumula.');
 
 for(const url of [...Object.values(assets.window.STARTER_ASSETS.models),...assets.window.STARTER_ASSETS.backgrounds,...assets.window.STARTER_ASSETS.sprites.flatMap(s=>Object.values(s))])assert.ok(fs.existsSync(path.join(site,url)),url);
+
+for(const file of ['entry','font','caught',...Object.values(assets.window.POKEDEX_ASSETS.species).flatMap(p=>['foot-'+p.id,...p.types.map(t=>'type-'+t)])])assert.ok(fs.existsSync(path.join(site,'assets/pokedex/'+file+'.png')),file);
+assert.ok(html.includes('pokedex.css'), 'Pokedex stylesheet must be loaded');
+assert.equal(assets.window.POKEDEX_ASSETS.species.Patrat.number,10);
+assert.equal(assets.window.POKEDEX_ASSETS.species.Lillipup.number,12);
+console.log('PASS original Pokedex entry graphics, font, footprint/type assets and regional numbers');

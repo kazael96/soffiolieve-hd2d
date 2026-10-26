@@ -329,3 +329,12 @@ Salvataggi precedenti senza money ricevono3000, senza inventare ricompense
 retroattive per battaglie di cui non conosciamo il risultato.
 40testNode; nove partite complete con vittorie/sconfitte verificano4000/3000.
 La fuga corretta provata visivamente contro LillipupLv2: nessun testo vittoria.
+
+
+### 26 October, 03:20 Rome — original capture registration and Pokédex
+
+- Native IRBI overlay206 (`zukan_info`, base021b9ce0) uses a/1/5/9 (not B2's a/1/5/7), palette9, character25, screens31/40. Extracted original font0 from a/0/2/3 including the custom three-byte prefix in every glyph. Footprints a/1/6/7, native two-OAM layout; type labels a/0/8/3. Text banks234/260/245/268/236 and regional table from a/0/1/6 member668. Reproducible exporter `tools/extract-pokedex.py`.
+- Capture completion now records first catches, shows bank15 message66 and original registration layout, asks bank234 message175, and accepts a nickname for the captured party slot. Repeat catches skip registration. Original starter is registered on receipt; enemy species become seen in actual story battles. Tutorial does not change player's Pokédex. Old saves infer only owned species and the two guaranteed opening rivals when already past them.
+- Diary can open scoped Pokédex entries. Caught-only data remain hidden for species merely seen. Browser menu shell and text-entry field remain web adaptations, not the original DS lower-screen menu/keyboard. Entry sprite uses existing native animation player; entry transition/glow/background scrolling not yet reproduced.
+- Browser QA on isolated save: original Patrat panel, correct footprint, registration text, nickname YES → Vedetta via Enter, correct party slot and caught list. No console errors. 41 Node tests + runtime first/duplicate catch and tutorial exclusion pass; all nine original event flows still pass.
+- Main browser playthrough completed original capture comparison and phone call, then reached Quattroventi end boundary without block (main save on tab8). Full playthrough precedes this new Pokédex code; local QA used tab10 `/qa-dex.html` with isolated save key.

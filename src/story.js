@@ -14,6 +14,7 @@
     $('storyBag').textContent=`Denaro: $${state.money} · Poké Ball: ${state.pokeballs} · Pozioni: ${potions}`+(phaseIndex()>=4?' · Interpoké':'')+(phaseIndex()>=6?' · Pokédex':'')+(phaseIndex()>=7?' · Mappa Città':'');
     $('world').dataset.chapter=state.phase;$('world').dataset.scene=state.scene;
     document.querySelector('.place').firstChild.textContent=state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):'SOFFIOLIEVE';
+    $('openPokedex').hidden=!state.original?.pokedex;
     $('openLab').disabled=!state.starter;
   }
   function save(force=false){
@@ -38,7 +39,7 @@
   function hint() { return ''; }
   function monConfig(m){return {...m,moves:m.moves.map(x=>x.id),pp:m.moves};}
   function configs(){battleSlots=state.party.map((p,i)=>i).filter(i=>state.party[i].hp!==0);if(battleSlots.includes(lead))battleSlots=[lead,...battleSlots.filter(i=>i!==lead)];participants=new Set([battleSlots[0]]);return battleSlots.map(i=>{const m=unpack(state.party[i]);return monConfig(m);});}
-  function attachBattle(s,kind){if(kind!=='tutorial')for(let i=0;i<s.battle.p1.pokemon.length;i++)s.battle.p1.pokemon[i].storyId=battleSlots[i];}
+  function attachBattle(s,kind){if(kind!=='tutorial'){for(const m of s.battle.p2.pokemon)StoryState.register(state,m.species.name);for(let i=0;i<s.battle.p1.pokemon.length;i++)s.battle.p1.pokemon[i].storyId=battleSlots[i];}}
   function recordParticipant(s){const id=s.active().storyId;if(id!==undefined)participants.add(id);}
   async function progressText(bank,id,words){
     for(const page of messagePages(ORIGINAL_EVENTS.progressTexts[bank][id],words))await NativeStory.showPage(page.replace(/\{be(?:02|04|05)(?::[^}]*)?\}/g,''));
@@ -77,7 +78,12 @@
     processing=true;encounterState.reset();try{
     if(kind==='tutorial'){displayPartner();window.NativeStory?.battleDone(s,kind);return;}
     for(const m of s.battle.p1.pokemon){const id=m.storyId;if(id!==undefined)state.party[id]={...state.party[id],hp:m.hp,status:m.status,pp:m.moveSlots.map(move=>({id:GEN5.byMoveKey[move.id]?.id||0,left:move.pp}))};}
-    if(captured)state.party.push(pack(captured,OPENING_DATA[captured.name].growth[captured.level]));else if(!escaped&&s.battle.winner==='Alcide')await gainXP(s,kind);
+    if(captured){
+      const first=StoryState.register(state,captured.name,true),index=state.party.length;state.party.push(pack(captured,OPENING_DATA[captured.name].growth[captured.level]));
+      if(first&&state.original?.pokedex){await progressText(15,66,[captured.name]);await Pokedex.entry(captured.name,{registration:true});}
+      await NativeStory.showPage(messagePages(POKEDEX_ASSETS.labels.nickname,[captured.name]).join('\n'));
+      if(await NativeStory.choice(['SÌ','NO'])===0)await NativeStory.nickname(index);
+    }else if(!escaped&&s.battle.winner==='Alcide')await gainXP(s,kind);
     if(s.openingTrainer&&s.battle.winner==='Alcide'){
       for(const page of messagePages(s.openingTrainer.messages[1],[]))await NativeStory.showPage(page,s.openingTrainer.name);
       const reward=OpeningBattleRules.prize(s.openingTrainer);state.money=Math.min(9999999,state.money+reward);
@@ -106,6 +112,7 @@
   }
   function openJournal(){if(battling||menuOpen()||window.NativeStory?.locked)return;resetInput();update();save();$('journal').showModal();}
   function openTeam(){if(battling||menuOpen()||window.NativeStory?.locked||!state.starter)return;resetInput();$('partyList').replaceChildren();state.party.forEach((p,i)=>{const b=document.createElement('button');b.textContent=`${p.nickname||p.name} · Lv. ${p.level} · ${p.hp}/${makeMon(p.name,p.level,p).max} PS${i===lead?' · In testa':''}`;b.disabled=p.hp===0;b.onclick=()=>{lead=i;displayPartner();$('partyDialog').close();};$('partyList').append(b);});$('partyDialog').showModal();}
+  $('openPokedex').onclick=()=>Pokedex.browse();
   $('openJournal').onclick=openJournal;$('closeJournal').onclick=()=>$('journal').close();$('saveNow').onclick=()=>save(true);
   $('touchPreference').checked=preferences.touch;$('focusPreference').checked=!preferences.cinema;renderer.zoom=preferences.zoom;renderer.cinema=preferences.cinema;$('zoomValue').value=Math.round(renderer.zoom*100)+'%';document.body.classList.toggle('touch-enabled',preferences.touch);
   $('touchPreference').onchange=()=>{preferences.touch=$('touchPreference').checked;document.body.classList.toggle('touch-enabled',preferences.touch);resetInput();save(true);};$('focusPreference').onchange=()=>{renderer.cinema=!$('focusPreference').checked;save(true);};

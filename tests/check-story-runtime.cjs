@@ -8,11 +8,12 @@ function environment(){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js','pokedex-assets.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0]};
  const source=fs.readFileSync(path.join(site,'game.js'),'utf8');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
  vm.runInContext(fs.readFileSync(path.join(site,'story.js'),'utf8'),c,{filename:'story.js'});
+ c.Pokedex={entry:async(name,options)=>{c.dexEntries??=[];c.dexEntries.push({name,options});}};
  c.StarterSelection={choose:async({text})=>{assert.match(text(18,'Snivy'),/Snivy/);return c.testStarter||0;}};
  c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
@@ -44,6 +45,19 @@ async function drain(c,promise,starter=0,outcome='play'){
  assert.equal(c.$('world').dataset.eventError,undefined,c.$('world').dataset.eventError);return messages;
 }
 (async()=>{
+ {
+  const c=environment(),j=c.Journey,n=c.NativeStory;n.state.intro=true;n.state.pokedex=true;j.state.starter='Snivy';j.state.phase='route';j.state.party=[j.pack(c.newStoryMon('Snivy',5),135)];c.StoryState.register(j.state,'Snivy',true);
+  for(let i=0;i<2;i++){
+   const s=new c.GEN5.Session(j.configs(),[{name:'Patrat',level:3}],{seed:[1,2,3,4]});j.attachBattle(s,'wild');
+   assert.ok(j.state.dex.seen.includes('Patrat'));const caught=c.newStoryMon('Patrat',3);caught.hp=3;s.battle.win('p1');
+   const pages=await drain(c,j.afterBattle(s,'wild',caught,false));assert.ok(pages.some(t=>t.includes('soprannome')));assert.equal(j.state.party.at(-1).hp,3);
+  }
+  assert.equal(c.dexEntries.length,1);assert.equal(c.dexEntries[0].name,'Patrat');assert.equal(c.dexEntries[0].options.registration,true);
+  assert.equal(j.state.party.length,3);assert.equal(j.state.party[0].xp,135,'Captures give no experience in Gen V');
+  assert.deepEqual(Array.from(j.state.dex.caught),['Snivy','Patrat']);
+  const s=new c.GEN5.Session([{name:'Minccino',level:7}],[{name:'Lillipup',level:2}]);j.attachBattle(s,'tutorial');assert.ok(!j.state.dex.seen.includes('Lillipup'));
+  console.log('PASS first capture registration, duplicate catch, original nickname prompt and tutorial exclusion');
+ }
  {
   const c=environment(),n=c.NativeStory;
   c.startBattle=async()=>{throw Error('Test battle setup failure');};

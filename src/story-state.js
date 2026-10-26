@@ -5,7 +5,7 @@
   const starters=['Snivy','Tepig','Oshawott'];
   const scenes=['bedroom','home','bianca','biancaRoom','komorHome','komorRoom','lab','town'];
   const objectives={gift:'Apri il regalo di Aralia nella tua camera.',belle:'Affronta Belle nella tua prima lotta.',komor:'Ora tocca alla lotta con Komor.',mother:'Scendi al piano terra e parla con Mamma.',biancaHouse:'Raggiungi Belle a casa sua, a sud-ovest.',lab:'Incontra Aralia nel laboratorio.',map:'Parla con Mamma fuori dal laboratorio.',routeStart:'Raggiungi Belle e Komor all’uscita nord.',tutorial:'Segui Aralia sul Percorso 1.',route:'Attraversa il Percorso 1 verso Quattroventi.',arrival:'Sei arrivato a Quattroventi. Fine della demo.'};
-  function fresh(){return {version:2,playerName:'Alcide',phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],pokeballs:0,potions:0,money:3000,routePotion:false};}
+  function fresh(){return {version:2,playerName:'Alcide',phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],dex:{seen:[],caught:[]},pokeballs:0,potions:0,money:3000,routePotion:false};}
   function advance(s,expected){if(s.phase!==expected)return false;s.phase=phases[phases.indexOf(expected)+1]||expected;return true;}
   function choose(s,name){if(s.phase!=='gift'||!starters.includes(name))return false;s.starter=name;s.phase='belle';return true;}
   function rivalStarter(name,rival){return (rival==='Belle'?{Snivy:'Oshawott',Tepig:'Snivy',Oshawott:'Tepig'}:{Snivy:'Tepig',Tepig:'Oshawott',Oshawott:'Snivy'})[name];}
@@ -26,13 +26,23 @@
     const names=[...starters,'Patrat','Lillipup'];
     s.party=Array.isArray(v.party)?v.party.filter(p=>names.includes(p?.name)).slice(0,6).map(p=>({name:p.name,nickname:typeof p.nickname==='string'?p.nickname.slice(0,10):'',...traits(p),level:Math.max(2,Math.min(100,Math.floor(p.level)||5)),xp:Math.max(0,Math.floor(p.xp)||0),hp:Number.isInteger(p.hp)?Math.max(0,Math.min(999,p.hp)):null,status:['par','brn','psn','tox','slp','frz'].includes(p.status)?p.status:'',pp:Array.isArray(p.pp)?p.pp.filter(m=>Number.isInteger(m?.id)&&Number.isInteger(m?.left)).map(m=>({id:m.id,left:Math.max(0,Math.min(99,m.left))})).slice(0,4):[]})):[];
     if(s.phase!=='gift'&&(!s.party.length||s.party[0].name!==s.starter))return null;
+    const valid=list=>Array.isArray(list)?[...new Set(list.filter(n=>names.includes(n)))]:[];
+    s.dex={seen:valid(v.dex?.seen),caught:valid(v.dex?.caught)};
+    for(const p of s.party)register(s,p.name,true);
+    if(!v.dex&&s.starter&&phases.indexOf(s.phase)>=phases.indexOf('mother'))for(const rival of ['Belle','Komor'])register(s,rivalStarter(s.starter,rival));
+    s.dex.seen=[...new Set([...s.dex.seen,...s.dex.caught])];
     s.pokeballs=Math.max(0,Math.min(5,Math.floor(v.pokeballs)||0));s.potions=Math.max(0,Math.min(20,Math.floor(v.potions)||0));s.routePotion=v.routePotion===true;
     s.playerName=typeof v.playerName==='string'?v.playerName.slice(0,10):'Alcide';
     s.money=Number.isFinite(v.money)?Math.max(0,Math.min(9999999,Math.floor(v.money))):3000;
     if(v.original&&Number.isInteger(v.original.zone)&&[317,389,390,391,392,393,394,395,396].includes(v.original.zone)){s.original=structuredClone(v.original);s.original.flags=(s.original.flags||[]).filter(Number.isInteger);s.original.vars=Object.fromEntries(Object.entries(s.original.vars||{}).filter(([k,n])=>Number.isInteger(+k)&&Number.isInteger(n)));}
     return s;
   }
+  function register(s,name,caught=false){
+    if(![...starters,'Patrat','Lillipup'].includes(name))return false;
+    s.dex??={seen:[],caught:[]};if(!s.dex.seen.includes(name))s.dex.seen.push(name);
+    const first=caught&&!s.dex.caught.includes(name);if(first)s.dex.caught.push(name);return first;
+  }
   function read(storage){try{const raw=storage.getItem(KEY);if(!raw)return fresh();return normalize(JSON.parse(raw))||fresh();}catch{return fresh();}}
   function write(storage,state){try{const normalized=normalize(state);if(!normalized)return false;storage.setItem(KEY,JSON.stringify(normalized));return true;}catch{return false;}}
-  const api={KEY,phases,starters,scenes,objectives,fresh,advance,choose,rivalStarter,normalize,read,write};root.StoryState=api;if(typeof module!=='undefined')module.exports=api;
+  const api={KEY,phases,starters,scenes,objectives,fresh,advance,choose,rivalStarter,register,normalize,read,write};root.StoryState=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
