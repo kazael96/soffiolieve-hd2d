@@ -360,3 +360,13 @@ Nessun indice di Nero 2 viene assunto automaticamente: le costanti di
 [pokebw2](https://github.com/fuddlesworth/pokebw2/blob/main/include/constants/arc.h)
 sono state consultate come orientamento, mentre tutti gli asset di questo
 checkpoint provengono dalla NARC IRBI verificata.
+
+## Original battle narrative catalog (IRBI)
+
+`src/battle-narrative-assets.js` exposes `window.BATTLE_NARRATIVE`, extracted by `tools/extract-battle-narrative.py` directly from a/0/0/2. Bank13 has1680 messages: complete original move-use phrases in triplets, indexed `3*moveID+side`. Bank14 has1159 Pokémon-specific battle messages; bank15 has200 general battle/trainer messages. Side offsets are0 own,1 wild opponent,2 trainer opponent. Exact original text, formatting tokens and native line breaks are preserved; substitutions and control-token handling belong to the renderer.
+
+Stats are original sentence templates, not name-plus-arrow displays. The catalog provides +1,+2,+3,-1,-2,-3,max,min families with seven stats in native order Attack, Defense, SpecialAttack, SpecialDefense, Speed, accuracy, evasion. Bank14 family bases are27,48,69,90,111,132,153,174. Within a family the message is `base+statIndex*3+side`. Examples:14:93 `La Difesa di {0102:0} diminuisce!`,14:95 `La Difesa di {0102:0} nemico diminuisce!`; a two-stage decrease says `diminuisce di molto`, and a three-or-more decrease says `cala a picco`. Limits have their own `non può ... di più` sentences.
+
+The `events` map covers80 common visible events, including KO, immunity, miss, failed move, critical/effectiveness, poison/toxic/burn/paralysis/freeze/sleep/confusion, recovery, recoil, item recovery and initial trainer/wild/switch text. Bank15 also contains multiple contextual withdrawal/send-out variants; the catalog's named switch entries select the basic original variants, without claiming the complete original game-state selector has been ported. All source banks are available for further exact choices.
+
+Existing native font0 message atlas already supports this text. Unsupported arrow/minus status summaries should be replaced with these sentences, not with new glyphs. Literal `\\n` is a line-break escape in decoded bank strings. `{be..}` and other native pacing controls must not appear visibly; retain their meaning separately or omit the control from displayed text. The compact provenance companion records the ROM archive SHA256 and mapping formulas.

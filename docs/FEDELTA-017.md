@@ -14,9 +14,11 @@ Ambito giocabile: camera di Alcide, Soffiolieve, Percorso 1 e ingresso di Quattr
 - Lista Pokédex: sette righe selezionabili in basso, otto righe precedenti in alto, fascia inferiore opaca originale e lampeggio della palette al posto della cornice bianca aggiunta.
 - Pagine Pokédex: fusione RGB555 delle aree habitat, testo originale «Zona ignota», intestazione «Habitat di …» e font della ROM. Luminosità selettiva dei piani BG0/BG2/BG3: otto aggiornamenti per Info e per il display inferiore di Zona; nessuna dissolvenza generica di otto aggiornamenti su Verso o Forme. Il cambio specie carica atomicamente le nuove risorse.
 
+- Messaggi narrativi della lotta: banche originali13/14/15, uso mosse, KO, cambi, efficacia, critici, errori e stati comuni. Le statistiche usano template distinti per proprio/selvatico/nemico e variazioni di1/2/3livelli, con frasi specifiche ai limiti. Gli aggiornamenti normali dei PS e i contatori interni non producono messaggi aggiunti. Eventi non mappati conservano il traduttore precedente; la copertura non è universale.
+
 ## Prove e limiti
 
-86 test Node e3 test Python; controllo dell'archivio di base e delle risorse della build; nove percorsi automatici della storia,14 porte e62 interazioni. Collaudo nel browser su salvataggi isolati per quantità, ricerca, habitat, menu Y e schermate di lotta, compresi ispezione, scambio e ritorno.
+89 test Node e3 test Python; controllo dell'archivio di base e delle risorse della build; nove percorsi automatici della storia,14 porte e62 interazioni. Collaudo nel browser su salvataggi isolati per quantità, ricerca, habitat, menu Y e schermate di lotta, compresi ispezione, scambio e ritorno.
 
 I modelli puri verificano i contatori di pressione e l'inerzia; non è stato eseguito un collaudo fisico del trascinamento prolungato su telefono. La lista regionale conserva ancora una navigazione adattata al browser; la coreografia completa fra caricamenti dei moduli, priorità hardware di ogni piano e sincronismo video/audio rispetto alla console non sono certificati. Il rendering è canvas/WebGL e l'uscita audio è WebAudio. Non si dichiara una replica pixel/ciclo esatta né una verifica esaustiva di ogni combinazione di mosse, abilità e stati del gioco completo.
 
