@@ -1,0 +1,733 @@
+{
+  "source": {
+    "rom": "IRBI",
+    "archive": "a/0/0/2",
+    "sha256": "e0fbb1eec9cca0ac3935517e97a8042e979b78faec16e18caa61d57400c53547",
+    "banks": [
+      13,
+      14,
+      15
+    ],
+    "method": "Original encrypted message sections decoded; native formatting controls and line breaks retained. Semantic event associations follow unambiguous original text; no changed dialogue."
+  },
+  "sides": {
+    "own": 0,
+    "wild": 1,
+    "trainer": 2
+  },
+  "moveUse": {
+    "bank": 13,
+    "formula": "3*moveID+side",
+    "moveStride": 3,
+    "sideStride": 1,
+    "maxMoveId": 559,
+    "patternVerified": true,
+    "note": "Use original complete move-use string; do not reconstruct move names or append generic arrows."
+  },
+  "events": {
+    "faint": {
+      "bank": 14,
+      "base": 0,
+      "sideStride": 1
+    },
+    "revived": {
+      "bank": 14,
+      "base": 3,
+      "sideStride": 1
+    },
+    "superEffectiveTarget": {
+      "bank": 14,
+      "base": 6,
+      "sideStride": 1
+    },
+    "notVeryEffectiveTarget": {
+      "bank": 14,
+      "base": 15,
+      "sideStride": 1
+    },
+    "failedTarget": {
+      "bank": 14,
+      "base": 24,
+      "sideStride": 1
+    },
+    "immune": {
+      "bank": 14,
+      "base": 210,
+      "sideStride": 1
+    },
+    "miss": {
+      "bank": 14,
+      "base": 213,
+      "sideStride": 1
+    },
+    "unharmed": {
+      "bank": 14,
+      "base": 216,
+      "sideStride": 1
+    },
+    "poison": {
+      "bank": 14,
+      "base": 234,
+      "sideStride": 1
+    },
+    "toxic": {
+      "bank": 14,
+      "base": 237,
+      "sideStride": 1
+    },
+    "poisonDamage": {
+      "bank": 14,
+      "base": 243,
+      "sideStride": 1
+    },
+    "poisonCured": {
+      "bank": 14,
+      "base": 246,
+      "sideStride": 1
+    },
+    "poisonAlready": {
+      "bank": 14,
+      "base": 249,
+      "sideStride": 1
+    },
+    "poisonPrevented": {
+      "bank": 14,
+      "base": 252,
+      "sideStride": 1
+    },
+    "burn": {
+      "bank": 14,
+      "base": 255,
+      "sideStride": 1
+    },
+    "burnDamage": {
+      "bank": 14,
+      "base": 261,
+      "sideStride": 1
+    },
+    "burnCured": {
+      "bank": 14,
+      "base": 264,
+      "sideStride": 1
+    },
+    "burnAlready": {
+      "bank": 14,
+      "base": 267,
+      "sideStride": 1
+    },
+    "burnPrevented": {
+      "bank": 14,
+      "base": 270,
+      "sideStride": 1
+    },
+    "paralysis": {
+      "bank": 14,
+      "base": 273,
+      "sideStride": 1
+    },
+    "paralysisCantMove": {
+      "bank": 14,
+      "base": 276,
+      "sideStride": 1
+    },
+    "paralysisCured": {
+      "bank": 14,
+      "base": 279,
+      "sideStride": 1
+    },
+    "paralysisAlready": {
+      "bank": 14,
+      "base": 282,
+      "sideStride": 1
+    },
+    "paralysisPrevented": {
+      "bank": 14,
+      "base": 285,
+      "sideStride": 1
+    },
+    "freeze": {
+      "bank": 14,
+      "base": 288,
+      "sideStride": 1
+    },
+    "freezeCantMove": {
+      "bank": 14,
+      "base": 291,
+      "sideStride": 1
+    },
+    "freezeCured": {
+      "bank": 14,
+      "base": 294,
+      "sideStride": 1
+    },
+    "freezeAlready": {
+      "bank": 14,
+      "base": 297,
+      "sideStride": 1
+    },
+    "freezePrevented": {
+      "bank": 14,
+      "base": 300,
+      "sideStride": 1
+    },
+    "thawedByMove": {
+      "bank": 14,
+      "base": 303,
+      "sideStride": 1
+    },
+    "sleep": {
+      "bank": 14,
+      "base": 306,
+      "sideStride": 1
+    },
+    "sleepCantMove": {
+      "bank": 14,
+      "base": 309,
+      "sideStride": 1
+    },
+    "sleepCured": {
+      "bank": 14,
+      "base": 312,
+      "sideStride": 1
+    },
+    "sleepAlready": {
+      "bank": 14,
+      "base": 315,
+      "sideStride": 1
+    },
+    "sleepPrevented": {
+      "bank": 14,
+      "base": 318,
+      "sideStride": 1
+    },
+    "nightmareDamage": {
+      "bank": 14,
+      "base": 321,
+      "sideStride": 1
+    },
+    "nightmare": {
+      "bank": 14,
+      "base": 324,
+      "sideStride": 1
+    },
+    "infatuation": {
+      "bank": 14,
+      "base": 327,
+      "sideStride": 1
+    },
+    "infatuationCantMove": {
+      "bank": 14,
+      "base": 336,
+      "sideStride": 1
+    },
+    "infatuationCured": {
+      "bank": 14,
+      "base": 339,
+      "sideStride": 1
+    },
+    "statusCured": {
+      "bank": 14,
+      "base": 342,
+      "sideStride": 1
+    },
+    "confusion": {
+      "bank": 14,
+      "base": 345,
+      "sideStride": 1
+    },
+    "confusionActive": {
+      "bank": 14,
+      "base": 348,
+      "sideStride": 1
+    },
+    "confusionCured": {
+      "bank": 14,
+      "base": 351,
+      "sideStride": 1
+    },
+    "confusionAlready": {
+      "bank": 14,
+      "base": 354,
+      "sideStride": 1
+    },
+    "confusionPrevented": {
+      "bank": 14,
+      "base": 357,
+      "sideStride": 1
+    },
+    "flinch": {
+      "bank": 14,
+      "base": 363,
+      "sideStride": 1
+    },
+    "bindingDamage": {
+      "bank": 14,
+      "base": 372,
+      "sideStride": 1
+    },
+    "bindingEnded": {
+      "bank": 14,
+      "base": 375,
+      "sideStride": 1
+    },
+    "recoil": {
+      "bank": 14,
+      "base": 378,
+      "sideStride": 1
+    },
+    "criticalTarget": {
+      "bank": 14,
+      "base": 384,
+      "sideStride": 1
+    },
+    "heal": {
+      "bank": 14,
+      "base": 387,
+      "sideStride": 1
+    },
+    "ppRestore": {
+      "bank": 14,
+      "base": 390,
+      "sideStride": 1
+    },
+    "allPpRestore": {
+      "bank": 14,
+      "base": 393,
+      "sideStride": 1
+    },
+    "sandDamage": {
+      "bank": 14,
+      "base": 396,
+      "sideStride": 1
+    },
+    "hailDamage": {
+      "bank": 14,
+      "base": 399,
+      "sideStride": 1
+    },
+    "wildEncounter": {
+      "bank": 15,
+      "message": 1
+    },
+    "sendOut": {
+      "bank": 15,
+      "message": 11
+    },
+    "withdraw": {
+      "bank": 15,
+      "message": 25
+    },
+    "trainerSendOut": {
+      "bank": 15,
+      "message": 17
+    },
+    "trainerWithdraw": {
+      "bank": 15,
+      "message": 31
+    },
+    "trainerSendOutNamedClass": {
+      "bank": 15,
+      "message": 14
+    },
+    "trainerWithdrawNamedClass": {
+      "bank": 15,
+      "message": 30
+    },
+    "winTrainerNamedClass": {
+      "bank": 15,
+      "message": 44
+    },
+    "winTrainer": {
+      "bank": 15,
+      "message": 48
+    },
+    "lose": {
+      "bank": 15,
+      "message": 54
+    },
+    "experience": {
+      "bank": 15,
+      "message": 42
+    },
+    "levelUp": {
+      "bank": 15,
+      "message": 60
+    },
+    "caught": {
+      "bank": 15,
+      "message": 65
+    },
+    "ineffectiveGeneric": {
+      "bank": 15,
+      "message": 68
+    },
+    "failed": {
+      "bank": 15,
+      "message": 71
+    },
+    "escaped": {
+      "bank": 15,
+      "message": 72
+    },
+    "escapeFailed": {
+      "bank": 15,
+      "message": 73
+    },
+    "escapeTrainerForbidden": {
+      "bank": 15,
+      "message": 76
+    },
+    "superEffective": {
+      "bank": 15,
+      "message": 78
+    },
+    "notVeryEffective": {
+      "bank": 15,
+      "message": 79
+    },
+    "confusionSelfHit": {
+      "bank": 15,
+      "message": 80
+    },
+    "critical": {
+      "bank": 15,
+      "message": 81
+    },
+    "noPp": {
+      "bank": 15,
+      "message": 82
+    },
+    "nothingHappened": {
+      "bank": 15,
+      "message": 102
+    }
+  },
+  "stats": {
+    "+1": {
+      "atk": {
+        "bank": 14,
+        "base": 27,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 30,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 33,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 36,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 39,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 42,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 45,
+        "sideStride": 1
+      }
+    },
+    "+2": {
+      "atk": {
+        "bank": 14,
+        "base": 48,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 51,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 54,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 57,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 60,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 63,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 66,
+        "sideStride": 1
+      }
+    },
+    "+3": {
+      "atk": {
+        "bank": 14,
+        "base": 69,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 72,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 75,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 78,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 81,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 84,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 87,
+        "sideStride": 1
+      }
+    },
+    "-1": {
+      "atk": {
+        "bank": 14,
+        "base": 90,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 93,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 96,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 99,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 102,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 105,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 108,
+        "sideStride": 1
+      }
+    },
+    "-2": {
+      "atk": {
+        "bank": 14,
+        "base": 111,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 114,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 117,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 120,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 123,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 126,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 129,
+        "sideStride": 1
+      }
+    },
+    "-3": {
+      "atk": {
+        "bank": 14,
+        "base": 132,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 135,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 138,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 141,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 144,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 147,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 150,
+        "sideStride": 1
+      }
+    },
+    "max": {
+      "atk": {
+        "bank": 14,
+        "base": 153,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 156,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 159,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 162,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 165,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 168,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 171,
+        "sideStride": 1
+      }
+    },
+    "min": {
+      "atk": {
+        "bank": 14,
+        "base": 174,
+        "sideStride": 1
+      },
+      "def": {
+        "bank": 14,
+        "base": 177,
+        "sideStride": 1
+      },
+      "spa": {
+        "bank": 14,
+        "base": 180,
+        "sideStride": 1
+      },
+      "spd": {
+        "bank": 14,
+        "base": 183,
+        "sideStride": 1
+      },
+      "spe": {
+        "bank": 14,
+        "base": 186,
+        "sideStride": 1
+      },
+      "accuracy": {
+        "bank": 14,
+        "base": 189,
+        "sideStride": 1
+      },
+      "evasion": {
+        "bank": 14,
+        "base": 192,
+        "sideStride": 1
+      }
+    }
+  },
+  "statOrder": [
+    "atk",
+    "def",
+    "spa",
+    "spd",
+    "spe",
+    "accuracy",
+    "evasion"
+  ],
+  "statNames": {
+    "atk": "Attacco",
+    "def": "Difesa",
+    "spa": "Attacco Speciale",
+    "spd": "Difesa Speciale",
+    "spe": "Velocità",
+    "accuracy": "precisione",
+    "evasion": "elusione"
+  },
+  "font": {
+    "index": 0,
+    "atlas": "assets/battle-ui/font-0-message.png",
+    "catalog": "assets/battle-ui/provenance.json fonts.0",
+    "note": "Existing native message font supports original text. Formatting tokens are not visible glyphs."
+  },
+  "formatting": {
+    "literalLineBreak": "\\n",
+    "tokens": "Preserve raw token type and argument for substitution. {0101:0}/{0102:0}/{010c:0} in the relevant event identify Pokémon; {0107:n} move names, {0109:n} items, {0100:n} trainer names, {010e:n} trainer classes, {020x:n} numbers. Token type is native formatting metadata, not a visible label.",
+    "controlTokens": "{be00},{be01},{be09:60},etc control pacing/advancement; do not render literal braces.",
+    "statMagnitude": "Choose +1,+2,+3 or -1,-2,-3 based on actual applied stage difference; magnitude>=3 uses the third template family. Max/min have distinct native templates."
+  }
+}
