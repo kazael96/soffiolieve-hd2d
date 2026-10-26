@@ -409,3 +409,8 @@ all53 manifest files and26 new assets match their expected hashes.
 Served JS/CSS sources match the verified checkout after CRLF normalization.
 Public browser reloaded with0.12 badge and bedroom opening; no console errors observed.
 Full nine story runs remain local/headless; no physical-phone or full emulator comparison.
+
+
+### 0.13 — remove permanent web HUD
+
+User requested the original uncluttered field view. Header branding/place/audio/help/lab, objective card, partner card, footer/version, zoom controls and proximity hints are hidden. DOM hooks remain for existing event logic. No changes to camera, movement, events or battle mechanics. Audio options and team access are in the menu. X opens it (J remains compatible); touch uses A/B/X controls. Original full menu graphics are still pending; this change does not claim to recreate them.
