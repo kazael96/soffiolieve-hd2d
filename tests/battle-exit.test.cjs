@@ -9,6 +9,7 @@ function environment(escape=true){
   log:text=>logs.push(text),GEN5:{translate:line=>line.startsWith('|win|')?'Alcide vince la lotta!':null},
   BATTLE_EVENTS:require('../src/battle-events.js'),$:()=>({hidden:false}),setTimeout:f=>f()};
  c.window=c;vm.createContext(c);
+ vm.runInContext(source.slice(source.indexOf('function nativeBattleMessage('),source.indexOf('const STATUS_NAMES=')),c);
  vm.runInContext(source.slice(source.indexOf('async function turn('),source.indexOf('function renderParty(')),c);
  vm.runInContext(source.slice(source.indexOf('async function playBattleEvents('),source.indexOf("$('animationSpeed').onclick")),c);
  return {c,logs,music};
