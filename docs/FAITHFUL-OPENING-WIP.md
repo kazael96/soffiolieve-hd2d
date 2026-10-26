@@ -363,3 +363,38 @@ Choice dialogs focus their first option and support arrows, Enter/Space and Esca
 Movement codes3/4/5 now use native direction sets and waits16/32/48/64, eight-update steps, original symmetric width/height bounds, collision and source/destination reservations. IRBI ov21 init0219a150/160/170, update0219a1b8, waits021d4e8c, sets021d5038..5048; ov10 walk-area check02163b8c. Native story scenes wait for an in-progress ambient step to finish. Random sequence is not the console global RNG; timing still needs emulator comparison. Browser visually confirmed walking town actors; final interaction-specific visual check was interrupted by app restart. Three deterministic walking regressions and all story flows pass.
 
 0.11 README/guide now describe actual implemented features and remaining limits, use Quattroventi, and no longer claim summarized dialogue. Full clean build work/fidelity/build-final-0752 revision e084279757e474ea:47 Node tests,3 Python tests, all JS syntax, asset/hash/reachability integration and nine complete story flows pass. No QA fixture pages are included. Publication outcome is recorded in the final handoff output after Actions/live verification.
+
+
+### Field model/effect checkpoint, 26 October — 0.12
+
+Continued from main 07a69a4; baseline clean build reproduced public revision
+be59cf32b8da5b9d. No remote changes were present at the pre-commit fetch.
+
+BM commands now create the original class/position-selected models, play distinct
+BCA sets with original BMA alpha and sounds, wait for completion, and restore the
+static model on release. Door child offsets and indoor/outdoor archive namespaces
+are preserved. Bedroom smoke is model140/class8, not a door or television effect.
+Automatic warps open alongside the departing player and close after arrival,
+following the native task order. Existing passage/fade timing remains an adaptation.
+See FIELD-MODELS.md for selectors, routines and task states.
+
+PlayFieldEffect50/51 now renders the male/female Pokédex receipt with original
+models, alpha tracks and SPA particles. Only these two authored field effects
+occur in the scoped opening. Resource/camera research is in FIELD-EFFECTS.md.
+ParticleSPL now chooses random radial direction for zero-radius emission, as
+the native SPL branch does. Independent RNG and particle projection remain
+adaptations. Native 71 animationframes is not certified wall-clock duration.
+
+Four original field SSEQ clips1669/1670/1671/1923 were added without removing
+the existing26 entries. No ROM, ARM9, overlay or raw NARC is included.
+
+Browser QA uses separate local fixture controls, without touching game saves:
+laboratory door closed/open, smoke frame20, both Pokédex models at frame35.
+It caught and fixed indoor IDs selecting outdoor doors, one-sided smoke geometry,
+and transparent WebGL clear/blending. No console errors observed in these scenes.
+No new emulator comparison or physical-phone test was performed.
+
+Publication status and final validation are recorded after release verification;
+this checkpoint by itself does not claim that Pages has been updated.
+
+Final local validation:53 Node tests,3 Python tests,46 JS syntax checks; clean build revision93d41cdc53076b6c; all hashes/dependencies/asset checks,62 interactions,14 transitions and9 complete story runs pass. Publication is pending at this commit.

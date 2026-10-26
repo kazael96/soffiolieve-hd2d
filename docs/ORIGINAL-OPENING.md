@@ -1,6 +1,6 @@
 # Perimetro: l’inizio di Pokémon Nero
 
-La demo 0.11 parte dalla camera di Alcide e termina all’ingresso di **Quattroventi**
+La demo 0.12 parte dalla camera di Alcide e termina all’ingresso di **Quattroventi**
 (Accumula in inglese), dopo il Percorso 1. Centro Pokémon e Team Plasma non sono
 inclusi. Non ampliare questa parte del gioco senza concordarlo con l’utente.
 
@@ -10,6 +10,7 @@ inclusi. Non ampliare questa parte del gioco senza concordarlo con l’utente.
   movimenti sincronizzati, flag, variabili e scelte; non dialoghi riassunti.
 - Interni, arredi, camera disordinata dopo le lotte, 14 porte/scale e 62 approcci
   validi alle interazioni con cartelli e mobili.
+- Porte animate, fumo della camera e ricezione del Pokédex con BCA/BMA/SPA originali.
 - Regalo e selezione animata dei tre starter con grafica originale; soprannomi.
 - Belle e Komor con squadra, caratteristiche e battute originali. Le prime
   sconfitte non sottraggono denaro; le vittorie assegnano 500 ciascuna.
@@ -44,8 +45,9 @@ ROM Nero, senza assumere che coincidano con Nero 2.
 ## Differenze ancora da completare
 
 - Introduzione precedente alla camera, scelta nome/sesso e personaggio femminile.
-- Animazioni delle porte e alcuni effetti di campo: alcuni comandi conservano
-  ancora lo stato dell’effetto senza riprodurne la grafica.
+- Porte, fumo e ricezione del Pokédex ora riproducono i dati originali. Restano
+  da confrontare i tempi assoluti, la preparazione/ripristino dello schermo e la
+  proiezione delle particelle del Pokédex; vedere FIELD-MODELS.md e FIELD-EFFECTS.md.
 - Regia, transizioni e tempi precisi da confrontare fotogramma per fotogramma;
   la camera HD-2D resta un adattamento. Non è un’emulazione della cartuccia.
 - Menu squadra/borsa/diario, interfaccia delle lotte e tastiera dei soprannomi
