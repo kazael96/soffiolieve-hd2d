@@ -17,7 +17,7 @@ function environment(){
  c.StarterSelection={choose:async({text})=>{assert.match(text(18,'Snivy'),/Snivy/);return c.testStarter||0;}};
  c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
- for(const file of ['original-events.js','field-event-vm.js','phone-assets.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['original-events.js','field-event-vm.js','phone-assets.js','npc-walk.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
   const {config}=c.lastBattle;if(config.trainerId){assert.equal(config.noBlackout,true);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);

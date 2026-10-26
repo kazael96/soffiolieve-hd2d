@@ -357,3 +357,9 @@ The background-event record's second coordinate is the north/south grid coordina
 
 Choice dialogs focus their first option and support arrows, Enter/Space and Escape to cancel. Nickname input supports Enter and Escape and returns the original input result. Browser QA: arrows choose NO then YES, Enter opens input, Sentinella assigned to captured Patrat only. Runtime regression covers cancellation and unchanged old nickname. Preference autosaves now merge only locally changed fields into latest storage, preserving other tabs' touch/cinema settings. Runtime regression passes; full story flows remain green.
 
+
+### Final checkpoint, 26 October morning — NPC walking and 0.11 release preparation
+
+Movement codes3/4/5 now use native direction sets and waits16/32/48/64, eight-update steps, original symmetric width/height bounds, collision and source/destination reservations. IRBI ov21 init0219a150/160/170, update0219a1b8, waits021d4e8c, sets021d5038..5048; ov10 walk-area check02163b8c. Native story scenes wait for an in-progress ambient step to finish. Random sequence is not the console global RNG; timing still needs emulator comparison. Browser visually confirmed walking town actors; final interaction-specific visual check was interrupted by app restart. Three deterministic walking regressions and all story flows pass.
+
+0.11 README/guide now describe actual implemented features and remaining limits, use Quattroventi, and no longer claim summarized dialogue. Full clean build work/fidelity/build-final-0752 revision e084279757e474ea:47 Node tests,3 Python tests, all JS syntax, asset/hash/reachability integration and nine complete story flows pass. No QA fixture pages are included. Publication outcome is recorded in the final handoff output after Actions/live verification.

@@ -6,7 +6,7 @@
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
   const names={7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
-  let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null;
+  let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
   let eventRunning=false,queued=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
@@ -26,7 +26,7 @@
   function face(id,dir){const n=actor(id);if(!n)return;if(id===255)facing=frames[dir];else pose(n,dir);}
   function putActor(record){
     const n={...world(record.x,record.z),uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:0};
-    pose(n,record.direction);npcs.push(n);return n;
+    n.wander=NpcWalk.create(record,{x:n.x,y:n.y});pose(n,record.direction);npcs.push(n);return n;
   }
   function syncActors(){
     npcs.splice(0);for(const n of data().actors){
@@ -146,8 +146,17 @@
       if(task.elapsed>=duration){if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
+  function ambientMoving(){return npcs.some(n=>n.wander?.phase===4);}
+  function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
+  function tickAmbient(dt,start){
+    ambientTime+=dt;
+    while(ambientTime>=1/30){ambientTime-=1/30;
+      for(const n of npcs)NpcWalk.update(n,{start,pose,blocked:(who,p)=>blocked(p.x,p.y)||Math.abs(player.x-p.x)<.75&&Math.abs(player.y-p.y)<.75||npcs.some(other=>other!==who&&NpcWalk.occupies(other,p.x,p.y))});
+    }
+    if(!ambientMoving()&&settleWaiters.length){const waiting=settleWaiters;settleWaiters=[];waiting.forEach(done=>done());}
+  }
   async function run(entry,bank=data().script){
-    if(eventRunning||failed)return;captureActors();journey.save(true);eventRunning=true;resetInput();
+    if(eventRunning||failed)return;eventRunning=true;resetInput();await settleAmbient();captureActors();journey.save(true);
     const before=structuredClone(state);
     try{
       await vm.run(bank,entry);native.intro=true;
@@ -291,7 +300,7 @@
     sceneChanging=true;resetInput();
     try{
       const dest=ORIGINAL_EVENTS.zones[w.zone],dw=dest.warps[w.warp],out=warpDirections[dw.a],inward=out^1;
-      await fade(1,8);await changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16));face(255,inward);
+      await settleAmbient();await fade(1,8);await changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16));face(255,inward);
       move(255,[[8+inward,1]]);await fade(0,8);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
       sceneChanging=false;warpCooldown=.8;
       const next=data().onEnter?.find(e=>value(e.var)===e.value);
@@ -314,7 +323,7 @@
   }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
-    const n=npcs.find(n=>Math.abs(n.x-player.x)<1.6&&Math.abs(n.y-player.y)<1.6&&Math.floor(n.x+origin()[0])===front.x&&Math.floor(n.y+origin()[1])===front.z);
+    const n=npcs.find(n=>{const p=NpcWalk.cell(n);return !n.hidden&&Math.abs(p.x-player.x)<1.6&&Math.abs(p.y-player.y)<1.6&&Math.floor(p.x+origin()[0])===front.x&&Math.floor(p.y+origin()[1])===front.z;});
     if(n)return {kind:'actor',n,script:n.script};
     // Background records use grid X/Z followed by vertical height. Directions
     // 0..3 are N/E/W/S; 4 is any, 5 horizontal and 6 vertical.
@@ -325,7 +334,8 @@
   function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;return run(t.script-1);}}
   function step(dt,moved,distance=0){
     try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    warpCooldown=Math.max(0,warpCooldown-dt);if(eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed)return;
+    const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
+    tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;
     if(!native.intro&&renderer.ready){run(4,782);return;}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
     journey.update();if(key!==lastTile){lastTile=key;
@@ -335,7 +345,7 @@
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>!n.hidden&&Math.abs(n.x-x)<.55&&Math.abs(n.y-z)<.55),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>NpcWalk.occupies(n,x,z)),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();pendingMessage?.();});
