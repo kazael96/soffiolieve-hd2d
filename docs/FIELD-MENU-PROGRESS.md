@@ -123,3 +123,37 @@ ARM9:0202008e..009e, and X explicitly produces -2 in021c5492. Reorder edge
 scroll has a special destination0xff path not fully transcribed here.
 
 Ready Font0 correction: packed template byte+0x17=0x18 means foreground1 and topY8; byte+0x18=0x2f means fill15 and shadow2. ARM9:0201ff18..0201ff66 decodes these fields,020204a4..020204c4 passes them to the printer. Both font atlases now use fg1/shadow2 with native normal/highlight banks11/12. Earlier fg14/shadow15 was incorrect and has been replaced. All mapped Font0 glyphs are exported.
+
+## Quantity arrows and Ready end insertion (0.17)
+
+The remaining quantity-arrow mapping is now certified. Bag loader021b9358..
+021b939e opens common NARC83 a/0/8/3 and binds NCGR20, NCER23, NANR26,
+NCLR19. Constructor021ba6e6..021ba7790 reads tables021bb958=[97,119] and
+021bb95c=[3,2], constructing up/down anchors [232,97]/[232,119], initial
+animations3/2. Both objects are initially hidden.021b7c90 shows them and
+021b7cc4 hides them when quantity selection ends. Exported quantityControls
+includes every original cell origin and animation frame. Change animations
+11(up)/10(down) each play pressed4frames, idle4frames, pressed4frames,
+idle4frames, native mode1 one-shot. The animation is restarted only after
+quantity value actually changes (021b7de8..021b7e0a).
+
+Touch counter increments every engine tick while either arrow is touched,
+resets0 outside both. Change occurs tick1, then every tick31..120 by1,
+then every tick121+ by10. Switching directly between arrows retains the
+counter; any touch over either arrow suppresses keyboard adjustment even
+during ticks2..30. Source021b7d16..021b7d82. This is frame/tick based, not
+an independent millisecond timer. Numeric wrap still applies. If maximum1
+causes unchanged quantity, no press-animation restart occurs.
+
+Ready reorder destination0xff is APPEND, not an arbitrary scroll index.
+ARM9:0200c480 removes the moved nativeID first via0200c418; if destination
+is255, it finds the first empty slot(sentinel25) and writes nativeID there.
+Otherwise, if original sourceIndex<destinationIndex, it decrements the
+insertion destination once, shifts following entries and inserts. The
+returned value is final index. Moving to its own preceding boundary is
+therefore unchanged. In overlay21:021c53ac, DOWN on final row while reorder
+is active toggles context+0x40 and moves marker below final row; a subsequent
+DOWN clears it and wraps first.021c5324 UP from first wraps to final with
+end marker; UP from end marker clears marker without changing row. When
+context+0x40 is set,021c5520..5536 passes destination255. B/X cancel still
+leaves order unchanged until a placement is actually confirmed.

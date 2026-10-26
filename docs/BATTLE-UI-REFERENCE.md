@@ -244,6 +244,17 @@ campioni e la cadenza sono provati; un totale in millisecondi indipendente
 dall'ordine dei task non è assunto. Il catalogo `moves.pressed.timing`
 contiene questi dati anziché una durata inventata.
 
+Aggiornamento0.17: chiuso anche l'ordine dei task. ARM9
+02030DAC–02030E28 ordina priorità **unsigned crescenti**: controllerpress0
+prima della palette0xFFFFFFFE. La nuova palette riceve skipflag a02030D78–D9C;
+runner02030CE0–02030D04 azzera quel flag senza eseguire la callback nello
+stesso passaggio. Dalla prima callback0220653C fase0, i coefficienti
+visibili per tick sono **0,2,4,6,8,8,6,4,2,0**. Al tick10 il controller
+osserva il completamento del ritorno e sblocca. È quindi provato il numero
+di tick relativo alla prima callback; l'attesa input→prima callback è
+separata. Il catalogo riporta `visibleCoefficientTicks` e
+`unlockAfterControllerTicks:10`, senza fissare millisecondi arbitrari.
+
 ### Borsa del campo: LCD e descrizione completa
 
 Catalogo dedicato: `assets/field-bag/provenance.json`, riproducibile con

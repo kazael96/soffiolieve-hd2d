@@ -49,3 +49,5 @@ Integration limitation remains native easing/touch inertia and precise full tran
 Sagoma left-value exception: original selected silhouette actor7 anchor(64,104), visible only if set, routine0x021BF518..550. It replaces the textual value window used by other criteria.
 
 
+
+Final help-layer proof: helpLayout is BG7 window1 [8,24,240,24], textorigin8,28, packed0x440, no wrapping. Italian Nome help measures151px with original metrics; width is not112. BG7template0x021C0694 has priority0; rowBG5template0x021C06D4 priority2. Draw help **after** SUB row backgrounds so they cannot erase its last letters. NativeNome printer0x021BE7F8..82E. Exactfont0/palette5 help atlas is now DEX_EFFECTS_ASSETS.fonts.help. This ordering is native; wrapping to a left-width invented column is not.
