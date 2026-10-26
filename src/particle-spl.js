@@ -15,7 +15,8 @@
  function initial(e,seed){let shape=e.flags&15,axis=e.flags>>6&3,theta=rand(seed)*Math.PI*2,z=rand(seed+2)*2-1,r=e.radius||0,pos=[0,0,0],rr=[4,5,7,9].includes(shape)?Math.cbrt(rand(seed+3)):1;
   if([1,4,8,9].includes(shape)){if(shape>=8)z=Math.abs(z);let q=Math.sqrt(1-z*z);pos=[r*q*Math.cos(theta)*rr,r*z*rr,r*q*Math.sin(theta)*rr]}
   else if(shape){let radial=shape===5||shape===7?Math.sqrt(rand(seed+3)):1,u=Math.cos(theta)*r*radial,v=Math.sin(theta)*r*radial,h=shape>=6?(rand(seed+4)-.5)*(e.length||0):0;pos=axis===1?[u,h,v]:axis===2?[h,u,v]:[u,v,h]}
-  let length=Math.hypot(...pos)||1,radial=double(e.radialVelocity||0,e.randomVelocity||0,seed+5),axial=double(e.axialVelocity||0,e.randomVelocity||0,seed+6),velocity=pos.map((v,i)=>v/length*radial+(e.axis?.[i]||0)*axial);return{p:pos,v:velocity};
+  let length=Math.hypot(...pos),direction;if(length)direction=pos.map(v=>v/length);else{const t=rand(seed+31)*Math.PI*2,z=rand(seed+32)*2-1,q=Math.sqrt(1-z*z);direction=[q*Math.cos(t),z,q*Math.sin(t)];} // Native SPL chooses a random unit vector at a zero-radius origin.
+  let radial=double(e.radialVelocity||0,e.randomVelocity||0,seed+5),axial=double(e.axialVelocity||0,e.randomVelocity||0,seed+6),velocity=direction.map((v,i)=>v*radial+(e.axis?.[i]||0)*axial);return{p:pos,v:velocity};
  }
  function step(e,state,age,seed){let p=state.p.slice(),v=state.v.slice(),acc=(e.gravity||[0,0,0]).slice();
   if(e.random&&age%Math.max(1,e.random[3])===0)for(let i=0;i<3;i++)acc[i]+=e.random[i]*(Math.floor(rand(seed+age*97+i)*512)-256)/256;

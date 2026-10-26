@@ -4,6 +4,7 @@
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
+  const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
   const names={7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
@@ -251,11 +252,11 @@
       case 'SEWait':case 'MEWait':await soundTask;break;
       case 'PVPlay':soundTask=AudioEngine.cry(v[0]);break;
       case 'PVWait':await soundTask;break;
-      case 'BMCreateHandleByGPos':m.set(a[0],v[1]);native.door={x:v[2],z:v[3],open:false};break;
-      case 'BMHndAudioVisualAnmPlay':native.door.open=v[1]===0;break;
-      case 'BMHndAnmWait':await delay(8);break;
-      case 'BMReleaseHandle':native.door=null;break;
-      case 'PlayFieldEffect':native.fieldEffect=v[0];break;
+      case 'BMCreateHandleByGPos':{const [ox,oz]=origin();m.set(a[0],fieldModels?fieldModels.create(v[1],v[2]-ox,v[3]-oz):v[1]);native.door={x:v[2],z:v[3],type:v[1],open:false};break;}
+      case 'BMHndAudioVisualAnmPlay':native.door.open=v[1]===0;if(fieldModels)await fieldModels.play(v[0],v[1]);break;
+      case 'BMHndAnmWait':if(fieldModels)await fieldModels.wait(v[0]);else await delay(8);break;
+      case 'BMReleaseHandle':fieldModels?.release(v[0]);native.door=null;break;
+      case 'PlayFieldEffect':native.fieldEffect=v[0];if(window.FieldEffects)await FieldEffects.play(v[0]);break;
       case 'ActivateRelocator':native.pokedex=true;break;
       case 'UnknownBW021C':native.starterRecord=v[1];break;
       case 'UnknownBW024E':native.belleDeparture=true;break;
@@ -291,6 +292,7 @@
   }
   async function changeZone(zone,x,z){
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
+    fieldModels?.clear();
     captureActors();native.zone=zone;native.music=data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
     for(const init of data().init||[]){const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
     captureActors();
@@ -300,8 +302,19 @@
     sceneChanging=true;resetInput();
     try{
       const dest=ORIGINAL_EVENTS.zones[w.zone],dw=dest.warps[w.warp],out=warpDirections[dw.a],inward=out^1;
-      await settleAmbient();await fade(1,8);await changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16));face(255,inward);
+      await settleAmbient();
+      const [ox,oz]=origin(),sourceX=w.x/16-ox,sourceZ=w.z/16-oz;
+      if(fieldModels?.find(1,sourceX,sourceZ)){
+        const handle=fieldModels.create(1,sourceX,sourceZ);await fieldModels.play(handle,0);
+        // IRBI pre-warp starts passage alongside opening; no additional door wait.
+        move(255,[[8+warpDirections[w.a],1]]);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
+      }
+      await fade(1,8);await changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16));face(255,inward);
+      const [dx,dz]=origin(),doorX=dw.x/16-dx,doorZ=dw.z/16-dz;
+      const door=fieldModels?.find(1,doorX,doorZ)?fieldModels.create(1,doorX,doorZ):null;
+      if(door!==null){await fieldModels.play(door,0);await fieldModels.wait(door);}
       move(255,[[8+inward,1]]);await fade(0,8);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
+      if(door!==null){await fieldModels.play(door,1);await fieldModels.wait(door);fieldModels.release(door);}
       sceneChanging=false;warpCooldown=.8;
       const next=data().onEnter?.find(e=>value(e.var)===e.value);
       if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);
@@ -333,6 +346,7 @@
   }
   function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;return run(t.script-1);}}
   function step(dt,moved,distance=0){
+    fieldModels?.tick(dt);
     try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;
