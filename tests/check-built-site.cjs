@@ -46,7 +46,14 @@ vm.runInNewContext(fs.readFileSync(path.join(site,'opening-assets.js'),'utf8'),a
 vm.runInNewContext(fs.readFileSync(path.join(site,'opening-sprites.js'),'utf8'),assets);
 const opening=assets.window.OPENING_ASSETS;
 for(const texture of Object.values(opening.textures))assert.ok(fs.existsSync(path.join(site,texture.src)),texture.src);
-for(const frames of Object.values(assets.window.OPENING_SPRITES))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame)),frame);
+for(const frames of Object.values(assets.window.OPENING_SPRITES))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame.split('?')[0])),frame);
+for(const file of ['phone-assets.js','field-audio.js','battle-fields.js','starter-assets.js','pokedex-assets.js','townmap-assets.js'])vm.runInNewContext(fs.readFileSync(path.join(site,file),'utf8'),assets);
+for(const frames of Object.values(assets.window.PHONE_ASSETS.portraits))for(const frame of frames)assert.ok(fs.existsSync(path.join(site,frame)),frame);
+for(const record of Object.values(assets.window.FIELD_AUDIO))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
+for(const record of Object.values(assets.window.BATTLE_FIELDS.textures))assert.ok(fs.existsSync(path.join(site,record.src)),record.src);
+assert.equal(assets.window.BATTLE_FIELDS.scenes.room.fieldId,9);
+assert.equal(assets.window.BATTLE_FIELDS.scenes.room.terrain,4);
+assert.equal(assets.window.BATTLE_FIELDS.scenes.route.terrain,5);
 function reachable(map,spawn,targets){
  context.renderer.scene=map;
  assert.ok(can(...spawn),'Blocked spawn '+spawn);
@@ -66,3 +73,15 @@ const route=reachable(outdoor,[-2,0],[[-7.5,5.5],[-6.5,-11.5],[1,-21],[6,-74],[2
 assert.ok(route.some(p=>p[1]<-80),'Accumula entrance is inaccessible');
 assert.ok(can(3.5,-18),'Blocked Route 1 transition');
 console.log('PASS: original room assets, every required door/NPC and the full walking route to Accumula.');
+
+for(const url of [...Object.values(assets.window.STARTER_ASSETS.models),...assets.window.STARTER_ASSETS.backgrounds,...assets.window.STARTER_ASSETS.sprites.flatMap(s=>Object.values(s))])assert.ok(fs.existsSync(path.join(site,url)),url);
+
+for(const file of ['entry','font','caught',...Object.values(assets.window.POKEDEX_ASSETS.species).flatMap(p=>['foot-'+p.id,...p.types.map(t=>'type-'+t)])])assert.ok(fs.existsSync(path.join(site,'assets/pokedex/'+file+'.png')),file);
+assert.ok(html.includes('pokedex.css'), 'Pokedex stylesheet must be loaded');
+assert.equal(assets.window.POKEDEX_ASSETS.species.Patrat.number,10);
+assert.equal(assets.window.POKEDEX_ASSETS.species.Lillipup.number,12);
+console.log('PASS original Pokedex entry graphics, font, footprint/type assets and regional numbers');
+
+for(const file of ['map','info',...assets.window.TOWNMAP_ASSETS.cells.map((_,i)=>'cell-'+i)])assert.ok(fs.existsSync(path.join(site,'assets/townmap/'+file+'.png')),file);
+assert.ok(html.includes('townmap.css'),'Town map stylesheet must be loaded');
+console.log('PASS original Unova map, information panel and all marker cells');

@@ -1,0 +1,740 @@
+{
+  "0": {
+    "name": "VMNop",
+    "args": []
+  },
+  "2": {
+    "name": "VMHalt",
+    "args": []
+  },
+  "3": {
+    "name": "VMSleep",
+    "args": [
+      "u16"
+    ]
+  },
+  "4": {
+    "name": "VMCall",
+    "args": [
+      "u32"
+    ]
+  },
+  "5": {
+    "name": "VMReturn",
+    "args": []
+  },
+  "8": {
+    "name": "StackPushConst",
+    "args": [
+      "u16"
+    ]
+  },
+  "9": {
+    "name": "StackPush",
+    "args": [
+      "u16"
+    ]
+  },
+  "10": {
+    "name": "StackPop",
+    "args": [
+      "u16"
+    ]
+  },
+  "16": {
+    "name": "StackPushFlag",
+    "args": [
+      "u16"
+    ]
+  },
+  "17": {
+    "name": "StackCmp",
+    "args": [
+      "u16"
+    ]
+  },
+  "25": {
+    "name": "WorkCmpConst",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "28": {
+    "name": "RTCallGlobal",
+    "args": [
+      "u16"
+    ]
+  },
+  "30": {
+    "name": "VMJump",
+    "args": [
+      "u32"
+    ]
+  },
+  "31": {
+    "name": "VMJumpIf",
+    "args": [
+      "u8",
+      "u32"
+    ]
+  },
+  "33": {
+    "name": "RTReserveScript",
+    "args": [
+      "u16"
+    ]
+  },
+  "35": {
+    "name": "FlagSet",
+    "args": [
+      "u16"
+    ]
+  },
+  "36": {
+    "name": "FlagReset",
+    "args": [
+      "u16"
+    ]
+  },
+  "38": {
+    "name": "WorkAdd",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "39": {
+    "name": "WorkSub",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "40": {
+    "name": "WorkSetConst",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "42": {
+    "name": "WorkSet",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "46": {
+    "name": "ActorPauseAll",
+    "args": []
+  },
+  "47": {
+    "name": "ActorUnlockAll",
+    "args": []
+  },
+  "48": {
+    "name": "RTFinishSubEvents",
+    "args": []
+  },
+  "50": {
+    "name": "InputWaitLast",
+    "args": []
+  },
+  "52": {
+    "name": "MsgSystem",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "54": {
+    "name": "MsgSystemClose",
+    "args": []
+  },
+  "56": {
+    "name": "MsgInfo",
+    "args": [
+      "u16",
+      "u8"
+    ]
+  },
+  "60": {
+    "name": "MsgActorEx",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "61": {
+    "name": "MsgActor",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "62": {
+    "name": "MsgActorClose",
+    "args": []
+  },
+  "63": {
+    "name": "MsgWinCloseAll",
+    "args": []
+  },
+  "67": {
+    "name": "MsgPlaceSign",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "68": {
+    "name": "MsgPlaceSignClose",
+    "args": []
+  },
+  "71": {
+    "name": "YesNoWin",
+    "args": [
+      "u16"
+    ]
+  },
+  "72": {
+    "name": "MsgActorGendered",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "75": {
+    "name": "MsgWaitAdvance",
+    "args": []
+  },
+  "76": {
+    "name": "WordSetPlayerName",
+    "args": [
+      "u8"
+    ]
+  },
+  "83": {
+    "name": "WordSetPartyPokeSpecies",
+    "args": [
+      "u8",
+      "u16"
+    ]
+  },
+  "84": {
+    "name": "WordSetPartyPokeName",
+    "args": [
+      "u8",
+      "u16"
+    ]
+  },
+  "87": {
+    "name": "WordSetPokeSpecies",
+    "args": [
+      "u8",
+      "u16"
+    ]
+  },
+  "92": {
+    "name": "WordSetNumber",
+    "args": [
+      "u8",
+      "u16",
+      "u16"
+    ]
+  },
+  "100": {
+    "name": "ActorCmdExec",
+    "args": [
+      "u16",
+      "u32"
+    ]
+  },
+  "101": {
+    "name": "ActorCmdWait",
+    "args": []
+  },
+  "104": {
+    "name": "PlayerGetGPos",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "105": {
+    "name": "ActorNew",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "107": {
+    "name": "ActorAdd",
+    "args": [
+      "u16"
+    ]
+  },
+  "108": {
+    "name": "ActorDelete",
+    "args": [
+      "u16"
+    ]
+  },
+  "109": {
+    "name": "ActorSetGPos",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "110": {
+    "name": "PlayerGetDir",
+    "args": [
+      "u16"
+    ]
+  },
+  "116": {
+    "name": "ActorSetEyeToEye",
+    "args": []
+  },
+  "133": {
+    "name": "CallTrainerBattle",
+    "args": [
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "141": {
+    "name": "TrainerBattleIsVictory",
+    "args": [
+      "u16"
+    ]
+  },
+  "142": {
+    "name": "CallTrainerBattleEnd",
+    "args": []
+  },
+  "152": {
+    "name": "BGMPlay",
+    "args": [
+      "u16"
+    ]
+  },
+  "158": {
+    "name": "BGMChangeMap",
+    "args": []
+  },
+  "166": {
+    "name": "SEPlay",
+    "args": [
+      "u16"
+    ]
+  },
+  "168": {
+    "name": "SEWait",
+    "args": []
+  },
+  "169": {
+    "name": "MEPlay",
+    "args": [
+      "u16"
+    ]
+  },
+  "170": {
+    "name": "MEWait",
+    "args": []
+  },
+  "171": {
+    "name": "PVPlay",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "172": {
+    "name": "PVWait",
+    "args": []
+  },
+  "179": {
+    "name": "FadeEx",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "180": {
+    "name": "FadeExWait",
+    "args": []
+  },
+  "194": {
+    "name": "MapChangeWarp",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "203": {
+    "name": "Random",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "204": {
+    "name": "RTGetTextFile",
+    "args": [
+      "u16"
+    ]
+  },
+  "216": {
+    "name": "MapReplaceIsEventSet",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "218": {
+    "name": "MapReplaceSetEvent",
+    "args": [
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "225": {
+    "name": "TrainerCardGetSex",
+    "args": [
+      "u16"
+    ]
+  },
+  "231": {
+    "name": "ActivateRelocator",
+    "args": [
+      "u16"
+    ]
+  },
+  "257": {
+    "name": "PokePartyIsFullHP",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "259": {
+    "name": "PokePartyGetCount",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "260": {
+    "name": "PokePartyRecoverAll",
+    "args": []
+  },
+  "261": {
+    "name": "CallPokeNameInput",
+    "args": [
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "268": {
+    "name": "PokePartyAdd",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "272": {
+    "name": "PokePartyGetParam",
+    "args": [
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "295": {
+    "name": "BMCreateHandleByGPos",
+    "args": [
+      "u16",
+      "u16",
+      "u16",
+      "u16"
+    ]
+  },
+  "296": {
+    "name": "BMReleaseHandle",
+    "args": [
+      "u16"
+    ]
+  },
+  "297": {
+    "name": "BMHndAudioVisualAnmPlay",
+    "args": [
+      "u16",
+      "u16"
+    ]
+  },
+  "298": {
+    "name": "BMHndAnmWait",
+    "args": [
+      "u16"
+    ]
+  },
+  "319": {
+    "name": "EVCameraInit",
+    "args": []
+  },
+  "320": {
+    "name": "EVCameraEnd",
+    "args": []
+  },
+  "321": {
+    "name": "EVCameraUnbind",
+    "args": []
+  },
+  "322": {
+    "name": "EVCameraRebind",
+    "args": []
+  },
+  "323": {
+    "name": "EVCameraMoveTo",
+    "args": [
+      "u16",
+      "u16",
+      "u32",
+      "u32",
+      "u32",
+      "u32",
+      "u16"
+    ]
+  },
+  "324": {
+    "name": "EVCameraReturn",
+    "args": [
+      "u16"
+    ]
+  },
+  "325": {
+    "name": "EVCameraWait",
+    "args": []
+  },
+  "327": {
+    "name": "EVCameraMoveToDefault",
+    "args": [
+      "u16"
+    ]
+  },
+  "330": {
+    "name": "FieldOpen",
+    "args": []
+  },
+  "331": {
+    "name": "FieldClose",
+    "args": []
+  },
+  "339": {
+    "name": "CallPoke3Select",
+    "args": [
+      "u16"
+    ]
+  },
+  "341": {
+    "name": "CallXTransceiver",
+    "args": [
+      "u16"
+    ]
+  },
+  "377": {
+    "name": "CallWildBattleEnd",
+    "args": []
+  },
+  "381": {
+    "name": "CallCaptureDemo",
+    "args": []
+  },
+  "415": {
+    "name": "PlayFieldEffect",
+    "args": [
+      "u16"
+    ]
+  },
+  "429": {
+    "name": "CMD_1ad",
+    "args": []
+  },
+  "430": {
+    "name": "CMD_1ae",
+    "args": []
+  },
+  "431": {
+    "name": "CMD_1af",
+    "args": []
+  },
+  "433": {
+    "name": "s01B1_CallLeagueLiftWarp",
+    "args": []
+  },
+  "540": {
+    "name": "UnknownBW021C",
+    "args": [
+      "any",
+      "var"
+    ]
+  },
+  "570": {
+    "name": "func_ov036_021a7340",
+    "args": [
+      "any",
+      "any"
+    ]
+  },
+  "577": {
+    "name": "func_ov036_021a6ec4",
+    "args": [
+      "any"
+    ]
+  },
+  "594": {
+    "name": "UnknownBW0252",
+    "args": []
+  },
+  "607": {
+    "name": "UnknownBW025F",
+    "args": []
+  },
+  "576": {
+    "name": "UnknownBW0240",
+    "args": [
+      "u16"
+    ]
+  },
+  "183": {
+    "name": "s00B7_ItemCheckSpace",
+    "args": [
+      "any",
+      "any",
+      "var"
+    ]
+  },
+  "41": {
+    "name": "s0029_WorkGet",
+    "args": [
+      "var",
+      "var"
+    ]
+  },
+  "29": {
+    "name": "s001D_RTEndGlobal",
+    "args": []
+  },
+  "78": {
+    "name": "s004E_WordSetItemNameEx",
+    "args": [
+      "u8",
+      "any",
+      "any",
+      "u8"
+    ]
+  },
+  "181": {
+    "name": "s00B5_ItemAdd",
+    "args": [
+      "any",
+      "any",
+      "var"
+    ]
+  },
+  "187": {
+    "name": "s00BB_ItemGetPocket",
+    "args": [
+      "any",
+      "var"
+    ]
+  },
+  "82": {
+    "name": "s0052_WordSetItemPocketName",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "77": {
+    "name": "s004D_WordSetItemName",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "79": {
+    "name": "s004F_WordSetItemNameWithArticle",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "80": {
+    "name": "s0050_WordSetTMMoveName",
+    "args": [
+      "u8",
+      "any"
+    ]
+  },
+  "590": {
+    "name": "UnknownBW024E",
+    "args": []
+  },
+  "591": {
+    "name": "UnknownBW024F",
+    "args": []
+  },
+  "73": {
+    "name": "s0049_ActorMsgVersioned",
+    "args": [
+      "any",
+      "any",
+      "any",
+      "any",
+      "any",
+      "any"
+    ]
+  },
+  "464": {
+    "name": "s01D0_UnityTowerCallFloorSelect",
+    "args": [
+      "any",
+      "var",
+      "var",
+      "var"
+    ]
+  },
+  "592": {
+    "name": "UnknownBW0250",
+    "args": []
+  }
+}

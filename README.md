@@ -1,7 +1,7 @@
-# Soffiolieve HD-2D — demo 0.10
+# Soffiolieve HD-2D — demo 0.11
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo ad Accumula**.
+Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo ad Quattroventi**.
 La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
@@ -13,13 +13,17 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 - Mamma e Interpoké, casa di Belle, laboratorio di Aralia, Pokédex e Mappa Città.
 - Partenza sul Percorso 1, dimostrazione di cattura con Minccino e Patrat, cinque Poké Ball.
 - Incontri nell’erba alta, catture, squadra fino a sei Pokémon, esperienza e apprendimento per livello.
-- Pozione della viandante, confronto delle catture e chiamata di Aralia, conclusione all’ingresso di Accumula.
+- Pozione della viandante, confronto delle catture e chiamata di Aralia, conclusione all’ingresso di Quattroventi.
 - Interni e terreno convertiti dalla ROM italiana fornita dall’utente; sprite e motore della demo conservati.
 
-Il capitolo inventato della 0.9 è stato rimosso. Questa è una prima implementazione
-della sequenza originale: **dialoghi sintetizzati e regia semplificata**. Non è
-una replica completa della cartuccia; i limiti sono descritti in
-[docs/ORIGINAL-OPENING.md](docs/ORIGINAL-OPENING.md).
+La 0.11 esegue i programmi degli eventi e i dialoghi italiani originali del tratto,
+con movimenti sincronizzati, camera riordinata/disordinata, scelta originale dello
+starter, Interpoké animato, Pokédex e Mappa Città consultabili. Incontri, catture,
+statistiche individuali, premi delle lotte e movimenti ambientali sono stati
+confrontati con i dati e le routine IRBI.
+
+**La fedeltà non è ancora completa.** Restano transizioni, effetti, interfacce e
+altre differenze elencate in [docs/ORIGINAL-OPENING.md](docs/ORIGINAL-OPENING.md).
 
 ## Comandi e salvataggi
 

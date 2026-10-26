@@ -9,7 +9,7 @@ const code=source.slice(source.indexOf('function frame(now)'),source.indexOf('}r
 function frame(keys,{battling=false,modal=false,blocked=()=>false}={}){
   const state={Math,last:0,t:0,cooldown:0,moving:false,facing:3,keys:{},controls:{state:()=>keys},
     player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,drawWorld(){},drawArena(){},
-    window:{Journey:{step(){}}},requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
+    window:{Journey:{step(dt,moved,distance){state.travel=distance;}}},requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
   vm.runInNewContext(code+';frame(40)',state);return state;
 }
 test('72 movement cases keep the correct facing, speed and normalized diagonals',()=>{
@@ -27,6 +27,7 @@ test('72 movement cases keep the correct facing, speed and normalized diagonals'
       const state=frame(input.state());
       assert.equal(state.facing,dy<0?0:dy>0?3:dx<0?6:dx>0?9:3);
       assert.equal(state.moving,!!(dx||dy));
+      assert.equal(state.travel,Math.hypot(state.player.x+2,state.player.y));
       assert.ok(Math.abs(Math.hypot(state.player.x+2,state.player.y)-(dx||dy?(run?6.5:3.5)*.04:0))<1e-12);
       count++;
     }

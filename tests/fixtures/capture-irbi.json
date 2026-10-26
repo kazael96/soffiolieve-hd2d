@@ -1,0 +1,506 @@
+[
+  {
+    "maxhp": 13,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 990916,
+    "threshold": 64683
+  },
+  {
+    "maxhp": 13,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2477290,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 13,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1486374,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 13,
+    "hp": 6,
+    "status": "",
+    "catchRate": 255,
+    "rate": 723101,
+    "threshold": 59771
+  },
+  {
+    "maxhp": 13,
+    "hp": 6,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1807753,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 13,
+    "hp": 6,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1084652,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 13,
+    "hp": 13,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 13,
+    "hp": 13,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 13,
+    "hp": 13,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  },
+  {
+    "maxhp": 14,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 994742,
+    "threshold": 64745
+  },
+  {
+    "maxhp": 14,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2486855,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 14,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1492113,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 14,
+    "hp": 7,
+    "status": "",
+    "catchRate": 255,
+    "rate": 696320,
+    "threshold": 59218
+  },
+  {
+    "maxhp": 14,
+    "hp": 7,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1740800,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 14,
+    "hp": 7,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1044480,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 14,
+    "hp": 14,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 14,
+    "hp": 14,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 14,
+    "hp": 14,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  },
+  {
+    "maxhp": 15,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 998058,
+    "threshold": 64792
+  },
+  {
+    "maxhp": 15,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2495145,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 15,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1497087,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 15,
+    "hp": 7,
+    "status": "",
+    "catchRate": 255,
+    "rate": 719530,
+    "threshold": 59705
+  },
+  {
+    "maxhp": 15,
+    "hp": 7,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1798825,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 15,
+    "hp": 7,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1079295,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 15,
+    "hp": 15,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 15,
+    "hp": 15,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 15,
+    "hp": 15,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  },
+  {
+    "maxhp": 16,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 1000960,
+    "threshold": 64839
+  },
+  {
+    "maxhp": 16,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2502400,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 16,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1501440,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 16,
+    "hp": 8,
+    "status": "",
+    "catchRate": 255,
+    "rate": 696320,
+    "threshold": 59218
+  },
+  {
+    "maxhp": 16,
+    "hp": 8,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1740800,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 16,
+    "hp": 8,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1044480,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 16,
+    "hp": 16,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 16,
+    "hp": 16,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 16,
+    "hp": 16,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  },
+  {
+    "maxhp": 17,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 1003520,
+    "threshold": 64886
+  },
+  {
+    "maxhp": 17,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2508800,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 17,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1505280,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 17,
+    "hp": 8,
+    "status": "",
+    "catchRate": 255,
+    "rate": 716800,
+    "threshold": 59652
+  },
+  {
+    "maxhp": 17,
+    "hp": 8,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1792000,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 17,
+    "hp": 8,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1075200,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 17,
+    "hp": 17,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 17,
+    "hp": 17,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 17,
+    "hp": 17,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  },
+  {
+    "maxhp": 18,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 1005795,
+    "threshold": 64917
+  },
+  {
+    "maxhp": 18,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2514488,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 18,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1508693,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 18,
+    "hp": 9,
+    "status": "",
+    "catchRate": 255,
+    "rate": 696320,
+    "threshold": 59218
+  },
+  {
+    "maxhp": 18,
+    "hp": 9,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1740800,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 18,
+    "hp": 9,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1044480,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 18,
+    "hp": 18,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 18,
+    "hp": 18,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 18,
+    "hp": 18,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  },
+  {
+    "maxhp": 19,
+    "hp": 1,
+    "status": "",
+    "catchRate": 255,
+    "rate": 1007831,
+    "threshold": 64949
+  },
+  {
+    "maxhp": 19,
+    "hp": 1,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 2519578,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 19,
+    "hp": 1,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1511747,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 19,
+    "hp": 9,
+    "status": "",
+    "catchRate": 255,
+    "rate": 714644,
+    "threshold": 59599
+  },
+  {
+    "maxhp": 19,
+    "hp": 9,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 1786610,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 19,
+    "hp": 9,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 1071966,
+    "threshold": 65536
+  },
+  {
+    "maxhp": 19,
+    "hp": 19,
+    "status": "",
+    "catchRate": 255,
+    "rate": 348160,
+    "threshold": 49802
+  },
+  {
+    "maxhp": 19,
+    "hp": 19,
+    "status": "slp",
+    "catchRate": 255,
+    "rate": 870400,
+    "threshold": 62616
+  },
+  {
+    "maxhp": 19,
+    "hp": 19,
+    "status": "par",
+    "catchRate": 255,
+    "rate": 522240,
+    "threshold": 55108
+  }
+]
