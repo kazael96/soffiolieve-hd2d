@@ -302,14 +302,15 @@
     return null;
   }
   function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;run(t.script-1);}}
-  function step(dt,moved){
+  function step(dt,moved,distance=0){
     try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     warpCooldown=Math.max(0,warpCooldown-dt);if(eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed)return;
     if(!native.intro&&renderer.ready){run(4,782);return;}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
-    journey.update();journey.encounter(dt,moved);if(key===lastTile)return;lastTile=key;
+    journey.update();if(key!==lastTile){lastTile=key;
     if(native.zone===317&&p.z<=671&&!native.arrived){native.arrived=true;state.phase='arrival';journey.update();showPage('Quattroventi\nFine della demo.');return;}
-    for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){run(trigger.script-1);return;}
+    for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){run(trigger.script-1);return;}}
+    journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();

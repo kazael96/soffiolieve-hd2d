@@ -214,3 +214,28 @@ configurazioni. a/1/2/6:77 contiene direttamente tasso8. Verificato nel codice
 random=floor(GFL_RandomLC(65535)/656), confronto <=tasso. Contatore aggiornato
 0x021aa628, reset0x021aa5f8. Disassemblato in work/fidelity/irbi-encounters.txt.
 Non applicare il sistema BW2 descritto nei precedenti appunti.
+
+
+## Checkpoint 26 ottobre, 01:00: incontri e precedenza delle scene
+
+Implementato il tasso IRBI verificato sopra: rate8 diretto, primo passo dopo
+una lotta rate1, estrazione0..65534 divisa per656 e confronto inclusivo.
+`tools/extract-opening-encounters.py` verifica tre tratti del programma originale
+e ricava zona317/rate8 dai dati. `RouteEncounter` conta la distanza effettiva
+passata dal frame di movimento: collisioni/pausa non fanno avanzare il contatore,
+camminata/corsa/diagonali non alterano la probabilità per distanza percorsa.
+Il contatore prosegue fuori dall'erba e si azzera dopo la lotta; nessun blocco
+artificiale di cinque secondi. Nella proiezione a movimento continuo, un passo
+corrisponde a una unità realmente percorsa, non a una pressione del tasto.
+
+Risolti due errori di integrazione: gli interni non riutilizzano le coordinate
+dell'erba esterna; arrivo/trigger narrativi sono controllati prima dell'incontro
+casuale. Il sistema rimane limitato al Percorso1 e alle specie originali presenti.
+Test aggiunti su limiti RNG, distanze frazionarie, collisioni, esclusione interni
+e precedenza dell'arrivo. Tutte le nove partite simulate passano insieme ai31
+test Node. Ancora da eseguire la passeggiata manuale finale con questi aggiornamenti.
+
+Dialoghi manuali laboratorio: soprannome rifiutato; risposta NO alla missione
+Pokédex verificata fino alla ripetizione originale della domanda, poi SÌ.
+La partita aperta nel browser è ancora nel dialogo di consegna del Pokédex;
+ricaricare al prossimo checkpoint prima del tutorial per usare il codice nuovo.

@@ -3,7 +3,8 @@
   let storage;try{storage=localStorage;}catch{storage=null;}
   const state=StoryState.read(storage),preferences=JourneyState.read(storage).state;
   const outdoor={...ROM_SCENE,instances:[...ROM_SCENE.instances,...OPENING_ASSETS.scenes.north.instances],permissionGrids:[...ROM_SCENE.permissionGrids,...OPENING_ASSETS.scenes.north.permissionGrids]};
-  let processing=false,continuation=null,walking=0,lead=0,battleSlots=[],participants=new Set(),lastSave='';
+  let processing=false,continuation=null,lead=0,battleSlots=[],participants=new Set(),lastSave='';
+  const encounterState=new RouteEncounter(OPENING_ENCOUNTER_RULES.rate);
   const phaseIndex=()=>StoryState.phases.indexOf(state.phase);
   function pack(m,xp=0){return {name:m.name,nickname:m.nickname||'',level:m.level,xp,hp:m.hp,status:m.status||'',ivs:m.ivs,evs:m.evs,nature:m.nature,gender:m.gender,abilityId:m.abilityId,happiness:m.happiness,pp:m.moves.map(m=>({id:m.id,left:m.left}))};}
   function unpack(p){const m=makeMon(p.name,p.level,p);if(p.hp!==null)m.hp=Math.min(m.max,p.hp);m.status=p.status;for(const move of m.moves){const old=p.pp.find(x=>x.id===move.id);if(old)move.left=Math.min(move.pp,old.left);}return m;}
@@ -20,7 +21,7 @@
     if(force||encoded!==lastSave){const ok=StoryState.write(storage,state);$('saveStatus').textContent=ok?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(ok)lastSave=encoded;}
     Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});JourneyState.write(storage,preferences);
   }
-  function setScene(name,x,y){state.scene=name;renderer.scene=name==='town'?outdoor:OPENING_ASSETS.scenes[name==='bedroom'&&state.original?.roomMess?'bedroomMess':name];player={x,y};facing=3;resetInput();walking=0;cooldown=3;renderer.center=[name==='town'?x*.7:-10,name==='town'?y+1.5:-10];actors();update();save();}
+  function setScene(name,x,y){state.scene=name;renderer.scene=name==='town'?outdoor:OPENING_ASSETS.scenes[name==='bedroom'&&state.original?.roomMess?'bedroomMess':name];player={x,y};facing=3;resetInput();encounterState.distance=0;cooldown=3;renderer.center=[name==='town'?x*.7:-10,name==='town'?y+1.5:-10];actors();update();save();}
   function say(speaker,text,done=null,title=speaker){
     resetInput();continuation=done;$('speakerName').textContent=speaker;$('dialogueTitle').textContent=title;$('dialogueText').textContent=text;
     const portrait=['Belle','Komor','Aralia','Mamma','Padre','Viandante'].includes(speaker);$('dialoguePortrait').hidden=!portrait;if(portrait){$('dialoguePortrait').src=`assets/${['Padre','Viandante'].includes(speaker)?'opening':'characters'}/${speaker}-3.png`;$('dialoguePortrait').alt=speaker;}
@@ -73,7 +74,7 @@
     }
   }
   async function afterBattle(s,kind,captured,escaped){
-    processing=true;try{
+    processing=true;encounterState.reset();try{
     if(kind==='tutorial'){displayPartner();window.NativeStory?.battleDone(s,kind);return;}
     for(const m of s.battle.p1.pokemon){const id=m.storyId;if(id!==undefined)state.party[id]={...state.party[id],hp:m.hp,status:m.status,pp:m.moveSlots.map(move=>({id:GEN5.byMoveKey[move.id]?.id||0,left:move.pp}))};}
     if(captured)state.party.push(pack(captured,OPENING_DATA[captured.name].growth[captured.level]));else if(!escaped&&s.battle.winner==='Alcide')await gainXP(s,kind);
@@ -84,10 +85,16 @@
     }finally{processing=false;save(true);}
   }
   function step(dt,moved){}
-  function encounter(dt,moved){
-    if(state.phase!=='route'||!moved||cooldown>0)return;
-    const g=outdoor.permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16),tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
-    if(g&&g.bytes[tile]===4){walking+=dt*(keys.Shift?6.5:3.5);if(walking>=1){walking%=1;if(Math.random()<.08){let roll=Math.random()*100;const e=OPENING_ENCOUNTERS.find(slot=>(roll-=slot.weight)<0)||OPENING_ENCOUNTERS.at(-1);startBattle(false,{story:'wild',p1:configs(),p2:[monConfig(newStoryMon(e.name,e.level))]});}}}else walking=0;
+  function encounter(dt,moved,distance=0){
+    if(state.phase!=='route'||!moved||battling)return;
+    const onRoute=window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;
+    const g=onRoute?outdoor.permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
+    const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
+    if(encounterState.advance(distance,!!g&&g.bytes[tile]===4,n=>Math.floor(Math.random()*n))){
+      let roll=Math.random()*100;
+      const e=OPENING_ENCOUNTERS.find(slot=>(roll-=slot.weight)<0)||OPENING_ENCOUNTERS.at(-1);
+      startBattle(false,{story:'wild',p1:configs(),p2:[monConfig(newStoryMon(e.name,e.level))]});
+    }
   }
   function openJournal(){if(battling||menuOpen()||window.NativeStory?.locked)return;resetInput();update();save();$('journal').showModal();}
   function openTeam(){if(battling||menuOpen()||window.NativeStory?.locked||!state.starter)return;resetInput();$('partyList').replaceChildren();state.party.forEach((p,i)=>{const b=document.createElement('button');b.textContent=`${p.nickname||p.name} · Lv. ${p.level} · ${p.hp}/${makeMon(p.name,p.level,p).max} PS${i===lead?' · In testa':''}`;b.disabled=p.hp===0;b.onclick=()=>{lead=i;displayPartner();$('partyDialog').close();};$('partyList').append(b);});$('partyDialog').showModal();}

@@ -8,7 +8,7 @@ function environment(){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0]};
  const source=fs.readFileSync(path.join(site,'game.js'),'utf8');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
@@ -100,6 +100,19 @@ async function drain(c,promise,starter=0,outcome='play'){
    assert.equal(n.tryWarp(out[0],out[1],c.player.x+out[0]*.4,c.player.y+out[1]*.4),false,'Arrival cooldown');count++;
   }
   assert.equal(count,14);console.log('PASS all 14 original door/stair transitions, direction, collision and re-entry cooldown');
+ }
+ {
+  const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;n.state.zone=317;
+  j.state.starter='Snivy';j.state.phase='route';j.state.party=[j.pack(c.makeMon('Snivy',5),0)];
+  c.Math=Object.create(Math);c.Math.random=()=>0;c.cooldown=999;
+  let grass;
+  for(const g of j.outdoor.permissionGrids)for(let z=0;z<32;z++)for(let x=0;x<32;x++)if(g.bytes[8+(z*32+x)*8]===4)grass={x:g.x-16+x+.5,y:g.z-16+z+.5};
+  assert.ok(grass);c.player=grass;
+  j.encounter(.01,true,1);assert.equal(c.lastBattle?.config.story,'wild','First moving step can encounter despite old clock cooldown');
+  c.lastBattle=null;n.state.zone=390;j.encounter(10,true,20);assert.equal(c.lastBattle,null,'Indoor coordinates cannot reuse outdoor grass');
+  n.state.zone=317;n.state.vars[16508]=2;c.player={x:6.5,y:-80.5};let calls=0;j.encounter=()=>calls++;
+  j.step(1/30,true,1);assert.equal(n.state.arrived,true);assert.equal(calls,0,'Arrival event takes priority over random encounters');c.continue();
+  console.log('PASS original encounter rate integration, indoor exclusion and scene priority');
  }
  for(const [starter,name] of ['Snivy','Tepig','Oshawott'].entries())for(const outcome of ['p1','p2','play']){
   const c=environment(),n=c.NativeStory,j=c.Journey;
