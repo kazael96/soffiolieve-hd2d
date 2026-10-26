@@ -17,7 +17,7 @@
       return {screen,images,groups,portraits};
     })();return prepared;
   }
-  async function open(){
+  async function open({searchInitially=false}={}){
     const r=await prepare(),s=r.screen,a=DEX_BROWSER_ASSETS,all=records(a,Journey.state.dex);let list=all;
     let selected=Math.max(0,list.findIndex(p=>p.seen)),start=0,resolve;
     const shortcut=await NativeShortcuts.checkbox('pokedex',188,172,()=>render());
@@ -50,7 +50,7 @@
       }});
       const focus=buttons.findIndex((p,i)=>i<8&&start+i===selected);s.selected=focus<0?buttons.length-1:focus;s.focus();
     }
-    render();return await finished;
+    render();if(searchInitially)await search();return await finished;
   }
   root.NativePokedexBrowser={records,open};if(typeof module!=='undefined')module.exports={records};
 })(typeof window!=='undefined'?window:globalThis);
