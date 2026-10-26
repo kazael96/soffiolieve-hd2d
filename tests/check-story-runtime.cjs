@@ -45,6 +45,18 @@ async function drain(c,promise,starter=0,outcome='play'){
 }
 (async()=>{
  {
+  const c=environment(),n=c.NativeStory;
+  c.startBattle=async()=>{throw Error('Test battle setup failure');};
+  for(const [name,args] of [['CallTrainerBattle',[59]],['CallCaptureDemo',[]]]){
+   await assert.rejects(n.vm.host.command({name},args,args,n.vm),/Test battle setup failure/);
+   assert.equal(n.battleDone(null,'tutorial'),false,'Failed battle must release the pending event callback');
+  }
+  c.startBattle=async()=>{};c.playCatchingTutorial=async()=>{throw Error('Test tutorial animation failure');};
+  await assert.rejects(n.vm.host.command({name:'CallCaptureDemo'},[],[],n.vm),/Test tutorial animation failure/);
+  assert.equal(n.battleDone(null,'tutorial'),false);
+  console.log('PASS asynchronous battle failures propagate without leaving a waiting field event');
+ }
+ {
   const c=environment(),j=c.Journey,n=c.NativeStory;n.state.intro=true;
   const moves=[{category:'Physical'},{category:'Status'}],score=(turn,hp,roll)=>Array.from(c.openingMoveScores(moves,turn,hp,100,()=>roll));
   assert.deepEqual(score(1,100,255),[101,100],'Original rivals attack on turn one');

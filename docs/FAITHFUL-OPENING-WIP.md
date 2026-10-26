@@ -274,3 +274,19 @@ i tempi perfettamente identici. Test mobile/audio della scelta ancora da eseguir
 La partita principale nel tab8 è fuori dal laboratorio, prima di Mamma/Mappa Città.
 Riprendere quella per il percorso manuale/tutorial/cattura/fine demo. Non confondere
 il salvataggio principale con qa-opening(tab11). La pubblicazione è ancora0.10.
+
+## Checkpoint 26 ottobre, 02:05: tutorial provato nel browser
+
+Partita principale: verificati saluto di Mamma, Mappa Città, partenza simultanea,
+arrivo da Aralia e dimostrazione con Minccino/Patrat. Nessun errore browser/audio.
+La prova ha rilevato il vecchio pulsante «Torna al villaggio» dopo il tutorial e
+la scomparsa anticipata della ball. Corretto: il tutorial mantiene la ball fino
+al ritorno automatico, dopo la lettura del risultato; le altre lotte della storia
+mostrano «Continua». PaginaQA `qa-tutorial.html` conferma ritorno automatico e
+assenza di errori. Il salvataggio principale è ancora nei dialoghi successivi
+alla dimostrazione; sono state assegnate le cinque Poké Ball.
+
+Rimosso anche l'esecutore Promise async in CallCaptureDemo e la mancata attesa
+dell'avvio in CallTrainerBattle: gli errori asincroni ora raggiungono il gestore
+dell'evento, liberando la callback pendente. Test di regressione su errore in
+avvio e animazione; nove percorsi originali ancora passano. Non ancora pubblicato.

@@ -176,12 +176,14 @@
       case 'CallTrainerBattle':{
         const trainer=OPENING_TRAINERS[v[0]];if(!trainer)throw Error('Trainer outside opening '+v[0]);
         const kind=trainer.name;state.phase=kind==='Belle'?'belle':'komor';rival=kind;journey.update();
-        await new Promise(resolve=>{pendingBattle=resolve;startBattle(true,{story:kind,trainerId:v[0],aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party)});});break;
+        const completed=new Promise(resolve=>pendingBattle=resolve);
+        try{await startBattle(true,{story:kind,trainerId:v[0],aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party)});await completed;}finally{pendingBattle=null;}break;
       }
       case 'TrainerBattleIsVictory':m.set(a[0],native.won?1:0);break;
       case 'CallTrainerBattleEnd':break;
       case 'CallCaptureDemo':{
-        await new Promise(async resolve=>{pendingBattle=resolve;await startBattle(false,{story:'tutorial',p1:[{...newStoryMon('Minccino',7),...ORIGINAL_EVENTS.captureTutorial.player}],p2:[{...newStoryMon('Patrat',2),...ORIGINAL_EVENTS.captureTutorial.enemy}]});await playCatchingTutorial();});break;
+        const completed=new Promise(resolve=>pendingBattle=resolve);
+        try{await startBattle(false,{story:'tutorial',p1:[{...newStoryMon('Minccino',7),...ORIGINAL_EVENTS.captureTutorial.player}],p2:[{...newStoryMon('Patrat',2),...ORIGINAL_EVENTS.captureTutorial.enemy}]});await playCatchingTutorial();await completed;}finally{pendingBattle=null;}break;
       }
       case 'RTReserveScript':queued=v[0];break;
       case 'RTGetTextFile':m.set(a[0],textBank);break;
