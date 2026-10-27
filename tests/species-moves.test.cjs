@@ -3,7 +3,7 @@ const S=require('../src/species-moves.js');
 const layout={p1:{x:300,y:380,height:150,w:1000,h:475},p2:{x:640,y:285,height:110,w:1000,h:475}};
 test('Snivy coverage is exactly its four level-10 moves; unimplemented species retain native effects',()=>{
  assert.deepEqual(Object.keys(S.profiles).map(Number).sort((a,b)=>a-b),[22,33,35,43]);
- for(const id of [22,33,35,43]){assert.equal(S.select(495,id).species,495);assert.equal(S.select(506,id),null);}
+ for(const id of [22,33,35,43]){assert.equal(S.select(495,id).species,495);assert.equal(S.select(572,id),null);}
  assert.equal(S.select(495,52),null);
 });
 test('all four choreographies deform named original parts and return to rest on both sides',()=>{
@@ -31,6 +31,6 @@ test('sound scheduling follows authored impact while retaining original control 
 test('MoveFX preview selects species profile only for the actual attacking Snivy',async()=>{
  const window={SpeciesMoves:S,ROM_MOVE_FX:{moves:{33:{id:33,variants:[{commands:[]}]}},spas:{}}};
  const context={window,SpeciesMoves:S,Image:class{},setTimeout,clearTimeout,performance};vm.runInNewContext(fs.readFileSync(require.resolve('../src/move-fx.js'),'utf8'),context);
- await window.MoveFX.preview(33,'p1',0,{cryIds:{p1:495,p2:506}});assert.equal(window.MoveFX.active.profile.key,'snivy-33');assert.equal(window.MoveFX.speciesPose('p2',495),null);assert.ok(window.MoveFX.speciesPose('p1',495));
- await window.MoveFX.preview(33,'p2',0,{cryIds:{p1:495,p2:506}});assert.equal(window.MoveFX.active.profile,null);window.MoveFX.cancel();
+ await window.MoveFX.preview(33,'p1',0,{cryIds:{p1:495,p2:572}});assert.equal(window.MoveFX.active.profile.key,'snivy-33');assert.equal(window.MoveFX.speciesPose('p2',495),null);assert.ok(window.MoveFX.speciesPose('p1',495));
+ await window.MoveFX.preview(33,'p2',0,{cryIds:{p1:495,p2:572}});assert.equal(window.MoveFX.active.profile,null);window.MoveFX.cancel();
 });

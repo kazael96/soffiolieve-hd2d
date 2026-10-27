@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const O=require('../src/oshawott-moves.js'),T=require('../src/tepig-moves.js'),S=require('../src/species-moves.js');
 const layout={p1:{x:300,y:380,height:150,w:1000,h:475},p2:{x:640,y:285,height:110,w:1000,h:475}};
 test('Oshawott selects its three level-10 pairs with distinct shared-move choreography',()=>{
- assert.deepEqual(Object.keys(O.profiles).map(Number).sort((a,b)=>a-b),[33,39,55]);for(const p of Object.values(O.profiles)){assert.equal(S.select(501,p.id),p);assert.ok(Object.isFrozen(p));assert.equal(S.select(506,p.id),null);}
+ assert.deepEqual(Object.keys(O.profiles).map(Number).sort((a,b)=>a-b),[33,39,55]);for(const p of Object.values(O.profiles)){assert.equal(S.select(501,p.id),p);assert.ok(Object.isFrozen(p));assert.equal(S.select(572,p.id),null);}
  assert.notEqual(S.select(501,33),S.select(495,33));assert.notEqual(S.select(501,39),S.select(498,39));assert.notDeepEqual(S.sample(O.profiles[33],44),S.sample(T.profiles[33],41));
 });
 test('Oshawott original head torso arms tail and feet have distinct finite gestures and return to rest',()=>{
