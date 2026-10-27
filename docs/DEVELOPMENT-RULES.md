@@ -59,3 +59,7 @@ Ogni consegna deve distinguere regole registrate, comportamento implementato e c
 ## Avanzamento animazioni 0.25
 
 Matrice esplicita e prove in [SPECIES-MOVES-025.md](SPECIES-MOVES-025.md): quattro coppie di Snivy implementate e verificate nella demo; le altre15 restano da realizzare. La presenza degli effetti generici non modifica questo conteggio.
+
+## Avanzamento animazioni 0.26
+
+Matrice e prove in [SPECIES-MOVES-026.md](SPECIES-MOVES-026.md): quattro coppie di Tepig aggiunte alle quattro di Snivy, per8/19 coppie verificate nella demo. Le altre11 restano aperte.
