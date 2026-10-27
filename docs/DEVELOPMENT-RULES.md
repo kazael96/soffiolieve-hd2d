@@ -51,7 +51,7 @@ Minccino del tutorial non è ottenibile nell'attuale demo e non rientra in quest
 Questa modifica registra i requisiti; non certifica una loro implementazione completa nel runtime 0.17.
 
 - Uscite: implementazione della demo0.18 in `src/field-actor-exits.js`, integrata con movimento69, ActorDelete, ricostruzioni della zona e rendering. Audit e verifiche in `ACTOR-EXIT-AUDIT.md` e `ACTOR-EXITS-018.md`. Le altre due regole restano requisiti distinti.
-- Sfondi: `src/game.js` distingue camera da letto e percorso; `src/battle-fields.js` contiene questi due contesti. Occorre sostituire il ripiego generale verso il percorso con una selezione geografica esplicita.
+- Sfondi: la demo0.19 acquisisce un contesto immutabile in `src/battle-location.js` e compone fondali distinti in `src/battle-environment.js`. Inventario di luoghi, materiali e adattamenti in `BATTLE-ENVIRONMENTS-019.md`; verifica dell'HUD e della selezione in `BATTLE-HUD-019.md`. Nuovi luoghi richiedono sempre un profilo esplicito.
 - Animazioni: la selezione attuale degli effetti si basa sulla mossa e sul contesto della lotta. Le19 coppie della tabella richiedono inventario di profili personalizzati e collaudo individuale; nessuna è dichiarata verificata dalla sola esistenza dell'effetto generico.
 
 Ogni consegna deve distinguere regole registrate, comportamento implementato e comportamento effettivamente verificato.
