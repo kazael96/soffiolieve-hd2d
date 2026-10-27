@@ -19,7 +19,7 @@
     function setStage(next){stage=next;dialog.dataset.stage=next;dialog.focus();}
     function setSelection(i,keys=false){if(stage!=='select')return;keyboard=keys;if(i===selected)return;selected=i;sound(1352);ballFrame=0;dialog.dataset.selected=names[i];description.textContent=text([18,17,16][i],names[i]);for(const [j,b] of [...query('.starter-hits').children].entries())b.setAttribute('aria-pressed',String(j===i));actions.replaceChildren();button('Conferma',()=>selectionWait?.(i));}
     function draw(now){
-      const dt=Math.max(0,Math.min(4,(now-last)/1000));last=now;
+      const dt=Math.max(0,Math.min(4,(now-last)/1000)*(window.GameSpeed?.rate||1));last=now;
       if(animation){const a=animation;a.time=Math.min(a.duration,a.time+dt);const k=a.duration?a.time/a.duration:1;a.update(k);if(k===1){animation=null;a.resolve();}}
       if(scene==='selection'){
         ballFrame=(ballFrame+dt*15)%160;

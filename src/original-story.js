@@ -58,7 +58,7 @@
     player=world(5,6);facing=3;
   }
   function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs);}
-  function delay(frames){return new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
+  function delay(frames){return window.GameSpeed?.wait(Math.max(0,frames)*1000/30)||new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
   function applyRoom(){if(state.scene==='bedroom')renderer.scene=OPENING_ASSETS.scenes[native.roomMess?'bedroomMess':'bedroom'];}
   function cameraTo(target,frames){
     const start=[...(renderer.storyCamera||renderer.center)];
@@ -207,7 +207,7 @@
       case 'ActorNew':if(!actor(v[3]))putActor({id:v[3],model:v[4],x:v[0],z:v[1],direction:v[2],script:2000});break;
       case 'PlayerGetGPos':m.set(a[0],grid().x);m.set(a[1],grid().z);break;
       case 'PlayerGetDir':m.set(a[0],frames.indexOf(facing));break;
-      case 'VMSleep':await new Promise(resolve=>setTimeout(resolve,v[0]*1000/30));break;
+      case 'VMSleep':await delay(v[0]);break;
       case 'CallTrainerBattle':{
         const trainer=OPENING_TRAINERS[v[0]];if(!trainer)throw Error('Trainer outside opening '+v[0]);
         const kind=trainer.name;state.phase=kind==='Belle'?'belle':'komor';rival=kind;journey.update();

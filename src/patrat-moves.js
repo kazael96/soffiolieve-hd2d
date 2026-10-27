@@ -32,7 +32,7 @@
  const stances=new Set();
  function setStance(side,on,id=504){on&&+id===504?stances.add(side):stances.delete(side);}
  function clearStances(){stances.clear();}
- function idlePose(side,id){return root.NativeSettings?.state?.animations!==false&&+id===504&&stances.has(side)?sample(bide.store,26+(performance.now()*.06)%40,side):null;}
+ function idlePose(side,id){return root.NativeSettings?.state?.animations!==false&&+id===504&&stances.has(side)?sample(bide.store,26+((root.GameSpeed?.now()??performance.now())*.06)%40,side):null;}
  function applyStance(side,pose,attacking=false){const a=!attacking&&idlePose(side,504);return a?{...pose,scaleY:(pose.scaleY??1)*(1-a.crouch),scaleX:(pose.scaleX??1)*(1+a.crouch*.4),pauseAnimation:true}:pose;}
  function draw(c,W,H,x,f,layer){
   const p=x.profile,a=sample(p,f,x.side,x.miss),layout=root.BattleGround.layout(W,H),from=layout[x.side],to=layout[x.targetSide],s=Math.min(W/1000,H/650),th=to.height;
@@ -51,4 +51,3 @@
  }
  const api={profiles,bide,tracks,select,sample,part,headPoint,bideEvent,draw,setStance,clearStances,idlePose,applyStance};root.PatratMoves=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
-

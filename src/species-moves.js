@@ -5,8 +5,9 @@
  const profiles=Object.freeze(Object.fromEntries([
   [33,'Azione',84,38],[43,'Fulmisguardo',100,46],[22,'Frustata',108,51],[35,'Avvolgibotta',138,72]
  ].map(([id,name,frames,impact])=>[id,Object.freeze({species:495,id,name,frames,impact,key:'snivy-'+id})])));
- function select(species,id,context={}){return +species===504?root.PatratMoves?.select(id,context)||null:+species===501?root.OshawottMoves?.profiles[id]||null:+species===498?root.TepigMoves?.profiles[id]||null:+species===495?profiles[id]||null:null;}
+ function select(species,id,context={}){return +species===506?root.LillipupMoves?.profiles[id]||null:+species===504?root.PatratMoves?.select(id,context)||null:+species===501?root.OshawottMoves?.profiles[id]||null:+species===498?root.TepigMoves?.profiles[id]||null:+species===495?profiles[id]||null:null;}
  function sample(p,f,side='p1',miss=false){
+  if(p.species===506)return root.LillipupMoves.sample(p,f,side,miss);
   if(p.species===504)return root.PatratMoves.sample(p,f,side,miss);
   if(p.species===501)return root.OshawottMoves.sample(p,f,side,miss);
   if(p.species===498)return root.TepigMoves.sample(p,f,side,miss);
@@ -25,7 +26,7 @@
  }
  // Track identities were checked against the original front/back Snivy composites.
  const tracks={front:{head:[0],body:[1],tail:[8,9],arms:[2,3],feet:[4,5]},back:{head:[0],body:[1],tail:[7,8],arms:[2,6],feet:[3,4]}};
- function part(track,back,a){if(!a)return null;if(a.species===504)return root.PatratMoves.part(track,back,a);if(a.species===501)return root.OshawottMoves.part(track,back,a);if(a.species===498)return root.TepigMoves.part(track,back,a);const map=tracks[back?'back':'front'];let role=Object.keys(map).find(k=>map[k].includes(track)),sign=track%2?1:-1;
+ function part(track,back,a){if(!a)return null;if(a.species===506)return root.LillipupMoves.part(track,back,a);if(a.species===504)return root.PatratMoves.part(track,back,a);if(a.species===501)return root.OshawottMoves.part(track,back,a);if(a.species===498)return root.TepigMoves.part(track,back,a);const map=tracks[back?'back':'front'];let role=Object.keys(map).find(k=>map[k].includes(track)),sign=track%2?1:-1;
   if(role==='head')return{rotation:a.head*a.dir,y:-a.glare*.8};
   if(role==='tail')return{rotation:a.tail*a.dir,x:-a.wind*.8};
   if(role==='arms')return{rotation:a.arms*sign,y:-a.hit*.5};
@@ -34,6 +35,7 @@
  }
  function timeline(sequence,p){if(p.species===504&&p.kind==='store')return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:[]};const sounds=sequence.audio.filter(e=>e.kind==='sfx'),anchor=(sounds.find(e=>e.target===16)||sounds[0])?.start||0;const map=t=>anchor>0&&t<=anchor?t/anchor*p.impact:p.impact+(t-anchor)/Math.max(1,sequence.frames-anchor)*(p.frames-p.impact);return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:sequence.audio.map(e=>({...e,start:Math.max(0,Math.min(p.frames-1,map(e.start)))}))};}
  function draw(c,W,H,x,f,layer){
+  if(x.profile.species===506)return root.LillipupMoves.draw(c,W,H,x,f,layer);
   if(x.profile.species===504)return root.PatratMoves.draw(c,W,H,x,f,layer);
   if(x.profile.species===501)return root.OshawottMoves.draw(c,W,H,x,f,layer);
   if(x.profile.species===498)return root.TepigMoves.draw(c,W,H,x,f,layer);
