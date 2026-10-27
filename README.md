@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.28
+# Soffiolieve HD-2D — demo 0.29
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -11,6 +11,8 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
 
 ## Questa versione
+
+La 0.29 aggiunge le quattro coppie di Patrat: Azione, Fulmisguardo, Morso e Pazienza, con parti originali articolate, incisivi, concentrazione persistente e fasi di accumulo/attesa/rilascio guidate dagli eventi del motore. Studio: `?patrat=1`. Matrice15/19 e prove in [docs/SPECIES-MOVES-029.md](docs/SPECIES-MOVES-029.md).
 
 La 0.28 aggiunge le tre coppie di Oshawott: Azione, Colpocoda e Pistolacqua, con movimenti delle parti originali, perni del collo e delle zampe, getto dal muso e spruzzi. Studio: `?oshawott=1`. Matrice11/19 e prove in [docs/SPECIES-MOVES-028.md](docs/SPECIES-MOVES-028.md).
 
