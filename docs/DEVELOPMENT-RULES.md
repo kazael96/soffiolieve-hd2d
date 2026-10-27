@@ -55,3 +55,7 @@ Questa modifica registra i requisiti; non certifica una loro implementazione com
 - Animazioni: la selezione attuale degli effetti si basa sulla mossa e sul contesto della lotta. Le19 coppie della tabella richiedono inventario di profili personalizzati e collaudo individuale; nessuna è dichiarata verificata dalla sola esistenza dell'effetto generico.
 
 Ogni consegna deve distinguere regole registrate, comportamento implementato e comportamento effettivamente verificato.
+
+## Avanzamento animazioni 0.25
+
+Matrice esplicita e prove in [SPECIES-MOVES-025.md](SPECIES-MOVES-025.md): quattro coppie di Snivy implementate e verificate nella demo; le altre15 restano da realizzare. La presenza degli effetti generici non modifica questo conteggio.
