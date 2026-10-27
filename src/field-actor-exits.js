@@ -1,0 +1,79 @@
+/* HD-2D departures: logical deletion never directly removes a visible person. */
+(function(root){
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre']);
+ const identity=n=>people.has(n.name)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
+ const outdoor=z=>z===389||z===317;
+ const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
+ function route(from,to,blocked){
+  const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),queue=[start],previous=new Map([[key(start),null]]);let best=start,bestDistance=Infinity;
+  for(let i=0;i<queue.length&&i<12000;i++){
+   const p=queue[i],distance=Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]);if(distance<bestDistance){best=p;bestDistance=distance;}if(distance===0)break;
+   const dirs=[[0,-1],[0,1],[-1,0],[1,0]].sort((a,b)=>Math.abs(p[0]+a[0]-end[0])+Math.abs(p[1]+a[1]-end[1])-Math.abs(p[0]+b[0]-end[0])-Math.abs(p[1]+b[1]-end[1]));
+   for(const [dx,dy]of dirs){const q=[p[0]+dx,p[1]+dy],id=key(q);if(previous.has(id)||Math.abs(q[0]-start[0])>110||Math.abs(q[1]-start[1])>160||blocked(q[0]+.5,q[1]+.5))continue;previous.set(id,p);queue.push(q);}
+  }
+  const path=[];for(let p=best;p&&key(p)!==key(start);p=previous.get(key(p)))path.push({x:p[0]+.5,y:p[1]+.5});return path.reverse();
+ }
+ function plan(n,zone,blocked){
+  const portal=(x,y,dx,dy,kind='door')=>({kind,anchor:{x,y},points:[{x,y},{x:x+dx*2.8,y:y+dy*2.8}],clip:kind==='stairs'?[0,1,0,-.04]:[-dx,0,-dy,dx*x+dy*y+(dy<0?1.3:0)]});
+  if(zone===391)return portal(-6.5,-13.5,0,0,'stairs');
+  if(zone===390||zone===392)return portal(Math.max(-11.5,Math.min(-9.5,n.x)),-5.5,0,1);
+  if(zone===396)return portal(Math.max(-13.5,Math.min(-11.5,n.x)),-4.5,0,1);
+  if(zone===389){
+   // Lab entrance, or a coherent return to the character's own house.
+   if(Math.hypot(n.x+6.5,n.y+11.5)<2.2)return portal(-6.5,-11.5,0,-1);
+   let home=null;if(n.name==='Mamma')home={x:-1.5,y:-3.5};else if(n.name==='Belle'&&n.y>2)home={x:-7.5,y:5.5};
+   if(home){const p=portal(home.x,home.y,0,-1),approach={x:home.x,y:home.y+1};p.points=[...route(n,approach,blocked),home,p.points[1]];return p;}
+  }
+  // The connected outdoor field remains rendered. Walk north along valid cells;
+  // at the field boundary retain the visual until genuinely hidden or offscreen.
+  const points=route(n,{x:4.5,y:-82.5},blocked);return {kind:'path',points,clip:null};
+ }
+ class Controller{
+  constructor({blocked=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
+  depart(n,zone,{covered=false,resident=false}={}){
+   if(n.model===208||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
+   const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
+   this.records.set(key,{key,actor,zone,plan:p,index:0,age:0,travel:0,zero:0,stage:resident?'resident':'walk',sampleSequence:-1});return true;
+  }
+  visible(base,player){
+   // There is one visual identity for each named story character, even when
+   // adjacent native maps contain two logical records for that same person.
+   for(const r of this.records.values())r.target=null;
+   const selected=new Map();for(const n of base){const key=identity(n),old=selected.get(key),d=v=>Math.hypot(v.x-player.x,v.y-player.y);if(!old||d(n)<d(old))selected.set(key,n);}
+   for(const [key,n]of selected){const r=this.records.get(key);if(r){r.target=n;if(r.stage==='resident'&&Math.hypot(r.actor.x-n.x,r.actor.y-n.y)<.001)this.records.delete(key);else r.stage='rejoin';}}
+   return [...selected].filter(([key])=>!this.records.has(key)).map(([,n])=>n).concat([...this.records.values()].map(r=>r.actor));
+  }
+  tick(dt){
+   dt=Math.min(.1,Math.max(0,dt));for(const [key,r]of this.records){const a=r.actor;r.age+=dt;
+    if(r.stage==='resident')continue;
+    if(r.stage==='rejoin'){
+     const b=r.target;if(!b){r.stage='walk';continue;}const d=Math.hypot(b.x-a.x,b.y-a.y),step=7.5*dt;
+     if(d<=step){this.records.delete(key);r.resolve?.();continue;}const dx=(b.x-a.x)/d,dy=(b.y-a.y)/d;a.x+=dx*step;a.y+=dy*step;a.height=b.height||0;delete a.exitClip;this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);continue;
+    }
+    const sample=this.sample(a);if(!sample)r.zero=0;else if(sample.sequence!==r.sampleSequence){r.sampleSequence=sample.sequence;r.zero=sample.visible?0:r.zero+1;}
+    const canRetire=r.plan.kind==='path'?r.travel>=1.5:r.stage==='hold';
+    if(canRetire&&r.zero>=2){this.records.delete(key);this.finishPortal(r);r.resolve?.();this.retired.push({name:a.name,zone:r.zone,reason:'rendered-invisible',x:a.x,y:a.y,height:a.height||0,sequence:r.sampleSequence});if(this.retired.length>40)this.retired.shift();continue;}
+    if(r.plan.kind!=='path'&&r.age>15&&!sample)throw Error('Verifica visibilità uscita non disponibile: '+a.name);
+    if(r.error)throw Error(r.error);
+    if(r.stage==='walk'){
+     const point=r.plan.points[r.index];if(point){const dx=point.x-a.x,dy=point.y-a.y,d=Math.hypot(dx,dy),step=3.75*dt;
+      if(r.plan.kind!=='path'&&r.index===r.plan.points.length-1&&!r.opened){r.stage='opening';Promise.resolve(this.portal(r)).then(handle=>{if(this.records.get(key)!==r){this.finishPortal({...r,handle});return;}r.handle=handle;r.opened=true;r.stage='walk';},error=>{r.error=String(error);r.stage='hold';});continue;}
+      if(r.opened)a.exitClip=r.plan.clip;
+      if(d<=step){a.x=point.x;a.y=point.y;r.travel+=d;r.index++;}else{a.x+=dx/d*step;a.y+=dy/d*step;r.travel+=step;}
+      if(d>1e-8)this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);else this.pose(a,a.direction);
+     }else {r.stage=r.plan.kind==='stairs'?'descend':'hold';this.pose(a,a.direction);}
+    }
+    if(r.stage==='descend'){a.exitClip=r.plan.clip;a.noShadow=true;a.height=Math.max(-2.5,(a.height||0)-dt*1.8);if(a.height===-2.5)r.stage='hold';}
+    // A result is valid only for the exact rendered pose. Never interpret a
+    // missing texture, a pending probe or an error as an invisible actor.
+   }
+  }
+  preserve(old,next,{covered=false,sameField=false}={}){if(covered||!sameField)return;const targets=new Map(next.filter(n=>!n.hidden).map(n=>[identity(n),n]));for(const n of old){const target=targets.get(identity(n));if(!target||Math.hypot(n.x-target.x,n.y-target.y)>.01)this.depart(n,n.fieldZone,{resident:true});}}
+  occupied(x,y,except=null){return [...this.records.values()].some(r=>r.key!==(except&&identity(except))&&(r.actor.height||0)>=0&&Math.abs(r.actor.x-x)<.55&&Math.abs(r.actor.y-y)<.55);}
+  wait(n){const r=this.records.get(identity(n));if(!r||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
+  clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
+  save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
+  restore(records,zone){for(const r of records||[]){if(!r?.actor||!r?.plan||!Number.isFinite(r.actor.x)||!Number.isFinite(r.actor.y)||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}
+ }
+ const api={Controller,identity,plan,route};root.FieldActorExits=api;if(typeof module!=='undefined')module.exports=api;
+})(typeof window!=='undefined'?window:globalThis);
