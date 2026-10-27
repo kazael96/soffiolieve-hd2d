@@ -2,8 +2,8 @@
 (() => {
   const panel=document.querySelector('#battle .battle-panel'),stage=document.createElement('div');stage.id='battleTouch';stage.className='native-stage';
   const canvas=document.createElement('canvas');canvas.width=256;canvas.height=192;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Comandi di lotta');stage.append(canvas);panel.append(stage);
-  const messageCanvas=document.createElement('canvas');messageCanvas.id='nativeBattleMessage';messageCanvas.width=256;messageCanvas.height=48;messageCanvas.setAttribute('role','img');$('battle').append(messageCanvas);const messageContext=messageCanvas.getContext('2d');messageContext.imageSmoothingEnabled=false;let lastMessage='';
-  const messageLayer=document.createElement('canvas');messageLayer.width=256;messageLayer.height=48;const messageLayerContext=messageLayer.getContext('2d');messageLayerContext.imageSmoothingEnabled=false;const messageScene=document.createElement('canvas');messageScene.width=256;messageScene.height=48;const messageSceneContext=messageScene.getContext('2d',{willReadFrequently:true});messageSceneContext.imageSmoothingEnabled=false;let messagePixels;
+  const messageCanvas=document.createElement('canvas');messageCanvas.id='nativeBattleMessage';messageCanvas.width=384;messageCanvas.height=72;messageCanvas.setAttribute('role','img');$('battle').append(messageCanvas);const messageContext=messageCanvas.getContext('2d');messageContext.imageSmoothingEnabled=false;let lastMessage='';
+  BattleHUD.mount(stage,messageCanvas);panel.inert=true;panel.setAttribute('aria-hidden','true');
   const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
   const resources={},images=new Map();let font,smallFont,battleFont,fontMetrics,moveMetrics,metadata,ready=false,mode='main',buttons=[],selected=0,wasBusy=false,notice=null,bagCategory='medicine',bagItem=17,lastItem=0,press=null,partyIndex=0,partyMove=0;
   function load(src){if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Grafica lotta non disponibile: '+src));im.src=NativeTextLayout.resource(src);}));return images.get(src);}
@@ -40,21 +40,21 @@
     if(trainer){notice='Non si possono catturare i Pokémon degli altri Allenatori!';mode='notice';update();return;}
     lastItem=4;$('catchBall').onclick();
   }
-  function activate(index){const b=buttons[index];if(!b||b.disabled||press)return;void AudioEngine.playSound(1352);if(mode==='moves'&&index<4){press={kind:'move',index,at:performance.now(),action:b.action};draw();return;}if(['party','itemTarget'].includes(mode)&&index<session.party().length){press={kind:'party',index,at:performance.now(),action:b.action};draw();return;}if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)){press={kind:'app',index,at:performance.now(),action:b.action};draw();return;}b.action();}
+  function activate(index){const b=buttons[index];if(!b||b.disabled||press||busy)return;void AudioEngine.playSound(1352);if(mode==='moves'&&index<partner.moves.length){press={kind:'move',index,at:performance.now(),action:b.action};draw();return;}if(['party','itemTarget'].includes(mode)&&index<session.party().length){press={kind:'party',index,at:performance.now(),action:b.action};draw();return;}if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)){press={kind:'app',index,at:performance.now(),action:b.action};draw();return;}b.action();}
   function renderButtons(next){
-    buttons=next;selected=Math.max(0,next.findIndex(b=>!b.disabled));stage.querySelectorAll('button').forEach(b=>b.remove());
-    next.forEach((b,i)=>{const el=document.createElement('button');el.className='native-hit';el.setAttribute('aria-label',b.label);el.textContent=b.label;el.disabled=!!b.disabled;Object.assign(el.style,{left:b.x/2.56+'%',top:b.y/1.92+'%',width:b.w/2.56+'%',height:b.h/1.92+'%'});el.onclick=()=>activate(i);el.onfocus=()=>{if(!press)selected=i;draw();};b.element=el;stage.append(el);});
+    BattleHUD.mode(mode,busy,finished);buttons=next;selected=Math.max(0,next.findIndex(b=>!b.disabled));stage.querySelectorAll('button').forEach(b=>b.remove());
+    next.forEach((b,i)=>{const el=document.createElement('button');el.className='native-hit';el.setAttribute('aria-label',b.label);el.textContent=b.label;el.disabled=!!b.disabled;Object.assign(el.style,{left:b.x/2.56+'%',top:b.y/1.92+'%',width:b.w/2.56+'%',height:b.h/1.92+'%'});el.onclick=()=>activate(i);el.onfocus=()=>{if(!press)selected=i;draw();};b.element=el;BattleHUD.decorate(el,b,i,finished?'main':mode,resources);stage.append(el);});
     if(!busy)next[selected]?.element.focus();draw();
   }
   stage.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input'))return;if(press||busy){e.preventDefault();e.stopPropagation();return;}const k=e.key.toLowerCase(),directions={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};if(directions[k]){e.preventDefault();e.stopPropagation();selected=NativeUI.nextButton(buttons,selected,...directions[k]);buttons[selected]?.element.focus();}else if(['enter',' ','z','a'].includes(k)){e.preventDefault();activate(selected);}else if(['escape','b','x'].includes(k)){e.preventDefault();back();}});
   function run(){if(trainer&&!labBattle){notice="Non si può fuggire da una lotta contro un Allenatore!";mode='notice';update();}else $('run').onclick();}
   function update(){
     if(!battling||!ready||!session)return;
-    const forced=!!session.request()?.forceSwitch?.[0];if(busy){wasBusy=true;renderButtons([]);return;}
+    const forced=!!session.request()?.forceSwitch?.[0];if(busy){wasBusy=true;BattleHUD.mode(mode,true,finished);if(['main','moves'].includes(mode)&&buttons.length){buttons.forEach(b=>b.element.disabled=true);return;}renderButtons([]);return;}
     if(wasBusy){wasBusy=false;mode=forced?'party':'main';}
     if(finished){renderButtons(storyBattle==='tutorial'?[]:[rect('Continua',0,0,256,192,()=>endBattle())]);return;}
     if(forced&&!['party','partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode))mode='party';
-    if(mode==='main')renderButtons([rect('LOTTA',0,60,256,64,()=>choose('moves')),rect('BORSA',0,142,84,50,()=>choose('bag')),rect('FUGA',86,154,84,38,run),rect('POKÉMON',172,142,84,50,()=>choose('party'))]);
+    if(mode==='main')renderButtons([rect('LOTTA',0,0,128,96,()=>choose('moves')),rect('BORSA',128,0,128,96,()=>choose('bag')),rect('POKÉMON',0,96,128,96,()=>choose('party')),rect('FUGA',128,96,128,96,run)]);
     else if(mode==='moves'){
       const list=[...$('moves').querySelectorAll(':scope > button')];renderButtons([...list.map((b,i)=>rect(b.textContent,i%2*128,32+Math.floor(i/2)*48,128,48,()=>b.onclick(),b.disabled)),rect('Indietro',176,144,80,48,back)]);
     }else if(mode==='bag'){
@@ -165,29 +165,19 @@
   }
   function tick(){
     if(!ready||!battling)return;if(press){const ticks=(performance.now()-press.at)*60/1000;if(['party','app'].includes(press.kind)&&ticks>=5)press.released=true;if(ticks>=(press.kind==='move'?metadata.moves.pressed.timing.unlockAfterControllerTicks:7)){const action=press.action;press=null;action();}}if(['moves','party','itemTarget','partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)&&!busy)draw();
-    let narrative=$('log').lastElementChild;while(narrative&&/^— Turno [0-9]+ —$/.test(narrative.textContent))narrative=narrative.previousElementSibling;const value=busy||finished||!['main','moves'].includes(mode)?narrative?.textContent||'':NativeTextLayout.format(metadata.battleText.banks['15'][69],[partner.nickname||partner.name]);
+    let narrative=$('log').lastElementChild;while(narrative&&/^— Turno [0-9]+ —$/.test(narrative.textContent))narrative=narrative.previousElementSibling;const value=mode==='notice'?notice:busy||finished||!['main','moves'].includes(mode)?narrative?.textContent||'':NativeTextLayout.format(metadata.battleText.banks['15'][69],[partner.nickname||partner.name]);
     messageCanvas.hidden=!value;if(!value)return;
-    if(value!==lastMessage){lastMessage=value;messageLayerContext.clearRect(0,0,256,48);messageLayerContext.drawImage(resources.messageFrame,0,0);
-      NativeTextLayout.wrap(value,metadata.fonts['0'],240).slice(-2).forEach((line,i)=>NativeText.draw(messageLayerContext,resources.messageFont,line,8,8+i*16,false,'left',metadata.fonts['0']));messagePixels=messageLayerContext.getImageData(0,0,256,48);messageCanvas.setAttribute('aria-label',value);}
-    const scene=$('arena'),region=messageCanvas.getBoundingClientRect(),bounds=scene.getBoundingClientRect();if(!region.width||!bounds.width||!messagePixels)return;
-    const sx=scene.width/bounds.width,sy=scene.height/bounds.height;messageSceneContext.clearRect(0,0,256,48);messageSceneContext.drawImage(scene,(region.left-bounds.left)*sx,(region.top-bounds.top)*sy,region.width*sx,region.height*sy,0,0,256,48);
-    for(const id of ['enemyCard','playerCard']){const card=$(id).querySelector('canvas');if(!card)continue;const r=card.getBoundingClientRect();if(r.bottom<region.top||r.top>region.bottom||r.right<region.left||r.left>region.right)continue;messageSceneContext.drawImage(card,(r.left-region.left)*256/region.width,(r.top-region.top)*48/region.height,r.width*256/region.width,r.height*48/region.height);}
-    const background=messageSceneContext.getImageData(0,0,256,48),output=messageContext.createImageData(256,48);output.data.set(NativeColor.blend(messagePixels.data,background.data,16,7));messageContext.putImageData(output,0,0);
-
+    if(value!==lastMessage){lastMessage=value;BattleHUD.message(value,resources.partyNameFont,resources.partyData.font.variants.name);}
   }
   function cards(){
     if(!ready)return;
     for(const [id,p,own] of [['enemyCard',enemy,false],['playerCard',partner,true]]){
-      const box=$(id);let card=box.querySelector('canvas');if(!card){card=document.createElement('canvas');card.width=128;card.height=own?54:40;box.replaceChildren(card);}const ctx=card.getContext('2d');ctx.clearRect(0,0,128,54);ctx.imageSmoothingEnabled=false;ctx.drawImage(resources[own?'cell-168-169-0.png':'cell-165-166-0.png'],0,15);
-      const put=(s,x,y,align='left')=>NativeText.draw(ctx,smallFont,String(s),x,y,false,align,fontMetrics);
-      function digits(value,x,y,align='left'){const string=String(value);if(align==='right')x-=string.length*8;for(const character of string){const source=metadata.hpAtlas.digits[character];if(source)ctx.drawImage(resources['hp-atlas-164.png'],...source,x,y,8,8);else NativeText.draw(ctx,smallFont,character,x+2,y-1,false,'left',fontMetrics);x+=8;}}
-      put(p.nickname||p.name,8,2);put(p.gender==='F'?'♀':p.gender==='M'?'♂':'',72,1);digits(p.level,117,15,'right');const fraction=p.hp/p.max;ctx.fillStyle='#29463e';ctx.fillRect(53,23,50,3);ctx.fillStyle=fraction<=.2?'#d85038':fraction<=.5?'#e8b038':'#58b888';ctx.fillRect(53,23,Math.ceil(50*fraction),3);
-      const status=p.hp<=0?6:({slp:1,brn:2,psn:3,tox:3,par:4,frz:5})[p.status];if(status!=null)ctx.drawImage(resources.partyStatuses[status],8,33);
-      if(own){digits(p.hp+'/'+p.max,119,33,'right');const record=Journey.state.party[session.active().storyId],growth=OPENING_DATA[p.name]?.growth,ratio=record&&growth?Math.min(1,(record.xp-growth[p.level])/(growth[p.level+1]-growth[p.level]||1)):0;ctx.fillStyle='#2c343d';ctx.fillRect(36,51,84,2);ctx.fillStyle='#74a6ff';ctx.fillRect(36,51,84*ratio,2);}
-      else if(Journey.state.dex.caught.includes(p.name))ctx.drawImage(resources['cell-115-117-0.png'],1,31,8,8);
-      card.setAttribute('role','img');card.setAttribute('aria-label',`${p.nickname||p.name}, livello ${p.level}${own?', PS '+p.hp+' su '+p.max:''}${p.hp<=0?', KO':p.status?', '+(STATUS_NAMES[p.status]||p.status):''}`);
+      const record=own?Journey.state.party[session.active().storyId]:null,growth=OPENING_DATA[p.name]?.growth;
+      const xp=record&&growth?Math.min(1,(record.xp-growth[p.level])/(growth[p.level+1]-growth[p.level]||1)):0;
+      BattleHUD.card($(id),p,own,resources,xp,Journey.state.dex.caught.includes(p.name));
     }
   }
+
   function itemTarget(s){const original=s.battle.runAction;s.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoPotion'&&s.potionTarget){const target=this.p1.pokemon[s.potionTarget-1];s.potionTarget=null;if(target&&target.hp>0)action.pokemon=target;}return original.call(this,action);};}
   window.BattleScreen={update,cards,tick,reset(){mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,loading};
 })();
