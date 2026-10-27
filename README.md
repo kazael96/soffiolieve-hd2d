@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.26
+# Soffiolieve HD-2D — demo 0.27
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -11,6 +11,8 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
 
 ## Questa versione
+
+La 0.27 rifinisce Braciere di Tepig: preparazione ed espulsione più leggibili, tre raffiche di braci con scie irregolari, origine fissata al muso al momento del lancio, scintille e piccolo sbuffo all’impatto. Dettagli in [docs/EMBER-027.md](docs/EMBER-027.md).
 
 La 0.26 aggiunge le quattro coppie di Tepig: Azione, Colpocoda, Braciere e Segugio, con gesti delle parti originali, muso articolato, braci e ricerca olfattiva. Studio: `?tepig=1`; quello di Snivy resta disponibile. Matrice 8/19 e verifiche in [docs/SPECIES-MOVES-026.md](docs/SPECIES-MOVES-026.md).
 
