@@ -67,3 +67,7 @@ Matrice e prove in [SPECIES-MOVES-026.md](SPECIES-MOVES-026.md): quattro coppie 
 ## Avanzamento animazioni 0.28
 
 Matrice e prove in [SPECIES-MOVES-028.md](SPECIES-MOVES-028.md): tre coppie di Oshawott aggiunte a Snivy/Tepig, per11/19 coppie verificate nella demo; altre8 aperte.
+
+## Avanzamento animazioni 0.29
+
+Matrice e prove in [SPECIES-MOVES-029.md](SPECIES-MOVES-029.md): quattro coppie di Patrat aggiunte agli starter, per15/19 coppie verificate; restano le quattro di Lillipup.
