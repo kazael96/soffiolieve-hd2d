@@ -63,3 +63,7 @@ Matrice esplicita e prove in [SPECIES-MOVES-025.md](SPECIES-MOVES-025.md): quatt
 ## Avanzamento animazioni 0.26
 
 Matrice e prove in [SPECIES-MOVES-026.md](SPECIES-MOVES-026.md): quattro coppie di Tepig aggiunte alle quattro di Snivy, per8/19 coppie verificate nella demo. Le altre11 restano aperte.
+
+## Avanzamento animazioni 0.28
+
+Matrice e prove in [SPECIES-MOVES-028.md](SPECIES-MOVES-028.md): tre coppie di Oshawott aggiunte a Snivy/Tepig, per11/19 coppie verificate nella demo; altre8 aperte.
