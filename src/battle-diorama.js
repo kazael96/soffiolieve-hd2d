@@ -58,7 +58,7 @@
  function requestAmbientVisibilityAudit(){visibilityAudit=true;ambientFrames.clear();}
  function drawAmbient(target,c,w,h,visibility={}){
   const record=records.get(c.id);if(c.id!=='route1'||!record?.ready||visibility.hideSky)return;const actors=record.ambient;if(!actors.length)return;
-  const key=[c.id,c.terrain,w,h].join(':'),stamp=Math.floor(performance.now()/50);let cached=ambientFrames.get(key);
+  const key=[c.id,c.terrain,w,h].join(':'),stamp=Math.floor((window.GameSpeed?.now()??performance.now())/50);let cached=ambientFrames.get(key);
   if(!cached||cached.stamp!==stamp||cached.hideGround!==!!visibility.hideGround){
    const {canvas,gl,program,uniforms:u,attrs}=setup();if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gpu.depthKey=null;}gl.viewport(0,0,w,h);gl.useProgram(program);const view=camera(c,w/h);for(const n of ['eye','forward','right','up'])gl.uniform3fv(u[n],view[n]);gl.uniform2fv(u.lens,view.lens);gl.uniform1f(u.indoor,0);gl.uniform1i(u.image,0);gl.activeTexture(gl.TEXTURE0);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);
    const draw=g=>{gl.bindBuffer(gl.ARRAY_BUFFER,g.buffer);[3,2,3,3].forEach((n,i)=>{gl.enableVertexAttribArray(attrs[i]);gl.vertexAttribPointer(attrs[i],n,gl.FLOAT,false,44,[0,12,20,32][i]);});gl.bindTexture(gl.TEXTURE_2D,g.tex.texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,g.repeatS?(g.mirrorS?gl.MIRRORED_REPEAT:gl.REPEAT):gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,g.repeatT?(g.mirrorT?gl.MIRRORED_REPEAT:gl.REPEAT):gl.CLAMP_TO_EDGE);gl.uniform2f(u.texSize,g.tex.w,g.tex.h);gl.uniform1f(u.alpha,g.alpha??1);gl.drawArrays(gl.TRIANGLES,0,g.count);};

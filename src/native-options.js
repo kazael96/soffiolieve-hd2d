@@ -25,6 +25,7 @@
       if(!changed())return done();
       NativeUI.confirm(t[33],finish,done);
     };
+    buttons.push({label:'Velocita gioco: x'+(root.GameSpeed?.rate||1),x:8,y:144,w:240,h:16,row:5,action:()=>{const rates=[1,2,4],n=rates[(rates.indexOf(root.GameSpeed?.rate||1)+1)%3];root.GameSpeed?.set(n);open(screen,done,draft,buttons.length-4);}});
     buttons.push({...shortcut.button,row:5},{label:t[8],x:64,y:160,w:64,h:32,row:5,action:finish},{label:t[9],x:128,y:160,w:128,h:32,row:5,action:leave});
     screen.show(t[0],c=>{
       c.drawImage(r.images.bottomBackground,0,0);
@@ -41,7 +42,7 @@
           write(c,t[ids[i]],x,y+4,false,'left',selected?(current?'focusedChosen':'focusedOther'):(current?'normalChosen':'normalOther'));
         });
       });
-      shortcut.draw(c);write(c,t[8],96,170,false,'center');write(c,t[9],192,170,false,'center');
+      write(c,'Velocita gioco: x'+(root.GameSpeed?.rate||1),12,146);shortcut.draw(c);write(c,t[8],96,170,false,'center');write(c,t[9],192,170,false,'center');
     },buttons,leave,{top:c=>{
       c.drawImage(r.images.upperBackground,0,0);
       c.fillStyle='#fff';c.fillRect(8,152,240,32);

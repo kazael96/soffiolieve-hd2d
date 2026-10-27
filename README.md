@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.29
+# Soffiolieve HD-2D — demo 0.30
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -121,3 +121,5 @@ copiato nel sito. Gli archivi intermedi restano in `_extract/`, esclusa da Git.
 ```sh
 python tools/extract-opening.py --rom "percorso/Pokemon.nds" --apicula "percorso/apicula.exe" --output src --work-dir _extract
 ```
+
+La 0.30 completa Lillipup (Azione, Fulmisguardo, Segugio e Morso), aggiunge reazioni anatomiche ai bersagli delle cinque specie e velocità x1/x2/x4 nelle Opzioni. Studio `?lillipup=1`, con bersaglio selezionabile. Matrice19/19 del perimetro livello10 e limiti in [docs/SPECIES-MOVES-030.md](docs/SPECIES-MOVES-030.md).

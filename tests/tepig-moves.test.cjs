@@ -12,7 +12,7 @@ test('Ember trails stay finite and fade out in both field directions at phone an
 });
 test('Tepig selects exactly its four level-10 pairs; shared Tackle remains distinct from Snivy',()=>{
  assert.deepEqual(Object.keys(T.profiles).map(Number).sort((a,b)=>a-b),[33,39,52,316]);
- for(const p of Object.values(T.profiles)){assert.equal(S.select(498,p.id),p);assert.ok(Object.isFrozen(p));assert.equal(S.select(506,p.id),null);}
+ for(const p of Object.values(T.profiles)){assert.equal(S.select(498,p.id),p);assert.ok(Object.isFrozen(p));assert.equal(S.select(572,p.id),null);}
  assert.notEqual(S.select(498,33),S.select(495,33));assert.notDeepEqual(S.sample(T.profiles[33],40),S.sample(S.profiles[33],40));
 });
 test('Tepig body poses are finite, distinct and return every part to rest on both sides',()=>{

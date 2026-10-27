@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const P=require('../src/patrat-moves.js'),S=require('../src/species-moves.js');
 const layout={p1:{x:300,y:380,height:150,w:1000,h:475},p2:{x:640,y:285,height:110,w:1000,h:475}},all=[P.profiles[33],P.profiles[43],P.profiles[44],...Object.values(P.bide)];
 test('Patrat coverage includes four level-10 pairs and three distinct Bide phases',()=>{
- assert.deepEqual(Object.keys(P.profiles).map(Number).sort((a,b)=>a-b),[33,43,44,117]);for(const p of Object.values(P.profiles)){assert.equal(S.select(504,p.id),p);assert.equal(S.select(506,p.id),null);assert.ok(Object.isFrozen(p));}
+ assert.deepEqual(Object.keys(P.profiles).map(Number).sort((a,b)=>a-b),[33,43,44,117]);for(const p of Object.values(P.profiles)){assert.equal(S.select(504,p.id),p);assert.equal(S.select(572,p.id),null);assert.ok(Object.isFrozen(p));}
  assert.equal(S.select(504,117,{phase:1}),P.bide.release);assert.equal(S.select(504,117,{storing:true}),P.bide.store);assert.equal(P.bide.prepare.phase,0);assert.equal(P.bide.release.phase,1);
 });
 test('Patrat poses remain finite throughout all phases, return to rest and lean into contact',()=>{
