@@ -9,7 +9,7 @@ test('native text wraps by glyph advance, preserves paragraphs and splits long w
  assert.equal(format('Natura {ff00:2}Seria{ff00:0}. {0202:1}', ['Alcide',5]),'Natura Seria. 5');
 });
 test('native metadata and images use the release revision without replacing an explicit asset revision',()=>{
- assert.equal(resource('assets/menu/a.png'),'assets/menu/a.png?v=0.26-dev');assert.equal(resource('a.png?v=rom-hash'),'a.png?v=rom-hash');assert.equal(resource('a.png?mode=1'),'a.png?mode=1&v=0.26-dev');
+ assert.equal(resource('assets/menu/a.png'),'assets/menu/a.png?v=0.27-dev');assert.equal(resource('a.png?v=rom-hash'),'a.png?v=rom-hash');assert.equal(resource('a.png?mode=1'),'a.png?mode=1&v=0.27-dev');
 });
 test('native naming limits ten character codes and preserves original special glyphs',()=>{
  const allowed=new Set(['A','É','⑭',' ']);

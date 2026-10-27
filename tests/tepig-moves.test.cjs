@@ -1,6 +1,15 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const T=require('../src/tepig-moves.js'),S=require('../src/species-moves.js');
 const layout={p1:{x:300,y:380,height:150,w:1000,h:475},p2:{x:640,y:285,height:110,w:1000,h:475}};
+test('Ember bursts start at the emission-time muzzle and arrive with the sound impact',()=>{
+ const births=[],origin=f=>{births.push(f);return{x:f,y:100}},target={x:600,y:200};
+ const atBirth=T.emberParticles(38,origin,target,100);assert.equal(atBirth.length,1);assert.equal(atBirth[0].x,38);assert.equal(atBirth[0].y,100);
+ const atImpact=T.emberParticles(65,origin,target,100).find(e=>e.n===0);assert.equal(atImpact.x,600);assert.equal(atImpact.y,200);assert.ok(births.every(f=>f>=38&&f<=61));
+ assert.equal(T.emberParticles(120,origin,target,100).length,0);
+});
+test('Ember trails stay finite and fade out in both field directions at phone and desktop scales',()=>{
+ for(const direction of [-1,1])for(const height of [80,150])for(let f=0;f<=120;f++)for(const e of T.emberParticles(f,()=>({x:direction*300,y:200}),{x:direction*650,y:150},height)){for(const key of ['x','y','angle','size','alpha'])assert.ok(Number.isFinite(e[key]));assert.ok(e.size>0&&e.alpha>=0&&e.alpha<=1);}
+});
 test('Tepig selects exactly its four level-10 pairs; shared Tackle remains distinct from Snivy',()=>{
  assert.deepEqual(Object.keys(T.profiles).map(Number).sort((a,b)=>a-b),[33,39,52,316]);
  for(const p of Object.values(T.profiles)){assert.equal(S.select(498,p.id),p);assert.ok(Object.isFrozen(p));assert.equal(S.select(501,p.id),null);}
@@ -31,6 +40,7 @@ test('muzzle landmark follows the head joint on front and back original composit
  for(const [side,key,r] of [['p1','498-back',[0,-1,-12]],['p2','498-front',[0,-2,-11]]]){
   global.ROM_SPRITE_ANIM.cache[key]={groundBounds:[-25,-40,25,0],data:{maps:[[r]]}};
   const rest=T.muzzle(side,T.sample(T.profiles[52],0,side)),breath=T.muzzle(side,T.sample(T.profiles[52],60,side));assert.ok(Number.isFinite(rest.x)&&Number.isFinite(rest.y));assert.notDeepEqual(rest,breath);assert.ok(side==='p1'?rest.x>0:rest.x<0);
+  assert.equal(rest.x,side==='p1'?.325:-.45);assert.equal(rest.y,side==='p1'?-.425:-.375);
  }global.ROM_SPRITE_ANIM=prior;
 });
 test('actual MoveFX resolves Tepig profiles for attacker only and preserves Snivy selection',async()=>{
