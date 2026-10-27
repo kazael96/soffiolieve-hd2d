@@ -16,6 +16,6 @@
     return lines;
   }
   function format(text,words=[]){return String(text).replace(/\{(?:be[0-9a-f]+|ff00)(?::[^}]*)?\}/gi,'').replace(/\{[0-9a-f]{4}:(\d+)\}/gi,(_,n)=>words[+n]??'').replaceAll('\\n','\n');}
-  function resource(path){if(/[?&]v=/.test(path))return path;const revision=typeof document!=='undefined'?document.documentElement?.dataset?.build:null;return path+(path.includes('?')?'&':'?')+'v='+encodeURIComponent(revision||'0.27-dev');}
+  function resource(path){if(/[?&]v=/.test(path))return path;const revision=typeof document!=='undefined'?document.documentElement?.dataset?.build:null;return path+(path.includes('?')?'&':'?')+'v='+encodeURIComponent(revision||'0.28-dev');}
   const api={width,wrap,format,resource};root.NativeTextLayout=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
