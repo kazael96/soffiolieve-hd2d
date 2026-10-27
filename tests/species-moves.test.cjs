@@ -3,7 +3,7 @@ const S=require('../src/species-moves.js');
 const layout={p1:{x:300,y:380,height:150,w:1000,h:475},p2:{x:640,y:285,height:110,w:1000,h:475}};
 test('Snivy coverage is exactly its four level-10 moves; unimplemented species retain native effects',()=>{
  assert.deepEqual(Object.keys(S.profiles).map(Number).sort((a,b)=>a-b),[22,33,35,43]);
- for(const id of [22,33,35,43]){assert.equal(S.select(495,id).species,495);assert.equal(S.select(501,id),null);}
+ for(const id of [22,33,35,43]){assert.equal(S.select(495,id).species,495);assert.equal(S.select(504,id),null);}
  assert.equal(S.select(495,52),null);
 });
 test('all four choreographies deform named original parts and return to rest on both sides',()=>{
