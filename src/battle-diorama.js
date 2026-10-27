@@ -36,5 +36,5 @@
   // Subtle warm grading and contact depth; leave combatant silhouettes unobstructed.
   const decor=layers[2].getContext('2d'),shade=decor.createRadialGradient(w*.51,h*.48,w*.13,w*.5,h*.5,w*.7);shade.addColorStop(0,'#192b2a00');shade.addColorStop(1,'#10242b30');decor.fillStyle=shade;decor.fillRect(0,0,w,h);return true;
  }
- window.BattleDiorama={prepare,paint,supported};
+ window.BattleDiorama={prepare,paint,supported,camera};
 })();
