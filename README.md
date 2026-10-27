@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.17
+# Soffiolieve HD-2D — demo 0.18
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -6,7 +6,13 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
+## Regole permanenti di sviluppo
+
+Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
+
 ## Questa versione
+
+La 0.18 applica la regola delle uscite senza sparizioni visibili: i personaggi attraversano porte e scale; all’aperto continuano a camminare e vengono rimossi dalla visuale solo dopo due riscontri di invisibilità nel rendering. Conserva gli attori visivi durante il passaggio fra Soffiolieve e Percorso1 e nei salvataggi. Verifiche e limiti: [docs/ACTOR-EXITS-018.md](docs/ACTOR-EXITS-018.md).
 
 La 0.17 completa il contesto della squadra in lotta con Scambia, INFO, MOSTRA MOSSE e dettaglio delle mosse, usando dati vivi della lotta. Corregge frecce e ripetizione della quantità, riordino del menu Y, selezione dei tipi, scorrimento della ricerca e composizione RGB555 di messaggi e habitat. Integra font, lampeggio e ritaglio originali della lista Pokédex e luminosità selettiva delle pagine. Usa i messaggi originali per mosse, statistiche, KO e stati comuni.
 
