@@ -40,6 +40,6 @@
  }
  function frame(context,w,h){const key=[context.id,context.terrain,w,h,revision].join(':');if(frames.has(key))return frames.get(key);const layers=[canvas(w,h),canvas(w,h),canvas(w,h)];for(const l of layers)l.getContext('2d').imageSmoothingEnabled=false;const p=profile(context);if(root.BattleDiorama?.paint(context,layers,w,h)){frames.set(key,layers);if(frames.size>12)frames.delete(frames.keys().next().value);return layers;}if(p.kind==='interior')indoor(context,p,layers,w,h);else outside(context,p,layers,w,h);frames.set(key,layers);if(frames.size>12)frames.delete(frames.keys().next().value);return layers;}
  function set(context){profile(context);active=context;void prepare(context).catch(error=>console.error(error));}
- function draw(c,w,h,visibility={}){if(!active)throw Error('Il luogo della lotta non è stato acquisito');const layers=frame(active,w,h);if(!visibility.hideSky)c.drawImage(layers[0],0,0);if(!visibility.hideGround)c.drawImage(layers[1],0,0);if(!visibility.hideSky)c.drawImage(layers[2],0,0);return true;}
+ function draw(c,w,h,visibility={}){if(!active)throw Error('Il luogo della lotta non è stato acquisito');const layers=frame(active,w,h);if(!visibility.hideSky)c.drawImage(layers[0],0,0);if(!visibility.hideGround)c.drawImage(layers[1],0,0);if(!visibility.hideSky)c.drawImage(layers[2],0,0);root.BattleDiorama?.drawAmbient(c,active,w,h,visibility);return true;}
  root.BattleEnvironment={set,draw,prepare,get context(){return active;}};
 })(window);

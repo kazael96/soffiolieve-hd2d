@@ -1,0 +1,11 @@
+# Pokémon ambientali — 0.22
+
+Patrat sul sentiero e Lillipup nell'erba sono ora rappresentati con le animazioni di attesa originali del pacchetto IRBI, invece dell'immagine statica iniziale. Il primo fotogramma opaco fornisce il riferimento dei piedi; i margini trasparenti del canvas animato non sollevano il Pokémon dal terreno. La base del corpo è y0.02, l'ombra è sul piano XZ a y0.025. Le dimensioni sono adattate per leggere le presenze lontane, senza confonderle con i due combattenti.
+
+Mantiene una sola presenza per variante, in posizione fissa per l'intera lotta: Patrat presso il margine sinistro dell'erba sul sentiero; Lillipup nel margine destro dell'area erbosa. Non vengono aggiunti incontri o bersagli interattivi. Le ombre morbide di contatto usano la prospettiva della scena. La profondità WebGL originale nasconde corpo e ombra dietro erba, cartelli e alberi; la parte bassa può quindi restare naturalmente coperta. Nessun Pokémon ambientale viene aggiunto nella camera.
+
+I tempi della sequenza originale avanzano in tempo reale; le immagini degli osservatori lontani vengono aggiornate a20fps. La geometria e il colore dello scenario restano memorizzati: il passaggio dinamico riutilizza la profondità statica e disegna soltanto ombra e sprite. Dopo un ridimensionamento o un'altra inquadratura ricostruisce la profondità una volta. Sono memorizzati al massimo due canvas dinamici. I combattenti principali mantengono il rendering a ogni fotogramma.
+
+I comandi delle mosse che nascondono il cielo/ambiente nascondono anche gli osservatori; nascondere soltanto il terreno evita di lasciare un'ombra su un piano non visibile. Gli aggiornamenti non spostano il luogo catturato all'inizio della lotta, né modificano l'appoggio dei combattenti della0.21.
+
+Verifica: due nuovi test controllano specie/posizioni e allineamento del piede opaco con il piano del suolo. Controllo nel browser dell'avanzamento dei fotogrammi con posizione stabile, occlusione e assenza di errori; anteprime in battaglia della camera e del sentiero; prova desktop e390×844. Conservata la regressione del motore e della storia. Le sequenze sullo sfondo sono adattamenti HD-2D della posa di battaglia originale, non nuove animazioni originali di esplorazione.
