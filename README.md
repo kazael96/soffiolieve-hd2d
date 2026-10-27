@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.24
+# Soffiolieve HD-2D — demo 0.25
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -11,6 +11,8 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
 
 ## Questa versione
+
+La 0.25 introduce coreografie personalizzate di Snivy per Azione, Fulmisguardo, Frustata e Avvolgibotta: parti del corpo originali, preparazione, esecuzione, recupero e percorsi delle liane. Studio interattivo: `?snivy=1`. Copertura e limiti in [docs/SPECIES-MOVES-025.md](docs/SPECIES-MOVES-025.md).
 
 La 0.24 mostra insieme Patrat e Lillipup nella fascia lontana del Percorso1 e corregge il taglio degli sprite ambientali: canvas più ampio, piedi vincolati al suolo e punti liberi della scena. Sono le due specie selvatiche disponibili nella demo. Audit dei cicli animati e limiti in [docs/BATTLE-AMBIENT-024.md](docs/BATTLE-AMBIENT-024.md).
 
