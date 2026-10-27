@@ -71,3 +71,7 @@ Matrice e prove in [SPECIES-MOVES-028.md](SPECIES-MOVES-028.md): tre coppie di O
 ## Avanzamento animazioni 0.29
 
 Matrice e prove in [SPECIES-MOVES-029.md](SPECIES-MOVES-029.md): quattro coppie di Patrat aggiunte agli starter, per15/19 coppie verificate; restano le quattro di Lillipup.
+
+## Avanzamento animazioni 0.30
+
+Quattro coppie di Lillipup aggiunte: matrice19/19 nel perimetro livello10, reazioni sui cinque rig e velocità in [SPECIES-MOVES-030.md](SPECIES-MOVES-030.md). La versione completa richiederà un inventario ampliato.
