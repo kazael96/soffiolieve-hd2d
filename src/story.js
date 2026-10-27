@@ -1,6 +1,6 @@
 /* Party, save and menu services shared with the original field-event host. */
 (() => {
-  let storage;try{storage=window.SnivyStudioMode?null:localStorage;}catch{storage=null;}
+  let storage;try{storage=window.SpeciesStudioMode?null:localStorage;}catch{storage=null;}
   const state=StoryState.read(storage),preferences=JourneyState.read(storage).state;
   if(window.TrainerProfile&&!state.trainer)state.trainer=TrainerProfile.create();
   const outdoor={...ROM_SCENE,instances:[...ROM_SCENE.instances,...OPENING_ASSETS.scenes.north.instances],permissionGrids:[...ROM_SCENE.permissionGrids,...OPENING_ASSETS.scenes.north.permissionGrids]};
