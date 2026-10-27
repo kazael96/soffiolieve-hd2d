@@ -8,6 +8,9 @@
   const names={7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
+  let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false;
+  const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
+  departures.restore(native.departures,native.zone);
   let eventRunning=false,queued=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
@@ -26,11 +29,11 @@
   }
   function face(id,dir){const n=actor(id);if(!n)return;if(id===255)facing=frames[dir];else pose(n,dir);}
   function putActor(record){
-    const n={...world(record.x,record.z),uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:0};
+    const n={...world(record.x,record.z),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:0};
     n.wander=NpcWalk.create(record,{x:n.x,y:n.y});pose(n,record.direction);npcs.push(n);return n;
   }
   function syncActors(){
-    npcs.splice(0);for(const n of data().actors){
+    const previousActors=[...npcs];npcs.splice(0);for(const n of data().actors){
       if(n.flag&&has(n.flag))continue;if(native.zone===317&&n.x<773)continue;
       // Post-game actors use initial hidden flags from the new-game state.
       if([736,681,682,683,684,685,656,675,817,1230,1143].includes(n.flag))continue;
@@ -43,6 +46,7 @@
       if(value(16511)===1){const n=actor(3);if(n)Object.assign(n,world(781,751));}
       if(value(16512)===2){putActor({id:250,model:7,script:2000,x:787,z:736,direction:0});putActor({id:240,model:134,script:2000,x:789,z:736,direction:1});}
     }
+    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317].includes(actorZone)&&[389,317].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
     state.phase=native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
@@ -53,7 +57,7 @@
     native.flags=[501,679];native.zone=391;native.initialized=true;
     player=world(5,6);facing=3;
   }
-  function captureActors(){native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs);}
+  function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs);}
   function delay(frames){return new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
   function applyRoom(){if(state.scene==='bedroom')renderer.scene=OPENING_ASSETS.scenes[native.roomMess?'bedroomMess':'bedroom'];}
   function cameraTo(target,frames){
@@ -62,7 +66,7 @@
   }
   function fade(to,frames=8,color='#000'){
     let cover=$('fieldFade');if(!cover){cover=document.createElement('div');cover.id='fieldFade';cover.style.cssText='position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0';document.body.append(cover);}
-    cover.style.background=color;cover.style.transition=`opacity ${frames/30}s linear`;cover.style.opacity=String(to);fadeTask=delay(frames);return fadeTask;
+    const revision=++fadeRevision;if(to===0)fieldCovered=false;cover.style.background=color;cover.style.transition=`opacity ${frames/30}s linear`;cover.style.opacity=String(to);fadeTask=delay(frames).then(()=>{if(revision!==fadeRevision)return;cover.style.transition='none';cover.style.opacity=String(to);fieldCovered=to===1;if(fieldCovered)departures.clear();});return fadeTask;
   }
   function showPage(text,speaker=''){
     const d=$('dialogue');$('speakerName').textContent=speaker;$('dialogueTitle').textContent='';$('dialogueText').textContent=text;
@@ -133,7 +137,7 @@
       else if(code>=76&&code<=79){dir=code-76;distance=1;duration=6/30;}
       else if(code===61){duration=2/30;}
       else if(code===63){duration=8/30;}
-      else if(code===69){duration=1/30;n.hidden=true;}
+      else if(code===69){duration=1/30;if(!task.departure){departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;task.departure=true;}const record=departures.records.get(FieldActorExits.identity(n));if(record&&record.plan.kind!=='path'&&record.plan.kind!=='resident')continue;}
       else if(code===75||code===159){duration=16/30;n.emote=code===75?'!':'?';}
       else if(code===181||code===100){
         const gesture=OPENING_GESTURES[n.name];if(!gesture)throw Error('Missing original gesture for '+n.name);
@@ -155,7 +159,7 @@
   function tickAmbient(dt,start){
     ambientTime+=dt;
     while(ambientTime>=1/30){ambientTime-=1/30;
-      for(const n of npcs)NpcWalk.update(n,{start,pose,blocked:(who,p)=>blocked(p.x,p.y)||Math.abs(player.x-p.x)<.75&&Math.abs(player.y-p.y)<.75||npcs.some(other=>other!==who&&NpcWalk.occupies(other,p.x,p.y))});
+      for(const n of npcs)NpcWalk.update(n,{start,pose,blocked:(who,p)=>blocked(p.x,p.y)||departures.occupied(p.x,p.y,who)||Math.abs(player.x-p.x)<.75&&Math.abs(player.y-p.y)<.75||npcs.some(other=>other!==who&&NpcWalk.occupies(other,p.x,p.y))});
     }
     if(!ambientMoving()&&settleWaiters.length){const waiting=settleWaiters;settleWaiters=[];waiting.forEach(done=>done());}
   }
@@ -196,10 +200,10 @@
       case 'TrainerCardGetSex':m.set(a[0],0);break;
       case 'ActorCmdExec':move(v[0],ORIGINAL_EVENTS.scripts[m.bank].movements[a[1]]);break;
       case 'ActorCmdWait':await Promise.all(motions.map(t=>t.promise));break;
-      case 'ActorSetGPos':{const n=actor(v[0]);if(n)Object.assign(n,world(v[1],v[3]));face(v[0],v[4]);break;}
+      case 'ActorSetGPos':{const n=actor(v[0]),before=n&&{...n};if(n)Object.assign(n,world(v[1],v[3]));face(v[0],v[4]);if(n&&v[0]!==255&&renderer.hasPresentedActor?.(n))departures.preserve([before],[n],{covered:fieldCovered,sameField:true});break;}
       case 'ActorSetEyeToEye':{const n=actor(currentActor);if(n){const dx=player.x-n.x,dy=player.y-n.y;face(currentActor,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0);}break;}
       case 'ActorAdd':{const record=data().actors.find(n=>n.id===v[0]);if(record&&!actor(v[0]))putActor(record);break;}
-      case 'ActorDelete':{const index=npcs.findIndex(n=>n.uid===v[0]);if(index>=0)npcs.splice(index,1);break;}
+      case 'ActorDelete':{const n=actor(v[0]);if(n){departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;await departures.wait(n);const index=npcs.indexOf(n);if(index>=0)npcs.splice(index,1);}break;}
       case 'ActorNew':if(!actor(v[3]))putActor({id:v[3],model:v[4],x:v[0],z:v[1],direction:v[2],script:2000});break;
       case 'PlayerGetGPos':m.set(a[0],grid().x);m.set(a[1],grid().z);break;
       case 'PlayerGetDir':m.set(a[0],frames.indexOf(facing));break;
@@ -295,10 +299,10 @@
   }
   async function changeZone(zone,x,z){
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
-    fieldModels?.clear();
+    const restoreField=!fieldCovered;if(restoreField)await fade(1,8);departures.clear();fieldModels?.clear();
     captureActors();native.zone=zone;native.music=data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
     for(const init of data().init||[]){const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
-    captureActors();
+    captureActors();if(restoreField)await fade(0,8);
   }
   const warpDirections={1:1,2:0,3:3,4:2};
   async function enterWarp(w){
@@ -351,7 +355,7 @@
   function step(dt,moved,distance=0){
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
     fieldModels?.tick(dt);
-    try{tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
+    try{departures.tick(dt);tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;
     if(!native.intro&&renderer.ready){run(4,782);return;}
@@ -363,7 +367,7 @@
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>NpcWalk.occupies(n,x,z)),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={departures,visualActors:()=>departures.visible(npcs.filter(n=>!n.hidden),player),showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>NpcWalk.occupies(n,x,z))||departures.occupied(x,z),blackout:()=>changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});
