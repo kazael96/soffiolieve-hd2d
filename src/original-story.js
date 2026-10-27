@@ -353,6 +353,7 @@
   }
   function interact(){if(vm.running||failed)return;const t=target();if(t&&t.script<2000){currentActor=t.n?.uid;return run(t.script-1);}}
   function step(dt,moved,distance=0){
+    if(window.SnivyStudioMode)return;
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
     fieldModels?.tick(dt);
     try{departures.tick(dt);tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
