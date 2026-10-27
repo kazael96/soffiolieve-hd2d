@@ -1,3 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');const c={window:{}};vm.runInNewContext(fs.readFileSync(require.resolve('../src/battle-diorama.js'),'utf8'),c);const {ambientSpecs,ambientQuad}=c.window.BattleDiorama;
 test('ambient species stay limited to the two Route 1 catches and have stable, separate ground positions',()=>{assert.deepEqual(Array.from(ambientSpecs,p=>p.species),['Patrat','Lillipup']);assert.ok(Object.isFrozen(ambientSpecs));for(const p of ambientSpecs){assert.ok(Object.isFrozen(p));assert.ok(p.height>0&&p.height<=1);assert.ok(Number.isFinite(p.x)&&p.z<0);}assert.notEqual(ambientSpecs[0].x,ambientSpecs[1].x);});
 test('ambient billboards place opaque feet on the ground despite the transparent animation canvas margin',()=>{for(const p of ambientSpecs){const v=ambientQuad(p),bottom=v.slice(0,11),top=v.slice(22,33),t=(80-68)/80,y=bottom[1]+(top[1]-bottom[1])*t;assert.ok(Math.abs(y-.02)<1e-10,'Foot pixel68 must meet the ground plane, not the canvas bottom');assert.equal(bottom[2],p.z);assert.ok(Math.abs((top[1]-bottom[1])*52/80-p.height)<1e-10);assert.equal(v.length,66);assert.ok(v.every(Number.isFinite));}});
+test('ambient Pokemon stay deeper, smaller and outside the two battle silhouettes on desktop and phone',()=>{
+ const Ground=require('../src/battle-ground.js'),Diorama=c.window.BattleDiorama;
+ const intersects=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+ for(const spec of ambientSpecs)for(const[w,h]of [[1280,475],[390,490],[844,234]]){const context={id:'route1',terrain:spec.species==='Patrat'?'path':'grass'},view=Diorama.camera(context,w/h),feet=Ground.project(view,[spec.x,.02,spec.z],w,h),height=h*spec.height/(2*view.lens[1]*feet.depth),layout=Ground.layout(w,h,context,view),rect={left:feet.x-height*.7,right:feet.x+height*.7,top:feet.y-height,bottom:feet.y};
+  assert.ok(feet.depth>layout.p2.depth*1.4,'Observers must be behind the opponent, not beside it');assert.ok(height<layout.p2.height*.3,'Observers must look substantially smaller');
+  for(const p of Object.values(layout)){const battle={left:p.x-p.height*.7-8,right:p.x+p.height*.7+8,top:p.y-p.height-8,bottom:p.y+8};assert.equal(intersects(rect,battle),false,'Observers must remain outside the combatants silhouette area');}
+ }
+});
