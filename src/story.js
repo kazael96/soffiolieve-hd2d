@@ -22,7 +22,7 @@
     $('openLab').disabled=!state.starter;
   }
   function save(force=false){
-    if(restarting||battling||window.NativeStory?.locked)return false;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);let saved=encoded===lastSave;
+    if(restarting||renderer.ready===false||renderer.contextLost||renderer.modelsRecovering||battling||window.NativeStory?.locked)return false;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);let saved=encoded===lastSave;
     if(force||encoded!==lastSave){saved=StoryState.write(storage,state);$('saveStatus').textContent=saved?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(saved)lastSave=encoded;}
     Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});
     const changed=Object.fromEntries(Object.keys(lastPreferences).filter(k=>preferences[k]!==lastPreferences[k]).map(k=>[k,preferences[k]]));
