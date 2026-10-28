@@ -16,8 +16,8 @@
     const image=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Mappa Città non disponibile: '+src));i.src=src;});
     const [map,info,font,...cells]=await Promise.all([image('assets/townmap/map.png?v='+TOWNMAP_ASSETS.revision),image('assets/townmap/info.png?v='+TOWNMAP_ASSETS.revision),NativeText.load(),...TOWNMAP_ASSETS.cells.map((_,i)=>image(`assets/townmap/cell-${i}.png?v=${TOWNMAP_ASSETS.revision}`))]);
     if(journalWasOpen&&!$('journal').open)return;$('journal').close();
-    const native=NativeStory.state,visited=new Set([389,...(native.arrived?[397]:[])]),places=TOWNMAP_ASSETS.places.filter(p=>p.params[16]===65535||native.flags.includes(p.params[16]));
-    const player=places.find(p=>p.zone===(native.arrived&&Journey.state.player.y<=-80?397:native.zone===317?317:389))||places[0];
+    const native=NativeStory.state,visited=new Set([389,...(native.arrived?[397]:[]),...(native.route2?[319]:[])]),places=TOWNMAP_ASSETS.places.filter(p=>p.params[16]===65535||native.flags.includes(p.params[16]));
+    const player=places.find(p=>p.zone===(native.zone===319?319:native.arrived&&Journey.state.player.y<=-80?397:native.zone===317?317:389))||places[0];
     let selected=player,cursor=[player.params[4],player.params[5]],view=viewFor(...cursor,1),tick=0,last=performance.now(),request=0,keyTime=0,drag=null,touch=false,zoomMotion=null;const held=new Set();
     const dialog=document.createElement('dialog');dialog.id='townMap';dialog.setAttribute('aria-label','Mappa Città');
     dialog.innerHTML='<div class="townmap-screens"><canvas class="townmap-info" width="256" height="192" role="img"></canvas><canvas class="townmap-map" width="256" height="192" role="img" aria-label="Mappa di Unima" tabindex="0"></canvas></div><div class="townmap-actions"><label>Luogo <select aria-label="Luogo sulla mappa"></select></label><button class="townmap-zoom">Ingrandisci</button><button class="townmap-close">Chiudi</button></div>';

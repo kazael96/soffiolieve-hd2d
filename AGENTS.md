@@ -1,5 +1,11 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Continuità richiesta il 28 ottobre 2026
+
+Per ogni estensione conservare il lavoro precedente: stile HD-2D e riferimenti IRBI, comandi e menu ispirati a Pokémon Nero, controlli mobile, velocità ×1/×2/×4 fuori menu e riavvio con conferma. Preservare le correzioni a illuminazione, texture, blocchi degli eventi, navigazione e rientro di Aralia. Le animazioni personalizzate e le reazioni devono funzionare su entrambi i lati della lotta. Eseguire la suite di regressione e aggiornare inventari e prove per i nuovi contenuti; non dichiarare verificati scenari non collaudati.
+
+L'utente autorizza il merge della PR #25 e delle future PR di questo progetto; questa autorizzazione resta valida senza chiederla nuovamente per ogni PR. Integrare dopo i controlli pertinenti. Estensione corrente autorizzata: eventi di Quattroventi fino all'ingresso nel Percorso 2, conservando i salvataggi esistenti.
+
 Leggere `docs/DEVELOPMENT-RULES.md` prima di modificare il gioco. Le tre regole richieste dall'utente valgono per la demo e per la futura versione completa:
 
 1. Un personaggio che lascia una scena deve uscire dalla visuale o essere realmente occultato prima della rimozione. Vietate sparizioni visibili causate dal semplice rispetto dei tempi/script DS.

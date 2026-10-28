@@ -1,6 +1,13 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {Controller,route,plan}=require('../src/field-actor-exits.js');
 const actor=(name='Belle')=>({name,uid:3,model:134,fieldZone:389,x:-2.5,y:5.5,height:0,frame:0,direction:0,flip:false});
+
+test('generic city men sharing the father sprite remain separate visible identities',()=>{
+ const c=new Controller(),a={...actor('Padre'),fieldZone:397,uid:9},b={...actor('Padre'),fieldZone:397,uid:27,x:4.5};
+ assert.equal(c.visible([a,b],{x:0,y:0}).length,2);
+ c.depart(a,397);assert.equal(c.visible([b],{x:0,y:0}).length,2);
+ const saved=c.save(),loaded=new Controller();loaded.restore(JSON.parse(JSON.stringify(saved)),397);assert.equal(loaded.visible([b],{x:0,y:0}).length,2);
+});
 test('a visible outdoor departure survives logical deletion and never retires on a missing GPU result',()=>{
  const n=actor('Komor'),c=new Controller();c.depart(n,317);n.hidden=true;
  for(let i=0;i<100;i++)c.tick(1/30);

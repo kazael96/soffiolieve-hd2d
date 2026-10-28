@@ -1,7 +1,7 @@
 /* Original IRBI meshes and UVs, reframed as low-camera HD-2D battle dioramas. */
 (()=>{
  const records=new Map(),textures=new Map();let gpu,reusableCanvas;const watched=new WeakSet();
- const supported=c=>c.id==='bedroomMess'||c.id==='route1';
+ const supported=c=>c.id==='bedroomMess'||c.id==='route1'||c.id==='accumula';
  const sub=(a,b)=>a.map((v,i)=>v-b[i]),dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),unit=a=>a.map(v=>v/Math.hypot(...a)),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
  function setup(){
   if(gpu)return gpu;const canvas=reusableCanvas||document.createElement('canvas'),gl=canvas.getContext('webgl',{alpha:true,antialias:true,preserveDrawingBuffer:true});if(!gl)throw Error('WebGL necessario per i fondali originali');
@@ -13,6 +13,7 @@
  }
  function loadTexture(name){if(textures.has(name))return textures.get(name);const {gl}=setup(),record=name.startsWith('ambient:')?{src:'assets/'+name.slice(8)+'-front.png'}:OPENING_ASSETS.textures[name]||ROM_SCENE.textures[name];const promise=(async()=>{if(!record)throw Error('Materiale originale mancante: '+name);const image=await RuntimeAssets.image(window.NativeTextLayout?.resource(record.src)||record.src);if(gl.isContextLost())throw Error('Contesto fondale interrotto');const texture=gl.createTexture();if(!texture)throw Error('Memoria fondale esaurita');gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);return{texture,w:image.width,h:image.height,image};})();textures.set(name,promise);promise.catch(()=>textures.delete(name));return promise;}
  function instances(c){if(c.id==='bedroomMess')return OPENING_ASSETS.scenes.bedroomMess.instances;
+  if(c.id==='accumula')return OPENING_ASSETS.scenes.north.instances.filter(i=>i.model==='map-5'||i.z< -80&&i.x>=-16).map(i=>({...i,z:i.z+96}));
   // South Route 1: original tutorial area and its adjacent northern map, in local coordinates.
   return [...ROM_SCENE.instances.filter(i=>i.model==='map3'||i.model==='prop151'||i.model==='prop154'&&i.z< -16).map(i=>({...i,z:i.z+32})),...OPENING_ASSETS.scenes.north.instances.filter(i=>i.model==='map-4').map(i=>({...i,z:i.z+32}))];
  }
@@ -34,7 +35,8 @@
  }return records.get(id).pending;}
  function camera(c,aspect){const room=c.id==='bedroomMess',portrait=aspect<1.2;let eye,target,fov;
   if(room){eye=portrait?[-10,2.1,-6.3]:[-10,2.4,-3.7];target=[-10,portrait?.25:.05,-11.3];fov=portrait?55:28;}
-  else{const grass=c.terrain==='grass';eye=grass?[4.5,2.2,3]:[4.5,2.7,13];target=grass?[4.5,portrait?-1.5:.15,-12]:[4.5,portrait?-2.5:.4,-7];fov=portrait?55:34;}
+  else if(c.id==='accumula'){eye=[1.5,3.4,16];target=[1.5,.1,-4];fov=portrait?55:34;}
+    else{const grass=c.terrain==='grass';eye=grass?[4.5,2.2,3]:[4.5,2.7,13];target=grass?[4.5,portrait?-1.5:.15,-12]:[4.5,portrait?-2.5:.4,-7];fov=portrait?55:34;}
   const forward=unit(sub(target,eye)),right=unit(cross(forward,[0,1,0])),up=cross(right,forward),t=Math.tan(fov*Math.PI/360);return{eye,forward,right,up,lens:[t*aspect,t]};
  }
  function paint(c,layers,w,h){const record=records.get(c.id);if(!supported(c)||!record?.ready)return false;const {canvas,gl,program,uniforms:u,attrs}=setup();if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.viewport(0,0,w,h);gl.useProgram(program);const view=camera(c,w/h);for(const n of ['eye','forward','right','up'])gl.uniform3fv(u[n],view[n]);gl.uniform2fv(u.lens,view.lens);gl.uniform1f(u.indoor,c.id==='bedroomMess'?1:0);gl.uniform1i(u.image,0);gl.activeTexture(gl.TEXTURE0);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);

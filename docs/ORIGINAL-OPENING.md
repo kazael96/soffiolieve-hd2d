@@ -1,5 +1,7 @@
 # Perimetro: l’inizio di Pokémon Nero
 
+**Estensione 0.35 autorizzata:** il tratto continua attraverso Quattroventi fino all’ingresso nel Percorso 2. Eventi e verifiche in [QUATTROVENTI-035.md](QUATTROVENTI-035.md). Il perimetro 0.12 riportato sotto è storico.
+
 La demo 0.12 parte dalla camera di Alcide e termina all’ingresso di **Quattroventi**
 (Accumula in inglese), dopo il Percorso 1. Centro Pokémon e Team Plasma non sono
 inclusi. Non ampliare questa parte del gioco senza concordarlo con l’utente.

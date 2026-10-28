@@ -1,8 +1,8 @@
-# Soffiolieve HD-2D — demo 0.34
+# Soffiolieve HD-2D — demo 0.35
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
-La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
+Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → ingresso nel Percorso 2**.
+Comprende la visita al Centro Pokémon, il comizio del Team Plasma e la prima lotta con N.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
@@ -11,6 +11,8 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
 
 ## Questa versione
+
+La 0.35 estende la storia fino al Percorso 2, conserva i salvataggi 0.34 e aggiunge interni, personaggi, servizi, fondale urbano, Purrloin e musica originale. Inventario e limiti in [QUATTROVENTI-035.md](docs/QUATTROVENTI-035.md).
 
 La 0.34 riporta Aralia al laboratorio anche dai vecchi salvataggi, riduce le attese a basso framerate e verifica tutte le 19 animazioni personalizzate anche nei turni degli avversari. Dettagli in [docs/ROUTE-BATTLES-034.md](docs/ROUTE-BATTLES-034.md).
 

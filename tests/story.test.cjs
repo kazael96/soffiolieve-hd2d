@@ -6,7 +6,7 @@ test('all three choices preserve the original rival order and elemental matchups
   assert.equal(s.phase,'belle');assert.equal(Story.choose(s,'Tepig'),false);
   assert.equal(Story.rivalStarter(starter,'Belle'),belle);assert.equal(Story.rivalStarter(starter,'Komor'),komor);
   for(const phase of Story.phases.slice(1,-1)){assert.equal(s.phase,phase);assert.equal(Story.advance(s,phase),true);assert.equal(Story.advance(s,phase),false);}
-  assert.equal(s.phase,'arrival');assert.equal(Story.advance(s,'route'),false);
+  assert.equal(s.phase,'route2');assert.equal(Story.advance(s,'route'),false);
  }
 });
 test('story saves are separate from the removed custom chapter',()=>{
