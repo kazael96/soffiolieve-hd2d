@@ -11,6 +11,8 @@
   let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false;
   const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
   departures.restore(native.departures,native.zone);
+  const warmedBanks=new Set();
+  function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
   let eventRunning=false,queued=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
@@ -66,7 +68,7 @@
   }
   function fade(to,frames=8,color='#000'){
     let cover=$('fieldFade');if(!cover){cover=document.createElement('div');cover.id='fieldFade';cover.style.cssText='position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0';document.body.append(cover);}
-    const revision=++fadeRevision;if(to===0)fieldCovered=false;cover.style.background=color;cover.style.transition=`opacity ${frames/30}s linear`;cover.style.opacity=String(to);fadeTask=delay(frames).then(()=>{if(revision!==fadeRevision)return;cover.style.transition='none';cover.style.opacity=String(to);fieldCovered=to===1;if(fieldCovered)departures.clear();});return fadeTask;
+    const revision=++fadeRevision;if(to===0)fieldCovered=false;cover.style.background=color;cover.style.transition=`opacity ${frames/30/(window.GameSpeed?.rate||1)}s linear`;cover.style.opacity=String(to);fadeTask=delay(frames).then(()=>{if(revision!==fadeRevision)return;cover.style.transition='none';cover.style.opacity=String(to);fieldCovered=to===1;if(fieldCovered)departures.clear();});return fadeTask;
   }
   function showPage(text,speaker=''){
     const d=$('dialogue');$('speakerName').textContent=speaker;$('dialogueTitle').textContent='';$('dialogueText').textContent=text;
@@ -137,7 +139,7 @@
       else if(code>=76&&code<=79){dir=code-76;distance=1;duration=6/30;}
       else if(code===61){duration=2/30;}
       else if(code===63){duration=8/30;}
-      else if(code===69){duration=1/30;if(!task.departure){departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;task.departure=true;}const record=departures.records.get(FieldActorExits.identity(n));if(record&&record.plan.kind!=='path'&&record.plan.kind!=='resident')continue;}
+      else if(code===69){duration=1/30;if(!task.departure){departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;task.departure=true;}const record=departures.records.get(FieldActorExits.identity(n));if(record&&!record.plan.background&&record.plan.kind!=='path'&&record.plan.kind!=='resident')continue;}
       else if(code===75||code===159){duration=16/30;n.emote=code===75?'!':'?';}
       else if(code===181||code===100){
         const gesture=OPENING_GESTURES[n.name];if(!gesture)throw Error('Missing original gesture for '+n.name);
@@ -165,7 +167,7 @@
   }
   async function run(entry,bank=data().script){
     if(eventRunning||failed)return;eventRunning=true;resetInput();const before=structuredClone(state);
-    try{await settleAmbient();captureActors();journey.save(true);
+    try{warmBank(bank);await settleAmbient();captureActors();journey.save(true);
       await vm.run(bank,entry);native.intro=true;
       if(bank===778&&entry===13&&queued===1){
         queued=null;const friends=npcs.filter(n=>n.uid===250||n.uid===240);native.zone=317;native.music=data().music;AudioEngine.setScene(native.music);delete native.actors?.[317];
@@ -354,7 +356,7 @@
   function step(dt,moved,distance=0){
     if(window.SpeciesStudioMode)return;
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
-    fieldModels?.tick(dt);
+    warmBank(data().script);fieldModels?.tick(dt);
     try{departures.tick(dt);tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;
