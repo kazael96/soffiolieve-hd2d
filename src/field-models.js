@@ -45,13 +45,12 @@
   class Controller {
     constructor(renderer,assets,audio=()=>{}){
       this.renderer=renderer;this.assets=assets;this.audio=audio;this.loaded=new Map();this.handles=new Map();this.scenes=new WeakMap();this.nextHandle=1;
-      this.ready=Promise.all(Object.values(assets.models).map(async record=>{
-        const model=await root.StarterScene.loadGLB(record.model),g=renderer.gl;
-        model.textures=(model.doc.textures||[]).map(tex=>renderer.upload(model.images[tex.source],false));model.cache=new Map();this.loaded.set(record.key,model);
-      }));
+      this.waiters=[];this.ready=this.load();
       renderer.fieldModels=this;
     }
-    restoreGraphics(){for(const model of this.loaded.values()){model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache.clear();}}
+    async load(){const results=await Promise.allSettled(Object.values(this.assets.models).map(async record=>{if(this.loaded.has(record.key))return;const model=await root.StarterScene.loadGLB(record.model);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache=new Map();this.loaded.set(record.key,model);}));const failed=results.find(r=>r.status==='rejected');this.error=failed?.reason||null;if(this.error){this.renderer.modelsRecovering=true;this.renderer.status?.('Alcuni modelli non sono disponibili. Riprova il caricamento.',()=>this.renderer.contextLost?this.renderer.restoreContext():this.retry());return false;}for(const done of this.waiters.splice(0))done();return true;}
+    async retry(){this.ready=this.load();const okay=await this.ready;if(okay){this.renderer.modelsRecovering=false;if(this.renderer.assetsReady&&!this.renderer.contextLost){this.renderer.ready=true;document.getElementById('loading')?.remove();}}return okay;}
+    restoreGraphics(){for(const model of this.loaded.values()){const gl=this.renderer.gl;for(const t of model.textures||[])if(gl?.isTexture?.(t.texture))gl.deleteTexture(t.texture);for(const groups of model.cache.values())for(const group of groups)if(gl?.isBuffer?.(group.buf))gl.deleteBuffer(group.buf);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache.clear();}}
     records(scene=this.renderer.scene){if(!this.scenes.has(scene))this.scenes.set(scene,targets(scene,this.assets));return this.scenes.get(scene);}
     find(type,x,z){
       // IRBI 0218C484/0218C8C4: first compatible loaded model, inclusive rectangle.
@@ -62,7 +61,7 @@
       const id=this.nextHandle++;this.handles.set(id,target);return id;
     }
     async play(id,animation){
-      await this.ready;const target=this.handles.get(id);if(!target)throw Error('Unknown field model handle '+id);
+      await this.ready;if(this.error)await new Promise(resolve=>this.waiters.push(resolve));const target=this.handles.get(id);if(!target)throw Error('Unknown field model handle '+id);
       const spec=target.record.animations[animation];if(!spec)throw Error('Unknown original model animation '+animation);
       target.resolve?.();target.animation=animation;target.elapsed=0;target.frame=0;target.playing=true;
       target.promise=new Promise(resolve=>target.resolve=resolve);

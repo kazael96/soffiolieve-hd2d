@@ -24,8 +24,7 @@
     return mul([f/aspect,0,0,0,0,f,0,0,0,0,(z+n)/(n-z),-1,0,0,2*z*n/(n-z),0],view);
   }
   async function loadGLB(url){
-    const response=await fetch(url);if(!response.ok)throw Error('Modello iniziale non disponibile: '+url);
-    const raw=await response.arrayBuffer(),header=new DataView(raw);if(header.getUint32(0,true)!==0x46546c67)throw Error('Invalid GLB');
+    const raw=await RuntimeAssets.bytes(url),header=new DataView(raw);if(header.getUint32(0,true)!==0x46546c67)throw Error('Invalid GLB');
     const length=header.getUint32(12,true),doc=JSON.parse(new TextDecoder().decode(new Uint8Array(raw,20,length))),data=new DataView(raw,28+length);
     const cache=new Map();function accessor(index){if(cache.has(index))return cache.get(index);const a=doc.accessors[index],v=doc.bufferViews[a.bufferView],sizes={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16},size=sizes[a.type],types={5126:['getFloat32',4,1],5125:['getUint32',4,4294967295],5123:['getUint16',2,65535],5121:['getUint8',1,255]},[getter,bytes,denom]=types[a.componentType],stride=v.byteStride||size*bytes,offset=(v.byteOffset||0)+(a.byteOffset||0);
       const values=Array.from({length:a.count},(_,i)=>Array.from({length:size},(_,j)=>data[getter](offset+i*stride+j*bytes,true)/(a.normalized?denom:1)));cache.set(index,values);return values;}
@@ -33,7 +32,7 @@
       ...animation.channels.filter(c=>c.target.node!==undefined).map(c=>{const s=animation.samplers[c.sampler];return {node:c.target.node,path:c.target.path,times:accessor(s.input).flat(),values:accessor(s.output),mode:s.interpolation||'LINEAR'};}),
       ...(animation.extensions?.EXT_property_animation?.channels||[]).map(c=>{const s=animation.samplers[c.sampler];return {property:c.target,times:accessor(s.input).flat(),values:accessor(s.output),mode:s.interpolation||'LINEAR'};})
     ]);
-    const images=await Promise.all(doc.images.map(record=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('Texture iniziale non disponibile: '+record.uri));image.src=new URL(record.uri,new URL(url,location.href)).href;})));
+    const images=await Promise.all(doc.images.map(record=>RuntimeAssets.image(new URL(record.uri,new URL(url,location.href)).href)));
     return {doc,accessor,animationSets,animations:animationSets.flat(),images};
   }
   class Scene {
