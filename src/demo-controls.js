@@ -1,0 +1,17 @@
+/* Browser conveniences: direct speed control and explicit new-game confirmation. */
+(()=>{
+ const bar=document.createElement('nav');bar.id='demoControls';bar.setAttribute('aria-label','Comandi demo');bar.innerHTML='<button id="demoSpeed" type="button"></button><button id="demoRestart" type="button" aria-label="Ricomincia la demo">↺ Ricomincia</button>';document.body.append(bar);
+ const speed=bar.querySelector('#demoSpeed'),restart=bar.querySelector('#demoRestart'),home=document.body;
+ function update(){const pending=GameSpeed.pending,value=pending??GameSpeed.rate;speed.textContent='×'+value+(pending!==null?'*':'');speed.setAttribute('aria-label','Velocita gioco ×'+value+(pending!==null?', dalla prossima azione':'')+'. Premi per cambiare');speed.title='Velocita ×1 / ×2 / ×4 (F)'+(pending!==null?' — cambio al termine della mossa':'');}
+ bar.addEventListener('pointerdown',event=>event.preventDefault());bar.addEventListener('keydown',event=>{if(['enter',' ','a','z','b','x'].includes(event.key.toLowerCase()))event.stopPropagation();});
+ GameSpeed.subscribe(update);update();speed.onclick=()=>GameSpeed.cycle();
+ const dialog=document.createElement('dialog');dialog.id='demoRestartConfirm';dialog.setAttribute('aria-labelledby','demoRestartTitle');dialog.innerHTML='<h2 id="demoRestartTitle">Ricominciare la demo?</h2><p>Verranno cancellati i progressi di questa demo su questo browser: squadra, catture e storia.</p><p>Le impostazioni di audio, visuale e velocita rimangono salvate.</p><p id="demoRestartError" role="alert" hidden></p><div><button id="demoRestartCancel" type="button">Annulla</button><button id="demoRestartConfirmButton" type="button">Cancella i progressi e ricomincia</button></div>';home.append(dialog);
+ const cancel=dialog.querySelector('#demoRestartCancel'),confirm=dialog.querySelector('#demoRestartConfirmButton'),error=dialog.querySelector('#demoRestartError');let prior;
+ function close(){dialog.close();window.resetInput?.();if(prior?.isConnected)prior.focus({preventScroll:true});}
+ restart.onclick=()=>{if(dialog.open)return;prior=document.activeElement;error.hidden=true;dialog.showModal();window.resetInput?.();cancel.focus({preventScroll:true});};cancel.onclick=close;dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
+ dialog.addEventListener('keydown',event=>{if(['b','escape'].includes(event.key.toLowerCase())){event.preventDefault();event.stopImmediatePropagation();close();}else if(event.repeat&&['a','z','enter',' '].includes(event.key.toLowerCase())){event.preventDefault();event.stopImmediatePropagation();}});
+ confirm.onclick=()=>{confirm.disabled=true;if(!Journey.restart()){error.textContent='Il salvataggio non puo essere cancellato. Nessun riavvio eseguito: riprova o controlla i permessi del browser.';error.hidden=false;confirm.disabled=false;cancel.focus({preventScroll:true});}};
+ function sync(){const active=[...document.querySelectorAll('dialog[open]')].at(-1),owner=active||home;if(bar.parentNode!==owner)owner.append(bar);bar.hidden=!!active&&active.id!=='dialogue';restart.hidden=!!window.SpeciesStudioMode;}
+ new MutationObserver(sync).observe(home,{subtree:true,childList:true,attributes:true,attributeFilter:['open']});sync();
+ addEventListener('keydown',event=>{if(event.defaultPrevented||event.repeat||event.ctrlKey||event.metaKey||event.altKey||event.key.toLowerCase()!=='f'||event.target.closest?.('input,select,textarea,[contenteditable="true"]'))return;event.preventDefault();GameSpeed.cycle();});
+})();
