@@ -5,16 +5,19 @@
  const outdoor=z=>z===389||z===317;
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
-  const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),queue=[start],previous=new Map([[key(start),null]]);let best=start,bestDistance=Infinity;
-  for(let i=0;i<queue.length&&i<12000;i++){
-   const p=queue[i],distance=Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]);if(distance<bestDistance){best=p;bestDistance=distance;}if(distance===0)break;
-   const dirs=[[0,-1],[0,1],[-1,0],[1,0]].sort((a,b)=>Math.abs(p[0]+a[0]-end[0])+Math.abs(p[1]+a[1]-end[1])-Math.abs(p[0]+b[0]-end[0])-Math.abs(p[1]+b[1]-end[1]));
-   for(const [dx,dy]of dirs){const q=[p[0]+dx,p[1]+dy],id=key(q);if(previous.has(id)||Math.abs(q[0]-start[0])>110||Math.abs(q[1]-start[1])>160||blocked(q[0]+.5,q[1]+.5))continue;previous.set(id,p);queue.push(q);}
+  const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
+  const less=(a,b)=>a.f<b.f||a.f===b.f&&a.h<b.h;
+  const push=node=>{heap.push(node);for(let i=heap.length-1;i>0;){const p=(i-1)>>1;if(!less(heap[i],heap[p]))break;[heap[i],heap[p]]=[heap[p],heap[i]];i=p;}};
+  const pop=()=>{const first=heap[0],last=heap.pop();if(heap.length){heap[0]=last;for(let i=0;;){let child=i*2+1;if(child>=heap.length)break;if(child+1<heap.length&&less(heap[child+1],heap[child]))child++;if(!less(heap[child],heap[i]))break;[heap[i],heap[child]]=[heap[child],heap[i]];i=child;}}return first;};
+  push({p:start,g:0,h:distance(start),f:distance(start)});let best=start,bestDistance=distance(start),visited=0;
+  while(heap.length&&visited<12000){const node=pop(),p=node.p;if(node.g!==cost.get(key(p)))continue;visited++;if(node.h<bestDistance){best=p;bestDistance=node.h;}if(node.h===0){best=p;break;}
+   for(const [dx,dy]of [[0,-1],[0,1],[-1,0],[1,0]]){const q=[p[0]+dx,p[1]+dy],id=key(q),g=node.g+1;if(g>=(cost.get(id)??Infinity)||Math.abs(q[0]-start[0])>110||Math.abs(q[1]-start[1])>160||blocked(q[0]+.5,q[1]+.5))continue;cost.set(id,g);previous.set(id,p);const h=distance(q);push({p:q,g,h,f:g+h});}
   }
   const path=[];for(let p=best;p&&key(p)!==key(start);p=previous.get(key(p)))path.push({x:p[0]+.5,y:p[1]+.5});return path.reverse();
  }
  function plan(n,zone,blocked){
   const portal=(x,y,dx,dy,kind='door')=>({kind,anchor:{x,y},points:[{x,y},{x:x+dx*2.8,y:y+dy*2.8}],clip:kind==='stairs'?[0,1,0,-.04]:[-dx,0,-dy,dx*x+dy*y+(dy<0?1.3:0)]});
+  if(outdoor(zone)&&n.name==='Aralia'){const p=portal(-6.5,-11.5,0,-1),approach={x:-6.5,y:-10.5};p.points=[...route(n,approach,blocked),p.anchor,p.points[1]];p.background=true;p.destination='lab';return p;}
   if(zone===391)return portal(-6.5,-13.5,0,0,'stairs');
   if(zone===390||zone===392)return portal(Math.max(-11.5,Math.min(-9.5,n.x)),-5.5,0,1);
   if(zone===396)return portal(Math.max(-13.5,Math.min(-11.5,n.x)),-4.5,0,1);
@@ -53,7 +56,7 @@
     const sample=this.sample(a);if(!sample)r.zero=0;else if(sample.sequence!==r.sampleSequence){r.sampleSequence=sample.sequence;r.zero=sample.visible?0:r.zero+1;}
     const canRetire=r.plan.kind==='path'?r.travel>=1.5:r.stage==='hold';
     if(canRetire&&r.zero>=2){this.records.delete(key);this.finishPortal(r);r.resolve?.();this.retired.push({name:a.name,zone:r.zone,reason:'rendered-invisible',x:a.x,y:a.y,height:a.height||0,sequence:r.sampleSequence});if(this.retired.length>40)this.retired.shift();continue;}
-    if(r.plan.kind!=='path'&&r.age>15&&!sample)throw Error('Verifica visibilità uscita non disponibile: '+a.name);
+    r.unverified=r.stage==='hold'&&!sample?(r.unverified||0)+dt:0;if(r.plan.kind!=='path'&&r.unverified>5)throw Error('Verifica visibilità uscita non disponibile: '+a.name);
     if(r.error)throw Error(r.error);
     if(r.stage==='walk'){
      const point=r.plan.points[r.index];if(point){const dx=point.x-a.x,dy=point.y-a.y,d=Math.hypot(dx,dy),step=3.75*dt;
@@ -70,10 +73,10 @@
   }
   preserve(old,next,{covered=false,sameField=false}={}){if(covered||!sameField)return;const targets=new Map(next.filter(n=>!n.hidden).map(n=>[identity(n),n]));for(const n of old){const target=targets.get(identity(n));if(!target||Math.hypot(n.x-target.x,n.y-target.y)>.01)this.depart(n,n.fieldZone,{resident:true});}}
   occupied(x,y,except=null){return [...this.records.values()].some(r=>r.key!==(except&&identity(except))&&(r.actor.height||0)>=0&&Math.abs(r.actor.x-x)<.55&&Math.abs(r.actor.y-y)<.55);}
-  wait(n){const r=this.records.get(identity(n));if(!r||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
+  wait(n){const r=this.records.get(identity(n));if(!r||r.plan.background||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
   clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
   save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
-  restore(records,zone){for(const r of records||[]){if(!r?.actor||!r?.plan||!Number.isFinite(r.actor.x)||!Number.isFinite(r.actor.y)||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}
+  restore(records,zone){for(let r of records||[]){if(!r?.actor||!r?.plan||!Number.isFinite(r.actor.x)||!Number.isFinite(r.actor.y)||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;if(r.actor.name==='Aralia'&&outdoor(r.zone)&&r.plan.kind==='path'){r={...r,plan:plan(r.actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};}const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}
  }
  const api={Controller,identity,plan,route};root.FieldActorExits=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
