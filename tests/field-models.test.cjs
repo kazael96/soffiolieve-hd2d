@@ -1,10 +1,10 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'../src');
 function environment(){
- const c={console,URL,TextDecoder,DataView,Uint8Array,Float32Array,Math,Map,WeakMap,Promise,location:{href:'http://localhost/'}};c.window=c;
+ const c={console,URL,TextDecoder,setTimeout,clearTimeout,AbortController,DataView,Uint8Array,Float32Array,Math,Map,WeakMap,Promise,location:{href:'http://localhost/'}};c.window=c;
  c.fetch=async url=>{const data=fs.readFileSync(path.join(root,new URL(url,c.location.href).pathname));return {ok:true,arrayBuffer:async()=>data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)};};
  c.Image=class{set src(url){const data=fs.readFileSync(path.join(root,new URL(url,c.location.href).pathname));this.width=data.readUInt32BE(16);this.height=data.readUInt32BE(20);queueMicrotask(()=>this.onload());}};
- vm.createContext(c);for(const file of ['starter-scene.js','field-model-assets.js','field-models.js','opening-assets.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),c,{filename:file});return c;
+ vm.createContext(c);for(const file of ['runtime-assets.js','starter-scene.js','field-model-assets.js','field-models.js','opening-assets.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),c,{filename:file});return c;
 }
 test('all original field models retain distinct animation sets, finite skinning and native alpha',async()=>{
  const c=environment();let samples=0,changes=0;
