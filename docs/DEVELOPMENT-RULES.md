@@ -79,3 +79,7 @@ Quattro coppie di Lillipup aggiunte: matrice19/19 nel perimetro livello10, reazi
 ## Estensione Quattroventi 0.35
 
 L'utente autorizza la progressione fino all'ingresso nel Percorso2. Inventario e prove in [QUATTROVENTI-035.md](QUATTROVENTI-035.md): nuovo fondale urbano esplicito, uscite della folla/N/Ghecis/Aralia tramite porte e varco, ripresa delle uscite fra le mappe esterne collegate. Le cinque specie ottenibili e le19 coppie iniziali restano invariate; Purrloin è soltanto avversario nella squadra di N, con due profili aggiuntivi (Graffio/Ruggito). Questi due profili non certificano tutte le altre mosse apprendibili da Purrloin. I test nel browser coprono le21 coppie sui due lati e i rapporti distinguono il collaudo visivo dalla verifica del motore.
+
+## Copertura della partita 0.36
+
+Richiesta: tutte le mosse utilizzabili nella demo. Matrice83 coppie in [SPECIES-MOVES-036.md](SPECIES-MOVES-036.md): tutti i learnset per livello delle cinque specie ottenibili (anche oltre10), le due mosse del Purrloin di N, Botta del Minccino del tutorial e Scontro per tutte le sette specie. Restano validi i requisiti di anatomia, reazioni, entrambi i lati, effetti/audio e verifiche. Il laboratorio tecnico con mosse arbitrarie non sostituisce l’inventario della partita.
