@@ -34,7 +34,7 @@ async function drain(c,promise,starter=0,outcome='play'){
  c.testStarter=starter;let done=false,error;Promise.resolve(promise).then(()=>done=true,e=>{done=true;error=e;});
  const messages=[];
  for(let frame=0;!done&&frame<30000;frame++){
-  await Promise.resolve();c.Journey.step(1/30,false);
+  await Promise.resolve();c.tickAudio?.();for(let step=0;step<(c.testSpeed||1);step++)c.Journey.step(1/30,false);
   if(c.lastBattle){const b=c.lastBattle;c.lastBattle=null;if(b.config.story!=='tutorial'){c.lastBattle=b;c.simulate(outcome);c.lastBattle=null;}}
   const d=c.$('dialogue');if(d.open){messages.push(c.$('dialogueText').textContent);
    if(!c.$('starterChoices').hidden){const choices=c.$('starterChoices').children;const i=choices[0]?.textContent==='Snivy'?starter:0;
@@ -47,7 +47,7 @@ async function drain(c,promise,starter=0,outcome='play'){
  if(error)throw error;assert.ok(done,'Original scene did not terminate');
  assert.equal(c.$('world').dataset.eventError,undefined,c.$('world').dataset.eventError);return messages;
 }
-(async()=>{
+if(require.main===module)(async()=>{
  {
   const c=environment(),j=c.Journey;c.NativeStory.state.intro=true;j.state.starter='Snivy';j.state.phase='route';
   j.state.party=[j.pack(c.newStoryMon('Snivy',10),1000),j.pack(c.newStoryMon('Patrat',4),100)];c.potions=2;j.state.pokeballs=5;
@@ -221,3 +221,5 @@ async function drain(c,promise,starter=0,outcome='play'){
   console.log('PASS original scenes',name,outcome);
  }
 })().catch(error=>{console.error(error);process.exitCode=1;});
+
+module.exports={environment,drain};

@@ -44,9 +44,9 @@
   function renderButtons(next){
     BattleHUD.mode(mode,busy,finished);buttons=next;selected=Math.max(0,next.findIndex(b=>!b.disabled));stage.querySelectorAll('button').forEach(b=>b.remove());
     next.forEach((b,i)=>{const el=document.createElement('button');el.className='native-hit';el.setAttribute('aria-label',b.label);el.textContent=b.label;el.disabled=!!b.disabled;Object.assign(el.style,{left:b.x/2.56+'%',top:b.y/1.92+'%',width:b.w/2.56+'%',height:b.h/1.92+'%'});el.onclick=()=>activate(i);el.onfocus=()=>{if(!press)selected=i;draw();};b.element=el;BattleHUD.decorate(el,b,i,finished?'main':mode,resources);stage.append(el);});
-    if(!busy)next[selected]?.element.focus();draw();
+    if(!busy)next[selected]?.element.focus({preventScroll:true});draw();
   }
-  stage.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input'))return;if(press||busy){e.preventDefault();e.stopPropagation();return;}const k=e.key.toLowerCase(),directions={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};if(directions[k]){e.preventDefault();e.stopPropagation();selected=NativeUI.nextButton(buttons,selected,...directions[k]);buttons[selected]?.element.focus();}else if(['enter',' ','z','a'].includes(k)){e.preventDefault();activate(selected);}else if(['escape','b','x'].includes(k)){e.preventDefault();back();}});
+  stage.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input'))return;if(press||busy){e.preventDefault();e.stopPropagation();return;}const k=e.key.toLowerCase();if(e.repeat&&['enter',' ','z','a','b','escape','x'].includes(k)){e.preventDefault();return;}const directions={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};if(directions[k]){e.preventDefault();e.stopPropagation();selected=NativeUI.nextButton(buttons,selected,...directions[k]);buttons[selected]?.element.focus({preventScroll:true});}else if(['enter',' ','z','a'].includes(k)){e.preventDefault();activate(selected);}else if(['escape','b','x'].includes(k)){e.preventDefault();back();}});
   function run(){if(trainer&&!labBattle){notice="Non si può fuggire da una lotta contro un Allenatore!";mode='notice';update();}else $('run').onclick();}
   function update(){
     if(!battling||!ready||!session)return;

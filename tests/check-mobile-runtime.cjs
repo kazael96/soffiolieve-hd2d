@@ -1,0 +1,9 @@
+/* Mobile event matrix: pre/post tutorial, speed x1/x2/x4, sound off/running/interrupted. */
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),{environment,drain}=require('./check-story-runtime.cjs');
+(async()=>{for(const speed of [1,2,4])for(const audio of ['off','running','suspended']){const c=environment(),n=c.NativeStory,j=c.Journey;c.testSpeed=speed;const timers=new Set();let ticks=0,completed=0;c.setInterval=fn=>{timers.add(fn);return fn};c.clearInterval=fn=>timers.delete(fn);vm.runInContext(fs.readFileSync(require.resolve('../src/audio-playback.js'),'utf8'),c);const sources=[];c.tickAudio=()=>{if(++ticks%30===0){for(const fn of [...timers])fn();if(audio==='running')sources.splice(0).forEach(source=>source.onended());}};
+ c.AudioEngine.playSound=()=>{if(audio==='off')return Promise.resolve();const source={stop(){}};sources.push(source);return c.AudioPlayback.ended(source,{state:audio},()=>completed++,{hidden:()=>false});};c.AudioEngine.cry=c.AudioEngine.playSound;
+ await drain(c,n.run(4,782));await drain(c,n.run(8,782));c.player={x:-7.2,y:-13.5};j.step(1,false);await drain(c,n.tryWarp(1,0,-7.1,-13.5));await n.changeZone(392,5,9);await drain(c,n.run(2,784));await n.changeZone(396,4,11);await drain(c,n.run(0,792));await n.changeZone(389,777,741);await drain(c,n.run(11,778));
+ // A hidden wanderer must never keep settleAmbient pending forever.
+ c.npcs.push({name:'Hidden wanderer',uid:999,hidden:true,wander:{phase:4}});c.player={x:4.5,y:-12.5};await drain(c,n.run(13,778));assert.equal(n.state.vars[16508],1);assert.equal(n.locked,false);assert.equal(j.state.pokeballs,5);
+ c.player={x:6.5,y:-73.5};await drain(c,n.run(4,634));assert.equal(n.state.vars[16508],2);assert.equal(n.locked,false);if(audio!=='off')assert.ok(completed>0);console.log('PASS mobile pre/post tutorial speed='+speed+' audio='+audio);
+}})().catch(e=>{console.error(e);process.exitCode=1;});
