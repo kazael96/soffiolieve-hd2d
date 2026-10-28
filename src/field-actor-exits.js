@@ -1,7 +1,7 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
  const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis']);
- const identity=n=>people.has(n.name)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
+ const identity=n=>people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
