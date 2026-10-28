@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.31
+# Soffiolieve HD-2D — demo 0.32
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → arrivo a Quattroventi**.
@@ -11,6 +11,8 @@ La demo si ferma prima degli eventi del Centro Pokémon e del Team Plasma.
 Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
 
 ## Questa versione
+
+La 0.32 aggiunge ↺ Ricomincia con conferma e controllo diretto ×1/×2/×4 (tasto F), senza aprire le Opzioni. Corregge la riscrittura del vecchio salvataggio durante il riavvio. Dettagli in [docs/DEMO-CONTROLS-032.md](docs/DEMO-CONTROLS-032.md).
 
 La 0.31 corregge luce degli interni, giunzioni dei tasselli degli sprite, gestione delle interruzioni grafiche/audio su mobile e navigazione touch/tastiera dei menu. Prove, cause accertate e limiti in [docs/BUGFIXES-031.md](docs/BUGFIXES-031.md).
 
