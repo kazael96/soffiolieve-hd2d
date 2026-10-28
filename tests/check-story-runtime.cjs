@@ -1,8 +1,9 @@
 /* Exercise the actual story controller against real release maps and Gen V battles. */
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');
 const site=path.resolve(process.argv[2]||'_site');
-function environment(){
+function environment({save}={}){
  const elements=new Map(),records=new Map();
+ if(save)records.set('soffiolieve-black-opening-v2',JSON.stringify(save));
  function element(id=''){if(elements.has(id))return elements.get(id);const e={id,style:{},dataset:{},children:[],hidden:false,open:false,checked:false,firstChild:{},classList:{toggle(){},remove(){}},append(...v){this.children.push(...v);},replaceChildren(...v){this.children=[...v];},setAttribute(){},remove(){},showModal(){this.open=true;},close(){this.open=false;},addEventListener(){},focus(){}};if(id)elements.set(id,e);return e;}
  const c={console,Math,Buffer,structuredClone,TextEncoder,TextDecoder,setTimeout:(f)=>{queueMicrotask(f);return 0;},clearTimeout,setInterval(){},clearInterval(){},addEventListener(){},performance,
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
