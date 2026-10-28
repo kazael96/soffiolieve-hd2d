@@ -47,5 +47,6 @@
   }
   function read(storage){try{const raw=storage.getItem(KEY);if(!raw)return fresh();return normalize(JSON.parse(raw))||fresh();}catch{return fresh();}}
   function write(storage,state){try{const normalized=normalize(state);if(!normalized)return false;storage.setItem(KEY,JSON.stringify(normalized));return true;}catch{return false;}}
-  const api={KEY,phases,starters,scenes,objectives,fresh,advance,choose,rivalStarter,register,normalize,read,write};root.StoryState=api;if(typeof module!=='undefined')module.exports=api;
+  function erase(storage){try{if(!storage)return false;storage.removeItem(KEY);return storage.getItem(KEY)==null;}catch{return false;}}
+  const api={erase,KEY,phases,starters,scenes,objectives,fresh,advance,choose,rivalStarter,register,normalize,read,write};root.StoryState=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
