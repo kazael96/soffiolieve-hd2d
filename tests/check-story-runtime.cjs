@@ -9,7 +9,7 @@ function environment({save}={}){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js','pokedex-assets.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],gl:{},upload(){return {};}};
  c.StarterScene={loadGLB:async()=>({doc:{textures:[]},images:[]})};
  for(const file of ['field-model-assets.js','field-models.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
@@ -21,10 +21,10 @@ function environment({save}={}){
  let visibilityFrame=0;c.renderer.actorVisibility=()=>({visible:false,sequence:++visibilityFrame});
  c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
- for(const file of ['original-events.js','field-event-vm.js','phone-assets.js','npc-walk.js','field-actor-exits.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','npc-walk.js','field-actor-exits.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
-  const {config}=c.lastBattle;if(config.trainerId){assert.equal(config.noBlackout,true);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
+  const {config}=c.lastBattle;if(config.trainerId){assert.equal(config.noBlackout,config.trainerId!==64);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,config.trainerId===64?'Purrloin':c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,config.trainerId===64?6:0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
   if(winner==='play')for(let i=0;i<50&&!s.battle.ended;i++)s.act('move 1');else s.battle.win(winner);
   assert.ok(s.battle.ended);c.Journey.afterBattle(s,config.story,null,false);return s;
  };
@@ -88,6 +88,7 @@ if(require.main===module)(async()=>{
   const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;let count=0;
   const allowed=[[0],[3],[2],[1],[0,1,2,3],[2,3],[0,1]],vectors=[[0,-1],[0,1],[-1,0],[1,0]];
   for(const [zone,data] of Object.entries(c.ORIGINAL_EVENTS.zones))for(const b of data.background){
+   if(![317,389,390,391,392,393,394,395,396].includes(+zone))continue; // The new chapter has its own interaction coverage.
    if(b.condition>=2||b.script>=2000)continue;
    assert.ok(c.ORIGINAL_EVENTS.scripts[data.script].supportedEntries.includes(b.script-1),'Background script extracted '+zone+':'+b.script);
    n.state.zone=+zone;c.npcs.splice(0);const [ox,oz]=[317,389].includes(+zone)?[784,752]:[16,16];
@@ -174,6 +175,7 @@ if(require.main===module)(async()=>{
   Object.assign(n.state.vars,{16513:2,16517:1,16504:1,16505:1,16512:2,16508:1});j.state.phase='route';
   const directions=[[0,-1],[0,1],[-1,0],[1,0]],dirs={1:1,2:0,3:3,4:2};let count=0;
   for(const [zone,data] of Object.entries(c.ORIGINAL_EVENTS.zones))for(const w of data.warps){
+   if(![317,389,390,391,392,393,394,395,396].includes(+zone))continue;
    if(!c.ORIGINAL_EVENTS.zones[w.zone])continue;
    await n.changeZone(+zone,5,6);j.step(1,false);
    const [ox,oz]=[389,317].includes(+zone)?[784,752]:[16,16],dir=dirs[w.a],[dx,dz]=directions[dir];
@@ -199,7 +201,7 @@ if(require.main===module)(async()=>{
   j.encounter(.01,true,1);assert.equal(c.lastBattle?.config.story,'wild','First moving step can encounter despite old clock cooldown');
   c.lastBattle=null;n.state.zone=390;j.encounter(10,true,20);assert.equal(c.lastBattle,null,'Indoor coordinates cannot reuse outdoor grass');
   n.state.zone=317;n.state.vars[16508]=2;c.player={x:6.5,y:-80.5};let calls=0;j.encounter=()=>calls++;
-  j.step(1/30,true,1);assert.equal(n.state.arrived,true);assert.equal(calls,0,'Arrival event takes priority over random encounters');c.continue();
+  j.step(1/30,true,1);assert.equal(n.state.arrived,true);assert.equal(calls,0,'Arrival event takes priority over random encounters');
   console.log('PASS original encounter rate integration, indoor exclusion and scene priority');
  }
  for(const [starter,name] of ['Snivy','Tepig','Oshawott'].entries())for(const outcome of ['p1','p2','play']){

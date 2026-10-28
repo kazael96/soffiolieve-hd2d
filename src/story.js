@@ -107,7 +107,7 @@
   }
   function step(dt,moved){}
   function encounter(dt,moved,distance=0){
-    if(state.phase!=='route'||!moved||battling)return;
+    if(phaseIndex()<StoryState.phases.indexOf('route')||!moved||battling)return;
     const onRoute=window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;
     const g=onRoute?outdoor.permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
     const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
@@ -135,7 +135,7 @@
   function discardItem(id,count){if(battling||![4,17].includes(id)||!Number.isInteger(count)||count<=0)return false;const have=id===4?state.pokeballs:potions;if(count>have)return false;if(id===4)state.pokeballs-=count;else potions-=count;save(true);return true;}
   window.Journey={restart,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
   potions=state.potions;renderer.scene=state.scene==='town'?outdoor:OPENING_ASSETS.scenes[state.scene==='bedroom'&&state.original?.roomMess?'bedroomMess':state.scene];player={...state.player};facing=state.facing;
-  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
+  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
   renderer.center=state.scene==='town'?[player.x*.7,player.y+1.5]:[-10,-10];displayPartner();actors();update();
   addEventListener('pagehide',()=>save());document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});setInterval(()=>save(),5000);
 })();

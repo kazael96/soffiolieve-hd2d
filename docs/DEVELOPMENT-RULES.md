@@ -75,3 +75,7 @@ Matrice e prove in [SPECIES-MOVES-029.md](SPECIES-MOVES-029.md): quattro coppie 
 ## Avanzamento animazioni 0.30
 
 Quattro coppie di Lillipup aggiunte: matrice19/19 nel perimetro livello10, reazioni sui cinque rig e velocità in [SPECIES-MOVES-030.md](SPECIES-MOVES-030.md). La versione completa richiederà un inventario ampliato.
+
+## Estensione Quattroventi 0.35
+
+L'utente autorizza la progressione fino all'ingresso nel Percorso2. Inventario e prove in [QUATTROVENTI-035.md](QUATTROVENTI-035.md): nuovo fondale urbano esplicito, uscite della folla/N/Ghecis/Aralia tramite porte e varco, ripresa delle uscite fra le mappe esterne collegate. Le cinque specie ottenibili e le19 coppie iniziali restano invariate; Purrloin è soltanto avversario nella squadra di N, con due profili aggiuntivi (Graffio/Ruggito). Questi due profili non certificano tutte le altre mosse apprendibili da Purrloin. I test nel browser coprono le21 coppie sui due lati e i rapporti distinguono il collaudo visivo dalla verifica del motore.

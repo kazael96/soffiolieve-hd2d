@@ -1,8 +1,8 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre']);
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis']);
  const identity=n=>people.has(n.name)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
- const outdoor=z=>z===389||z===317;
+ const outdoor=z=>[389,317,397,319].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
@@ -17,10 +17,18 @@
  }
  function plan(n,zone,blocked){
   const portal=(x,y,dx,dy,kind='door')=>({kind,anchor:{x,y},points:[{x,y},{x:x+dx*2.8,y:y+dy*2.8}],clip:kind==='stairs'?[0,1,0,-.04]:[-dx,0,-dy,dx*x+dy*y+(dy<0?1.3:0)]});
-  if(outdoor(zone)&&n.name==='Aralia'){const p=portal(-6.5,-11.5,0,-1),approach={x:-6.5,y:-10.5};p.points=[...route(n,approach,blocked),p.anchor,p.points[1]];p.background=true;p.destination='lab';return p;}
+  if([389,317].includes(zone)&&n.name==='Aralia'){const p=portal(-6.5,-11.5,0,-1),approach={x:-6.5,y:-10.5};p.points=[...route(n,approach,blocked),p.anchor,p.points[1]];p.background=true;p.destination='lab';return p;}
   if(zone===391)return portal(-6.5,-13.5,0,0,'stairs');
   if(zone===390||zone===392)return portal(Math.max(-11.5,Math.min(-9.5,n.x)),-5.5,0,1);
   if(zone===396)return portal(Math.max(-13.5,Math.min(-11.5,n.x)),-4.5,0,1);
+  if(zone===398){const p=portal(-9.5,3.5,0,1);p.points=[...route(n,{x:-9.5,y:2.5},blocked),p.anchor,p.points[1]];return p;}
+  if(zone===397){
+   if(n.name==='Aralia'){const p=portal(12.5,-94.5,0,-1);p.points=[...route(n,{x:12.5,y:-93.5},blocked),p.anchor,p.points[1]];return p;}
+   const gate=['N','Ghecis','Komor'].includes(n.name)||[98,99,204].includes(n.model);
+   const doors=gate?[[-15.5,-104.5,-1,0]]:[[-12.5,-91.5,0,-1],[1.5,-105.5,0,-1],[-6.5,-105.5,0,-1],[10.5,-103.5,0,-1]];
+   const d=doors.sort((a,b)=>Math.hypot(n.x-a[0],n.y-a[1])-Math.hypot(n.x-b[0],n.y-b[1]))[0],p=portal(...d);
+   p.points=[...route(n,{x:d[0]-d[2],y:d[1]-d[3]},blocked),p.anchor,p.points[1]];p.background=true;return p;
+  }
   if(zone===389){
    // Lab entrance, or a coherent return to the character's own house.
    if(Math.hypot(n.x+6.5,n.y+11.5)<2.2)return portal(-6.5,-11.5,0,-1);
