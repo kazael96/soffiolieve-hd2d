@@ -29,9 +29,7 @@
     function draw(now){
       const dt=Math.min(.1,(now-last)/1000);last=now;tick+=dt*60;keyTime+=dt;
       if(zoomMotion){const m=zoomMotion;m.time=Math.min(10/30,m.time+dt);const k=m.time/(10/30);view={zoom:m.from.zoom+(m.to.zoom-m.from.zoom)*k,x:m.from.x+(m.to.x-m.from.x)*k,y:m.from.y+(m.to.y-m.from.y)*k};if(k===1){zoomMotion=null;zoom.disabled=false;selectPlace(hit(places,...cursor));}}
-      while(keyTime>=1/30){keyTime-=1/30;let dx=Number(held.has('ArrowRight'))-Number(held.has('ArrowLeft')),dy=Number(held.has('ArrowDown'))-Number(held.has('ArrowUp'));
-        if(!zoomMotion&&(dx||dy)){touch=false;const point=screen(...cursor,view),length=Math.hypot(dx,dy);point[0]=clamp(point[0]+Math.trunc(3*dx/length),0,248);point[1]=clamp(point[1]+Math.trunc(3*dy/length),8,168);cursor=world(...point,view);selectPlace(hit(places,...cursor));}
-      }
+      while(keyTime>=1/30){keyTime-=1/30;moveCursor(Number(held.has('ArrowRight'))-Number(held.has('ArrowLeft')),Number(held.has('ArrowDown'))-Number(held.has('ArrowUp')));}
       a.clearRect(0,0,256,192);a.drawImage(info,0,0);
       if(selected){NativeText.draw(a,font,selected.name,128,48,false,'center');lines(selected.description,28,80);if(visited.has(selected.zone)||selected.params[15]===65535)selected.landmarks.forEach((s,i)=>lines(s,i<3?16:136,128+(i%3)*16));}
       b.fillStyle='#000';b.fillRect(0,0,256,192);const origin=screen(0,0,view);b.drawImage(map,origin[0],origin[1],256*view.zoom,192*view.zoom);
@@ -41,13 +39,14 @@
       if(selected){marker(b,0,128,96,1000);NativeText.draw(b,font,selected.name,16,2);}
       request=requestAnimationFrame(draw);
     }
+    function moveCursor(dx,dy){if(!zoomMotion&&(dx||dy)){touch=false;const point=screen(...cursor,view),length=Math.hypot(dx,dy);point[0]=clamp(point[0]+Math.trunc(3*dx/length),0,248);point[1]=clamp(point[1]+Math.trunc(3*dy/length),8,168);cursor=world(...point,view);selectPlace(hit(places,...cursor));dialog.dataset.cursor=cursor.join(',');}}
     select.onchange=()=>{const p=places.find(p=>p.zone===+select.value);cursor=[p.params[4],p.params[5]];view=viewFor(...cursor,view.zoom);selectPlace(p);void AudioEngine.playSound(1352);bottom.focus();};
     zoom.onclick=()=>{if(zoomMotion)return;const next=view.zoom===1?2:1;zoomMotion={time:0,from:{...view},to:viewFor(...cursor,next)};zoom.disabled=true;zoom.textContent=next===1?'Ingrandisci':'Riduci';dialog.dataset.zoom=String(next);held.clear();selectPlace(null);void AudioEngine.playSound(next===2?1608:1609);bottom.focus();};
     const point=e=>{const r=bottom.getBoundingClientRect();return[(e.clientX-r.left)*256/r.width,(e.clientY-r.top)*192/r.height];};
     bottom.onpointerdown=e=>{if(zoomMotion)return;touch=true;held.clear();const pos=point(e);cursor=world(...pos,view);selectPlace(hit(places,...cursor));drag={pos,view:{...view},moved:false};bottom.setPointerCapture(e.pointerId);bottom.focus();e.preventDefault();};
     bottom.onpointermove=e=>{if(!drag||view.zoom===1||zoomMotion)return;const pos=point(e),dx=pos[0]-drag.pos[0],dy=pos[1]-drag.pos[1];if(Math.hypot(dx,dy)>3)drag.moved=true;if(drag.moved){view.x=clamp(drag.view.x+dx,-128,128);view.y=clamp(drag.view.y+dy,-72,96);}};
     bottom.onpointerup=bottom.onpointercancel=()=>{drag=null;};
-    const key=e=>{if(e.target===select)return;if(e.key.startsWith('Arrow')){e.preventDefault();e.stopImmediatePropagation();held.add(e.key);}else if(['+','=','-'].includes(e.key)){e.preventDefault();zoom.click();}};
+    const key=e=>{if(e.target===select)return;if(e.key.startsWith('Arrow')){e.preventDefault();e.stopImmediatePropagation();if(e.code==='TouchControl')moveCursor(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0,e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0);else held.add(e.key);}else if(['+','=','-'].includes(e.key)){e.preventDefault();zoom.click();}};
     const keyup=e=>held.delete(e.key),blur=()=>held.clear();dialog.addEventListener('keydown',key);addEventListener('keyup',keyup);addEventListener('blur',blur);
     document.body.append(dialog);dialog.showModal();selectPlace(selected);bottom.focus();request=requestAnimationFrame(draw);
     try{await new Promise(resolve=>{q('.townmap-close').onclick=resolve;dialog.addEventListener('cancel',e=>{e.preventDefault();resolve();});});}

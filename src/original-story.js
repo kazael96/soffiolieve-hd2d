@@ -154,7 +154,7 @@
       if(task.elapsed>=duration){if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
-  function ambientMoving(){return npcs.some(n=>n.wander?.phase===4);}
+  function ambientMoving(){return npcs.some(n=>!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
   function tickAmbient(dt,start){
     ambientTime+=dt;
@@ -164,9 +164,8 @@
     if(!ambientMoving()&&settleWaiters.length){const waiting=settleWaiters;settleWaiters=[];waiting.forEach(done=>done());}
   }
   async function run(entry,bank=data().script){
-    if(eventRunning||failed)return;eventRunning=true;resetInput();await settleAmbient();captureActors();journey.save(true);
-    const before=structuredClone(state);
-    try{
+    if(eventRunning||failed)return;eventRunning=true;resetInput();const before=structuredClone(state);
+    try{await settleAmbient();captureActors();journey.save(true);
       await vm.run(bank,entry);native.intro=true;
       if(bank===778&&entry===13&&queued===1){
         queued=null;const friends=npcs.filter(n=>n.uid===250||n.uid===240);native.zone=317;native.music=data().music;AudioEngine.setScene(native.music);delete native.actors?.[317];

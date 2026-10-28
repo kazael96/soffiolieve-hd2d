@@ -51,6 +51,7 @@
       }));
       renderer.fieldModels=this;
     }
+    restoreGraphics(){for(const model of this.loaded.values()){model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache.clear();}}
     records(scene=this.renderer.scene){if(!this.scenes.has(scene))this.scenes.set(scene,targets(scene,this.assets));return this.scenes.get(scene);}
     find(type,x,z){
       // IRBI 0218C484/0218C8C4: first compatible loaded model, inclusive rectangle.

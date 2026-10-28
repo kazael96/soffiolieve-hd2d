@@ -55,7 +55,7 @@
      for(let i=0;i<3;i++)nativeCell(c,a.groups.tabs,r.tabs,i===2?8:i===page?i+3:i,i*40,168);
      for(const [key,index,x]of [['previous',3,144],['next',2,168],['close',0,200],['back',1,232]])nativeCell(c,DEX_BROWSER_ASSETS.groups.detailCommon,r.common,index,x,168);
      nativeCell(c,a.groups.toggle,r.toggles,(NativeSettings.state.registered||[]).includes(shortcut)?1:0,124,172);
-   },buttons,()=>detail>=0?change(page):back(),{drawFocus:false,top,topLabel:'Riepilogo superiore di '+name,key:key=>{if(key==='y'){NativeUI.register(shortcut);change(page,detail);return true;}if(['arrowleft','arrowright'].includes(key)){change((page+1)%2);return true;}if(['arrowup','arrowdown'].includes(key)&&detail<0){adjacent(key==='arrowup'?-1:1);return true;}return false;}});
+   },buttons,()=>detail>=0?change(page):back(),{drawFocus:false,top,topLabel:'Riepilogo superiore di '+name,key:key=>{if(key==='y'){NativeUI.register(shortcut);change(page,detail);return true;}if(['arrowleft','arrowright'].includes(key)){change((page+1)%2);return true;}if(['arrowup','arrowdown'].includes(key)){const delta=key==='arrowup'?-1:1;if(page===0){adjacent(delta);return true;}if(detail>=0){change(page,Math.max(0,Math.min(m.moves.length-1,detail+delta)));return true;}}return false;}});if(page===1&&detail>=0){screen.selected=Math.min(detail,m.moves.length-1);screen.focus();}
  }
  root.NativeSummary={open};
 })(typeof window!=='undefined'?window:globalThis);
