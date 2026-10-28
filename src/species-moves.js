@@ -5,8 +5,9 @@
  const profiles=Object.freeze(Object.fromEntries([
   [33,'Azione',84,38],[43,'Fulmisguardo',100,46],[22,'Frustata',108,51],[35,'Avvolgibotta',138,72]
  ].map(([id,name,frames,impact])=>[id,Object.freeze({species:495,id,name,frames,impact,key:'snivy-'+id})])));
- function select(species,id,context={}){return +species===509?root.PurrloinMoves?.profiles[id]||null:+species===506?root.LillipupMoves?.profiles[id]||null:+species===504?root.PatratMoves?.select(id,context)||null:+species===501?root.OshawottMoves?.profiles[id]||null:+species===498?root.TepigMoves?.profiles[id]||null:+species===495?profiles[id]||null:null;}
+ function select(species,id,context={}){const extra=root.DemoMoves?.select(species,id,context);if(extra)return extra;return +species===509?root.PurrloinMoves?.profiles[id]||null:+species===506?root.LillipupMoves?.profiles[id]||null:+species===504?root.PatratMoves?.select(id,context)||null:+species===501?root.OshawottMoves?.profiles[id]||null:+species===498?root.TepigMoves?.profiles[id]||null:+species===495?profiles[id]||null:null;}
  function sample(p,f,side='p1',miss=false){
+  if(p.nativeEffects)return root.DemoMoves.sample(p,f,side,miss);
   if(p.species===509)return root.PurrloinMoves.sample(p,f,side,miss);
   if(p.species===506)return root.LillipupMoves.sample(p,f,side,miss);
   if(p.species===504)return root.PatratMoves.sample(p,f,side,miss);
@@ -23,19 +24,22 @@
  function pose(p,f,side,attacker,miss,layout){
   const a=sample(p,f,attacker,miss);if(side!==attacker){const q=!miss&&![39,316].includes(p.id)&&!(p.species===504&&(p.id===43||p.id===117&&p.phase!==1))?Math.sin(Math.PI*clamp((f-p.impact)/18)):0;return{x:a.dir*5*q,y:0,scale:1,alpha:1,rotation:p.id===35?.045*q:0};}
   const from=layout[attacker],to=layout[attacker==='p1'?'p2':'p1'],s=Math.min(from.w/1000,from.h/650);
-  return{x:(to.x-from.x)*a.reach/s,y:((to.y-from.y)*a.reach-from.height*a.lift)/s,groundY:(to.y-from.y)*a.reach/s,scale:lerp(1,to.height/from.height,Math.max(0,a.reach)),alpha:1,rotation:a.lean*a.dir,scaleY:1-a.crouch,scaleX:1+a.crouch*.4,pauseAnimation:true,speciesPose:a};
+  const out={x:(to.x-from.x)*a.reach/s,y:((to.y-from.y)*a.reach-from.height*a.lift)/s,groundY:(to.y-from.y)*a.reach/s,scale:lerp(1,to.height/from.height,Math.max(0,a.reach)),alpha:1,rotation:(a.roll||0)+a.lean*a.dir,scaleY:1-a.crouch,scaleX:1+a.crouch*.4,pauseAnimation:true,speciesPose:a};
+  if(a.roll!==undefined){const b=root.ROM_SPRITE_ANIM?.cache[p.species+'-'+(attacker==='p1'?'back':'front')]?.groundBounds,aspect=b?(b[2]-b[0])/(b[3]-b[1]):.75,h=from.height*out.scale*out.scaleY,w=from.height*out.scale*out.scaleX*aspect,theta=a.roll;out.rotation=theta;out.x-=Math.sin(theta)*h*.5/s;out.y+=(Math.cos(theta)*h*.5-(Math.abs(Math.sin(theta))*w+Math.abs(Math.cos(theta))*h)*.5)/s;}
+  return out;
  }
  // Track identities were checked against the original front/back Snivy composites.
  const tracks={front:{head:[0],body:[1],tail:[8,9],arms:[2,3],feet:[4,5]},back:{head:[0],body:[1],tail:[7,8],arms:[2,6],feet:[3,4]}};
- function part(track,back,a){if(!a)return null;if(a.species===509)return root.PurrloinMoves.part(track,back,a);if(a.species===506)return root.LillipupMoves.part(track,back,a);if(a.species===504)return root.PatratMoves.part(track,back,a);if(a.species===501)return root.OshawottMoves.part(track,back,a);if(a.species===498)return root.TepigMoves.part(track,back,a);const map=tracks[back?'back':'front'];let role=Object.keys(map).find(k=>map[k].includes(track)),sign=track%2?1:-1;
+ function part(track,back,a){if(!a)return null;if(a.species===572)return root.DemoMoves?.part(track,back,a)||null;if(a.species===509)return root.PurrloinMoves.part(track,back,a);if(a.species===506)return root.LillipupMoves.part(track,back,a);if(a.species===504)return root.PatratMoves.part(track,back,a);if(a.species===501)return root.OshawottMoves.part(track,back,a);if(a.species===498)return root.TepigMoves.part(track,back,a);const map=tracks[back?'back':'front'];let role=Object.keys(map).find(k=>map[k].includes(track)),sign=track%2?1:-1;
   if(role==='head')return{rotation:a.head*a.dir,y:-a.glare*.8};
   if(role==='tail')return{rotation:a.tail*a.dir,x:-a.wind*.8};
   if(role==='arms')return{rotation:a.arms*sign,y:-a.hit*.5};
   if(role==='feet')return{rotation:a.feet*sign};
   if(role==='body')return{rotation:a.lean*.25*a.dir};return null;
  }
- function timeline(sequence,p){if(p.species===504&&p.kind==='store')return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:[]};const sounds=sequence.audio.filter(e=>e.kind==='sfx'),anchor=(sounds.find(e=>e.target===16)||sounds[0])?.start||0;const map=t=>anchor>0&&t<=anchor?t/anchor*p.impact:p.impact+(t-anchor)/Math.max(1,sequence.frames-anchor)*(p.frames-p.impact);return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:sequence.audio.map(e=>({...e,start:Math.max(0,Math.min(p.frames-1,map(e.start)))}))};}
+ function timeline(sequence,p){if(p.species===504&&p.kind==='store')return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:[]};const sounds=sequence.audio.filter(e=>e.kind==='sfx'),anchor=(sounds.find(e=>e.target===16)||sounds[0])?.start||0;const map=t=>anchor>0&&t<=anchor?t/anchor*p.impact:p.impact+(t-anchor)/Math.max(1,sequence.frames-anchor)*(p.frames-p.impact);return{...sequence,frames:p.frames,nativeFrames:sequence.frames,nativeAnchor:anchor,customImpact:p.impact,audio:sequence.audio.map(e=>({...e,start:Math.max(0,Math.min(p.frames-1,map(e.start)))}))};}
  function draw(c,W,H,x,f,layer){
+  if(x.profile.nativeEffects)return root.DemoMoves.draw(c,W,H,x,f,layer);
   if(x.profile.species===509)return root.PurrloinMoves.draw(c,W,H,x,f,layer);
   if(x.profile.species===506)return root.LillipupMoves.draw(c,W,H,x,f,layer);
   if(x.profile.species===504)return root.PatratMoves.draw(c,W,H,x,f,layer);

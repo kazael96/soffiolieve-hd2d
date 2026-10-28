@@ -15,3 +15,5 @@ Leggere `docs/DEVELOPMENT-RULES.md` prima di modificare il gioco. Le tre regole 
 Questi requisiti dell'utente prevalgono sulla riproduzione letterale della ROM quando servono adattamenti HD-2D. Non alterare le meccaniche di lotta per ottenere un effetto visivo. Conservare copertura, prove e limiti dichiarati; non dichiarare completata una combinazione solo perché esiste un'animazione per il suo moveID.
 
 Ogni nuova scena, specie, fonte di apprendimento o mossa deve aggiornare il relativo inventario e le verifiche previste nel documento. I requisiti non si considerano implementati per il solo fatto di essere documentati.
+
+La richiesta successiva amplia le animazioni a tutte le mosse utilizzabili nella partita della demo: applicare la matrice83 coppie in docs/SPECIES-MOVES-036.md, compresi livelli oltre10, tutorial e Scontro. Conservare il perimetro delle specie ottenibili e non aggiungere mosse illegali per ampliare la copertura.
