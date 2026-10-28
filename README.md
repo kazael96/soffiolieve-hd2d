@@ -96,6 +96,8 @@ Le preferenze di visualizzazione vengono recuperate. Ricomincia richiede conferm
 
 ## Build e pubblicazione
 
+Il [collaudo approfondito](docs/DEEP-TESTING.md) aggiunge stress di input, salvataggi e combattimenti, riprese della storia e un collaudo grafico isolato per il browser. Comando completo: `node scripts/test-deep.cjs _site test-results/deep --python=python3`. I risultati automatici e quelli della GPU/browser rimangono distinti.
+
 `src/` contiene i sorgenti pubblicati e i nuovi asset di questo tratto.
 Gli asset precedenti e il simulatore `battle-sim.js` provengono dalla
 [release v0.8](https://github.com/kazael96/soffiolieve-hd2d/releases/tag/v0.8).

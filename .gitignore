@@ -5,3 +5,4 @@ __pycache__/
 
 _extract/
 *.nds
+test-results/

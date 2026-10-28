@@ -36,6 +36,8 @@ jobs:
           node tests/check-story-runtime.cjs _site
           node tests/check-mobile-runtime.cjs _site
           node tests/check-opponent-runtime.cjs _site
+          node tests/check-checkpoint-stress.cjs _site
+          node tests/check-combat-stress.cjs _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
