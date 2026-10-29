@@ -11,7 +11,7 @@
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
   let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false;
-  const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&[...npcs.filter(n=>!n.hidden),...departures.records.values()].some(n=>{n=n.actor||n;return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
+  const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&fieldActors().some(n=>{return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
   departures.restore(native.departures,native.zone,native);
   const warmedBanks=new Set();
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
@@ -198,12 +198,14 @@
       if(task.elapsed>=duration){if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
+  function fieldActors(){return departures.visible(npcs.filter(n=>!n.hidden),player);}
+  function occupied(x,y){return fieldActors().some(n=>(n.height||0)>=0&&NpcWalk.occupies(n,x,y));}
   function ambientMoving(){return npcs.some(n=>!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
   function tickAmbient(dt,start){
     ambientTime+=dt;
     while(ambientTime>=1/30){ambientTime-=1/30;
-      for(const n of npcs)NpcWalk.update(n,{start,pose,blocked:(who,p)=>blocked(p.x,p.y)||departures.occupied(p.x,p.y,who)||Math.abs(player.x-p.x)<.75&&Math.abs(player.y-p.y)<.75||npcs.some(other=>other!==who&&NpcWalk.occupies(other,p.x,p.y))});
+      const bodies=fieldActors();for(const n of npcs){if(!bodies.includes(n))continue;NpcWalk.update(n,{start,pose,blocked:(who,p)=>blocked(p.x,p.y)||Math.abs(player.x-p.x)<.75&&Math.abs(player.y-p.y)<.75||bodies.some(other=>other!==who&&(other.height||0)>=0&&NpcWalk.occupies(other,p.x,p.y))});}
     }
     if(!ambientMoving()&&settleWaiters.length){const waiting=settleWaiters;settleWaiters=[];waiting.forEach(done=>done());}
   }
@@ -404,7 +406,7 @@
   }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
-    const visible=departures.visible(npcs.filter(n=>!n.hidden),player).filter(n=>n.fieldZone===native.zone&&Number.isFinite(n.script));
+    const visible=fieldActors().filter(n=>n.fieldZone===native.zone&&Number.isFinite(n.script));
     const find=(tile,reach)=>visible.find(n=>{const at=NpcWalk.cell(n);return Math.abs(at.x-player.x)<reach&&Math.abs(at.y-player.y)<reach&&Math.floor(at.x+origin()[0])===tile.x&&Math.floor(at.y+origin()[1])===tile.z;});
     let n=find(front,1.6);
     if(n)return {kind:'actor',n,script:n.script};
@@ -436,7 +438,7 @@
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={departures,visualActors:()=>departures.visible(npcs.filter(n=>!n.hidden),player),showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied:(x,z)=>npcs.some(n=>NpcWalk.occupies(n,x,z))||departures.occupied(x,z),blackout:()=>native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={departures,visualActors:fieldActors,showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});

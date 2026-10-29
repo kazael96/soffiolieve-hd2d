@@ -60,6 +60,12 @@
   async function auto(promise){let done=false,failure;Promise.resolve(promise).then(()=>done=true,e=>{failure=e;done=true;});const start=performance.now();while(!done){if(performance.now()-start>120000)throw Error('Itinerary replay timed out');const d=document.getElementById('dialogue');if(d.open){const choices=document.getElementById('starterChoices');if(!choices.hidden)choices.querySelector('button')?.click();else document.getElementById('dialogueContinue').click();}await wait(20);}if(failure)throw failure;check(!document.getElementById('world').dataset.eventError,document.getElementById('world').dataset.eventError);}
   const person=(name,x,y)=>{const all=NativeStory.visualActors().filter(n=>n.name===name);check(all.length===1,'Duplicate/missing '+name);return Math.hypot(all[0].x-x,all[0].y-y)<.01;};
   try{
+   native.vars[16508]=1;native.flags.push(508);await NativeStory.changeZone(317,788,724);
+   NativeStory.departures.depart({name:'Aralia',uid:2,model:105,fieldZone:317,x:4.5,y:-30.5,height:0,frame:0,direction:0},317);player={x:12.5,y:-92.5};facing=0;resetInput();
+   check(!NativeStory.occupied(12.5,-93.5),'Invisible future destination is solid');
+   try{window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',code:'ArrowUp',bubbles:true,cancelable:true}));await until(()=>player.y< -93.3,'actual movement through the empty future NPC cell',8000);}finally{window.dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowUp',code:'ArrowUp',bubbles:true}));resetInput();}
+   check(Math.hypot(NativeStory.visualActors().find(n=>n.name==='Aralia').x-12.5,NativeStory.visualActors().find(n=>n.name==='Aralia').y+93.5)>5,'The collision test ran after Aralia arrived');
+   NativeStory.departures.clear();native.flags=[501,679];native.actors={};native.actorFlags={};native.vars={16508:0,16513:2,16505:1,16512:2};
    await NativeStory.changeZone(389,788,739);await auto(NativeStory.run(13,778));check(native.vars[16508]===1,'Original catching tutorial missing');
    renderer.storyCamera=[8,-88];await until(()=>person('Aralia',12.5,-93.5)&&person('Komor',8.5,-71.5)&&person('Belle',6.5,-75.5),'next event positions',40000);
    check(!NativeStory.departures.retired.some(r=>['Aralia','Komor','Belle'].includes(r.name)),'An arrival was treated as disappearance');
@@ -70,7 +76,7 @@
    await auto(NativeStory.interact());check(native.zone===398&&native.vars[16507]===1,'Aralia did not lead into the Center');
    const nurse=async()=>{player={x:-8.5,y:-3.5};facing=0;Journey.state.party[0].hp=1;Journey.state.party[0].status='psn';for(const m of Journey.state.party[0].pp)m.left=0;check(Journey.hint().includes('Interagisci'),'Nurse not reachable through the counter');document.getElementById('interact').click();await auto(until(()=>!NativeStory.locked&&Journey.state.party[0].status===''&&Journey.state.party[0].hp>1,'nurse restores party',90000));check(Journey.state.party[0].pp.every(m=>m.left>0),'Nurse did not restore PP');};
    await nurse();check(native.vars[16507]===3,'First healing did not finish the tour');await nurse();renderer.storyCamera=null;await wait(80);drawWorld();shot('Infermiera: interazione dal bancone e cure ripetute',renderer.canvas);
-   return {tutorial:true,arrivals:['Aralia: Centro','Komor: confronto e piazza','Belle: confronto e Centro'],boundaryHandoff:true,nurse:{input:'actual A/touch button',healings:2,hp:true,pp:true,status:true},speed:4};
+   return {emptyFutureTileCrossed:true,tutorial:true,arrivals:['Aralia: Centro','Komor: confronto e piazza','Belle: confronto e Centro'],boundaryHandoff:true,nurse:{input:'actual A/touch button',healings:2,hp:true,pp:true,status:true},speed:4};
   }finally{window.SpeciesStudioMode=true;Journey.step=()=>{};renderer.storyCamera=null;GameSpeed.set(1);}
  }
  panel.querySelector('#qaContinuity').onclick=async()=>{if(running)return;running=true;publish();await ready();await test('real-renderer-itineraries-and-nurse',continuityReplay);running=false;status.textContent='Arrivi e infermiera verificati';publish();};

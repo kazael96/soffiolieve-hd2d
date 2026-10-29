@@ -49,6 +49,21 @@
   // at the field boundary retain the visual until genuinely hidden or offscreen.
   const points=route(n,{x:4.5,y:-82.5},blocked);return {kind:'path',points,clip:null};
  }
+ function savedRecord(r){
+  const point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<=4096&&Math.abs(p.y)<=4096;
+  const a=r?.actor;let p=r?.plan,stage=r?.stage||'walk',index=r?.index??0;
+  if(!point(a)||typeof a.name!=='string'||!a.name.length||a.name.length>80||!Number.isInteger(a.uid)||!Number.isInteger(r.zone))return null;
+  // The documented old Aralia routes are rebuilt from her valid saved pose;
+  // their obsolete path/index must not prevent that compatibility migration.
+  if(r.zone===317&&a.name==='Aralia'&&p&&!p.itineraryVersion&&(['path','resident'].includes(p.kind)||p.destination==='lab')){p={kind:'path',points:[],clip:null,...(p.destination==='lab'?{destination:'lab'}:{})};index=0;stage='walk';}
+  if(!p||!['path','door','stairs','resident','arrival'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(point))return null;
+  if(['door','stairs','arrival'].includes(p.kind)&&!point(p.anchor))return null;
+  if(p.clip!=null&&(!Array.isArray(p.clip)||p.clip.length!==4||!p.clip.every(Number.isFinite)))return null;
+  if(p.kind==='arrival'&&(!Number.isInteger(p.destinationZone)||!Number.isInteger(p.targetUid)))return null;
+  if(!['walk','resident','rejoin','hold','descend','opening'].includes(stage)||!Number.isInteger(index)||index<0||index>p.points.length)return null;
+  const actor=copy(a);actor.fieldZone=Number.isInteger(a.fieldZone)?a.fieldZone:r.zone;actor.height=Number.isFinite(a.height)?a.height:0;actor.frame=Number.isInteger(a.frame)&&a.frame>=0&&a.frame<512?a.frame:0;actor.direction=[0,1,2,3].includes(a.direction)?a.direction:1;
+  return {key:identity(actor),actor,zone:r.zone,plan:p,index,stage,age:Number.isFinite(r.age)&&r.age>=0?r.age:0,travel:Number.isFinite(r.travel)&&r.travel>=0?r.travel:0,opened:r.opened===true};
+ }
  class Controller{
   constructor({blocked=()=>false,obstructed=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,obstructed,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
   depart(n,zone,{covered=false,resident=false}={}){
@@ -103,7 +118,7 @@
   wait(n){const r=this.records.get(identity(n));if(!r||r.plan.background||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
   clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
   save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
-  restore(records,zone,progress={}){for(let r of records||[]){if(!r?.actor||!r?.plan||!Number.isFinite(r.actor.x)||!Number.isFinite(r.actor.y)||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;
+  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(!r||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;
    const lateFriends=(progress.flags||[]).includes(515)||(progress.vars?.[16508]||0)>=2;
    if(r.zone===317&&!r.plan.itineraryVersion&&(r.actor.name==='Aralia'&&['path','resident'].includes(r.plan.kind)||r.actor.name==='Aralia'&&r.plan.destination==='lab'||['Komor','Belle'].includes(r.actor.name)&&(['path'].includes(r.plan.kind)||lateFriends&&r.plan.kind==='resident'))){
     const actor={...r.actor};if(lateFriends&&actor.name!=='Aralia')actor.uid=actor.name==='Komor'?3:4;
@@ -112,7 +127,12 @@
     if(actor.name==='Aralia'&&r.plan.destination==='lab'&&this.blocked(actor.x,actor.y)){actor.x=-6.5;actor.y=-10.5;}
     r={...r,actor,plan:plan(actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};
    }
-   const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}
+   const stage=r.plan.kind==='resident'?'resident':['rejoin','opening'].includes(r.stage)?'walk':r.stage,actor={...r.actor,exitProbe:stage!=='resident'};
+   if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}
+   // Door models/handles belong to this renderer instance, not the save file.
+   // Keep the portal cut but reopen its model before resuming a saved passage.
+   const opened=r.opened&&!(stage==='walk'&&r.plan.kind==='door');
+   this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened,stage});}}
  }
  const api={Controller,identity,plan,route};root.FieldActorExits=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
