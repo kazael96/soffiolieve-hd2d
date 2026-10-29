@@ -433,7 +433,11 @@
     journey.update();if(key!==lastTile){lastTile=key;
     if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
-    for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){run(trigger.script-1);return;}}
+    for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){
+      // The DS places friends instantly; our visible walk must finish first.
+      // Recheck a stationary player without locking input while they arrive.
+      if(native.zone===317&&trigger.script===5){const bodies=fieldActors();if(![3,4].every(id=>{const n=actor(id);return n&&!n.hidden&&bodies.includes(n);})){lastTile='';return;}}
+      run(trigger.script-1);return;}}
     journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}

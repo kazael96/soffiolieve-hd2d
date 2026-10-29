@@ -4,7 +4,7 @@
 
 La suite precedente sulla0.37 passava190 test Node,3 Python e10 fasi automatiche. L’audit aggiunge scenari indipendenti: confronta le collisioni con i corpi effettivamente rappresentati, ricarica durante i passaggi e la riadozione degli attori, ripete rapidamente gli input e altera deliberatamente singoli record di viaggio in copie isolate del salvataggio.
 
-Sono stati riprodotti quattro difetti della0.37 e un caso aggiuntivo di robustezza:
+Sono stati riprodotti cinque difetti della0.37 e un caso aggiuntivo di robustezza:
 
 | Caso | Prima | Correzione0.38 |
 | --- | --- | --- |
@@ -12,6 +12,7 @@ Sono stati riprodotti quattro difetti della0.37 e un caso aggiuntivo di robustez
 | Ricarica durante l’attraversamento di una porta | Il flag aperto era salvato, ma il nuovo renderer non aveva il relativo modello/handle aperto. | Il ritaglio viene conservato e il modello della porta viene riaperto prima di riprendere il movimento. |
 | Ricarica di un residente in riadozione senza attore logico momentaneamente disponibile | Il viaggio diventava un’uscita e il personaggio poteva essere ritirato fuori visuale. | Il residente resta in attesa e viene poi riadottato; l’attesa non costituisce una sparizione. |
 | Errore temporaneo nel caricamento del menu | La promessa fallita rimaneva in cache e i tentativi successivi fallivano subito. | Caricamento limitato e ripetibile, font e Borsa recuperabili, pulizia dei dialoghi incompleti. |
+| Arrivo anticipato al confronto sul Percorso1 | Il dialogo partiva mentre Komor e Belle erano ancora in viaggio. | Il giocatore resta libero fino al loro arrivo; il trigger riparte anche restando fermi. Prova a�1/�2/�4. |
 | Record di viaggio danneggiato, per esempio punti nulli | Poteva provocare un’eccezione e bloccare il caricamento. | Convalida di forma, coordinate, fasi e indici; righe non valide isolate; identità ricostruite e campi transitori esclusi. Rimangono supportate le migrazioni note di Aralia. |
 
 Le prove prima delle correzioni sono conservate nel rapporto locale `reproductions-before.json`, sulla build0.37 effettiva. Non vengono usati salvataggi del giocatore.
