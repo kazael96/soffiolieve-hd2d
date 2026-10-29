@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.36
+# Soffiolieve HD-2D — demo 0.37
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → ingresso nel Percorso 2**.
@@ -11,6 +11,8 @@ Comprende la visita al Centro Pokémon, il comizio del Team Plasma e la prima lo
 Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
 
 ## Questa versione
+
+La 0.37 corregge gli itinerari di Aralia, Komor e Belle verso gli eventi successivi e consente di parlare all’infermiera attraverso il bancone del Centro Pokémon, anche dopo una ricarica. Resta compatibile con i salvataggi precedenti. Dettagli in [CITY-CONTINUITY-037.md](docs/CITY-CONTINUITY-037.md).
 
 La 0.36 completa83 coppie Pokémon–mossa della partita: tutti i livelli delle cinque specie ottenibili, tutorial, avversari e Scontro. Mantiene le21 animazioni precedenti e ne aggiunge62 con pose anatomiche, effetti originali e reazioni sui due lati. Inventario e limiti in [SPECIES-MOVES-036.md](docs/SPECIES-MOVES-036.md).
 

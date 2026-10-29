@@ -12,6 +12,8 @@ Applicare la regola a tutti i percorsi di rimozione e ricostruzione degli attori
 
 Verifica: riprodurre ogni uscita con visuale bassa, zoom supportati, camera ferma e in movimento. Controllare i fotogrammi prima/durante/dopo la rimozione, la conclusione dell'evento e il corretto stato al rientro. Distinguere visibilità effettiva, occlusione e semplice posizione nel rettangolo dello schermo.
 
+La richiesta del29 ottobre2026 aggiunge la continuità narrativa degli spostamenti: Aralia, Komor e Belle devono raggiungere la posizione coerente con il loro prossimo evento. Un personaggio che arriva e aspetta non deve essere eliminato perché fuori inquadratura. La revisione0.37 sostituisce il precedente ritorno di Aralia al laboratorio dopo il tutorial con l’arrivo davanti al Centro di Quattroventi. Inventario e verifiche in [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md).
+
 ## 2. Sfondi delle lotte legati al luogo
 
 Ogni lotta deve usare un ambiente coerente con il luogo fisico in cui inizia: interni, stanze specifiche, erba/percorso e, quando saranno disponibili, città, grotte, acqua, edifici speciali e altri terreni. Anche lotte della storia e tutorial seguono questa regola. Il tipo di avversario non sostituisce il contesto geografico.

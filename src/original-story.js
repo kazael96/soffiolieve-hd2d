@@ -11,8 +11,8 @@
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
   let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false;
-  const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
-  departures.restore(native.departures,native.zone);
+  const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&[...npcs.filter(n=>!n.hidden),...departures.records.values()].some(n=>{n=n.actor||n;return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
+  departures.restore(native.departures,native.zone,native);
   const warmedBanks=new Set();
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
   let eventRunning=false,queued=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
@@ -26,7 +26,7 @@
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   function pose(n,dir,step=0){
-    if(n.fieldZone===397&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y);
+    if([389,317,397,319].includes(n.fieldZone)&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y);
     n.direction=dir;const count=OPENING_SPRITES[n.name]?.length||ROM_SPRITES[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
     else if(count===7){n.frame=[0,2,4,4][dir]+(step===1?1:step===2?(dir<2?1:2):0);n.flip=dir===3||(dir<2&&step===2);}
@@ -55,6 +55,15 @@
       if(value(16511)===1){const n=actor(3);if(n)Object.assign(n,world(781,751));}
       if(value(16512)===2){putActor({id:250,model:7,script:2000,x:787,z:736,direction:0});putActor({id:240,model:134,script:2000,x:789,z:736,direction:1});}
     }
+    // Both towns and Route 1 share the same rendered field. Stage characters
+    // at their next outdoor event before crossing the native map boundary.
+    // These visual neighbours cannot run a script belonging to another map.
+    if(native.zone===317){
+      const adjacent=[];
+      if(has(508)&&!has(520))adjacent.push(6);
+      if(value(16508)>=2&&!has(528))adjacent.push(10);
+      for(const id of adjacent){const record=ORIGINAL_EVENTS.zones[397].actors.find(n=>n.id===id);const n=putActor({...record,script:2000});Object.assign(n,{fieldZone:397,projection:true});}
+    }
     if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319].includes(actorZone)&&[389,317,397,319].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
@@ -66,7 +75,7 @@
     native.flags=[501,679];native.zone=391;native.initialized=true;
     player=world(5,6);facing=3;
   }
-  function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs);}
+  function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs.filter(n=>!n.projection));}
   function delay(frames){return window.GameSpeed?.wait(Math.max(0,frames)*1000/30)||new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
   function applyRoom(){if(state.scene==='bedroom')renderer.scene=OPENING_ASSETS.scenes[native.roomMess?'bedroomMess':'bedroom'];}
   function cameraTo(target,frames){
@@ -210,7 +219,7 @@
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
       if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone(398,7,13);}
-      derivePhase();captureActors();eventRunning=false;journey.save(true);
+      derivePhase();captureActors();if(native.zone===317)syncActors();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
       failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
@@ -395,8 +404,14 @@
   }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
-    const n=npcs.find(n=>{const p=NpcWalk.cell(n);return !n.hidden&&Math.abs(p.x-player.x)<1.6&&Math.abs(p.y-player.y)<1.6&&Math.floor(p.x+origin()[0])===front.x&&Math.floor(p.y+origin()[1])===front.z;});
+    const visible=departures.visible(npcs.filter(n=>!n.hidden),player).filter(n=>n.fieldZone===native.zone&&Number.isFinite(n.script));
+    const find=(tile,reach)=>visible.find(n=>{const at=NpcWalk.cell(n);return Math.abs(at.x-player.x)<reach&&Math.abs(at.y-player.y)<reach&&Math.floor(at.x+origin()[0])===tile.x&&Math.floor(at.y+origin()[1])===tile.z;});
+    let n=find(front,1.6);
     if(n)return {kind:'actor',n,script:n.script};
+    // IRBI's counter tile is behaviour 0xD4. A wall or merely distant actor
+    // does not permit talking through it. The nurse stands one tile beyond it.
+    const wx=front.x+.5-origin()[0],wz=front.z+.5-origin()[1],g=renderer.scene.permissionGrids.find(g=>wx>=g.x-16&&wx<g.x+16&&wz>=g.z-16&&wz<g.z+16);
+    if(g){const i=8+((Math.floor(wz-g.z)+16)*32+Math.floor(wx-g.x)+16)*8;if(g.bytes[i]===0xd4){n=find({x:front.x+dx,z:front.z+dz},2.6);if(n)return {kind:'actor',n,script:n.script};}}
     // Background records use grid X/Z followed by vertical height. Directions
     // 0..3 are N/E/W/S; 4 is any, 5 horizontal and 6 vertical.
     const dir=frames.indexOf(facing),allowed=[[0],[3],[2],[1],[0,1,2,3],[2,3],[0,1]];
