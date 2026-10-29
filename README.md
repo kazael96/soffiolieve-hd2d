@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.40
+# Soffiolieve HD-2D — demo 0.41
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → Percorso 2 → Levantopoli**.
@@ -11,6 +11,8 @@ Comprende la visita al Centro Pokémon, il comizio del Team Plasma, la prima lot
 Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata a tutte le mosse utilizzabili nella demo, ora 139 coppie. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.41 migliora la Borsa in battaglia (icone originali, quantità, margini, pagine e ritorno alla selezione), corregge i volti Interpoké di Komor e Alcide e permette di parlare con Komor prima del comizio. Raggruppa gli script, gli stili e le immagini iniziali per ridurre le richieste, prepara in anticipo il tutorial di cattura e corregge un’attesa infinita causata da un camminatore non presente sul campo. Prove e limiti in [QA-041.md](docs/QA-041.md).
 
 La 0.40 aggiunge scuola, regalo del Pokémon complementare, palestra con tre tende, allenatori e Capopalestra scelto dallo starter, Medaglia Tris e MT83. Seguono Zania, MN01 Taglio, Munna e Team Plasma al Cantiere dei Sogni, restituzione del Fumonirico e traguardo C-Gear offline. Nuove animazioni personalizzate per le specie aggiunte, su entrambi i lati. Inventario e adattamenti in [STRIATON-DREAMYARD-040.md](docs/STRIATON-DREAMYARD-040.md) e [SPECIES-MOVES-040.md](docs/SPECIES-MOVES-040.md).
 

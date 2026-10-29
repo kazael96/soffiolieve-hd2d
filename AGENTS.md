@@ -27,3 +27,5 @@ Richiesta del29 ottobre2026: ogni uscita narrativa di Aralia, Komor e Belle deve
 La 0.39 aggiunge Purrloin ottenibile e porta la matrice a 97 coppie, conservando le precedenti. Applicare docs/ROUTE2-STRIATON-039.md e docs/SPECIES-MOVES-039.md. Il limite della nuova progressione è 15: non abbassare i livelli già superiori presenti nei salvataggi precedenti.
 
 La 0.40 conserva le 97 coppie e aggiunge 42 profili (139 complessivi), con Pansage/Pansear/Panpour, Munna/Musharna e Taglio. Le animazioni del corpo sono adattamenti HD-2D: non chiamarle sequenze scheletriche originali DS. C-Gear è un traguardo narrativo offline; non dichiarare funzioni di rete implementate.
+
+La 0.41 conserva il capitolo 0.40 e corregge caricamento, attese degli eventi, dialogo pre-Plasma di Komor, ritratti Interpoké e Borsa. Conservare il trasporto raggruppato con ripiego alle immagini individuali e la selezione/contesto dei sottomenu. L’estensione richiesta fino a Zefiropoli resta da implementare; non considerarla inclusa nella 0.41. Vedere docs/QA-041.md.

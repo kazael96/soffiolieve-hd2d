@@ -5,8 +5,8 @@
   const messageCanvas=document.createElement('canvas');messageCanvas.id='nativeBattleMessage';messageCanvas.width=384;messageCanvas.height=72;messageCanvas.setAttribute('role','img');$('battle').append(messageCanvas);const messageContext=messageCanvas.getContext('2d');messageContext.imageSmoothingEnabled=false;let lastMessage='';
   BattleHUD.mount(stage,messageCanvas);panel.inert=true;panel.setAttribute('aria-hidden','true');
   const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
-  const resources={},images=new Map();let font,smallFont,battleFont,fontMetrics,moveMetrics,metadata,ready=false,mode='main',buttons=[],selected=0,wasBusy=false,notice=null,bagCategory='medicine',bagItem=17,lastItem=0,press=null,partyIndex=0,partyMove=0;
-  function load(src){if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Grafica lotta non disponibile: '+src));im.src=NativeTextLayout.resource(src);}));return images.get(src);}
+  const resources={},images=new Map(),selectionByMode=new Map();let font,smallFont,battleFont,fontMetrics,moveMetrics,metadata,ready=false,mode='main',buttons=[],selected=0,wasBusy=false,notice=null,bagCategory='medicine',bagPage=0,bagItem=17,lastItem=0,press=null,partyIndex=0,partyMove=0;
+  function load(src){if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{images.delete(src);reject(Error('Grafica lotta non disponibile: '+src));};im.src=NativeTextLayout.resource(src);}));return images.get(src);}
   const loading=(async()=>{
     metadata=await fetch(NativeTextLayout.resource('assets/battle-ui/provenance.json')).then(r=>{if(!r.ok)throw Error('Catalogo interfaccia lotta non disponibile');return r.json();});fontMetrics=metadata.fonts['2'];moveMetrics=metadata.fonts['0'];
     [font,smallFont,battleFont]=await Promise.all([NativeText.load(),load(fontMetrics.hpPalette162.path),load(moveMetrics.battlePalette13.path)]);
@@ -32,9 +32,13 @@
   })().catch(error=>{console.error(error);stage.setAttribute('aria-label',error.message);stage.textContent=error.message;});
   const text=(s,x,y,white=false,align='left')=>NativeText.draw(c,font,String(s),x,y,white,align);
   const rect=(label,x,y,w,h,action,disabled=false)=>({label,x,y,w,h,action,disabled});
-  function choose(next){mode=next;notice=null;update();}
-  function back(){if(busy||press)return;if(mode==='partyContext')return choose('party');if(['partyInfo','partyMoves','partyMoveDetail'].includes(mode))return choose(mode==='partyMoveDetail'?'partyMoves':'partyContext');if(mode==='party'&&session.request()?.forceSwitch?.[0])return;if(mode==='main')return;choose(mode==='itemDetail'?bagCategory:['medicine','balls','statusItems','battleItems'].includes(mode)?'bag':'main');}
-  function bagItems(){return mode==='medicine'?[17,25,26,28,30,155].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):mode==='balls'?[4,3].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):mode==='statusItems'?[22,27].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):[];}
+  function choose(next){selectionByMode.set(mode,selected);if(BattleBag.names[next]&&mode!=='itemDetail'&&mode!=='itemTarget'&&mode!==next)bagPage=0;mode=next;notice=null;update();}
+  function back(){if(busy||press)return;if(mode==='itemTarget')return choose(bagCategory);if(mode==='partyContext')return choose('party');if(['partyInfo','partyMoves','partyMoveDetail'].includes(mode))return choose(mode==='partyMoveDetail'?'partyMoves':'partyContext');if(mode==='party'&&session.request()?.forceSwitch?.[0])return;if(mode==='main')return;choose(mode==='itemDetail'?bagCategory:['medicine','balls','statusItems','battleItems'].includes(mode)?'bag':'main');}
+  function bagView(){return BattleBag.page(BattleBag.inventory(mode,id=>Journey.itemCount(id)),bagPage);}
+  function pageBag(delta){bagPage=bagView().number+delta;update();}
+  function bagIcon(id){const key='item-'+id,path=window.PARTY_DETAIL_ASSETS?.itemMap?.[id]?.src;if(path&&!resources[key]&&!resources[key+'-pending']){resources[key+'-pending']=true;void load(path).then(im=>{resources[key]=im;draw();}).catch(()=>{}).finally(()=>{resources[key+'-pending']=false;});}return resources[key];}
+  function drawBagIcon(id,x,y){const im=bagIcon(id);if(im)c.drawImage(im,Math.round(x+(24-im.width)/2),Math.round(y+(24-im.height)/2));}
+
   function useBagItem(){
     if(BattleMedicine.ids.includes(bagItem)){if(Journey.itemCount(bagItem)>0){lastItem=bagItem;choose('itemTarget');}return;}
     if(trainer){notice='Non si possono catturare i Pokémon degli altri Allenatori!';mode='notice';update();return;}
@@ -42,7 +46,7 @@
   }
   function activate(index){const b=buttons[index];if(!b||b.disabled||press||busy)return;void AudioEngine.playSound(1352);if(mode==='moves'&&index<partner.moves.length){press={kind:'move',index,at:performance.now(),action:b.action};draw();return;}if(['party','itemTarget'].includes(mode)&&index<session.party().length){press={kind:'party',index,at:performance.now(),action:b.action};draw();return;}if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)){press={kind:'app',index,at:performance.now(),action:b.action};draw();return;}b.action();}
   function renderButtons(next){
-    BattleHUD.mode(mode,busy,finished);buttons=next;selected=Math.max(0,next.findIndex(b=>!b.disabled));stage.querySelectorAll('button').forEach(b=>b.remove());
+    BattleHUD.mode(mode,busy,finished);buttons=next;selected=selectionByMode.get(mode)??0;if(!next[selected]||next[selected].disabled)selected=Math.max(0,next.findIndex(b=>!b.disabled));stage.querySelectorAll('button').forEach(b=>b.remove());
     next.forEach((b,i)=>{const el=document.createElement('button');el.className='native-hit';el.setAttribute('aria-label',b.label);el.textContent=b.label;el.disabled=!!b.disabled;Object.assign(el.style,{left:b.x/2.56+'%',top:b.y/1.92+'%',width:b.w/2.56+'%',height:b.h/1.92+'%'});el.onclick=()=>activate(i);el.onfocus=()=>{if(!press)selected=i;draw();};b.element=el;BattleHUD.decorate(el,b,i,finished?'main':mode,resources);stage.append(el);});
     if(!busy)next[selected]?.element.focus({preventScroll:true});draw();
   }
@@ -60,12 +64,12 @@
     }else if(mode==='bag'){
       const names=metadata.battleText.banks['17'],modes=['medicine','balls','statusItems','battleItems'];
       renderButtons([...metadata.bag.categories.map((category,i)=>rect(category.messages.map(id=>names[id]).join(' '),...category.panelRect,()=>{bagCategory=modes[i];choose(bagCategory);})),...(lastItem?[rect(names[8],16,160,200,32,()=>{bagItem=lastItem;bagCategory=[22,27].includes(lastItem)?'statusItems':BattleMedicine.ids.includes(lastItem)?'medicine':'balls';choose('itemDetail');})]:[]),rect('Indietro',216,152,40,40,back)]);
-    }else if(['medicine','balls','statusItems','battleItems'].includes(mode))renderButtons([...bagItems().map((item,i)=>rect(ORIGINAL_EVENTS.itemNames[item.id]+' ×'+item.count,i%2*128,Math.floor(i/2)*48,128,48,()=>{bagItem=item.id;choose('itemDetail');},storyBattle==='tutorial')),rect('Indietro',216,152,40,40,()=>choose('bag'))]);
-    else if(mode==='itemDetail')renderButtons([rect('USA',56,152,152,40,useBagItem,storyBattle==='tutorial'),rect('Indietro',216,152,40,40,back)]);
+    }else if(BattleBag.names[mode]){const view=bagView();bagPage=view.number;renderButtons([...view.items.map(item=>rect(ORIGINAL_EVENTS.itemNames[item.id]+' ×'+item.count,...item.rect,()=>{bagItem=item.id;choose('itemDetail');},storyBattle==='tutorial')),rect('Pagina precedente',4,156,32,32,()=>pageBag(-1),!view.previous),rect('Pagina successiva',44,156,32,32,()=>pageBag(1),!view.next),rect('Indietro',220,156,32,32,()=>choose('bag'))]);}
+    else if(mode==='itemDetail')renderButtons([rect('USA',56,152,152,40,useBagItem,storyBattle==='tutorial'||!Journey.itemCount(bagItem)),rect('Indietro',216,152,40,40,back)]);
     else if(mode==='party'||mode==='itemTarget'){
       const item=mode==='itemTarget';renderButtons([...session.party().map((p,i)=>rect(p.name,...resources.partyData.slots[i].rect,()=>{
         if(item){session.potionTarget=p.index;session.potionItem=bagItem;turn(null,'potion');}else {partyIndex=i;choose('partyContext');}
-      },item&&!BattleMedicine.canUse(bagItem,p))),...(!forced?[rect('Indietro',188,164,64,28,()=>choose(item?'medicine':'main'))]:[])]);
+      },item&&!BattleMedicine.canUse(bagItem,p))),...(!forced?[rect('Indietro',188,164,64,28,()=>choose(item?bagCategory:'main'))]:[])]);
     }else if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode))renderPartyPageButtons();
     else if(mode==='notice')renderButtons([rect('Continua',0,0,256,192,()=>choose('main'))]);
   }
@@ -98,10 +102,10 @@
         c.drawImage(resources['bag-categories'],0,0);const names=metadata.battleText.banks['17'];
         metadata.bag.categories.forEach(category=>{const w=metadata.bag.windows[category.window];category.messages.forEach((id,i)=>text(names[id],w.pixelRect[0]+w.pixelRect[2]/2,w.pixelRect[1]+i*16,true,'center'));});
         if(lastItem)text(names[8],120,168,true,'center');
-      }else if(['medicine','balls','statusItems','battleItems'].includes(mode)){
-        c.drawImage(resources['bag-list'],0,0);bagItems().forEach((item,i)=>{const x=i%2*128,y=Math.floor(i/2)*48;text(ORIGINAL_EVENTS.itemNames[item.id],x+8,y+8,true);text('×'+item.count,x+104,y+32,true,'right');});
+      }else if(BattleBag.names[mode]){
+        c.drawImage(resources['bag-list'],0,0);const view=bagView();for(let i=view.items.length;i<6;i++){c.fillStyle='#182329b0';c.fillRect(8+i%2*128,8+Math.floor(i/2)*48,112,32);}for(const item of view.items){const [x,y]=item.rect;drawBagIcon(item.id,x+2,y+8);const label=ORIGINAL_EVENTS.itemNames[item.id],width=NativeTextLayout.width(label,POKEDEX_ASSETS.font);c.save();c.translate(x+30,y+8);c.scale(Math.min(1,84/width),1);text(label,0,0,true);c.restore();text('×'+item.count,x+108,y+24,true,'right');}if(!view.items.length)text('Nessuno strumento',128,64,true,'center');text(BattleBag.names[mode]+' '+(view.number+1)+'/'+view.pages,148,168,true,'center');c.fillStyle='#182329a0';if(!view.previous)c.fillRect(4,156,32,32);if(!view.next)c.fillRect(44,156,32,32);
       }else if(mode==='itemDetail'){
-        c.drawImage(resources['bag-detail'],0,0);text(ORIGINAL_EVENTS.itemNames[bagItem],56,32,true);text('×'+Journey.itemCount(bagItem),200,32,true,'right');
+        c.drawImage(resources['bag-detail'],0,0);drawBagIcon(bagItem,16,24);text(ORIGINAL_EVENTS.itemNames[bagItem],56,32,true);text('×'+Journey.itemCount(bagItem),200,32,true,'right');
         NativeTextLayout.wrap(MENU_ASSETS.itemDescriptions[bagItem]||'',POKEDEX_ASSETS.font,224).slice(0,3).forEach((line,i)=>text(line,16,72+15*i,true));text('USA',108,168,true,'center');
       }else if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)){drawPartyPage();
       }else if(mode==='party'||mode==='itemTarget'){
@@ -180,5 +184,5 @@
 
   function itemTarget(s){const original=s.battle.runAction;s.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoPotion'){const target=this.p1.pokemon[(s.potionTarget||action.pokemon.position+1)-1];s.potionTarget=null;BattleMedicine.apply(this,s.potionItem||17,target);return;}return original.call(this,action);};}
 
-  window.BattleScreen={update,cards,tick,reset(){mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,loading};
+  window.BattleScreen={update,cards,tick,reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,loading};
 })();

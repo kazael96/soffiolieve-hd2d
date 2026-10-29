@@ -19,6 +19,8 @@
   const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&fieldActors().some(n=>{return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
   departures.restore(native.departures,native.zone,native);
   const warmedBanks=new Set();
+  let tutorialWarm=null;
+  function warmTutorial(){if(native.zone!==317||value(16508)>=1||tutorialWarm||!window.BattleEnvironment||!window.ROM_SPRITE_ANIM)return;tutorialWarm=Promise.all([BattleEnvironment.prepare(Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass'})),ROM_SPRITE_ANIM.prepare([{id:572,back:true},{id:504,back:false}]),window.NativeCapture?.preload(),window.MoveFX?.preload(1),window.AudioEngine?.preloadMove(1,{p1:572,p2:504})]).catch(()=>{tutorialWarm=null;});}
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
   let eventRunning=false,queued=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
@@ -45,7 +47,7 @@
   function syncActors(){
     const previousActors=[...npcs];npcs.splice(0);for(const n of data().actors){
       if(n.flag&&has(n.flag))continue;if(native.zone===317&&n.x<773)continue;
-      if(native.zone===397&&value(16507)<3&&[521,523,524,525,528,637,638,1106,1114].includes(n.flag))continue;
+      if(native.zone===397&&value(16507)<3&&[521,523,524,525,637,638,1106,1114].includes(n.flag))continue;
       if(native.zone===397&&[1106,1114].includes(n.flag))continue;
       if(native.zone===319&&[8195].includes(n.model))continue;
       if(native.zone===6&&[13,14].includes(n.id))continue;
@@ -213,7 +215,7 @@
   }
   function fieldActors(){return departures.visible(npcs.filter(n=>!n.hidden),player);}
   function occupied(x,y){return fieldActors().some(n=>!n.gimmick&&(n.height||0)>=0&&NpcWalk.occupies(n,x,y));}
-  function ambientMoving(){return npcs.some(n=>!n.hidden&&n.wander?.phase===4);}
+  function ambientMoving(){const bodies=fieldActors();return npcs.some(n=>bodies.includes(n)&&!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
   function tickAmbient(dt,start){
     ambientTime+=dt;
@@ -472,11 +474,12 @@
     return null;
   }
   async function cutTree(n){if(eventRunning)return;eventRunning=true;try{if(!state.party.some(p=>p.pp.some(m=>m.id===15))){await showPage('Questo albero può essere tagliato con la mossa Taglio.');return;}await showPage('Vuoi usare Taglio?');if(await choice(['SÌ','NO'])!==0)return;await showPage('Il Pokémon usa Taglio!');await delay(12);native.dreamyardTreeCut=true;n.hidden=true;captureActors();}finally{eventRunning=false;journey.save(true);}}
-  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return message(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152].includes(native.zone)&&t.script>=3000&&t.script<4000)return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if([398,8].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
+  async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152].includes(native.zone)&&t.script>=3000&&t.script<4000)return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if([398,8].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
   function step(dt,moved,distance=0){
     if(window.SpeciesStudioMode||failed)return;
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
-    warmBank(data().script);fieldModels?.tick(dt);
+    warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
     try{departures.tick(dt);tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;

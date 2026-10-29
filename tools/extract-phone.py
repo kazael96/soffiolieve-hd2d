@@ -39,7 +39,7 @@ def cells(pal,char,cell):
 dest=args.output/'assets/phone';dest.mkdir(parents=True,exist_ok=True)
 catalog={}
 # Face-cell resources and full portraits have distinct ordering in the archive.
-for name,portrait,cell_index in [('Alcide',2,3),('Komor',3,2),('Belle',4,5),('Aralia',0,0)]:
+for name,portrait,cell_index in [('Alcide',2,2),('Komor',3,3),('Belle',4,5),('Aralia',0,0)]:
  base=render(24+portrait*2,18+portrait);parts=cells(39+cell_index*4,40+cell_index*4,41+cell_index*4);paths=[]
  for blink in range(3):
   for mouth in range(3):
