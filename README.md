@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.39
+# Soffiolieve HD-2D — demo 0.40
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → Percorso 2 → Levantopoli**.
@@ -8,9 +8,11 @@ Comprende la visita al Centro Pokémon, il comizio del Team Plasma, la prima lot
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata a tutte le mosse utilizzabili nella demo, ora 97 coppie. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata a tutte le mosse utilizzabili nella demo, ora 139 coppie. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.40 aggiunge scuola, regalo del Pokémon complementare, palestra con tre tende, allenatori e Capopalestra scelto dallo starter, Medaglia Tris e MT83. Seguono Zania, MN01 Taglio, Munna e Team Plasma al Cantiere dei Sogni, restituzione del Fumonirico e traguardo C-Gear offline. Nuove animazioni personalizzate per le specie aggiunte, su entrambi i lati. Inventario e adattamenti in [STRIATON-DREAMYARD-040.md](docs/STRIATON-DREAMYARD-040.md) e [SPECIES-MOVES-040.md](docs/SPECIES-MOVES-040.md).
 
 La 0.39 aggiunge Percorso 2, chiamata della mamma e Scarpe da Corsa, tre allenatori, nuova sfida con Belle, Purrloin catturabile, strumenti originali e Centro Pokémon di Levantopoli. Conserva le animazioni precedenti, aggiunge il repertorio di Purrloin e verifica le chiamate Interpoké nei tre formati. Inventario e limiti in [ROUTE2-STRIATON-039.md](docs/ROUTE2-STRIATON-039.md) e [SPECIES-MOVES-039.md](docs/SPECIES-MOVES-039.md).
 

@@ -1,7 +1,7 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis']);
- const identity=n=>people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello']);
+ const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
@@ -29,6 +29,10 @@
    }
   }
   if(zone===319){if(n.name==='Mamma'){const p=portal(-22.5,-104.5,1,0);p.points=[...route(n,{x:-23.5,y:-104.5},blocked),p.anchor,p.points[1]];p.background=true;return p;}if(n.name==='Belle')return arrival(20.5,-171.5,6,251,'dreamyard-gate');}
+  if(zone===6){const p=portal(n.name==='Zania'?5.5:4.5,n.name==='Zania'?-157.5:-165.5,0,-1);p.points=[...route(n,{x:p.anchor.x,y:p.anchor.y+1},blocked),p.anchor,p.points[1]];return p;}
+  if(zone===9)return portal(-7.5,-13.5,0,0,'stairs');
+  if(zone===15)return arrival(-6.5,-13.5,15,5,'school-wait');
+  if(zone===152){if(n.name==='Belle')return arrival(15.5,11.5,152,1,'dreamyard-search');if(n.name==='Zania')return {kind:'path',points:[...route(n,{x:-7.5,y:10.5},blocked),{x:-36,y:10.5}],clip:null,background:true,destination:'fennel-house'};const points=[...route(n,{x:11.5,y:-5.5},blocked),{x:11.5,y:-25.5}];return {kind:'path',points,clip:null};}
   if(zone===391)return portal(-6.5,-13.5,0,0,'stairs');
   if(zone===390||zone===392)return portal(Math.max(-11.5,Math.min(-9.5,n.x)),-5.5,0,1);
   if(zone===396)return portal(Math.max(-13.5,Math.min(-11.5,n.x)),-4.5,0,1);

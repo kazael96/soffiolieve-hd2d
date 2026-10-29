@@ -50,12 +50,12 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.39', 'revision': revision,
+            'version': '0.40', 'revision': revision,
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes,
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)
-    print(f"Built Soffiolieve 0.39 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.40 ({revision}) in {target}")
 
 
 if __name__ == '__main__':

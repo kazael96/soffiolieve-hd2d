@@ -36,25 +36,27 @@ const assert=require('node:assert/strict'),{environment,drain}=require('./check-
   const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;n.state.arrived=true;
   j.state.starter='Tepig';j.state.party=[j.pack(c.newStoryMon('Tepig',7),300)];Object.assign(n.state.vars,{16506:2,16507:3});
   n.state.flags=n.state.flags.filter(f=>![522,523,524,525,528].includes(f));await n.changeZone(397,790,657);c.testSpeed=4;
-  await drain(c,n.run(9,794),1,outcome);assert.equal(n.state.vars[16506],3);assert.equal(j.state.phase,'nextRoute');
-  if(outcome==='p2'){assert.equal(n.state.zone,398);assert.equal(j.state.party[0].hp,j.unpack(j.state.party[0]).max);assert.equal(j.state.money,2944);}
+  await drain(c,n.run(9,794),1,outcome);
+  if(outcome==='p2'){assert.equal(n.state.vars[16506],2,'A blackout cannot complete N victory-only instructions');assert.equal(j.state.phase,'plasma');assert.equal(n.state.zone,398);assert.equal(j.state.party[0].hp,j.unpack(j.state.party[0]).max);assert.equal(j.state.money,2944);await n.changeZone(397,790,657);await drain(c,n.run(9,794),1,'p1');}
+  assert.equal(n.state.vars[16506],3);assert.equal(j.state.phase,'nextRoute');
   console.log('PASS N '+outcome+' at x4, story completion and blackout recovery');
  }
  {
   const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;n.state.arrived=true;
   j.state.starter='Snivy';j.state.party=[j.pack(c.newStoryMon('Snivy',7),300)];
   Object.assign(n.state.vars,{16506:3,16507:3});n.state.flags.push(520,521,522,523,524,525,528,637);
+  n.state.trainerWins=[7,8,9,10];Object.assign(n.state.vars,{16514:4,16532:5});
   const dirs={1:1,2:0,3:3,4:2},vectors=[[0,-1],[0,1],[-1,0],[1,0]];let count=0;
-  for(const zone of [397,398,399,400,401,402,403,404,405,320,319,6,8])for(const w of c.ORIGINAL_EVENTS.zones[zone].warps){
+  for(const zone of [397,398,399,400,401,402,403,404,405,320,319,6,8,7,9,10,15,152])for(const w of c.ORIGINAL_EVENTS.zones[zone].warps){
    if(!c.ORIGINAL_EVENTS.zones[w.zone])continue;
    await n.changeZone(zone,[397,319,6].includes(zone)?(zone===319?760:796):7,[397,319,6].includes(zone)?(zone===319?647:zone===6?600:659):8);j.step(1,false);
    const [ox,oz]=[397,319,6].includes(zone)?[784,752]:[16,16],[dx,dz]=vectors[dirs[w.a]];
    c.player={x:w.x/16-ox-dx*.9,y:w.z/16-oz-dz*.9};
-   const p=n.tryWarp(dx,dz,c.player.x+dx*.3,c.player.y+dz*.3);assert.ok(p,'New door '+zone+' -> '+w.zone);
+   const p=n.tryWarp(dx,dz,c.player.x+dx*.3,c.player.y+dz*.3);assert.ok(p,'New door '+zone+' -> '+w.zone+' '+JSON.stringify({locked:n.locked,phase:j.state.phase,vars:n.state.vars}));
    await drain(c,p);assert.equal(n.state.zone,w.zone);
    assert.equal(c.blocked(c.player.x-.18,c.player.y-.18)||c.blocked(c.player.x+.18,c.player.y+.18),false,'Walkable destination '+zone+' -> '+w.zone+' '+JSON.stringify(c.player));count++;
   }
-  assert.equal(count,22);assert.equal(n.state.route2,true);assert.equal(j.state.phase,'route2');
+  assert.equal(count,32);assert.equal(n.state.route2,true);assert.equal(j.state.phase,'dreamyard');
   console.log('PASS all '+count+' new doors, stairs, gate and Route 2 landing');
  }
  {

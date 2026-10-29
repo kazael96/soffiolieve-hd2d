@@ -18,7 +18,7 @@ test('all original field models retain distinct animation sets, finite skinning 
   if(JSON.stringify(first)!==JSON.stringify(last))changes++;
   if(record.class===8)assert.ok(last.filter(g=>record.materialAlpha[g.material]).every(g=>g.alpha===0),'Original smoke materials end transparent');
  }
- assert.equal(changes,6);assert.equal(samples,44);
+ assert.equal(changes,8);assert.equal(samples,60);
 });
 test('building children retain original offsets and rotation, smoke stays a separate model',()=>{
  const c=environment(),assets=c.FIELD_MODEL_ASSETS,scene={instances:[{model:'prop6',x:10,y:2,z:20,rotation:Math.PI/2},{model:'in-prop-140',x:5,y:-4.5,z:1,rotation:0}]};

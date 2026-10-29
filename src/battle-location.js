@@ -3,6 +3,7 @@
  const rooms={bedroom:['bedroom','Camera di Alcide',391],home:['home','Casa di Alcide',390],bianca:['bianca','Casa di Belle',392],biancaRoom:['biancaRoom','Camera di Belle',393],komorHome:['komorHome','Casa di Komor',394],komorRoom:['komorRoom','Camera di Komor',395],lab:['lab','Laboratorio di Aralia',396]};
  function capture(state,native,position,terrain='path'){
   if(!state||!position||!Number.isFinite(position.x)||!Number.isFinite(position.y))throw Error('Posizione del combattimento non disponibile');
+  if([7,15,152].includes(native?.zone)){const [id,label]=native.zone===7?['striatonGym','Palestra di Levantopoli']:native.zone===15?['trainerSchool','Scuola per Allenatori']:['dreamyard','Cantiere dei Sogni'];return Object.freeze({id,label,zone:native.zone,scene:state.scene,x:position.x,y:position.y,terrain:native.zone===152?(terrain==='grass'?'grass':'path'):'interior'});}
   let id,label,zone,variant='interior';const room=rooms[state.scene];
   if(room){[id,label,zone]=room;if(id==='bedroom'&&native?.roomMess)id='bedroomMess';}
   else if(state.scene==='town'){
