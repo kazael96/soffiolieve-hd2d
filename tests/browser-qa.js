@@ -62,9 +62,9 @@
   const person=(name,x,y)=>{const all=NativeStory.visualActors().filter(n=>n.name===name);check(all.length===1,'Duplicate/missing '+name);return Math.hypot(all[0].x-x,all[0].y-y)<.01;};
   try{
    native.vars[16508]=1;native.flags.push(508);await NativeStory.changeZone(317,788,724);
-   NativeStory.departures.depart({name:'Aralia',uid:2,model:105,fieldZone:317,x:4.5,y:-30.5,height:0,frame:0,direction:0},317);player={x:12.5,y:-92.5};facing=0;resetInput();
+   NativeStory.departures.depart({name:'Aralia',uid:2,model:105,fieldZone:317,x:4.5,y:-30.5,height:0,frame:0,direction:0},317);player={x:11.5,y:-93.5};facing=3;resetInput();
    check(!NativeStory.occupied(12.5,-93.5),'Invisible future destination is solid');
-   try{window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',code:'ArrowUp',bubbles:true,cancelable:true}));await until(()=>player.y< -93.3,'actual movement through the empty future NPC cell',8000);}finally{window.dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowUp',code:'ArrowUp',bubbles:true}));resetInput();}
+   try{document.body.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',bubbles:true,cancelable:true}));await until(()=>player.x>12.3,'actual movement through the empty future NPC cell',8000);}finally{document.body.dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowRight',code:'ArrowRight',bubbles:true}));resetInput();}
    check(Math.hypot(NativeStory.visualActors().find(n=>n.name==='Aralia').x-12.5,NativeStory.visualActors().find(n=>n.name==='Aralia').y+93.5)>5,'The collision test ran after Aralia arrived');
    NativeStory.departures.clear();native.flags=[501,679];native.actors={};native.actorFlags={};native.vars={16508:0,16513:2,16505:1,16512:2};
    Journey.step=()=>{};await NativeStory.changeZone(389,788,739);const tutorial=NativeStory.run(13,778);Journey.step=(dt,moved,distance)=>{if(NativeStory.locked||battling||NativeStory.departures.records.size)fieldStep(dt,moved,distance);};await auto(tutorial);check(native.vars[16508]===1,'Original catching tutorial missing');
