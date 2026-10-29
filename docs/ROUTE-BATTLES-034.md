@@ -1,3 +1,5 @@
+> Nota0.37: la destinazione al laboratorio descritta qui è storica. Dopo il tutorial Aralia ora raggiunge il Centro Pokémon di Quattroventi; vedere [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md).
+
 # Percorso, tempi e animazioni avversarie 0.34
 
 ## Aralia

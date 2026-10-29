@@ -17,7 +17,17 @@
  }
  function plan(n,zone,blocked){
   const portal=(x,y,dx,dy,kind='door')=>({kind,anchor:{x,y},points:[{x,y},{x:x+dx*2.8,y:y+dy*2.8}],clip:kind==='stairs'?[0,1,0,-.04]:[-dx,0,-dy,dx*x+dy*y+(dy<0?1.3:0)]});
-  if([389,317].includes(zone)&&n.name==='Aralia'){const p=portal(-6.5,-11.5,0,-1),approach={x:-6.5,y:-10.5};p.points=[...route(n,approach,blocked),p.anchor,p.points[1]];p.background=true;p.destination='lab';return p;}
+  const arrival=(x,y,destinationZone,targetUid,destination)=>({kind:'arrival',points:route(n,{x,y},blocked),anchor:{x,y},clip:null,background:true,destinationZone,targetUid,destination,itineraryVersion:1});
+  // Reach the next story position and wait there, even if its native map has
+  // not become the player's active map yet. Arrival is not a disappearance.
+  if(zone===317){
+   if(n.name==='Aralia')return arrival(12.5,-93.5,397,6,'center-front');
+   if(n.name==='Komor')return n.uid===250?arrival(8.5,-71.5,317,3,'route-comparison'):arrival(1.5,-93.5,397,10,'plaza');
+   if(n.name==='Belle'){
+    if(n.uid===240)return arrival(6.5,-75.5,317,4,'route-comparison');
+    const p=portal(12.5,-94.5,0,-1);p.points=[...route(n,{x:11.5,y:-93.5},blocked),{x:12.5,y:-93.5},p.anchor,p.points[1]];p.background=true;p.destination='center-interior';p.itineraryVersion=1;return p;
+   }
+  }
   if(zone===391)return portal(-6.5,-13.5,0,0,'stairs');
   if(zone===390||zone===392)return portal(Math.max(-11.5,Math.min(-9.5,n.x)),-5.5,0,1);
   if(zone===396)return portal(Math.max(-13.5,Math.min(-11.5,n.x)),-4.5,0,1);
@@ -40,7 +50,7 @@
   const points=route(n,{x:4.5,y:-82.5},blocked);return {kind:'path',points,clip:null};
  }
  class Controller{
-  constructor({blocked=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
+  constructor({blocked=()=>false,obstructed=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,obstructed,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
   depart(n,zone,{covered=false,resident=false}={}){
    if(n.model===208||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
    const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
@@ -51,15 +61,23 @@
    // adjacent native maps contain two logical records for that same person.
    for(const r of this.records.values())r.target=null;
    const selected=new Map();for(const n of base){const key=identity(n),old=selected.get(key),d=v=>Math.hypot(v.x-player.x,v.y-player.y);if(!old||d(n)<d(old))selected.set(key,n);}
-   for(const [key,n]of selected){const r=this.records.get(key);if(r){r.target=n;if(r.stage==='resident'&&Math.hypot(r.actor.x-n.x,r.actor.y-n.y)<.001)this.records.delete(key);else r.stage='rejoin';}}
+   for(const [key,n]of selected){const r=this.records.get(key);if(r){r.target=n;
+    if(r.plan.kind==='arrival'){
+     const next=base.find(v=>!v.hidden&&identity(v)===key&&v.fieldZone===r.plan.destinationZone&&v.uid===r.plan.targetUid);if(next){r.target=next;selected.set(key,next);}
+     if(r.stage==='resident'&&r.target.fieldZone===r.plan.destinationZone&&r.target.uid===r.plan.targetUid&&Math.hypot(r.actor.x-r.target.x,r.actor.y-r.target.y)<.001){this.records.delete(key);r.resolve?.();}
+    }else if(r.stage==='resident'&&Math.hypot(r.actor.x-n.x,r.actor.y-n.y)<.001)this.records.delete(key);else r.stage='rejoin';}}
    return [...selected].filter(([key])=>!this.records.has(key)).map(([,n])=>n).concat([...this.records.values()].map(r=>r.actor));
   }
   tick(dt){
    dt=Math.min(.1,Math.max(0,dt));for(const [key,r]of this.records){const a=r.actor;r.age+=dt;
     if(r.stage==='resident')continue;
     if(r.stage==='rejoin'){
-     const b=r.target;if(!b){r.stage='walk';continue;}const d=Math.hypot(b.x-a.x,b.y-a.y),step=7.5*dt;
-     if(d<=step){this.records.delete(key);r.resolve?.();continue;}const dx=(b.x-a.x)/d,dy=(b.y-a.y)/d;a.x+=dx*step;a.y+=dy*step;a.height=b.height||0;delete a.exitClip;this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);continue;
+     const b=r.target;if(!b){r.stage='walk';continue;}const d=Math.hypot(b.x-a.x,b.y-a.y),step=3.75*dt;
+     if(d<.001){this.records.delete(key);r.resolve?.();continue;}
+     const goal=Math.floor(b.x)+','+Math.floor(b.y);if(r.rejoinGoal!==goal){r.rejoinGoal=goal;r.rejoinPath=route(a,b,this.blocked);r.rejoinIndex=0;}
+     const point=r.rejoinPath?.[r.rejoinIndex]||(d<=1.1&&!this.blocked(b.x,b.y)?b:null);if(!point)continue;
+     const distance=Math.hypot(point.x-a.x,point.y-a.y),dx=distance?(point.x-a.x)/distance:0,dy=distance?(point.y-a.y)/distance:0,travel=Math.min(distance,step);a.x+=dx*travel;a.y+=dy*travel;if(distance<=step)r.rejoinIndex++;
+     a.height=b.height||0;delete a.exitClip;this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);continue;
     }
     const sample=this.sample(a);if(!sample)r.zero=0;else if(sample.sequence!==r.sampleSequence){r.sampleSequence=sample.sequence;r.zero=sample.visible?0:r.zero+1;}
     const canRetire=r.plan.kind==='path'?r.travel>=1.5:r.stage==='hold';
@@ -68,11 +86,12 @@
     if(r.error)throw Error(r.error);
     if(r.stage==='walk'){
      const point=r.plan.points[r.index];if(point){const dx=point.x-a.x,dy=point.y-a.y,d=Math.hypot(dx,dy),step=3.75*dt;
-      if(r.plan.kind!=='path'&&r.index===r.plan.points.length-1&&!r.opened){r.stage='opening';Promise.resolve(this.portal(r)).then(handle=>{if(this.records.get(key)!==r){this.finishPortal({...r,handle});return;}r.handle=handle;r.opened=true;r.stage='walk';},error=>{r.error=String(error);r.stage='hold';});continue;}
+      if(d>0&&this.obstructed(r,{x:a.x+dx/d*Math.min(d,step),y:a.y+dy/d*Math.min(d,step)})){this.pose(a,a.direction);continue;}
+      if(['door','stairs'].includes(r.plan.kind)&&r.index===r.plan.points.length-1&&!r.opened){r.stage='opening';Promise.resolve(this.portal(r)).then(handle=>{if(this.records.get(key)!==r){this.finishPortal({...r,handle});return;}r.handle=handle;r.opened=true;r.stage='walk';},error=>{r.error=String(error);r.stage='hold';});continue;}
       if(r.opened)a.exitClip=r.plan.clip;
       if(d<=step){a.x=point.x;a.y=point.y;r.travel+=d;r.index++;}else{a.x+=dx/d*step;a.y+=dy/d*step;r.travel+=step;}
       if(d>1e-8)this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);else this.pose(a,a.direction);
-     }else {r.stage=r.plan.kind==='stairs'?'descend':'hold';this.pose(a,a.direction);}
+     }else {r.stage=r.plan.kind==='arrival'?'resident':r.plan.kind==='stairs'?'descend':'hold';if(r.plan.kind==='arrival'){a.fieldZone=r.plan.destinationZone;a.uid=r.plan.targetUid;a.exitProbe=false;this.pose(a,r.plan.destination==='center-front'?1:a.direction);}else this.pose(a,a.direction);}
     }
     if(r.stage==='descend'){a.exitClip=r.plan.clip;a.noShadow=true;a.height=Math.max(-2.5,(a.height||0)-dt*1.8);if(a.height===-2.5)r.stage='hold';}
     // A result is valid only for the exact rendered pose. Never interpret a
@@ -84,7 +103,16 @@
   wait(n){const r=this.records.get(identity(n));if(!r||r.plan.background||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
   clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
   save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
-  restore(records,zone){for(let r of records||[]){if(!r?.actor||!r?.plan||!Number.isFinite(r.actor.x)||!Number.isFinite(r.actor.y)||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;if(r.actor.name==='Aralia'&&outdoor(r.zone)&&r.plan.kind==='path'){r={...r,plan:plan(r.actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};}const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}
+  restore(records,zone,progress={}){for(let r of records||[]){if(!r?.actor||!r?.plan||!Number.isFinite(r.actor.x)||!Number.isFinite(r.actor.y)||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;
+   const lateFriends=(progress.flags||[]).includes(515)||(progress.vars?.[16508]||0)>=2;
+   if(r.zone===317&&!r.plan.itineraryVersion&&(r.actor.name==='Aralia'&&['path','resident'].includes(r.plan.kind)||r.actor.name==='Aralia'&&r.plan.destination==='lab'||['Komor','Belle'].includes(r.actor.name)&&(['path'].includes(r.plan.kind)||lateFriends&&r.plan.kind==='resident'))){
+    const actor={...r.actor};if(lateFriends&&actor.name!=='Aralia')actor.uid=actor.name==='Komor'?3:4;
+    // A pre-0.37 portal save can already be behind the old laboratory door,
+    // outside the walkable field. Recover its threshold before the first draw.
+    if(actor.name==='Aralia'&&r.plan.destination==='lab'&&this.blocked(actor.x,actor.y)){actor.x=-6.5;actor.y=-10.5;}
+    r={...r,actor,plan:plan(actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};
+   }
+   const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}
  }
  const api={Controller,identity,plan,route};root.FieldActorExits=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
