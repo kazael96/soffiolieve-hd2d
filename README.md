@@ -12,7 +12,7 @@ Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.m
 
 ## Questa versione
 
-La 0.38 aggiunge un audit delle collisioni, delle ricariche durante gli spostamenti e degli input ripetuti. Corregge celle vuote bloccate da NPC futuri, ripresa delle porte dopo ricarica e rimozione erronea di residenti in attesa; isola i record di viaggio non validi. Prove e limiti in [DEEP-AUDIT-038.md](docs/DEEP-AUDIT-038.md).
+La 0.38 aggiunge un audit delle collisioni, delle ricariche durante gli spostamenti e degli input ripetuti. Corregge celle vuote bloccate da NPC futuri, ripresa delle porte dopo ricarica e rimozione erronea di residenti in attesa; isola i record di viaggio non validi e permette di riprovare i caricamenti falliti di menu, font e Borsa. Prove e limiti in [DEEP-AUDIT-038.md](docs/DEEP-AUDIT-038.md).
 
 La 0.37 corregge gli itinerari di Aralia, Komor e Belle verso gli eventi successivi e consente di parlare all’infermiera attraverso il bancone del Centro Pokémon, anche dopo una ricarica. Resta compatibile con i salvataggi precedenti. Dettagli in [CITY-CONTINUITY-037.md](docs/CITY-CONTINUITY-037.md).
 
