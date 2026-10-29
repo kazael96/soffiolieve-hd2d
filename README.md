@@ -8,7 +8,7 @@ Comprende la visita al Centro Pokémon, il comizio del Team Plasma e la prima lo
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata a tutte le mosse utilizzabili nella demo, oggi 83 coppie. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
 

@@ -1,5 +1,9 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Standard da leggere prima di ogni modifica
+
+Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md), consolidati il 29 ottobre 2026: continuità degli eventi e posizioni successive degli NPC, fedeltà HD-2D, sfondi e Pokémon ambientali, animazioni e reazioni sui due lati, audio, comandi/servizi, salvataggi e recupero dagli errori, regressioni e consegna. Aggiornare gli inventari e compilare la checklist della PR per gli aspetti interessati. Queste istruzioni persistono per tutte le modifiche future della demo e della versione completa.
+
 ## Continuità richiesta il 28 ottobre 2026
 
 Per ogni estensione conservare il lavoro precedente: stile HD-2D e riferimenti IRBI, comandi e menu ispirati a Pokémon Nero, controlli mobile, velocità ×1/×2/×4 fuori menu e riavvio con conferma. Preservare le correzioni a illuminazione, texture, blocchi degli eventi, navigazione e arrivo coerente di Aralia. Le animazioni personalizzate e le reazioni devono funzionare su entrambi i lati della lotta. Eseguire la suite di regressione e aggiornare inventari e prove per i nuovi contenuti; non dichiarare verificati scenari non collaudati.
