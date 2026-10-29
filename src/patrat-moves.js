@@ -29,11 +29,11 @@
  }
  function headPoint(side,a,local){const back=side==='p1',state=root.ROM_SPRITE_ANIM?.cache['504-'+(back?'back':'front')],b=state?.groundBounds,r=state?.data?.maps?.[0]?.find(v=>v[0]===0);if(!b||!r)return{x:a.dir*.25,y:-.72};const px=local[0]-2,py=local[1]-6,angle=a.head*a.dir,h=b[3]-b[1];return{x:(r[1]+2+px*Math.cos(angle)-py*Math.sin(angle)-(b[0]+b[2])/2)/h,y:(r[2]+6+px*Math.sin(angle)+py*Math.cos(angle)-b[3])/h};}
  function bideEvent(events,index){const e=events[index];if(!e||!/(?:^|\s)Bide$/.test(e.args?.[0]||'')||e.args.includes('[silent]'))return null;if(e.kind==='-activate')return{phase:0,storing:true,miss:false};if(e.kind!=='-end')return null;let miss=false;for(let i=index+1;i<events.length;i++){if(['move','turn','cant'].includes(events[i].kind))break;if(['-fail','-immune','-miss','-notarget'].includes(events[i].kind))miss=true;}return{phase:1,storing:false,miss};}
- const stances=new Set();
- function setStance(side,on,id=504){on&&+id===504?stances.add(side):stances.delete(side);}
+ const stances=new Map();
+ function setStance(side,on,id=504){on&&[504,532].includes(+id)?stances.set(side,+id):stances.delete(side);}
  function clearStances(){stances.clear();}
- function idlePose(side,id){return root.NativeSettings?.state?.animations!==false&&+id===504&&stances.has(side)?sample(bide.store,26+((root.GameSpeed?.now()??performance.now())*.06)%40,side):null;}
- function applyStance(side,pose,attacking=false){const a=!attacking&&idlePose(side,504);return a?{...pose,scaleY:(pose.scaleY??1)*(1-a.crouch),scaleX:(pose.scaleX??1)*(1+a.crouch*.4),pauseAnimation:true}:pose;}
+ function idlePose(side,id){return root.NativeSettings?.state?.animations!==false&&stances.get(side)===+id?(+id===504?sample(bide.store,26+((root.GameSpeed?.now()??performance.now())*.06)%40,side):root.ChapterMoves?.sample(root.ChapterMoves.select(532,117,{storing:true}),26+((root.GameSpeed?.now()??performance.now())*.06)%40,side)):null;}
+ function applyStance(side,pose,attacking=false){const a=!attacking&&idlePose(side,stances.get(side)||504);return a?{...pose,scaleY:(pose.scaleY??1)*(1-a.crouch),scaleX:(pose.scaleX??1)*(1+a.crouch*.4),pauseAnimation:true}:pose;}
  function draw(c,W,H,x,f,layer){
   const p=x.profile,a=sample(p,f,x.side,x.miss),layout=root.BattleGround.layout(W,H),from=layout[x.side],to=layout[x.targetSide],s=Math.min(W/1000,H/650),th=to.height;
   const attach=(tick,u,v)=>{const q=root.SpeciesMoves.pose(p,tick,x.side,x.side,x.miss,layout),h=from.height*q.scale,px=u*h*q.scaleX,py=v*h*q.scaleY;return{x:from.x+q.x*s+px*Math.cos(q.rotation)-py*Math.sin(q.rotation),y:from.y+q.y*s+px*Math.sin(q.rotation)+py*Math.cos(q.rotation)}};
@@ -49,5 +49,5 @@
    if(!x.miss&&f>=p.impact&&f<p.impact+26){const age=f-p.impact,q=1-age/26;c.globalAlpha=q;c.strokeStyle='#ffe4a0';c.lineWidth=Math.max(1,th*.024);c.beginPath();c.ellipse(target.x,target.y,th*(.1+age*.012),th*(.15+age*.012),0,0,Math.PI*2);c.stroke();for(let n=0;n<10;n++){const angle=n*2.4,r=age*th*.017;c.fillStyle='#ffd793';c.fillRect(target.x+Math.cos(angle)*r,target.y+Math.sin(angle)*r,Math.max(1,q*th*.025),Math.max(1,q*th*.025));}}
   }c.restore();
  }
- const api={profiles,bide,tracks,select,sample,part,headPoint,bideEvent,draw,setStance,clearStances,idlePose,applyStance};root.PatratMoves=api;if(typeof module!=='undefined')module.exports=api;
+ const api={profiles,bide,tracks,select,sample,part,headPoint,bideEvent,draw,setStance,clearStances,idlePose,applyStance,stanceSpecies:side=>stances.get(side)||0};root.PatratMoves=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

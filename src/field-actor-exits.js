@@ -2,7 +2,7 @@
 (function(root){
  const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello']);
  const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
- const outdoor=z=>[389,317,397,319,6].includes(z);
+ const outdoor=z=>[389,317,397,319,6,321,16].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
@@ -30,6 +30,14 @@
   }
   if(zone===319){if(n.name==='Mamma'){const p=portal(-22.5,-104.5,1,0);p.points=[...route(n,{x:-23.5,y:-104.5},blocked),p.anchor,p.points[1]];p.background=true;return p;}if(n.name==='Belle')return arrival(20.5,-171.5,6,251,'dreamyard-gate');}
   if(zone===6){const p=portal(n.name==='Zania'?5.5:4.5,n.name==='Zania'?-157.5:-165.5,0,-1);p.points=[...route(n,{x:p.anchor.x,y:p.anchor.y+1},blocked),p.anchor,p.points[1]];return p;}
+  if(zone===321){
+   if(n.name==='Komor'&&n.uid===21)return arrival(-103.5,-197.5,321,22,'cave-front');
+   const cave=n.name!=='Belle'&&n.uid!==4&&n.uid!==8;
+   const p=cave?portal(-104.5,-197.5,-1,0):portal(-105.5,-153.5,-1,0);
+   p.points=[...route(n,{x:p.anchor.x+1,y:p.anchor.y},blocked),p.anchor,p.points[1]];p.background=true;p.destination=cave?'wellspring-entry':'nacrene-gate';p.itineraryVersion=1;return p;
+  }
+  if(zone===324){const p=portal(14.5,-10.5,1,0);p.points=[...route(n,{x:13.5,y:-10.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination=n.name==='Komor'?'route3-dark-grass':'route3-exit';p.itineraryVersion=1;return p;}
+  if(zone===16){if(n.name==='Komor')return arrival(-149.5,-164.5,16,7,'museum-wait');const points=[...route(n,{x:-174.5,y:-169.5},blocked),{x:-192.5,y:-169.5}];return {kind:'path',points,clip:null,background:true,destination:'pinwheel-forest',itineraryVersion:1};}
   if(zone===9)return portal(-7.5,-13.5,0,0,'stairs');
   if(zone===15)return arrival(-6.5,-13.5,15,5,'school-wait');
   if(zone===152){if(n.name==='Belle')return arrival(15.5,11.5,152,1,'dreamyard-search');if(n.name==='Zania')return {kind:'path',points:[...route(n,{x:-7.5,y:10.5},blocked),{x:-36,y:10.5}],clip:null,background:true,destination:'fennel-house'};const points=[...route(n,{x:11.5,y:-5.5},blocked),{x:11.5,y:-25.5}];return {kind:'path',points,clip:null};}

@@ -38,7 +38,7 @@
   if(role==='feet')return{rotation:a.feet*sign};
   if(role==='body')return{rotation:a.lean*.25*a.dir};return null;
  }
- function timeline(sequence,p){if(p.species===504&&p.kind==='store')return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:[]};const sounds=sequence.audio.filter(e=>e.kind==='sfx'),anchor=(sounds.find(e=>e.target===16)||sounds[0])?.start||0;const map=t=>anchor>0&&t<=anchor?t/anchor*p.impact:p.impact+(t-anchor)/Math.max(1,sequence.frames-anchor)*(p.frames-p.impact);return{...sequence,frames:p.frames,nativeFrames:sequence.frames,nativeAnchor:anchor,customImpact:p.impact,audio:sequence.audio.map(e=>({...e,start:Math.max(0,Math.min(p.frames-1,map(e.start)))}))};}
+ function timeline(sequence,p){if(p.species===504&&p.kind==='store'||p.id===117&&p.storing)return{...sequence,frames:p.frames,nativeFrames:sequence.frames,audio:[]};const sounds=sequence.audio.filter(e=>e.kind==='sfx'),anchor=(sounds.find(e=>e.target===16)||sounds[0])?.start||0;const map=t=>anchor>0&&t<=anchor?t/anchor*p.impact:p.impact+(t-anchor)/Math.max(1,sequence.frames-anchor)*(p.frames-p.impact);return{...sequence,frames:p.frames,nativeFrames:sequence.frames,nativeAnchor:anchor,customImpact:p.impact,audio:sequence.audio.map(e=>({...e,start:Math.max(0,Math.min(p.frames-1,map(e.start)))}))};}
  function draw(c,W,H,x,f,layer){
   if(x.profile.chapter)return root.ChapterMoves.draw(c,W,H,x,f,layer);
   if(x.profile.nativeEffects)return root.DemoMoves.draw(c,W,H,x,f,layer);

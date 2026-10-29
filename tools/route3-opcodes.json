@@ -1,0 +1,220 @@
+{
+  "159": {
+    "spec": {
+      "name": "NativeOpcode159",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21aefbc",
+    "reads": [
+      "0x21aefe0"
+    ]
+  },
+  "134": {
+    "spec": {
+      "name": "NativeOpcode134",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21aea3c",
+    "reads": [
+      "0x21aea54",
+      "0x21aea5e",
+      "0x21aea68",
+      "0x21aea72"
+    ]
+  },
+  "475": {
+    "spec": {
+      "name": "NativeOpcode475",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21cfec4",
+    "reads": [
+      "0x21cfedc"
+    ]
+  },
+  "417": {
+    "spec": {
+      "name": "NativeOpcode417",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21c8098",
+    "reads": [
+      "0x21c80b4"
+    ]
+  },
+  "521": {
+    "spec": {
+      "name": "NativeOpcode521",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21d1558",
+    "reads": [
+      "0x21d1576",
+      "0x21d1580",
+      "0x21d1588",
+      "0x21d1590"
+    ]
+  },
+  "269": {
+    "spec": {
+      "name": "NativeOpcode269",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b748",
+    "reads": [
+      "0x215b74e",
+      "0x215b758"
+    ]
+  },
+  "252": {
+    "spec": {
+      "name": "NativeOpcode252",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b604",
+    "reads": [
+      "0x215b60c",
+      "0x215b616"
+    ]
+  },
+  "263": {
+    "spec": {
+      "name": "NativeOpcode263",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b5a30",
+    "reads": [
+      "0x21b5a36",
+      "0x21b5a40",
+      "0x21b5a4a"
+    ]
+  },
+  "447": {
+    "spec": {
+      "name": "NativeOpcode447",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b6360",
+    "reads": [
+      "0x21b638c",
+      "0x21b6396",
+      "0x21b63a0"
+    ]
+  },
+  "288": {
+    "spec": {
+      "name": "NativeOpcode288",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b64bc",
+    "reads": [
+      "0x21b64e6",
+      "0x21b64f0"
+    ]
+  },
+  "446": {
+    "spec": {
+      "name": "NativeOpcode446",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b6430",
+    "reads": [
+      "0x21b644a",
+      "0x21b6454"
+    ]
+  },
+  "578": {
+    "spec": {
+      "name": "NativeOpcode578",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b650c",
+    "reads": [
+      "0x21b6530",
+      "0x21b653a"
+    ]
+  },
+  "151": {
+    "spec": {
+      "name": "NativeOpcode151",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b278",
+    "reads": [
+      "0x215b28e",
+      "0x215b298"
+    ]
+  },
+  "148": {
+    "spec": {
+      "name": "NativeOpcode148",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21aec24",
+    "reads": [
+      "0x21aec3c",
+      "0x21aec46",
+      "0x21aec50",
+      "0x21aec5a"
+    ]
+  },
+  "207": {
+    "spec": {
+      "name": "NativeOpcode207",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x215aa3c",
+    "reads": [
+      "0x215aa4e"
+    ]
+  }
+}

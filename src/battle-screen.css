@@ -46,3 +46,10 @@
  #bwBattlePlace{top:8px;left:16px;font-size:9px}.bw-type{font-size:9px;padding:1px 5px}.bw-move-meta{font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.bw-hp-rail i{transition:none}}
+
+/* Four combatants retain the native bitmap HP panels. */
+#battle .double-card{position:absolute;width:clamp(150px,30vw,240px);z-index:8;right:12px;top:42px}
+#battle .double-card canvas{display:block;width:100%;height:auto;image-rendering:pixelated}
+#battle .double-card:nth-last-child(2){top:auto;right:auto;left:12px;bottom:calc(var(--battle-controls) + 10px)}
+#battle .double-card[hidden]{display:none}
+@media(max-height:480px){#battle .double-card{width:150px;top:35px}#battle .double-card:nth-last-child(2){left:auto;right:208px;bottom:calc(var(--battle-controls) + 8px)}}
