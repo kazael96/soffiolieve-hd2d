@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "build": "0775b234fec087c4",
+  "viewport": [
+    844,
+    390
+  ],
+  "running": false,
+  "result": "FAIL",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 6
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 1534,
+      "details": {
+        "frames": 75,
+        "scenes": 25
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3467,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 15897,
+      "details": {
+        "textures": 647,
+        "transparentOriginalSlots": 26,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 6894,
+      "details": {
+        "frames": 1560,
+        "atlases": 26
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "FAIL",
+      "durationMs": 287,
+      "error": "Error: Unexpected menu preparation failure: ReferenceError: MENU_ASSETS is not defined\n    at check (http://127.0.0.1:4201/__qa/browser-qa.js:7:56)\n    at menus (http://127.0.0.1:4201/__qa/browser-qa.js:38:339)\n    at async test (http://127.0.0.1:4201/__qa/browser-qa.js:11:103)\n    at async HTMLButtonElement.<anonymous> (http://127.0.0.1:4201/__qa/browser-qa.js:46:350)"
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 32,
+      "details": {
+        "cancelPreservesState": true
+      }
+    },
+    {
+      "name": "battle-backgrounds-and-custom-animations",
+      "result": "PASS",
+      "durationMs": 278528,
+      "details": {
+        "customFrames": 2780,
+        "pairs": 139,
+        "sides": 2,
+        "outcomes": 2,
+        "backgrounds": 9,
+        "ambient": [
+          {
+            "species": "Patrat",
+            "poses": 770,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Lillipup",
+            "poses": 384,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Patrat",
+            "poses": 770,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Lillipup",
+            "poses": 384,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Patrat",
+            "poses": 770,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Munna",
+            "poses": 6006,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "uncaught-errors",
+      "result": "PASS",
+      "durationMs": 2,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "Interpoke-original-portraits-layout-and-cleanup",
+      "result": "FAIL",
+      "durationMs": 690,
+      "error": "Error: Dialogue overlaps phone portraits\n    at check (http://127.0.0.1:4201/__qa/browser-qa.js:7:56)\n    at checkDialogue (http://127.0.0.1:4201/__qa/browser-qa.js:102:666)\n    at phoneReplay (http://127.0.0.1:4201/__qa/browser-qa.js:105:5)\n    at async test (http://127.0.0.1:4201/__qa/browser-qa.js:11:103)\n    at async panel.querySelector.onclick (http://127.0.0.1:4201/__qa/browser-qa.js:109:93)"
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

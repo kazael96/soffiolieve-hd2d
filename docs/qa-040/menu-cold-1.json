@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "build": "b7fad52e27c0020d",
+  "viewport": [
+    844,
+    390
+  ],
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "cold-menu-and-resource-recovery",
+      "result": "PASS",
+      "durationMs": 2088,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

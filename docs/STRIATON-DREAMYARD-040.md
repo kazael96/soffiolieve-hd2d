@@ -40,3 +40,5 @@ C-Gear è uno sblocco narrativo con avviso offline: servizi Wi-Fi, Sincronigioco
 La fixture browser ha un replay dedicato a palestra/Cantiere e controlli di sfondi, sprite, menu, coreografie, Interpoké e ripristino GPU nei tre formati. I rapporti della build consegnata distinguono prove eseguite da quelle non eseguite. Nessuna prova su viewport certifica ogni GPU Android fisica o l’assenza assoluta di bug.
 
 Correzioni emerse nel collaudo: il blackout interrompe il programma corrente e non esegue ricompense o avanzamenti riservati alla vittoria; regressioni di sconfitta/rivincita per Capopalestra e N. Le chiamate Interpoké adattano le righe dei ritratti già durante l’apertura di ogni messaggio, prima del ResizeObserver, evitando la sovrapposizione del primo fotogramma in orizzontale.
+
+Rapporti e limiti della consegna in [QA-040.md](QA-040.md).

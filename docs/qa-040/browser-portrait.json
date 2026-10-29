@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "build": "b7fad52e27c0020d",
+  "viewport": [
+    390,
+    844
+  ],
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 6
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 1006,
+      "details": {
+        "frames": 75,
+        "scenes": 25
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3569,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 11013,
+      "details": {
+        "textures": 647,
+        "transparentOriginalSlots": 26,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 6424,
+      "details": {
+        "frames": 1560,
+        "atlases": 26
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "PASS",
+      "durationMs": 1050,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 14,
+      "details": {
+        "cancelPreservesState": true
+      }
+    },
+    {
+      "name": "battle-backgrounds-and-custom-animations",
+      "result": "PASS",
+      "durationMs": 282349,
+      "details": {
+        "customFrames": 2780,
+        "pairs": 139,
+        "sides": 2,
+        "outcomes": 2,
+        "backgrounds": 9,
+        "ambient": [
+          {
+            "species": "Patrat",
+            "poses": 770,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Lillipup",
+            "poses": 384,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Patrat",
+            "poses": 770,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Lillipup",
+            "poses": 384,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Patrat",
+            "poses": 770,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          },
+          {
+            "species": "Munna",
+            "poses": 6006,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "uncaught-errors",
+      "result": "PASS",
+      "durationMs": 2,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "repeated-context-recovery",
+      "result": "PASS",
+      "durationMs": 6854,
+      "details": {
+        "restores": 2,
+        "preservedTextures": 647
+      }
+    },
+    {
+      "name": "negative-control",
+      "result": "PASS",
+      "details": {
+        "emptyCanvasRejected": true
+      }
+    },
+    {
+      "name": "Interpoke-original-portraits-layout-and-cleanup",
+      "result": "PASS",
+      "durationMs": 7633,
+      "details": {
+        "calls": [
+          {
+            "id": 1,
+            "participants": 4,
+            "expressionFrames": 36,
+            "dialoguePages": 14,
+            "minimumDialogueGap": 210.21875,
+            "cleanClose": true
+          },
+          {
+            "id": 2,
+            "participants": 2,
+            "expressionFrames": 18,
+            "dialoguePages": 14,
+            "minimumDialogueGap": 406.21875,
+            "cleanClose": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "real-renderer-Striaton-gym-and-Dreamyard",
+      "result": "PASS",
+      "durationMs": 186439,
+      "details": {
+        "school": true,
+        "gift": "Panpour",
+        "curtains": 3,
+        "wrongSwitch": true,
+        "trainers": 2,
+        "leader": "Chicco",
+        "badge": true,
+        "tm83": true,
+        "cut": true,
+        "plasmaBattles": 2,
+        "dreamMist": true,
+        "cgearOffline": true,
+        "speed": 4
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}
