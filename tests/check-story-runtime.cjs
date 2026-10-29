@@ -9,7 +9,7 @@ function environment({save}={}){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','engine.js','journey-state.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js','route2-assets.js','route2-data.js','route2-trainers.js','route2-bootstrap.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],gl:{},upload(){return {};}};
  c.StarterScene={loadGLB:async()=>({doc:{textures:[]},images:[]})};
  for(const file of ['field-model-assets.js','field-models.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
@@ -21,10 +21,10 @@ function environment({save}={}){
  let visibilityFrame=0;c.renderer.actorVisibility=()=>({visible:false,sequence:++visibilityFrame});
  c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
- for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','npc-walk.js','field-actor-exits.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
+ for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','npc-walk.js','field-actor-exits.js','original-story.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),c,{filename:file});
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
-  const {config}=c.lastBattle;if(config.trainerId){assert.equal(config.noBlackout,config.trainerId!==64);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,config.trainerId===64?'Purrloin':c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,config.trainerId===64?6:0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
+  const {config}=c.lastBattle;if(config.trainerId&&[53,54,55,59,60,61,64].includes(config.trainerId)){assert.equal(config.noBlackout,config.trainerId!==64);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,config.trainerId===64?'Purrloin':c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,config.trainerId===64?6:0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4]});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
   if(winner==='play')for(let i=0;i<50&&!s.battle.ended;i++)s.act('move 1');else s.battle.win(winner);
   assert.ok(s.battle.ended);c.Journey.afterBattle(s,config.story,null,false);return s;
  };

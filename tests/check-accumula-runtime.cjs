@@ -45,16 +45,16 @@ const assert=require('node:assert/strict'),{environment,drain}=require('./check-
   j.state.starter='Snivy';j.state.party=[j.pack(c.newStoryMon('Snivy',7),300)];
   Object.assign(n.state.vars,{16506:3,16507:3});n.state.flags.push(520,521,522,523,524,525,528,637);
   const dirs={1:1,2:0,3:3,4:2},vectors=[[0,-1],[0,1],[-1,0],[1,0]];let count=0;
-  for(const zone of [397,398,399,400,401,402,403,404,405,320,319])for(const w of c.ORIGINAL_EVENTS.zones[zone].warps){
+  for(const zone of [397,398,399,400,401,402,403,404,405,320,319,6,8])for(const w of c.ORIGINAL_EVENTS.zones[zone].warps){
    if(!c.ORIGINAL_EVENTS.zones[w.zone])continue;
-   await n.changeZone(zone,zone===397?796:7,zone===397?659:8);j.step(1,false);
-   const [ox,oz]=[397,319].includes(zone)?[784,752]:[16,16],[dx,dz]=vectors[dirs[w.a]];
+   await n.changeZone(zone,[397,319,6].includes(zone)?(zone===319?760:796):7,[397,319,6].includes(zone)?(zone===319?647:zone===6?600:659):8);j.step(1,false);
+   const [ox,oz]=[397,319,6].includes(zone)?[784,752]:[16,16],[dx,dz]=vectors[dirs[w.a]];
    c.player={x:w.x/16-ox-dx*.9,y:w.z/16-oz-dz*.9};
    const p=n.tryWarp(dx,dz,c.player.x+dx*.3,c.player.y+dz*.3);assert.ok(p,'New door '+zone+' -> '+w.zone);
    await drain(c,p);assert.equal(n.state.zone,w.zone);
    assert.equal(c.blocked(c.player.x-.18,c.player.y-.18)||c.blocked(c.player.x+.18,c.player.y+.18),false,'Walkable destination '+zone+' -> '+w.zone+' '+JSON.stringify(c.player));count++;
   }
-  assert.equal(count,20);assert.equal(n.state.route2,true);assert.equal(j.state.phase,'route2');
+  assert.equal(count,22);assert.equal(n.state.route2,true);assert.equal(j.state.phase,'route2');
   console.log('PASS all '+count+' new doors, stairs, gate and Route 2 landing');
  }
  {

@@ -23,7 +23,7 @@ for(const [name,hash] of Object.entries(manifest.assets||{}))assert.equal(crypto
 const raw=fs.readFileSync(path.join(site,'assets/scene.js'),'utf8');
 const scene=JSON.parse(raw.slice(raw.indexOf('=')+1).replace(/;\s*$/,''));
 const source=fs.readFileSync(path.join(site,'game.js'),'utf8');
-const context={renderer:{scene}};
+const context={renderer:{scene}};context.window=context;
 vm.runInNewContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),context);
 const can=(x,y)=>!context.blocked(x-.18,y-.18)&&!context.blocked(x+.18,y+.18);
 const actors=vm.runInNewContext(source.match(/const npcs=(\[.*?\]);/)[1],{});

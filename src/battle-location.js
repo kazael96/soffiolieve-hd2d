@@ -6,6 +6,7 @@
   let id,label,zone,variant='interior';const room=rooms[state.scene];
   if(room){[id,label,zone]=room;if(id==='bedroom'&&native?.roomMess)id='bedroomMess';}
   else if(state.scene==='town'){
+   if(native?.zone===319)return Object.freeze({id:'route2',label:'Percorso 2',zone:319,scene:state.scene,x:position.x,y:position.y,terrain:terrain==='grass'?'grass':'path'});
    if(native?.zone===397){id='accumula';label='Piazza di Quattroventi';zone=397;variant='town';return Object.freeze({id,label,zone,scene:state.scene,x:position.x,y:position.y,terrain:variant});}
    const north=position.y< -16;
    id=north?'route1':'nuvema';label=north?'Percorso 1':'Soffiolieve';zone=north?317:389;variant=terrain==='grass'?'grass':'path';

@@ -2,7 +2,7 @@
 (function(root){
  const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis']);
  const identity=n=>people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
- const outdoor=z=>[389,317,397,319].includes(z);
+ const outdoor=z=>[389,317,397,319,6].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
@@ -28,6 +28,7 @@
     const p=portal(12.5,-94.5,0,-1);p.points=[...route(n,{x:11.5,y:-93.5},blocked),{x:12.5,y:-93.5},p.anchor,p.points[1]];p.background=true;p.destination='center-interior';p.itineraryVersion=1;return p;
    }
   }
+  if(zone===319){if(n.name==='Mamma'){const p=portal(-22.5,-104.5,1,0);p.points=[...route(n,{x:-23.5,y:-104.5},blocked),p.anchor,p.points[1]];p.background=true;return p;}if(n.name==='Belle')return arrival(20.5,-171.5,6,251,'dreamyard-gate');}
   if(zone===391)return portal(-6.5,-13.5,0,0,'stairs');
   if(zone===390||zone===392)return portal(Math.max(-11.5,Math.min(-9.5,n.x)),-5.5,0,1);
   if(zone===396)return portal(Math.max(-13.5,Math.min(-11.5,n.x)),-4.5,0,1);

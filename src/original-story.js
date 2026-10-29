@@ -2,9 +2,10 @@
 (() => {
   const journey=window.Journey,state=journey.state;
   if(window.ACCUMULA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ACCUMULA_EVENTS[k]);OPENING_TRAINERS[64]=ACCUMULA_EVENTS.trainer;}
+  if(window.ROUTE2_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ROUTE2_EVENTS[k]);Object.assign(OPENING_TRAINERS,ROUTE2_TRAINERS);Object.assign(ORIGINAL_EVENTS.itemNames,ROUTE2_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ROUTE2_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
-  zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
+  zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
   const names={7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
@@ -20,13 +21,13 @@
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
   const data=()=>ORIGINAL_EVENTS.zones[native.zone];
-  const origin=()=>[389,317,397,319].includes(native.zone)?[784,752]:[16,16];
+  const origin=()=>[389,317,397,319,6].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   function pose(n,dir,step=0){
-    if([389,317,397,319].includes(n.fieldZone)&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y);
+    if([389,317,397,319,6].includes(n.fieldZone)&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y);
     n.direction=dir;const count=OPENING_SPRITES[n.name]?.length||ROM_SPRITES[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
     else if(count===7){n.frame=[0,2,4,4][dir]+(step===1?1:step===2?(dir<2?1:2):0);n.flip=dir===3||(dir<2&&step===2);}
@@ -42,8 +43,10 @@
       if(n.flag&&has(n.flag))continue;if(native.zone===317&&n.x<773)continue;
       if(native.zone===397&&value(16507)<3&&[521,523,524,525,528,637,638,1106,1114].includes(n.flag))continue;
       if(native.zone===397&&[1106,1114].includes(n.flag))continue;
-      if(native.zone===319)continue; // End-of-chapter landing, no Route 2 events yet.
-      if(native.zone===398&&[657].includes(n.flag))continue;
+      if(native.zone===319&&[8195].includes(n.model))continue;
+      if(native.zone===6&&[7,8,9,13,14].includes(n.id))continue;
+      if(native.zone===319&&native.routeItems?.includes(n.id))continue;
+      if([398,8].includes(native.zone)&&[657].includes(n.flag))continue;
       // Post-game actors use initial hidden flags from the new-game state.
       if([736,681,682,683,684,685,656,675,817,1230,1143].includes(n.flag))continue;
       putActor(n);
@@ -64,10 +67,11 @@
       if(value(16508)>=2&&!has(528))adjacent.push(10);
       for(const id of adjacent){const record=ORIGINAL_EVENTS.zones[397].actors.find(n=>n.id===id);const n=putActor({...record,script:2000});Object.assign(n,{fieldZone:397,projection:true});}
     }
-    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319].includes(actorZone)&&[389,317,397,319].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
+    if([319,6].includes(native.zone)&&value(16509)>=2){const n=putActor({id:251,model:134,script:2000,x:804,z:580,direction:3});Object.assign(n,{fieldZone:6,projection:true});}
+    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6].includes(actorZone)&&[389,317,397,319,6].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
-    state.phase=native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
+    state.phase=native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
     journey.update();
   }
   function initialize(){
@@ -129,13 +133,13 @@
     const say=async i=>{for(const page of messagePages(ORIGINAL_EVENTS.texts[346][i],vm.words))await showPage(page);};
     await say(2);if(await choice(['SÌ','NO'])!==0){await say(8);return false;}
     await say(6);journey.heal();await AudioEngine.playSound(1369);await say(7);await say(8);
-    native.healZone=398;if(value(16507)===1)vm.set(16507,2);return true;
+    native.healZone=native.zone===8?8:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
   }
   async function cityService(script){
     if(eventRunning||sceneChanging||journey.processing||failed)return;
     eventRunning=true;resetInput();
     try{
-      if(script===2100){await healAtCenter();if(value(16507)===2)await vm.run(796,6);}
+      if(script===2100){await healAtCenter();if(native.zone===398&&value(16507)===2)await vm.run(796,6);}
       else if(script===2101){
         await showPage('Benvenuto al Pokémon-Market!');
         let buying=true;while(buying){const i=await choice(['Poké Ball — ₽200','Pozione — ₽300','Annulla']);if(i===2)break;
@@ -220,7 +224,7 @@
       if(bank===778&&native.zone===396&&value(16505)===0)await vm.run(792,0);
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
-      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone(398,7,13);}
+      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone(native.healZone===8?8:398,7,13);}
       derivePhase();captureActors();if(native.zone===317)syncActors();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
       failed=error;console.error(error);$('world').dataset.eventError=error.message;
@@ -273,7 +277,7 @@
       case 'RTReserveScript':queued=v[0];break;
       case 'RTGetTextFile':m.set(a[0],textBank);break;
       case 'RTCallGlobal':{
-        if(v[0]===10395||v[0]===10396){native.healZone=398;break;}
+        if([10394,10395,10396].includes(v[0])){native.healZone=native.zone===8?8:398;break;}
         if(v[0]===10110){await healAtCenter();break;}
         if(![2800,2805].includes(v[0]))throw Error('Global script outside opening '+v[0]);
         const child=new FieldEventVM(ORIGINAL_EVENTS,native,m.host);child.words=m.words;await child.run(862,v[0]-2800);break;
@@ -302,7 +306,8 @@
       case 'BGMTrackGet':m.set(a[0],native.musicTracks?.[v[1]]?1:0);break;
       case 'BGMTrackEnable':native.musicTracks??={};native.musicTracks[v[0]]=true;AudioEngine.setMusicTrack?.(v[0],true);break;
       case 'UnknownBW017E':await showPage('Quattroventi ← → Percorso 2');break;
-      case 'MapReplaceSetEvent':native.roomMess=true;applyRoom();break;
+      case 'MapReplaceSetEvent':if(m.bank===638){native.route2MapEvent=v[0];}else{native.roomMess=true;applyRoom();}break;
+      case 'EnableRunningShoes':native.runningShoes=true;break;
       case 'MapReplaceIsEventSet':m.set(a[1],native.roomMess?1:0);break;
       case 'EVCameraInit':renderer.storyCamera=[...renderer.center];break;
       case 'EVCameraEnd':case 'EVCameraRebind':renderer.storyCamera=null;break;
@@ -342,18 +347,20 @@
     return true;
   }
   async function phoneCall(id,m){
-    if(id!==1)throw Error('Call outside opening '+id);
+    if(![1,2].includes(id))throw Error('Call outside opening '+id);
+    const call=id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
     const names=['Alcide','Komor','Belle','Aralia','Mamma'],panel=document.createElement('section');panel.id='phoneScene';panel.setAttribute('aria-label','Interpoké');
-    const pictures=PHONE_ASSETS.participants.map(person=>{
+    const pictures=call.participants.filter(person=>person<5).map(person=>{
       const name=names[person],tile=document.createElement('figure'),image=document.createElement('img'),label=document.createElement('figcaption');
-      image.src=PHONE_ASSETS.portraits[name][0];image.alt=name;label.textContent=name;tile.append(image,label);panel.append(tile);return {name,tile,image};
+      image.src=portraits[name][0];image.alt=name;label.textContent=name;tile.append(image,label);panel.append(tile);return {name,tile,image};
     });
-    document.body.append(panel);$('world').dataset.phone='1';await fade(0);
-    let talker=-1,frame=0;const clock=setInterval(()=>{frame++;pictures.forEach((p,i)=>{const blink=frame%28===26?1:frame%28===27?2:0;const mouth=i===talker?[0,1,2,1][frame%4]:0;p.image.src=PHONE_ASSETS.portraits[p.name][blink*3+mouth];p.tile.classList.toggle('speaking',i===talker);});},1000/15);
+    if(window.RuntimeAssets)await Promise.all([...new Set(pictures.flatMap(p=>portraits[p.name]))].map(src=>RuntimeAssets.image(src)));
+    panel.dataset.participants=String(pictures.length);document.body.append(panel);$('world').dataset.phone=String(id);await fade(0);
+    let talker=-1,frame=0;const clock=setInterval(()=>{frame++;pictures.forEach((p,i)=>{const blink=frame%28===26?1:frame%28===27?2:0;const mouth=i===talker?[0,1,2,1][frame%4]:0;p.image.src=portraits[p.name][blink*3+mouth];p.tile.classList.toggle('speaking',i===talker);});},1000/15);
     try{
-      for(const [op,face,param] of PHONE_ASSETS.commands){
+      for(const [op,face,param] of call.commands){
         if(op===0)break;
-        if(op===1){talker=face;for(const page of messagePages(ORIGINAL_EVENTS.phoneTexts[param],m.words))await showPage(page,pictures[face].name);}
+        if(op===1){talker=face;for(const page of messagePages((id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts)[param],m.words))await showPage(page,pictures[face].name);}
         else if(op===2)await delay(param);else if(op===3)soundTask=AudioEngine.playSound(param);else if(op===4)await soundTask;else throw Error('Unknown phone command '+op);
       }
     }finally{clearInterval(clock);panel.remove();delete $('world').dataset.phone;}
@@ -362,7 +369,7 @@
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);departures.clear();fieldModels?.clear();
     captureActors();native.zone=zone;native.music=data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
-    for(const init of data().init||[]){const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
+    for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
     if(zone===319){native.route2=true;derivePhase();}
     captureActors();if(restoreField)await fade(0,8);
   }
@@ -385,7 +392,7 @@
       move(255,[[8+inward,1]]);await fade(0,8);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
       if(door!==null){await fieldModels.play(door,1);await fieldModels.wait(door);fieldModels.release(door);}
       sceneChanging=false;warpCooldown=.8;
-      if(w.zone===319){await showPage('Percorso 2\nFine della demo.');journey.save(true);return;}
+      if(w.zone===319){journey.save(true);return;}
       const next=data().onEnter?.find(e=>value(e.var)===e.value);
       if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);
       else journey.save(true);
@@ -404,6 +411,25 @@
     }
     return false;
   }
+  async function routeTrainer(n){
+    if(eventRunning||sceneChanging||journey.processing||failed||!n)return;
+    const id=n.script-3000,trainer=OPENING_TRAINERS[id];if(!trainer)return;
+    eventRunning=true;resetInput();
+    const say=async key=>{for(const page of messagePages(trainer.messages[key]||'',{}))if(page)await showPage(page,trainer.name);};
+    try{await settleAmbient();captureActors();journey.save(true);
+      if(native.trainerWins?.includes(id)){await say(2);return;}
+      n.emote='!';await delay(8);n.emote=null;const dir=Math.abs(player.x-n.x)>Math.abs(player.y-n.y)?player.x>n.x?3:2:player.y>n.y?1:0;face(n.uid,dir);const [dx,dy]=directions[dir],distance=Math.max(Math.abs(player.x-n.x),Math.abs(player.y-n.y)),lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx),steps=lateral<.35?Math.max(0,Math.floor(distance)-1):0;if(steps){move(n.uid,[[8+dir,steps]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));}await say(0);
+      const completed=new Promise(resolve=>pendingBattle=resolve);rival=trainer.name;
+      try{await startBattle(true,{story:trainer.name,trainerId:id,aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party)});await completed;}finally{pendingBattle=null;}
+      if(native.won){native.trainerWins??=[];if(!native.trainerWins.includes(id))native.trainerWins.push(id);}
+      else{journey.heal();await changeZone(native.healZone===8?8:398,7,13);}
+    }catch(error){failed=error;console.error(error);$('world').dataset.eventError=error.message;await showPage(error.message);}
+    finally{eventRunning=false;n.emote=null;derivePhase();captureActors();if(!failed)journey.save(true);}
+  }
+  async function routeItem(n){
+    if(eventRunning||!n)return;const item=window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
+    eventRunning=true;try{if(!journey.addItem(item.id,item.count)){await showPage('La Borsa è piena.');return;}native.routeItems??=[];native.routeItems.push(n.uid);const record=data().actors.find(a=>a.id===n.uid);if(record?.flag&&!has(record.flag))native.flags.push(record.flag);n.hidden=true;await showPage('Hai trovato '+ORIGINAL_EVENTS.itemNames[item.id]+'!');captureActors();journey.save(true);}finally{eventRunning=false;}
+  }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
     const visible=fieldActors().filter(n=>n.fieldZone===native.zone&&Number.isFinite(n.script));
@@ -420,7 +446,7 @@
     const b=data().background.find(b=>b.condition<2&&b.x===front.x&&b.z===front.z&&allowed[b.direction]?.includes(dir));if(b)return {kind:'background',script:b.script};
     return null;
   }
-  function interact(){if(vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(t.script<2000)return run(t.script-1);if(native.zone===398)return cityService(t.script);}}
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return message(351,10);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if(native.zone===319&&t.script>=3000&&t.script<4000)return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if([398,8].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
   function step(dt,moved,distance=0){
     if(window.SpeciesStudioMode)return;
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
@@ -432,17 +458,21 @@
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
     journey.update();if(key!==lastTile){lastTile=key;
     if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if(native.zone===6&&p.z>=609){native.zone=319;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
     for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){
+      if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
       // Recheck a stationary player without locking input while they arrive.
       if(native.zone===317&&trigger.script===5){const bodies=fieldActors();if(![3,4].every(id=>{const n=actor(id);return n&&!n.hidden&&bodies.includes(n);})){lastTile='';return;}}
       run(trigger.script-1);return;}}
+    if(native.zone===319){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-3000))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
     journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={departures,visualActors:fieldActors,showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});

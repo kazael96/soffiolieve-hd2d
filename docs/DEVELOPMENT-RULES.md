@@ -152,3 +152,7 @@ L'utente autorizza la progressione fino all'ingresso nel Percorso2. Inventario e
 ## Copertura della partita 0.36
 
 Richiesta: tutte le mosse utilizzabili nella demo. Matrice83 coppie in [SPECIES-MOVES-036.md](SPECIES-MOVES-036.md): tutti i learnset per livello delle cinque specie ottenibili (anche oltre10), le due mosse del Purrloin di N, Botta del Minccino del tutorial e Scontro per tutte le sette specie. Restano validi i requisiti di anatomia, reazioni, entrambi i lati, effetti/audio e verifiche. Il laboratorio tecnico con mosse arbitrarie non sostituisce l’inventario della partita.
+
+## Estensione Percorso 2 e livello 15 · 0.39
+
+La richiesta del29 ottobre estende il capitolo fino all’arrivo a Levantopoli e la progressione al livello15. Inventario narrativo, itinerari, strumenti, Centro e chiamate in [ROUTE2-STRIATON-039.md](ROUTE2-STRIATON-039.md). Purrloin diventa ottenibile; la matrice conservata cresce da83 a97 coppie in [SPECIES-MOVES-039.md](SPECIES-MOVES-039.md). Non alterare i livelli selvatici originali per confonderli con il limite di allenamento. Verificare sempre anche entrambe le chiamate Interpoké, ritratti corretti, espressioni, layout telefono e pulizia alla chiusura.
