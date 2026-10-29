@@ -5,7 +5,8 @@ function environment({save}={}){
  const elements=new Map(),records=new Map();
  if(save)records.set('soffiolieve-black-opening-v2',JSON.stringify(save));
  function element(id=''){if(elements.has(id))return elements.get(id);const e={id,style:{},dataset:{},children:[],hidden:false,open:false,checked:false,firstChild:{},classList:{toggle(){},remove(){}},append(...v){this.children.push(...v);},replaceChildren(...v){this.children=[...v];},setAttribute(){},remove(){},showModal(){this.open=true;},close(){this.open=false;},addEventListener(){},focus(){}};if(id)elements.set(id,e);return e;}
- const c={console,Math,Buffer,structuredClone,TextEncoder,TextDecoder,setTimeout:(f)=>{queueMicrotask(f);return 0;},clearTimeout,setInterval(){},clearInterval(){},addEventListener(){},performance,
+ // Geometry is checked in the real browser fixture; this harness has no layout engine.
+ const c={console,Math,Buffer,structuredClone,TextEncoder,TextDecoder,ResizeObserver:class{observe(){}disconnect(){}},setTimeout:(f)=>{queueMicrotask(f);return 0;},clearTimeout,setInterval(){},clearInterval(){},addEventListener(){},removeEventListener(){},performance,
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);

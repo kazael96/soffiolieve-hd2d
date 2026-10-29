@@ -26,7 +26,7 @@ Le lotte del Percorso2 fissano un contesto `route2` proprio (sentiero/erba), con
 
 ## Interpoké e audio
 
-La chiamata2 usa record64 di a/1/3/1 e testi193 di a/0/0/2. Mamma usa ritratto5 e celle4: il ritratto1 è la protagonista femminile e non deve essere riutilizzato. Rimane la chiamata1 con quattro partecipanti. Ogni ritratto ha nove combinazioni occhi/bocca; le immagini vengono caricate prima di mostrare il pannello e ridimensionate senza ritagliare il personaggio. Timer e pannello vengono rimossi alla chiusura.
+La chiamata2 usa record64 di a/1/3/1 e testi193 di a/0/0/2. Mamma usa ritratto5 e celle4: il ritratto1 è la protagonista femminile e non deve essere riutilizzato. Rimane la chiamata1 con quattro partecipanti. Ogni ritratto ha nove combinazioni occhi/bocca; le immagini vengono caricate prima di mostrare il pannello e ridimensionate senza ritagliare il personaggio. Le righe dei ritratti si adattano alla posizione effettiva del dialogo, anche con comandi touch e rotazione, lasciando almeno8 pixel di margine. Timer, osservatore del layout e pannello vengono rimossi alla chiusura.
 
 Musiche originali aggiunte: Levantopoli1026 e incontro con Belle1088; Percorso2 e incontro con Mamma erano già disponibili. I normali allenatori usano il tema allenatore, Belle quello rivale. La sintesi web e la camera HD-2D sono adattamenti, non un’emulazione bit-identica.
 
