@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "build": "bface11d1ad31415",
+  "viewport": [
+    390,
+    844
+  ],
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "real-renderer-itineraries-and-nurse",
+      "result": "PASS",
+      "durationMs": 34303,
+      "details": {
+        "emptyFutureTileCrossed": true,
+        "tutorial": true,
+        "arrivals": [
+          "Aralia: Centro",
+          "Komor: confronto e piazza",
+          "Belle: confronto e Centro"
+        ],
+        "boundaryHandoff": true,
+        "nurse": {
+          "input": "actual A/touch button",
+          "healings": 2,
+          "hp": true,
+          "pp": true,
+          "status": true
+        },
+        "speed": 4
+      }
+    },
+    {
+      "name": "repeated-context-recovery",
+      "result": "PASS",
+      "durationMs": 11891,
+      "details": {
+        "restores": 2,
+        "preservedTextures": 647
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}
