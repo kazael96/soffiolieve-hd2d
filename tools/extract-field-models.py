@@ -26,6 +26,7 @@ def extract(rom,output,apicula):
     dest=output/'assets/field-models';dest.mkdir(parents=True,exist_ok=True)
     for path,member,texture_path,texture_member,ids in [
       ('a/2/2/9',0,'a/1/7/6',0,[93,101,103,164,165]),
+      ('a/2/2/9',1,'a/1/7/6',1,[176,260]),
       ('a/2/3/0',5,'a/1/7/7',5,[140])]:
         bundle=ndspy.narc.NARC(rom.getFileByName(path)).files[member]
         tex=ndspy.narc.NARC(rom.getFileByName(texture_path)).files[texture_member]

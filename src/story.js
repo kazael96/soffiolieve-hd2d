@@ -16,7 +16,7 @@
     $('questSummary').textContent=$('storyObjective').textContent=StoryState.objectives[state.phase];
     $('storyBag').textContent=`Denaro: $${state.money} · Poké Ball: ${state.pokeballs} · Pozioni: ${potions}`+(phaseIndex()>=4?' · Interpoké':'')+(phaseIndex()>=6?' · Pokédex':'')+(phaseIndex()>=7?' · Mappa Città':'');
     $('world').dataset.chapter=state.phase;$('world').dataset.scene=state.scene;
-    document.querySelector('.place').firstChild.textContent=state.original?.zone===6?'LEVANTOPOLI':state.original?.zone===319?'PERCORSO 2':state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):state.scene==='zone8'?'CENTRO POKÉMON':'SOFFIOLIEVE';
+    document.querySelector('.place').firstChild.textContent=state.original?.zone===6?'LEVANTOPOLI':state.original?.zone===319?'PERCORSO 2':state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):state.scene==='zone8'?'CENTRO POKÃ‰MON':'SOFFIOLIEVE';
     $('openTownMap').hidden=!state.original?.map;
     $('openPokedex').hidden=!state.original?.pokedex;
     $('openLab').disabled=!state.starter;
@@ -59,7 +59,7 @@
       await progressText(204,4,words);
       if(await NativeStory.choice(['SÌ','NO'])===0){
         const index=await NativeStory.choice([...p.pp.map(m=>GEN5.moves.find(x=>x.id===m.id).name),'Annulla']);
-        if(index<4){await progressText(204,5,[words[0],GEN5.moves.find(m=>m.id===p.pp[index].id).name]);p.pp[index]={id,left:move.pp};await progressText(204,6,words);return;}
+        if(index<4){if(p.pp[index].id===15){await NativeStory.showPage('Le mosse MN non possono essere dimenticate.');continue;}await progressText(204,5,[words[0],GEN5.moves.find(m=>m.id===p.pp[index].id).name]);p.pp[index]={id,left:move.pp};await progressText(204,6,words);return;}
       }
       await progressText(204,7,words);
       if(await NativeStory.choice(['SÌ','NO'])===0){await progressText(204,8,words);return;}
@@ -106,14 +106,14 @@
     }finally{processing=false;save(true);}
   }
   function step(dt,moved){}
-  function encounter(dt,moved,distance=0){
+  function encounter(dt,moved,distance=0){if(moved&&state.original?.repelRemaining)state.original.repelRemaining=Math.max(0,state.original.repelRemaining-distance);
     if(phaseIndex()<StoryState.phases.indexOf('route')||!moved||battling)return;
-    const route2=window.ROUTE2_DATA&&window.NativeStory?.state.zone===319,table=route2?ROUTE2_DATA.encounters.slots:OPENING_ENCOUNTERS;const onRoute=route2||window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;encounterState.rate=route2?ROUTE2_DATA.encounters.rate:OPENING_ENCOUNTER_RULES.rate;
-    const g=onRoute?outdoor.permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
+    const route2=window.ROUTE2_DATA&&window.NativeStory?.state.zone===319,dream=window.NativeStory?.state.zone===152,enc=dream?STRIATON_DATA.encounters:route2?ROUTE2_DATA.encounters:null,table=enc?enc.slots:OPENING_ENCOUNTERS;const onRoute=!!enc||window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;encounterState.rate=enc?enc.rate:OPENING_ENCOUNTER_RULES.rate;
+    const g=onRoute?(dream?renderer.scene:outdoor).permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
     const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
     if(encounterState.advance(distance,!!g&&g.bytes[tile]===4,n=>Math.floor(Math.random()*n))){
       let roll=Math.random()*100;
-      const e=table.find(slot=>(roll-=slot.weight)<0)||table.at(-1);
+      const e=table.find(slot=>(roll-=slot.weight)<0)||table.at(-1);if((state.original.repelRemaining||0)>0&&(e.level||e.min)<(state.party[lead]?.level||0))return;
       startBattle(false,{story:'wild',p1:configs(),p2:[monConfig(newStoryMon(e.name,e.level??e.min+Math.floor(Math.random()*(e.max-e.min+1))))]});
     }
   }
@@ -130,16 +130,20 @@
   for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',resetInput);
   function moveParty(from,to){if(battling||!state.party[from]||!state.party[to])return false;[state.party[from],state.party[to]]=[state.party[to],state.party[from]];lead=0;displayPartner();save(true);return true;}
   function itemCount(id){return id===4?state.pokeballs:id===17?potions:Math.max(0,Math.min(999,Math.floor(state.original?.extraItems?.[id])||0));}
-  function addItem(id,count=1){if(![3,4,17,26,50].includes(id)||!Number.isInteger(count)||count<1||itemCount(id)+count>999)return false;if(id===4)state.pokeballs+=count;else if(id===17)potions+=count;else{state.original.extraItems??={};state.original.extraItems[id]=itemCount(id)+count;}return true;}
+  function addItem(id,count=1){if(!([3,4,17,26,50].includes(id)||window.STRIATON_DATA?.itemNames[id])||!Number.isInteger(count)||count<1||itemCount(id)+count>999)return false;if(id===4)state.pokeballs+=count;else if(id===17)potions+=count;else{state.original.extraItems??={};state.original.extraItems[id]=itemCount(id)+count;}return true;}
   function consumeItem(id,count=1){if(!Number.isInteger(count)||count<1||itemCount(id)<count)return false;if(id===4)state.pokeballs-=count;else if(id===17)potions-=count;else state.original.extraItems[id]=itemCount(id)-count;return true;}
   function usePotion(index,id=17){const p=state.party[index];if(battling||!p||![17,26].includes(id)||itemCount(id)<=0||p.hp<=0)return 0;const m=unpack(p),healed=Math.min(id===26?50:20,m.max-m.hp);if(healed<=0)return 0;p.hp=m.hp+healed;consumeItem(id);displayPartner();save(true);return healed;}
   async function useRareCandy(index){const p=state.party[index];if(battling||processing||!p||p.level>=15||!itemCount(50))return false;processing=true;try{const old=unpack(p);consumeItem(50);p.level++;p.xp=OPENING_DATA[p.name].growth[p.level];await progressText(15,60,[p.nickname||p.name,p.level]);const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,old.hp+next.max-old.max);displayPartner();return true;}finally{processing=false;save(true);}}
-  function giveItem(id,index){const p=state.party[index];if(battling||!p||![3,4,17,26,50].includes(id)||!itemCount(id)||p.heldItem&&itemCount(p.heldItem)>=999)return false;consumeItem(id);if(p.heldItem)addItem(p.heldItem);p.heldItem=id;save(true);return true;}
+  function giveItem(id,index){const p=state.party[index];if(battling||!p||!([3,4,17,22,25,26,27,28,30,50,58,79,155].includes(id))||!itemCount(id)||p.heldItem&&itemCount(p.heldItem)>=999)return false;consumeItem(id);if(p.heldItem)addItem(p.heldItem);p.heldItem=id;save(true);return true;}
   function takeItem(index){const p=state.party[index],id=p?.heldItem;if(battling||!id||!addItem(id))return 0;p.heldItem=0;save(true);return id;}
-  function discardItem(id,count){if(battling||![3,4,17,26,50].includes(id)||!consumeItem(id,count))return false;save(true);return true;}
-  window.Journey={restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
+  function discardItem(id,count){if(battling||![3,4,17,22,25,26,27,28,30,50,58,79,155].includes(id)||!consumeItem(id,count))return false;save(true);return true;}
+  async function useMoonStone(index){const p=state.party[index];if(battling||processing||p?.name!=='Munna'||!itemCount(58))return false;processing=true;try{await NativeStory.showPage('Cosa? Munna si sta evolvendo!');const previous=unpack(p);consumeItem(58);p.name='Musharna';const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,previous.hp+next.max-previous.max);StoryState.register(state,p.name,true);displayPartner();await NativeStory.showPage('Congratulazioni! Munna si è evoluto in Musharna!');return true;}finally{processing=false;save(true);}}
+  function useMedicine(index,id){const p=state.party[index];if(battling||!p||!itemCount(id))return false;const m=unpack(p),old=p.hp,status=p.status;if([25,30,155].includes(id)&&p.hp>0)p.hp=Math.min(m.max,p.hp+({25:200,30:50,155:10}[id]));else if(id===22&&p.status==='par')p.status='';else if(id===27)p.status='';else if(id===28&&p.hp===0)p.hp=Math.max(1,Math.floor(m.max/2));if(old===p.hp&&status===p.status)return false;consumeItem(id);displayPartner();save(true);return true;}
+  function useRepel(){if(battling||!itemCount(79))return false;consumeItem(79);state.original.repelRemaining=100;save(true);return true;}
+  async function teachMachine(id,index){const p=state.party[index],move={410:526,420:15}[id];if(battling||processing||!p||!move||!itemCount(id)||!STRIATON_DATA.compatibility[p.name]?.includes(id))return false;processing=true;try{await learnMove(p,move);return p.pp.some(m=>m.id===move);}finally{processing=false;save(true);}}
+  window.Journey={useMoonStone,useMedicine,useRepel,teachMachine,restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
   potions=state.potions;renderer.scene=state.scene==='town'?outdoor:OPENING_ASSETS.scenes[state.scene==='bedroom'&&state.original?.roomMess?'bedroomMess':state.scene];player={...state.player};facing=state.facing;
-  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone8:[-8.5,-3.5],zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
+  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone8:[-8.5,-3.5],zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],zone7:[-3.5,26.5],zone9:[-8.5,-6.5],zone10:[-5.5,-12.5],zone15:[-8.5,-1.5],zone152:[-6.5,10.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
   renderer.center=state.scene==='town'?[player.x*.7,player.y+1.5]:[-10,-10];displayPartner();actors();update();
   addEventListener('pagehide',()=>save());document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});setInterval(()=>save(),5000);
 })();

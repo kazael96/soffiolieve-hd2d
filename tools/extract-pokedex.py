@@ -38,7 +38,7 @@ def extract(rom,output):
     sheet=pixels(raw,256,64,colors[:16]);sheet.crop((8,0,40,24)).save(dest/'caught.png')
     records={};regional=struct.unpack('<650H',personal[-1])
     type_pals=[0,0,1,1,0,0,2,1,0,0,1,2,0,1,1,2,0]
-    for sid in [495,498,501,504,506,509]:
+    for sid in [495,498,501,504,506,509,511,513,515,517,518]:
         types=list(dict.fromkeys(personal[sid][6:8]));name=texts[70][sid]
         records[name]={'id':sid,'number':regional[sid],'category':texts[260][sid],'height':texts[245][sid],'weight':texts[268][sid],'description':texts[236][sid],'types':types}
         # Native NCER has two 16x8 OAMs: tile 1 at (-8,-8), tile 0 at (-8,0), 128-byte mapping.

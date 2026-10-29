@@ -156,3 +156,7 @@ Richiesta: tutte le mosse utilizzabili nella demo. Matrice83 coppie in [SPECIES-
 ## Estensione Percorso 2 e livello 15 · 0.39
 
 La richiesta del29 ottobre estende il capitolo fino all’arrivo a Levantopoli e la progressione al livello15. Inventario narrativo, itinerari, strumenti, Centro e chiamate in [ROUTE2-STRIATON-039.md](ROUTE2-STRIATON-039.md). Purrloin diventa ottenibile; la matrice conservata cresce da83 a97 coppie in [SPECIES-MOVES-039.md](SPECIES-MOVES-039.md). Non alterare i livelli selvatici originali per confonderli con il limite di allenamento. Verificare sempre anche entrambe le chiamate Interpoké, ritratti corretti, espressioni, layout telefono e pulizia alla chiusura.
+
+## Estensione palestra e Cantiere · 0.40
+
+Inventario corrente: [STRIATON-DREAMYARD-040.md](STRIATON-DREAMYARD-040.md), matrice [SPECIES-MOVES-040.md](SPECIES-MOVES-040.md), 139 coppie implementate. Le matrici precedenti restano riferimenti storici. Aggiungere la regressione `check-striaton-runtime.cjs` alla suite completa e a Pages. Non confondere superamento dei test matematici dei profili con confronto visivo al gioco DS; riportare separatamente adattamenti, prove nel browser e limiti.

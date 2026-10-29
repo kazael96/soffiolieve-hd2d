@@ -8,7 +8,7 @@ Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPME
 
 Per ogni estensione conservare il lavoro precedente: stile HD-2D e riferimenti IRBI, comandi e menu ispirati a Pokémon Nero, controlli mobile, velocità ×1/×2/×4 fuori menu e riavvio con conferma. Preservare le correzioni a illuminazione, texture, blocchi degli eventi, navigazione e arrivo coerente di Aralia. Le animazioni personalizzate e le reazioni devono funzionare su entrambi i lati della lotta. Eseguire la suite di regressione e aggiornare inventari e prove per i nuovi contenuti; non dichiarare verificati scenari non collaudati.
 
-L'utente autorizza il merge della PR #25 e delle future PR di questo progetto; questa autorizzazione resta valida senza chiederla nuovamente per ogni PR. Integrare dopo i controlli pertinenti. Estensione corrente autorizzata: Percorso 2 fino all’arrivo a Levantopoli, inclusi Centro Pokémon, progressione fino al livello 15 e verifica grafica di entrambe le chiamate Interpoké. Conservare i salvataggi esistenti; palestra e Cantiere dei Sogni sono il capitolo successivo.
+L'utente autorizza il merge della PR #25 e delle future PR di questo progetto; questa autorizzazione resta valida senza chiederla nuovamente per ogni PR. Integrare dopo i controlli pertinenti. Estensione corrente autorizzata: palestra di Levantopoli e Cantiere dei Sogni, fino alla restituzione del Fumonirico a Zania. Conservare Percorso 2, Centro Pokémon, limite 15, chiamate Interpoké e salvataggi esistenti. Applicare docs/STRIATON-DREAMYARD-040.md e docs/SPECIES-MOVES-040.md.
 
 Leggere `docs/DEVELOPMENT-RULES.md` prima di modificare il gioco. Le tre regole richieste dall'utente valgono per la demo e per la futura versione completa:
 
@@ -25,3 +25,5 @@ La richiesta successiva amplia le animazioni a tutte le mosse utilizzabili nella
 Richiesta del29 ottobre2026: ogni uscita narrativa di Aralia, Komor e Belle deve condurre verso la posizione del loro prossimo evento. Dopo il tutorial Aralia va davanti al Centro Pokémon di Quattroventi; la destinazione al laboratorio della0.34 è superata. Applicare docs/CITY-CONTINUITY-037.md e preservare le interazioni attraverso i banconi.
 
 La 0.39 aggiunge Purrloin ottenibile e porta la matrice a 97 coppie, conservando le precedenti. Applicare docs/ROUTE2-STRIATON-039.md e docs/SPECIES-MOVES-039.md. Il limite della nuova progressione è 15: non abbassare i livelli già superiori presenti nei salvataggi precedenti.
+
+La 0.40 conserva le 97 coppie e aggiunge 42 profili (139 complessivi), con Pansage/Pansear/Panpour, Munna/Musharna e Taglio. Le animazioni del corpo sono adattamenti HD-2D: non chiamarle sequenze scheletriche originali DS. C-Gear è un traguardo narrativo offline; non dichiarare funzioni di rete implementate.

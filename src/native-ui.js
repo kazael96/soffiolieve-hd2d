@@ -115,7 +115,7 @@
   }
   function swap(i){if(i!==swapFrom)Journey.moveParty(swapFrom,i);swapFrom=null;team();}
   function summary(index,page=0,back=()=>team({focus:index})){return NativeSummary.open(screen,index,back,page);}
-  function inventory(pocket){const s=Journey.state;return pocket===1?[17,26,50].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===0?[4,3].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===4?[...(s.original?.map?[{id:442,count:1}]:[]),...(s.original?.phone?[{id:621,count:1}]:[])]:[];}
+  function inventory(pocket){const s=Journey.state;return pocket===1?[17,22,25,26,27,28,30,50].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===0?[4,3,58,79].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===2?[410,420].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===3?[155].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===4?[...(Journey.itemCount(437)?[{id:437,count:1}]:[]),...(s.original?.map?[{id:442,count:1}]:[]),...(s.original?.phone?[{id:621,count:1}]:[])]:[];}
   let fieldBagReady;
   async function prepareFieldBag(){
     if(!fieldBagReady)fieldBagReady=(async()=>{const url=NativeTextLayout.resource('assets/field-bag/provenance.json');if(root.RuntimeAssets?.json)assets.fieldBag=await root.RuntimeAssets.json(url);else{const response=await fetch(url);if(!response.ok)throw Error('Catalogo Borsa non disponibile');assets.fieldBag=await response.json();}assets.fieldBagImages={};await Promise.all(Object.entries(assets.fieldBag.images).map(async([key,record])=>assets.fieldBagImages[key]=await image(record.path)));assets.fieldBagFont=await image(assets.fieldBag.font.path);})().catch(error=>{fieldBagReady=null;throw error;});return fieldBagReady;
@@ -126,7 +126,7 @@
     const items=inventory(pocket),item=items[Math.min(selectedItem,items.length-1)];if(!item)return;
     const write=(text,x,y)=>NativeText.draw(c,assets.fieldBagFont,String(text),x,y,false,'left',a.font);
     write(ORIGINAL_EVENTS.itemNames[item.id],...a.topTitle.textScreenOrigin);
-    if(item.id===4||item.id===17)write('× '+item.count,...a.topQuantity.textScreenOrigin);
+    if(![410,420,437,442,621,626].includes(item.id))write('× '+item.count,...a.topQuantity.textScreenOrigin);
     const icon=assets['item-'+item.id],record=PARTY_DETAIL_ASSETS.itemMap[item.id];if(icon&&record)c.drawImage(icon,a.topItemIcon.actorOrigin[0]+record.origin[0],a.topItemIcon.actorOrigin[1]+record.origin[1]);
     NativeTextLayout.wrap(MENU_ASSETS.itemDescriptions[item.id]||'',a.font,232).slice(0,3).forEach((line,i)=>write(line,16,100+i*15));
   }
@@ -134,14 +134,14 @@
     c.drawImage(assets.fieldBagImages.bottomMale,0,0);const names=ORIGINAL_EVENTS.itemNames,items=inventory(pocket),group=MENU_ASSETS.groups.bagMale,a=assets.fieldBag;
     a.bagActors.sequencePairs.forEach(([active,inactive],i)=>{const frame=group.animations[i===pocket?active:inactive].frames.at(-1),cell=group.cells[frame[0]];c.drawImage(assets.bagCells[frame[0]],cell.origin[0]+frame[2],80+cell.origin[1]+frame[3]);});
     screen.text(MENU_ASSETS.texts['55'][pocket],8,6,true);
-    items.forEach((item,i)=>{const y=12+i*24;c.drawImage(assets.bagButton,135,y);screen.text(names[item.id],142,y+4,true);if(item.id===4||item.id===17)screen.text('×'+item.count,238,y+4,true,'right');});
+    items.forEach((item,i)=>{const y=12+i*24;c.drawImage(assets.bagButton,135,y);screen.text(names[item.id],142,y+4,true);if(![410,420,437,442,621,626].includes(item.id))screen.text('×'+item.count,238,y+4,true,'right');});
     if(pocket===4)items.forEach((item,i)=>{if(item.id===442)c.drawImage(assets.bagChecks[(NativeSettings.state.registered||[]).includes('item:442')?0:1],119,16+i*24);});
     c.drawImage(assets.nativeClose,237,173);
   }
   async function bag(pocket=0,context={}){
     try{await prepareFieldBag();}catch(error){return loadFailure(error);}const items=inventory(pocket),names=ORIGINAL_EVENTS.itemNames,back=context.back||main,group=MENU_ASSETS.groups.bagMale;
     const buttons=assets.fieldBag.bagActors.sequencePairs.map(([,inactive],n)=>{const cell=group.cells[group.animations[inactive].frames[0][0]];return rect(MENU_ASSETS.texts['55'][n],Math.max(0,cell.origin[0]),80+cell.origin[1],cell.size[0],cell.size[1],()=>bag(n,context));});
-    items.forEach((item,i)=>buttons.push(rect(names[item.id]+' ×'+item.count,135,12+i*24,106,24,()=>context.giveTo!==undefined?giveItem(item.id,context.giveTo,()=>bag(pocket,context)):bagAction(item.id,pocket),context.giveTo!==undefined&&pocket===4)));
+    items.forEach((item,i)=>buttons.push(rect(names[item.id]+' ×'+item.count,135,12+i*24,106,24,()=>context.giveTo!==undefined?giveItem(item.id,context.giveTo,()=>bag(pocket,context)):bagAction(item.id,pocket),context.giveTo!==undefined&&[2,4].includes(pocket))));
     if(context.giveTo===undefined&&pocket===4&&items.some(item=>item.id===442))buttons.push(rect('Assegna Mappa Città al pulsante Y',116,16+items.findIndex(item=>item.id===442)*24,16,16,()=>{register('item:442');bag(pocket,context);}));
     buttons.push(rect('ESCI',228,168,28,24,()=>screen.close()));
     screen.show('Borsa',c=>drawBag(c,pocket,bagItemIndex()),buttons,back,{drawFocus:false,top:c=>drawBagTop(c,pocket),topLabel:'Descrizione dello strumento',key:key=>{
@@ -151,7 +151,7 @@
   }
   function bagAction(id,pocket){
     const t=MENU_ASSETS.texts['3'],actions=[[t[0],()=>useItem(id,pocket)]];
-    if([3,4,17,26,50].includes(id))actions.push([t[1],()=>discard(id,pocket)],[t[3],()=>team({select:i=>giveItem(id,i,()=>bag(pocket)),back:()=>bag(pocket)})]);
+    if([3,4,17,22,25,26,27,28,30,50,58,79,155].includes(id))actions.push([t[1],()=>discard(id,pocket)],[t[3],()=>team({select:i=>giveItem(id,i,()=>bag(pocket)),back:()=>bag(pocket)})]);
     actions.push([t[8],()=>bag(pocket)]);
     const top=192-actions.length*24,itemIndex=inventory(pocket).findIndex(item=>item.id===id);
     screen.show(ORIGINAL_EVENTS.itemNames[id],c=>{drawBag(c,pocket,itemIndex);actions.forEach(([label],i)=>{c.drawImage(assets['popup-'+(screen.selected===i?'buttonSelected':'buttonNormal')],152,top+i*24);NativeText.draw(c,assets.popupFont,label,162,top+6+i*24,false,'left',PARTY_POPUP_ASSETS.font);});},actions.map(([label,action],i)=>rect(label,152,top+i*24,104,24,action)),()=>bag(pocket),{drawFocus:false,top:c=>drawBagTop(c,pocket,itemIndex),topLabel:'Descrizione dello strumento'});
@@ -172,7 +172,7 @@
     }
     renderReady();const animateReady=()=>{if(!screen.dialog.open||screen.title!=='Comandi rapidi Y')return;screen.draw();requestAnimationFrame(animateReady);};requestAnimationFrame(animateReady);
   }
-  function useItem(id,pocket){if(id===442)return external(()=>TownMap.open(),()=>bag(pocket));if(id===50)return team({select:i=>external(()=>Journey.useRareCandy(i),()=>bag(pocket)),back:()=>bag(pocket)});if(id===17||id===26)return team({select:i=>{const result=Journey.usePotion(i,id);notice(result?MENU_ASSETS.texts['157'][44].replace('{0102:0}',Journey.state.party[i].nickname||Journey.state.party[i].name).replace('{0202:1}',result):'Non avrebbe alcun effetto.',()=>bag(pocket));},back:()=>bag(pocket)});notice('Non è il momento di usarlo!',()=>bag(pocket));}
+  function useItem(id,pocket){if(id===58)return team({select:i=>external(async()=>{if(!await Journey.useMoonStone(i))await NativeStory.showPage('Non avrebbe alcun effetto.');},()=>bag(pocket)),back:()=>bag(pocket)});if(id===79){Journey.useRepel();return notice('Hai usato Repellente.',()=>bag(pocket));}if([22,25,27,28,30,155].includes(id))return team({select:i=>{const used=Journey.useMedicine(i,id);notice(used?'Lo strumento ha avuto effetto.':'Non avrebbe alcun effetto.',()=>bag(pocket));},back:()=>bag(pocket)});if([410,420].includes(id))return team({select:i=>external(async()=>{if(!await Journey.teachMachine(id,i))await NativeStory.showPage('Non può imparare questa mossa.');},()=>bag(pocket)),back:()=>bag(pocket)});if(id===442)return external(()=>TownMap.open(),()=>bag(pocket));if(id===50)return team({select:i=>external(()=>Journey.useRareCandy(i),()=>bag(pocket)),back:()=>bag(pocket)});if(id===17||id===26)return team({select:i=>{const result=Journey.usePotion(i,id);notice(result?MENU_ASSETS.texts['157'][44].replace('{0102:0}',Journey.state.party[i].nickname||Journey.state.party[i].name).replace('{0202:1}',result):'Non avrebbe alcun effetto.',()=>bag(pocket));},back:()=>bag(pocket)});notice('Non è il momento di usarlo!',()=>bag(pocket));}
   function discard(id,pocket,count=1){
     const maximum=Journey.itemCount(id),a=FIELD_POPUP_ASSETS.bagQuantity,t=MENU_ASSETS.texts['3'],item=ORIGINAL_EVENTS.itemNames[id],group=FIELD_POPUP_ASSETS.groups.quantityControls,pressed={up:-Infinity,down:-Infinity};
     let request=0,activePointer=null,heldDirection=0,lastTick=0,remainder=0,suppressClick=false;const hold=new NativeRepeat.Hold(),abort=new AbortController();

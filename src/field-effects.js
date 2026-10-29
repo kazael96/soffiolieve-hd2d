@@ -2,6 +2,7 @@
 (function(root){
   const fieldRate=30;
   function duration(effect,assets){
+    if(effect.particles===false)return effect.frames;
     const tail=Math.max(0,...assets.particles.emitters.map(e=>(effect.emitterStartFrame||0)+(e.delay||0)+(e.emitterLife||0)+(e.life||0)+1));
     return Math.max(effect.frames,tail);
   }
@@ -10,6 +11,7 @@
     return {x:(clip[0]/clip[3]+1)*w/2,y:(1-clip[1]/clip[3])*h/2,w:clip[3]};
   }
   function particles(effect,assets,frame,w,h){
+    if(effect.particles===false)return [];
     const out=[],S=root.ParticleSPL,matrix=root.StarterScene.camera([[0,0,0,...assets.camera.eye]],0,w/h,assets.perspective);
     const emitter=assets.particles.emitters[effect.emitter],time=frame-(effect.emitterStartFrame||0)-(emitter.delay||0),interval=Math.max(1,emitter.interval||1);
     if(time<0)return out;
@@ -42,8 +44,8 @@
   }
   async function play(id){
     root.ParticleSPL.clear();const player=new Player(id);let request;
-    try{await player.ready;const end=duration(player.effect,player.assets);await new Promise((resolve,reject)=>{let start;
-      const tick=now=>{try{start??=now;const frame=Math.min(end-1,Math.floor((now-start)*fieldRate/1000));player.draw(frame);if((now-start)*fieldRate/1000>=end)resolve();else request=requestAnimationFrame(tick);}catch(error){reject(error);}};
+    try{await player.ready;const end=duration(player.effect,player.assets);await new Promise((resolve,reject)=>{let last,elapsed=0;
+      const tick=now=>{try{last??=now;elapsed+=(now-last)*(root.GameSpeed?.rate||1);last=now;const frame=Math.min(end-1,Math.floor(elapsed*fieldRate/1000));player.draw(frame);if(elapsed*fieldRate/1000>=end)resolve();else request=requestAnimationFrame(tick);}catch(error){reject(error);}};
       request=requestAnimationFrame(tick);
     });}finally{if(request)cancelAnimationFrame(request);player.destroy();}
   }

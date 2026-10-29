@@ -5,6 +5,6 @@ if(site===out||out.startsWith(site+path.sep))throw Error('QA output must be outs
 let html=fs.readFileSync(path.join(site,'index.html'),'utf8');
 html=html.replace('<head>','<head><base href="/"><script>window.DeepQAEarlyErrors=[];addEventListener("error",e=>DeepQAEarlyErrors.push(e.message));addEventListener("unhandledrejection",e=>DeepQAEarlyErrors.push(String(e.reason)));</script>').replace(/window.SpeciesStudioMode=\[[^;]+;/,'window.SpeciesStudioMode=true;');
 if(!html.includes('window.SpeciesStudioMode=true;'))throw Error('Save isolation could not be installed');
-html=html.replace('</body>','<script src="/__qa/browser-qa.js"></script></body>');fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'index.html'),html);fs.copyFileSync(path.join(__dirname,'../tests/browser-qa.js'),path.join(out,'browser-qa.js'));console.log('Generated isolated QA fixture in '+out);
+html=html.replace('</body>','<script src="/__qa/browser-qa.js?v='+require('crypto').createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../tests/browser-qa.js'))).digest('hex').slice(0,12)+'"></script></body>');fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'index.html'),html);fs.copyFileSync(path.join(__dirname,'../tests/browser-qa.js'),path.join(out,'browser-qa.js'));console.log('Generated isolated QA fixture in '+out);
 }
 if(require.main===module)build(process.argv[2]||'_site',process.argv[3]||'test-results/browser-site');module.exports=build;
