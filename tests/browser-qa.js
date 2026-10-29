@@ -67,7 +67,7 @@
    try{window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',code:'ArrowUp',bubbles:true,cancelable:true}));await until(()=>player.y< -93.3,'actual movement through the empty future NPC cell',8000);}finally{window.dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowUp',code:'ArrowUp',bubbles:true}));resetInput();}
    check(Math.hypot(NativeStory.visualActors().find(n=>n.name==='Aralia').x-12.5,NativeStory.visualActors().find(n=>n.name==='Aralia').y+93.5)>5,'The collision test ran after Aralia arrived');
    NativeStory.departures.clear();native.flags=[501,679];native.actors={};native.actorFlags={};native.vars={16508:0,16513:2,16505:1,16512:2};
-   await NativeStory.changeZone(389,788,739);await auto(NativeStory.run(13,778));check(native.vars[16508]===1,'Original catching tutorial missing');
+   Journey.step=()=>{};await NativeStory.changeZone(389,788,739);const tutorial=NativeStory.run(13,778);Journey.step=(dt,moved,distance)=>{if(NativeStory.locked||battling||NativeStory.departures.records.size)fieldStep(dt,moved,distance);};await auto(tutorial);check(native.vars[16508]===1,'Original catching tutorial missing');
    renderer.storyCamera=[8,-88];await until(()=>person('Aralia',12.5,-93.5)&&person('Komor',8.5,-71.5)&&person('Belle',6.5,-75.5),'next event positions',40000);
    check(!NativeStory.departures.retired.some(r=>['Aralia','Komor','Belle'].includes(r.name)),'An arrival was treated as disappearance');
    player={x:6.5,y:-73.5};await auto(NativeStory.run(4,634));renderer.storyCamera=[8,-92];await until(()=>person('Komor',1.5,-93.5),'Komor reaches plaza',25000);
