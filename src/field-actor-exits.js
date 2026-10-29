@@ -107,6 +107,9 @@
    const lateFriends=(progress.flags||[]).includes(515)||(progress.vars?.[16508]||0)>=2;
    if(r.zone===317&&!r.plan.itineraryVersion&&(r.actor.name==='Aralia'&&['path','resident'].includes(r.plan.kind)||r.actor.name==='Aralia'&&r.plan.destination==='lab'||['Komor','Belle'].includes(r.actor.name)&&(['path'].includes(r.plan.kind)||lateFriends&&r.plan.kind==='resident'))){
     const actor={...r.actor};if(lateFriends&&actor.name!=='Aralia')actor.uid=actor.name==='Komor'?3:4;
+    // A pre-0.37 portal save can already be behind the old laboratory door,
+    // outside the walkable field. Recover its threshold before the first draw.
+    if(actor.name==='Aralia'&&r.plan.destination==='lab'&&this.blocked(actor.x,actor.y)){actor.x=-6.5;actor.y=-10.5;}
     r={...r,actor,plan:plan(actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};
    }
    const actor={...r.actor,exitProbe:r.stage!=='resident'};if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}this.records.set(r.key,{...r,actor,zero:0,sampleSequence:-1,opened:!!r.opened,stage:r.stage==='rejoin'?'walk':r.stage});}}

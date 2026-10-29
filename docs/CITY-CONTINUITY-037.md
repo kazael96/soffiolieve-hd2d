@@ -16,7 +16,7 @@ Le adozioni di attori preesistenti seguono le celle percorribili invece di tagli
 
 ## Salvataggi precedenti
 
-Il vecchio tragitto di Aralia verso il laboratorio e i percorsi generici dei due amici vengono aggiornati dalla posizione salvata, senza spostare il corpo di colpo. Per Komor/Belle si considera anche se il confronto è già terminato. I nuovi viaggi salvano l’indice del percorso e riprendono da quel punto. Se Aralia era già stata rimossa da una vecchia versione, la sua attesa davanti al Centro viene ripristinata al caricamento del campo, usando la posizione originale dell’evento.
+Il vecchio tragitto di Aralia verso il laboratorio e i percorsi generici dei due amici vengono aggiornati dalla posizione salvata, senza spostare il corpo di colpo. Per Komor/Belle si considera anche se il confronto è già terminato. Eccezione di recupero: un vecchio salvataggio già oltre la porta del laboratorio, in una casella non percorribile, riparte dalla soglia esterna prima del primo fotogramma; da lì Aralia percorre il nuovo tragitto. I nuovi viaggi salvano l’indice del percorso e riprendono da quel punto. Se Aralia era già stata rimossa da una vecchia versione, la sua attesa davanti al Centro viene ripristinata al caricamento del campo, usando la posizione originale dell’evento.
 
 La vecchia destinazione descritta in `ROUTE-BATTLES-034.md` è storica ed è superata da questa revisione.
 
