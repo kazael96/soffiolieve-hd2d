@@ -9,7 +9,7 @@
     return candidates[0]?.i??current;
   }
   const images=new Map();
-  function image(url){if(!images.has(url))images.set(url,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa interfaccia non disponibile: '+url));i.src=NativeTextLayout.resource(url);}));return images.get(url);}
+  function image(url){if(!images.has(url)){const src=NativeTextLayout.resource(url),task=root.RuntimeAssets?root.RuntimeAssets.image(src):new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa interfaccia non disponibile: '+url));i.src=src;});images.set(url,task);task.catch(()=>{if(images.get(url)===task)images.delete(url);});}return images.get(url);}
   class Screen {
     constructor(){
       this.dialog=document.createElement('dialog');this.dialog.id='nativeMenu';this.dialog.className='native-screen';
@@ -72,9 +72,11 @@
       assets.partyPrompt=await image(COMMON_DIALOGUE_ASSETS.images.partyPrompt.src);
       assets.messageFrame=await image(COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src);
       if(root.MENU_ASSETS?.groups.selection)assets.selection=await image(MENU_ASSETS.groups.selection.cells[0].src);
-    })();return preparation;
+    })().catch(error=>{preparation=null;screen?.dialog.remove();screen=null;assets={};throw error;});return preparation;
   }
-  async function open(){if(battling||root.NativeStory?.locked)return;await prepare();main();}
+  function loadFailure(error){console.warn(error);root.toast?.('Caricamento del menu non riuscito. Riprova.');return false;}
+  async function usable(){try{await prepare();return true;}catch(error){return loadFailure(error);}}
+  async function open(){if(battling||root.NativeStory?.locked)return;if(!await usable())return false;main();}
   function main(){
     const s=Journey.state,labels=MENU_ASSETS.texts['34'],entries=[[labels[2],'pokemon',()=>team(),!s.starter],[labels[1],'pokedex',()=>external(()=>Pokedex.browse()),!s.original?.pokedex],[labels[3],'bag',()=>bag()], [s.playerName,'trainer',()=>trainerCard()],[labels[5],'save',()=>saveMenu()],[labels[6],'options',()=>options()]].filter(entry=>!entry[3]);
     const buttons=entries.map(([label,key,action,disabled],i)=>rect(label,4+(i%2)*128,24+Math.floor(i/2)*48,120,40,()=>{mainSelection=key;return action();},disabled));
@@ -116,7 +118,7 @@
   function inventory(pocket){const s=Journey.state;return pocket===1?[{id:17,count:potions}].filter(i=>i.count):pocket===0?[{id:4,count:s.pokeballs}].filter(i=>i.count):pocket===4?[...(s.original?.map?[{id:442,count:1}]:[]),...(s.original?.phone?[{id:621,count:1}]:[])]:[];}
   let fieldBagReady;
   async function prepareFieldBag(){
-    if(!fieldBagReady)fieldBagReady=(async()=>{const response=await fetch(NativeTextLayout.resource('assets/field-bag/provenance.json'));if(!response.ok)throw Error('Catalogo Borsa non disponibile');assets.fieldBag=await response.json();assets.fieldBagImages={};await Promise.all(Object.entries(assets.fieldBag.images).map(async([key,record])=>assets.fieldBagImages[key]=await image(record.path)));assets.fieldBagFont=await image(assets.fieldBag.font.path);})();return fieldBagReady;
+    if(!fieldBagReady)fieldBagReady=(async()=>{const url=NativeTextLayout.resource('assets/field-bag/provenance.json');if(root.RuntimeAssets?.json)assets.fieldBag=await root.RuntimeAssets.json(url);else{const response=await fetch(url);if(!response.ok)throw Error('Catalogo Borsa non disponibile');assets.fieldBag=await response.json();}assets.fieldBagImages={};await Promise.all(Object.entries(assets.fieldBag.images).map(async([key,record])=>assets.fieldBagImages[key]=await image(record.path)));assets.fieldBagFont=await image(assets.fieldBag.font.path);})().catch(error=>{fieldBagReady=null;throw error;});return fieldBagReady;
   }
   function bagItemIndex(){return Math.max(0,screen.selected-5);}
   function drawBagTop(c,pocket,selectedItem=bagItemIndex()){
@@ -137,7 +139,7 @@
     c.drawImage(assets.nativeClose,237,173);
   }
   async function bag(pocket=0,context={}){
-    await prepareFieldBag();const items=inventory(pocket),names=ORIGINAL_EVENTS.itemNames,back=context.back||main,group=MENU_ASSETS.groups.bagMale;
+    try{await prepareFieldBag();}catch(error){return loadFailure(error);}const items=inventory(pocket),names=ORIGINAL_EVENTS.itemNames,back=context.back||main,group=MENU_ASSETS.groups.bagMale;
     const buttons=assets.fieldBag.bagActors.sequencePairs.map(([,inactive],n)=>{const cell=group.cells[group.animations[inactive].frames[0][0]];return rect(MENU_ASSETS.texts['55'][n],Math.max(0,cell.origin[0]),80+cell.origin[1],cell.size[0],cell.size[1],()=>bag(n,context));});
     items.forEach((item,i)=>buttons.push(rect(names[item.id]+' ×'+item.count,135,12+i*24,106,24,()=>context.giveTo!==undefined?giveItem(item.id,context.giveTo,()=>bag(pocket,context)):bagAction(item.id,pocket),context.giveTo!==undefined&&pocket===4)));
     if(context.giveTo===undefined&&pocket===4&&items.some(item=>item.id===442))buttons.push(rect('Assegna Mappa Città al pulsante Y',116,16+items.findIndex(item=>item.id===442)*24,16,16,()=>{register('item:442');bag(pocket,context);}));
@@ -160,7 +162,7 @@
     const registry={pokemon:['POKÉMON',()=>team({back:()=>screen.close()})],pokedex:['POKÉDEX',()=>{screen.close();return Pokedex.browse();}],bag:['BORSA',()=>bag(0,{back:()=>screen.close()})],trainer:[Journey.state.playerName,()=>NativeTrainerCard.open(screen,()=>screen.close())],'trainer:back':['Scheda allenatore: retro',()=>NativeTrainerCard.open(screen,()=>screen.close(),true)],save:['SALVA',saveMenu],options:['OPZIONI',()=>NativeOptions.open(screen,()=>screen.close())],'item:442':['Mappa Città',()=>{screen.close();return TownMap.open();}],'summary:info':['Info',()=>summary(0,0,()=>screen.close())],'summary:moves':['Mosse',()=>summary(0,1,()=>screen.close())],'summary:ribbons':['Fiocchi',()=>summary(0,2,()=>screen.close())]};
     for(const mode of ['info','zona','verso','forme'])registry['pokedex:'+mode]=['Pokédex: '+mode,()=>{const name=Journey.state.dex.seen.find(n=>POKEDEX_ASSETS.species[n]);screen.close();return name?NativePokedexDetails.open(name,{mode}):Pokedex.browse();}];
       registry['pokedex:search']=['Pokédex: ricerca',()=>{screen.close();return NativePokedexBrowser.open({searchInitially:true});}];
-      const ids=(NativeSettings.state.registered||[]).filter(id=>registry[id]&&(id!=='item:442'||Journey.state.original?.map)&&(!id.startsWith('summary:')||Journey.state.party.length));await prepare();
+      const ids=(NativeSettings.state.registered||[]).filter(id=>registry[id]&&(id!=='item:442'||Journey.state.original?.map)&&(!id.startsWith('summary:')||Journey.state.party.length));if(!await usable())return false;
     if(ids.length===1)return registry[ids[0]][1]();
     if(!ids.length)return notice('Puoi assegnare strumenti e funzioni al pulsante Y dalla Borsa.',()=>screen.close());
     const nativeLabels={'item:442':1,'summary:info':7,'summary:moves':8,'summary:ribbons':9,bag:10,pokedex:15,'pokedex:search':16,'pokedex:info':17,'pokedex:zona':18,'pokedex:verso':19,'pokedex:forme':20,trainer:21,'trainer:back':22,options:24};for(const [id,index]of Object.entries(nativeLabels))registry[id][0]=FIELD_POPUP_ASSETS.ready.labels[index].replace(/\{ff00:\d+\}/g,'');
@@ -194,6 +196,6 @@
   function saveMenu(){return NativeSave.open(screen,confirm,notice,main);}
   function options(draft={...NativeSettings.state},focus=0){return NativeOptions.open(screen,main,draft,focus);}
   function trainerCard(){return NativeTrainerCard.open(screen,main);}
-  root.NativeUI={Screen,nextButton,open,prepare,confirm,register,useRegistered,team:async()=>{if(battling||root.NativeStory?.locked||!Journey.state.starter)return;await prepare();team({back:()=>screen.close()});},main,bag,summary};
+  root.NativeUI={Screen,nextButton,open,prepare,confirm,register,useRegistered,team:async()=>{if(battling||root.NativeStory?.locked||!Journey.state.starter)return;if(!await usable())return false;team({back:()=>screen.close()});},main,bag,summary};
   if(typeof module!=='undefined')module.exports={nextButton,wrapQuantity};
 })(typeof window!=='undefined'?window:globalThis);

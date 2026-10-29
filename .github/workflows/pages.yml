@@ -35,6 +35,7 @@ jobs:
           node tests/check-render-assets.cjs _site
           node tests/check-story-runtime.cjs _site
           node tests/check-accumula-runtime.cjs _site
+          node tests/check-field-stress.cjs _site
           node tests/check-mobile-runtime.cjs _site
           node tests/check-opponent-runtime.cjs _site
           node tests/check-checkpoint-stress.cjs _site

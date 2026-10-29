@@ -1,7 +1,7 @@
 /* Original one-screen registration layout, backed by the player's seen/caught record. */
 (() => {
   const images=new Map();
-  const image=src=>{if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=NativeTextLayout.resource(src);}));return images.get(src);};
+  const image=src=>{if(!images.has(src)){const url=NativeTextLayout.resource(src),task=window.RuntimeAssets?RuntimeAssets.image(url):new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=url;});images.set(src,task);task.catch(()=>{if(images.get(src)===task)images.delete(src);});}return images.get(src);};
   function text(ctx,atlas,value,x,y,white=false,align='left',font=POKEDEX_ASSETS.font){
     const f=font,glyphs=[...value].map(c=>f.glyphs[c]||f.glyphs['?']),width=glyphs.reduce((n,g)=>n+g[3],0);
     if(align==='center')x-=Math.floor(width/2);else if(align==='right')x-=width;
