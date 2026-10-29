@@ -20,6 +20,10 @@ for(const [name,hash] of Object.entries(manifest.files)){
   assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(site,name))).digest('hex'),hash,name);
 }
 for(const [name,hash] of Object.entries(manifest.assets||{}))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(site,name))).digest('hex'),hash,name);
+assert.equal((html.match(/<script src=/g)||[]).length,1,'One ordered script entry');
+assert.equal(fs.readFileSync(path.join(site,'app.css'),'utf8'),manifest.startup.styles.map(f=>fs.readFileSync(path.join(site,f),'utf8').replace(/\r\n/g,'\n')).join('\n'),'Every original stylesheet included in order');
+const bundle=fs.readFileSync(path.join(site,'app.js'),'utf8');
+const entries=JSON.parse(bundle.slice(bundle.indexOf(' of ')+4,bundle.indexOf('){const tag=')));assert.deepEqual(entries.map(e=>e[0]),manifest.startup.scripts,'Script order changed');for(const [file,source]of entries)assert.equal(source,fs.readFileSync(path.join(site,file),'utf8').replace(/\r\n/g,'\n'),'Bundled script differs: '+file);
 const raw=fs.readFileSync(path.join(site,'assets/scene.js'),'utf8');
 const scene=JSON.parse(raw.slice(raw.indexOf('=')+1).replace(/;\s*$/,''));
 const source=fs.readFileSync(path.join(site,'game.js'),'utf8');
@@ -79,11 +83,11 @@ console.log('PASS: original room assets, every required door/NPC and the full wa
 for(const url of [...Object.values(assets.window.STARTER_ASSETS.models),...assets.window.STARTER_ASSETS.backgrounds,...assets.window.STARTER_ASSETS.sprites.flatMap(s=>Object.values(s))])assert.ok(fs.existsSync(path.join(site,url)),url);
 
 for(const file of ['entry','font','caught',...Object.values(assets.window.POKEDEX_ASSETS.species).flatMap(p=>['foot-'+p.id,...p.types.map(t=>'type-'+t)])])assert.ok(fs.existsSync(path.join(site,'assets/pokedex/'+file+'.png')),file);
-assert.ok(html.includes('pokedex.css'), 'Pokedex stylesheet must be loaded');
+assert.ok(manifest.startup.styles.includes('pokedex.css')&&html.includes('app.css'), 'Pokedex stylesheet must be loaded in bundle');
 assert.equal(assets.window.POKEDEX_ASSETS.species.Patrat.number,10);
 assert.equal(assets.window.POKEDEX_ASSETS.species.Lillipup.number,12);
 console.log('PASS original Pokedex entry graphics, font, footprint/type assets and regional numbers');
 
 for(const file of ['map','info',...assets.window.TOWNMAP_ASSETS.cells.map((_,i)=>'cell-'+i)])assert.ok(fs.existsSync(path.join(site,'assets/townmap/'+file+'.png')),file);
-assert.ok(html.includes('townmap.css'),'Town map stylesheet must be loaded');
+assert.ok(manifest.startup.styles.includes('townmap.css')&&html.includes('app.css'),'Town map stylesheet must be loaded in bundle');
 console.log('PASS original Unova map, information panel and all marker cells');

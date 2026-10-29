@@ -1,6 +1,8 @@
 /* The original city programs run against real maps and the actual battle engine. */
 const assert=require('node:assert/strict'),{environment,drain}=require('./check-story-runtime.cjs');
 (async()=>{
+ for(const tour of [0,3]){const c=environment(),n=c.NativeStory,j=c.Journey;n.state.intro=true;j.state.starter='Snivy';j.state.party=[j.pack(c.newStoryMon('Snivy',7))];Object.assign(n.state.vars,{16508:2,16512:3,16507:tour,16506:0});n.state.flags=n.state.flags.filter(f=>f!==528);n.state.flags.push(521);await n.changeZone(397,785,659);n.departures.clear();c.player={x:1.5,y:-92.5};c.facing=0;const before=JSON.stringify(n.state.vars),text=await drain(c,n.interact(),0,'p1');assert.ok(text.join(' ').includes(tour===0?'Aralia':'piazza'),'Komor must answer before Plasma');assert.equal(JSON.stringify(n.state.vars),before,'Neutral conversation cannot advance Plasma or Center events');assert.equal(n.locked,false);console.log('PASS Komor dialogue before Plasma, Center stage'+tour);}
+
  {
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),root=path.resolve(process.argv[2]||'_site'),ctx={window:{}};
   vm.runInNewContext(fs.readFileSync(path.join(root,'field-audio.js'),'utf8'),ctx);const record=ctx.window.FIELD_AUDIO[1019],layers=[record,...record.layers];

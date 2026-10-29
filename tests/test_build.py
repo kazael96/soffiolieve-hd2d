@@ -1,6 +1,8 @@
 import hashlib
 import importlib.util
 import json
+import re
+import struct
 from pathlib import Path
 import tempfile
 import unittest
@@ -26,6 +28,8 @@ class BuildTests(unittest.TestCase):
             with zipfile.ZipFile(archive,'w') as z:
                 z.writestr('soffiolieve/assets/animated/800-front.png',b'test asset')
                 z.writestr('soffiolieve/game.js','OLD RELEASE CODE')
+                for name in re.findall(r'<script\s+src="([^"]+)"', (builder.ROOT/'src/index.html').read_text(encoding='utf8')):
+                    if not (builder.ROOT/'src'/name).exists():z.writestr('soffiolieve/'+name,'/* base fixture */')
             original=builder.ARCHIVE_SHA256
             try:
                 builder.ARCHIVE_SHA256=hashlib.sha256(archive.read_bytes()).hexdigest()
@@ -33,8 +37,12 @@ class BuildTests(unittest.TestCase):
                 self.assertEqual((target/'game.js').read_bytes(),(builder.ROOT/'src/game.js').read_bytes())
                 manifest=json.loads((target/'build.json').read_text())
                 html=(target/'index.html').read_text(encoding='utf-8')
-                self.assertIn(f'game.js?v={manifest["revision"]}',html)
-                self.assertIn(f'style.css?v={manifest["revision"]}',html)
+                self.assertIn(f'app.js?v={manifest["revision"]}',html)
+                self.assertIn(f'app.css?v={manifest["revision"]}',html)
+                self.assertIn('game.js',manifest['startup']['scripts'])
+                self.assertEqual(len(re.findall(r'<script src=',html)),1)
+                pack=(target/'assets/field-pack.bin').read_bytes();self.assertEqual(pack[:4],b'SFP1');length=struct.unpack_from('<I',pack,4)[0];entries=json.loads(pack[8:8+length])
+                for name,(offset,size) in entries.items():self.assertEqual(pack[8+length+offset:8+length+offset+size],(target/name).read_bytes())
                 self.assertIn(f'data-build="{manifest["revision"]}"',html)
                 self.assertEqual((target/'assets/animated/800-front.png').read_bytes(),b'test asset')
                 for name, digest in manifest['files'].items():
