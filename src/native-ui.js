@@ -115,7 +115,7 @@
   }
   function swap(i){if(i!==swapFrom)Journey.moveParty(swapFrom,i);swapFrom=null;team();}
   function summary(index,page=0,back=()=>team({focus:index})){return NativeSummary.open(screen,index,back,page);}
-  function inventory(pocket){const s=Journey.state;return pocket===1?[{id:17,count:potions}].filter(i=>i.count):pocket===0?[{id:4,count:s.pokeballs}].filter(i=>i.count):pocket===4?[...(s.original?.map?[{id:442,count:1}]:[]),...(s.original?.phone?[{id:621,count:1}]:[])]:[];}
+  function inventory(pocket){const s=Journey.state;return pocket===1?[17,26,50].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===0?[4,3].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===4?[...(s.original?.map?[{id:442,count:1}]:[]),...(s.original?.phone?[{id:621,count:1}]:[])]:[];}
   let fieldBagReady;
   async function prepareFieldBag(){
     if(!fieldBagReady)fieldBagReady=(async()=>{const url=NativeTextLayout.resource('assets/field-bag/provenance.json');if(root.RuntimeAssets?.json)assets.fieldBag=await root.RuntimeAssets.json(url);else{const response=await fetch(url);if(!response.ok)throw Error('Catalogo Borsa non disponibile');assets.fieldBag=await response.json();}assets.fieldBagImages={};await Promise.all(Object.entries(assets.fieldBag.images).map(async([key,record])=>assets.fieldBagImages[key]=await image(record.path)));assets.fieldBagFont=await image(assets.fieldBag.font.path);})().catch(error=>{fieldBagReady=null;throw error;});return fieldBagReady;
@@ -151,7 +151,7 @@
   }
   function bagAction(id,pocket){
     const t=MENU_ASSETS.texts['3'],actions=[[t[0],()=>useItem(id,pocket)]];
-    if(id===4||id===17)actions.push([t[1],()=>discard(id,pocket)],[t[3],()=>team({select:i=>giveItem(id,i,()=>bag(pocket)),back:()=>bag(pocket)})]);
+    if([3,4,17,26,50].includes(id))actions.push([t[1],()=>discard(id,pocket)],[t[3],()=>team({select:i=>giveItem(id,i,()=>bag(pocket)),back:()=>bag(pocket)})]);
     actions.push([t[8],()=>bag(pocket)]);
     const top=192-actions.length*24,itemIndex=inventory(pocket).findIndex(item=>item.id===id);
     screen.show(ORIGINAL_EVENTS.itemNames[id],c=>{drawBag(c,pocket,itemIndex);actions.forEach(([label],i)=>{c.drawImage(assets['popup-'+(screen.selected===i?'buttonSelected':'buttonNormal')],152,top+i*24);NativeText.draw(c,assets.popupFont,label,162,top+6+i*24,false,'left',PARTY_POPUP_ASSETS.font);});},actions.map(([label,action],i)=>rect(label,152,top+i*24,104,24,action)),()=>bag(pocket),{drawFocus:false,top:c=>drawBagTop(c,pocket,itemIndex),topLabel:'Descrizione dello strumento'});
@@ -172,9 +172,9 @@
     }
     renderReady();const animateReady=()=>{if(!screen.dialog.open||screen.title!=='Comandi rapidi Y')return;screen.draw();requestAnimationFrame(animateReady);};requestAnimationFrame(animateReady);
   }
-  function useItem(id,pocket){if(id===442)return external(()=>TownMap.open(),()=>bag(pocket));if(id===17)return team({select:i=>{const result=Journey.usePotion(i);notice(result?MENU_ASSETS.texts['157'][44].replace('{0102:0}',Journey.state.party[i].nickname||Journey.state.party[i].name).replace('{0202:1}',result):'Non avrebbe alcun effetto.',()=>bag(pocket));},back:()=>bag(pocket)});notice('Non è il momento di usarlo!',()=>bag(pocket));}
+  function useItem(id,pocket){if(id===442)return external(()=>TownMap.open(),()=>bag(pocket));if(id===50)return team({select:i=>external(()=>Journey.useRareCandy(i),()=>bag(pocket)),back:()=>bag(pocket)});if(id===17||id===26)return team({select:i=>{const result=Journey.usePotion(i,id);notice(result?MENU_ASSETS.texts['157'][44].replace('{0102:0}',Journey.state.party[i].nickname||Journey.state.party[i].name).replace('{0202:1}',result):'Non avrebbe alcun effetto.',()=>bag(pocket));},back:()=>bag(pocket)});notice('Non è il momento di usarlo!',()=>bag(pocket));}
   function discard(id,pocket,count=1){
-    const maximum=id===4?Journey.state.pokeballs:potions,a=FIELD_POPUP_ASSETS.bagQuantity,t=MENU_ASSETS.texts['3'],item=ORIGINAL_EVENTS.itemNames[id],group=FIELD_POPUP_ASSETS.groups.quantityControls,pressed={up:-Infinity,down:-Infinity};
+    const maximum=Journey.itemCount(id),a=FIELD_POPUP_ASSETS.bagQuantity,t=MENU_ASSETS.texts['3'],item=ORIGINAL_EVENTS.itemNames[id],group=FIELD_POPUP_ASSETS.groups.quantityControls,pressed={up:-Infinity,down:-Infinity};
     let request=0,activePointer=null,heldDirection=0,lastTick=0,remainder=0,suppressClick=false;const hold=new NativeRepeat.Hold(),abort=new AbortController();
     const stop=()=>{activePointer=null;heldDirection=0;hold.reset();};
     const change=delta=>{const next=wrapQuantity(count,delta,maximum);if(next!==count){count=next;pressed[delta>0?'up':'down']=performance.now();screen.draw();}};

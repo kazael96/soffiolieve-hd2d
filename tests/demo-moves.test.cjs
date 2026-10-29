@@ -4,10 +4,10 @@ for(const file of ['purrloin','tepig','oshawott','patrat','lillipup'])require('.
 const S=require('../src/species-moves.js'),R=require('../src/battle-reactions.js');
 const layout={p1:{x:300,y:430,height:170,w:1000,h:650},p2:{x:680,y:300,height:120,w:1000,h:650}};
 // Independent IRBI level-up inventory (all levels, not only the first ten).
-const learned={495:[33,43,22,35,74,536,73,72,21,348,489,202,378,380,437],498:[33,39,52,316,111,488,123,205,36,535,372,53,457,46,394],501:[33,39,55,346,116,534,210,352,279,453,227,401,514,14,56],504:[33,43,44,117,197,28,242,95,162,495,526,158,212,226,21],506:[43,33,316,44,270,36,526,242,46,514,179,387,416],509:[10,45],572:[1]};
-test('all 83 reachable adventure pairs have profiles, including tutorial and depleted PP',()=>{
- let count=0;for(const [species,ids]of Object.entries(learned))for(const id of [...ids,165]){const p=S.select(species,id);assert.equal(p?.species,+species,species+' / '+id);assert.equal(p.id,id);count++;}assert.equal(count,83);assert.equal(Object.keys(D.profiles).length,62);
- assert.equal(S.select(509,274),null,'N has an explicit two-move team; do not invent Assist access');assert.equal(S.select(572,52),null,'debug arbitrary moves are not adventure learnsets');
+const learned={495:[33,43,22,35,74,536,73,72,21,348,489,202,378,380,437],498:[33,39,52,316,111,488,123,205,36,535,372,53,457,46,394],501:[33,39,55,346,116,534,210,352,279,453,227,401,514,14,56],504:[33,43,44,117,197,28,242,95,162,495,526,158,212,226,21],506:[43,33,316,44,270,36,526,242,46,514,179,387,416],509:[10,45,274,28,154,228,259,252,468,372,163,445,400,289,417,389],572:[1]};
+test('all 97 reachable adventure pairs have profiles, including tutorial and depleted PP',()=>{
+ let count=0;for(const [species,ids]of Object.entries(learned))for(const id of [...ids,165]){const p=S.select(species,id);assert.equal(p?.species,+species,species+' / '+id);assert.equal(p.id,id);count++;}assert.equal(count,97);assert.equal(Object.keys(D.profiles).length,76);
+ const data={window:{}};vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../src/accumula-events.js'),'utf8'),data);assert.deepEqual(Array.from(data.window.ACCUMULA_EVENTS.trainer.party[0].moves),[10,45],'N keeps his explicit two-move team while wild Purrloin can learn Assist');assert.equal(S.select(572,52),null,'debug arbitrary moves are not adventure learnsets');
 });
 test('new bodies remain finite, mirrored and grounded; every pose recovers',()=>{
  for(const p of Object.values(D.profiles)){

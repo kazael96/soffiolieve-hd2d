@@ -16,7 +16,7 @@
     $('questSummary').textContent=$('storyObjective').textContent=StoryState.objectives[state.phase];
     $('storyBag').textContent=`Denaro: $${state.money} · Poké Ball: ${state.pokeballs} · Pozioni: ${potions}`+(phaseIndex()>=4?' · Interpoké':'')+(phaseIndex()>=6?' · Pokédex':'')+(phaseIndex()>=7?' · Mappa Città':'');
     $('world').dataset.chapter=state.phase;$('world').dataset.scene=state.scene;
-    document.querySelector('.place').firstChild.textContent=state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):'SOFFIOLIEVE';
+    document.querySelector('.place').firstChild.textContent=state.original?.zone===6?'LEVANTOPOLI':state.original?.zone===319?'PERCORSO 2':state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):state.scene==='zone8'?'CENTRO POKÉMON':'SOFFIOLIEVE';
     $('openTownMap').hidden=!state.original?.map;
     $('openPokedex').hidden=!state.original?.pokedex;
     $('openLab').disabled=!state.starter;
@@ -65,16 +65,16 @@
       if(await NativeStory.choice(['SÌ','NO'])===0){await progressText(204,8,words);return;}
     }
   }
-  async function gainXP(s,kind){
-    const foe=s.active('p2'),receivers=[...participants].filter(i=>state.party[i]?.hp>0);
+  async function gainXP(s,kind,foe=s.active('p2')){
+    const receivers=[...participants].filter(i=>state.party[i]?.hp>0);
     for(const id of receivers){const p=state.party[id],data=OPENING_DATA[p.name],foeData=OPENING_DATA[foe.species.name],base=foeData?.yield||0,old=unpack(p);
       p.evs??={hp:0,atk:0,def:0,spe:0,spa:0,spd:0};
       for(const [stat,n] of Object.entries(foeData?.evYield||{})){const total=Object.values(p.evs).reduce((a,b)=>a+b,0);p.evs[stat]+=Math.min(n,255-p.evs[stat],510-total);}
       const power=v=>Math.floor(Math.round(Math.sqrt(v)*4096)/4096*v*v);
       const xp=Math.floor(Math.floor(Math.floor(base*foe.level/5)*(kind==='wild'?1:1.5))/Math.max(1,receivers.length)*power(2*foe.level+10)/power(foe.level+p.level+10))+1;
-      p.xp+=xp;await progressText(15,42,[p.nickname||p.name,xp]);
+      const cap=window.ROUTE2_DATA?Math.max(15,p.level):100;p.xp=Math.min(data.growth[cap],p.xp+xp);await progressText(15,42,[p.nickname||p.name,xp]);
       const species=GEN5.species.find(m=>m.en===p.name);
-      while(p.level<100&&p.xp>=data.growth[p.level+1]){
+      while(p.level<cap&&p.xp>=data.growth[p.level+1]){
         p.level++;await progressText(15,60,[p.nickname||p.name,p.level]);
         for(const move of species.learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);
       }
@@ -90,7 +90,7 @@
       if(first&&state.original?.pokedex){await progressText(15,66,[captured.name]);await Pokedex.entry(captured.name,{registration:true});}
       await NativeStory.showPage(messagePages(POKEDEX_ASSETS.labels.nickname,[captured.name]).join('\n'));
       if(await NativeStory.choice(['SÌ','NO'])===0)await NativeStory.nickname(index);
-    }else if(!escaped&&s.battle.winner==='Alcide')await gainXP(s,kind);
+    }else if(!escaped&&s.battle.winner==='Alcide'){const defeated=s.battle.p2.pokemon.filter(p=>p.hp===0);for(const foe of defeated.length?defeated:[s.active('p2')])await gainXP(s,kind,foe);}
     if(s.openingTrainer&&s.battle.winner==='Alcide'){
       for(const page of messagePages(s.openingTrainer.messages[1],[]))await NativeStory.showPage(page,s.openingTrainer.name);
       const reward=OpeningBattleRules.prize(s.openingTrainer);state.money=Math.min(9999999,state.money+reward);
@@ -108,13 +108,13 @@
   function step(dt,moved){}
   function encounter(dt,moved,distance=0){
     if(phaseIndex()<StoryState.phases.indexOf('route')||!moved||battling)return;
-    const onRoute=window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;
+    const route2=window.ROUTE2_DATA&&window.NativeStory?.state.zone===319,table=route2?ROUTE2_DATA.encounters.slots:OPENING_ENCOUNTERS;const onRoute=route2||window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;encounterState.rate=route2?ROUTE2_DATA.encounters.rate:OPENING_ENCOUNTER_RULES.rate;
     const g=onRoute?outdoor.permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
     const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
     if(encounterState.advance(distance,!!g&&g.bytes[tile]===4,n=>Math.floor(Math.random()*n))){
       let roll=Math.random()*100;
-      const e=OPENING_ENCOUNTERS.find(slot=>(roll-=slot.weight)<0)||OPENING_ENCOUNTERS.at(-1);
-      startBattle(false,{story:'wild',p1:configs(),p2:[monConfig(newStoryMon(e.name,e.level))]});
+      const e=table.find(slot=>(roll-=slot.weight)<0)||table.at(-1);
+      startBattle(false,{story:'wild',p1:configs(),p2:[monConfig(newStoryMon(e.name,e.level??e.min+Math.floor(Math.random()*(e.max-e.min+1))))]});
     }
   }
   function openJournal(){if(window.NativeUI)return NativeUI.open();if(battling||menuOpen()||window.NativeStory?.locked)return;resetInput();update();save();$('journal').showModal();}
@@ -129,13 +129,17 @@
   $('confirmReset').onclick=()=>{if(!restart())toast('Impossibile cancellare il salvataggio. Riprova.');};
   for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',resetInput);
   function moveParty(from,to){if(battling||!state.party[from]||!state.party[to])return false;[state.party[from],state.party[to]]=[state.party[to],state.party[from]];lead=0;displayPartner();save(true);return true;}
-  function usePotion(index){const p=state.party[index];if(battling||!p||potions<=0||p.hp<=0)return 0;const m=unpack(p),healed=Math.min(20,m.max-m.hp);if(healed<=0)return 0;p.hp=m.hp+healed;potions--;displayPartner();save(true);return healed;}
-  function giveItem(id,index){const p=state.party[index];if(battling||!p||![4,17].includes(id)||(id===4?state.pokeballs:potions)<=0)return false;if(id===4)state.pokeballs--;else potions--;if(p.heldItem===4)state.pokeballs++;else if(p.heldItem===17)potions++;p.heldItem=id;save(true);return true;}
-  function takeItem(index){const p=state.party[index],id=p?.heldItem;if(battling||!id)return 0;if(id===4)state.pokeballs++;else if(id===17)potions++;p.heldItem=0;save(true);return id;}
-  function discardItem(id,count){if(battling||![4,17].includes(id)||!Number.isInteger(count)||count<=0)return false;const have=id===4?state.pokeballs:potions;if(count>have)return false;if(id===4)state.pokeballs-=count;else potions-=count;save(true);return true;}
-  window.Journey={restart,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
+  function itemCount(id){return id===4?state.pokeballs:id===17?potions:Math.max(0,Math.min(999,Math.floor(state.original?.extraItems?.[id])||0));}
+  function addItem(id,count=1){if(![3,4,17,26,50].includes(id)||!Number.isInteger(count)||count<1||itemCount(id)+count>999)return false;if(id===4)state.pokeballs+=count;else if(id===17)potions+=count;else{state.original.extraItems??={};state.original.extraItems[id]=itemCount(id)+count;}return true;}
+  function consumeItem(id,count=1){if(!Number.isInteger(count)||count<1||itemCount(id)<count)return false;if(id===4)state.pokeballs-=count;else if(id===17)potions-=count;else state.original.extraItems[id]=itemCount(id)-count;return true;}
+  function usePotion(index,id=17){const p=state.party[index];if(battling||!p||![17,26].includes(id)||itemCount(id)<=0||p.hp<=0)return 0;const m=unpack(p),healed=Math.min(id===26?50:20,m.max-m.hp);if(healed<=0)return 0;p.hp=m.hp+healed;consumeItem(id);displayPartner();save(true);return healed;}
+  async function useRareCandy(index){const p=state.party[index];if(battling||processing||!p||p.level>=15||!itemCount(50))return false;processing=true;try{const old=unpack(p);consumeItem(50);p.level++;p.xp=OPENING_DATA[p.name].growth[p.level];await progressText(15,60,[p.nickname||p.name,p.level]);const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,old.hp+next.max-old.max);displayPartner();return true;}finally{processing=false;save(true);}}
+  function giveItem(id,index){const p=state.party[index];if(battling||!p||![3,4,17,26,50].includes(id)||!itemCount(id)||p.heldItem&&itemCount(p.heldItem)>=999)return false;consumeItem(id);if(p.heldItem)addItem(p.heldItem);p.heldItem=id;save(true);return true;}
+  function takeItem(index){const p=state.party[index],id=p?.heldItem;if(battling||!id||!addItem(id))return 0;p.heldItem=0;save(true);return id;}
+  function discardItem(id,count){if(battling||![3,4,17,26,50].includes(id)||!consumeItem(id,count))return false;save(true);return true;}
+  window.Journey={restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
   potions=state.potions;renderer.scene=state.scene==='town'?outdoor:OPENING_ASSETS.scenes[state.scene==='bedroom'&&state.original?.roomMess?'bedroomMess':state.scene];player={...state.player};facing=state.facing;
-  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
+  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone8:[-8.5,-3.5],zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
   renderer.center=state.scene==='town'?[player.x*.7,player.y+1.5]:[-10,-10];displayPartner();actors();update();
   addEventListener('pagehide',()=>save());document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});setInterval(()=>save(),5000);
 })();

@@ -1,16 +1,18 @@
-# Soffiolieve HD-2D — demo 0.38
+# Soffiolieve HD-2D — demo 0.39
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → ingresso nel Percorso 2**.
-Comprende la visita al Centro Pokémon, il comizio del Team Plasma e la prima lotta con N.
+Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → Percorso 2 → Levantopoli**.
+Comprende la visita al Centro Pokémon, il comizio del Team Plasma, la prima lotta con N, gli eventi del Percorso 2 e l’arrivo a Levantopoli. La progressione della demo arriva al livello 15; i livelli già superiori dei vecchi salvataggi vengono conservati.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono le [regole vincolanti](docs/DEVELOPMENT-RULES.md): uscite dei personaggi senza sparizioni visibili, sfondi di lotta coerenti con il luogo e animazioni personalizzate per ogni coppia Pokémon–mossa. La prima copertura richiesta comprende19 coppie entro il livello 10. Le istruzioni operative sono in [AGENTS.md](AGENTS.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata a tutte le mosse utilizzabili nella demo, ora 97 coppie. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.39 aggiunge Percorso 2, chiamata della mamma e Scarpe da Corsa, tre allenatori, nuova sfida con Belle, Purrloin catturabile, strumenti originali e Centro Pokémon di Levantopoli. Conserva le animazioni precedenti, aggiunge il repertorio di Purrloin e verifica le chiamate Interpoké nei tre formati. Inventario e limiti in [ROUTE2-STRIATON-039.md](docs/ROUTE2-STRIATON-039.md) e [SPECIES-MOVES-039.md](docs/SPECIES-MOVES-039.md).
 
 La 0.38 aggiunge un audit delle collisioni, delle ricariche durante gli spostamenti e degli input ripetuti. Corregge celle vuote bloccate da NPC futuri, ripresa delle porte dopo ricarica e rimozione erronea di residenti in attesa; isola i record di viaggio non validi e permette di riprovare i caricamenti falliti di menu, font e Borsa. Prove e limiti in [DEEP-AUDIT-038.md](docs/DEEP-AUDIT-038.md).
 
