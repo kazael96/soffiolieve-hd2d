@@ -7,10 +7,10 @@
  const owner=key=>/^p[13]/.test(key)?'p1':'p2';
  function mon(key){const match=/^(p[1-4])([ab])/.exec(key);return match&&session.battle[match[1]]?.active[session.multi?0:match[2]==='b'?1:0];}
  function snapshot(key){const old={...session.focus},side=owner(key),slot=session.multi?(/^p[34]/.test(key)?1:0):key.endsWith('b')?1:0;session.focus[side]=slot;const p=session.snapshot(side),m=mon(key);session.focus=old;return {...p,gender:m?.gender,nickname:m?.name!==m?.species.name?m?.name:''};}
- function rememberStances(){if(!enabled())return;for(const [role,key]of Object.entries(refs))if(views[key])stances[key]=PatratMoves.stanceSpecies(role);}
+ function rememberStances(){if(!enabled())return;for(const [role,key]of Object.entries(refs))if(views[key]){stances[key]=PatratMoves.stanceSpecies(role);poses[key]=visualState[role]||poses[key]||{};}}
  function restoreStances(){if(!enabled())return;for(const [role,key]of Object.entries(refs))PatratMoves.setStance(role,!!stances[key],stances[key]);}
  function storedStance(key,id){if(stances[key]!==id)return null;const tick=26+(GameSpeed.now()*.06)%40;return id===504?PatratMoves.sample(PatratMoves.bide.store,tick,owner(key)):id===532?ChapterMoves.sample(ChapterMoves.select(532,117,{storing:true}),tick,owner(key)):null;}
- function resetViews(){rememberStances();views={};poses={};for(const side of ['p1','p2'])for(let slot=0;slot<2;slot++){const key=ref(side,slot);if(mon(key)){views[key]=snapshot(key);poses[key]={};}}refs={p1:ref('p1',session.selectionSlot),p2:ref('p2',0)};targets=[];restoreStances();}
+ function resetViews(){rememberStances();const previousViews=views,previousPoses=poses;views={};poses={};for(const side of ['p1','p2'])for(let slot=0;slot<2;slot++){const key=ref(side,slot);if(mon(key)){views[key]=snapshot(key);poses[key]=previousViews[key]?.spriteId===views[key].spriteId?previousPoses[key]||{}:{};}}refs={p1:ref('p1',session.selectionSlot),p2:ref('p2',0)};targets=[];restoreStances();}
  function display(){if(!enabled())return;for(const side of ['p1','p2']){const key=refs[side],p=views[key];if(!p)continue;visualState[side]=poses[key]||(poses[key]={});if(side==='p1')partner=p;else enemy=p;}}
  combatant=function(...args){const previous=drawingRole;drawingRole=args[6];try{return baseCombatant(...args);}finally{drawingRole=previous;}};
  MoveFX.speciesPose=(side,id)=>passive?storedStance(passive,id):baseSpeciesPose(drawingRole||side,id);
