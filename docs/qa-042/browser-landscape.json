@@ -1,0 +1,616 @@
+{
+  "schema": 2,
+  "fixture": "409b612fca48578f",
+  "build": "b74f60f4bdecd5aa",
+  "viewport": [
+    844,
+    390
+  ],
+  "stage": "Prova GPU conclusa",
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 6
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 1758,
+      "details": {
+        "frames": 90,
+        "scenes": 30
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3488,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 3592,
+      "details": {
+        "textures": 762,
+        "transparentOriginalSlots": 32,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 4782,
+      "details": {
+        "frames": 2280,
+        "atlases": 38
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "PASS",
+      "durationMs": 802,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 14,
+      "details": {
+        "cancelPreservesState": true
+      }
+    },
+    {
+      "name": "battle-backgrounds-and-custom-animations",
+      "result": "PASS",
+      "durationMs": 71260,
+      "details": {
+        "customFrames": 3620,
+        "pairs": 181,
+        "sides": 2,
+        "outcomes": 2,
+        "backgrounds": 14,
+        "ambient": [
+          {
+            "species": "Patrat",
+            "poses": 1540,
+            "uniquePoses": 23,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 1540,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Lillipup",
+            "poses": 3669316,
+            "uniquePoses": 370,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 3669316,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "uniquePoses": 13,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 21600,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Munna",
+            "poses": 6006,
+            "uniquePoses": 269,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 6006,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Pidove",
+            "poses": 1800708,
+            "uniquePoses": 16,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 1800708,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Blitzle",
+            "poses": 122100,
+            "uniquePoses": 235,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 122100,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Roggenrola",
+            "poses": 432,
+            "uniquePoses": 15,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 432,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Woobat",
+            "poses": 480,
+            "uniquePoses": 44,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 480,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "uncaught-errors",
+      "result": "PASS",
+      "durationMs": 2,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "new-chapter-ground-clearance-and-ambient-visibility",
+      "result": "PASS",
+      "durationMs": 1511,
+      "details": {
+        "scenes": [
+          {
+            "id": "route3",
+            "terrain": "path",
+            "ambient": [
+              {
+                "species": "Pidove",
+                "frame": 19497,
+                "world": [
+                  -8,
+                  0.02,
+                  -18
+                ],
+                "height": 0.55,
+                "bounds": [
+                  100,
+                  128,
+                  156,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19497,
+                  "visible": 25,
+                  "full": 25,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Blitzle",
+                "frame": 19497,
+                "world": [
+                  -5.7,
+                  0.02,
+                  -18
+                ],
+                "height": 0.65,
+                "bounds": [
+                  106,
+                  128,
+                  150,
+                  191
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19497,
+                  "visible": 24,
+                  "full": 24,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Patrat",
+                "frame": 19497,
+                "world": [
+                  -3.4,
+                  0.02,
+                  -18
+                ],
+                "height": 0.5,
+                "bounds": [
+                  93,
+                  131,
+                  163,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19497,
+                  "visible": 25,
+                  "full": 25,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              844,
+              234
+            ],
+            "double": true,
+            "partner": false
+          },
+          {
+            "id": "route3",
+            "terrain": "grass",
+            "ambient": [
+              {
+                "species": "Pidove",
+                "frame": 19602,
+                "world": [
+                  -8,
+                  0.02,
+                  -18
+                ],
+                "height": 0.55,
+                "bounds": [
+                  100,
+                  128,
+                  156,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19602,
+                  "visible": 25,
+                  "full": 25,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Blitzle",
+                "frame": 19602,
+                "world": [
+                  -5.7,
+                  0.02,
+                  -18
+                ],
+                "height": 0.65,
+                "bounds": [
+                  106,
+                  127,
+                  150,
+                  191
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19602,
+                  "visible": 24,
+                  "full": 24,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Patrat",
+                "frame": 19602,
+                "world": [
+                  -3.4,
+                  0.02,
+                  -18
+                ],
+                "height": 0.5,
+                "bounds": [
+                  93,
+                  131,
+                  163,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19602,
+                  "visible": 25,
+                  "full": 25,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              844,
+              234
+            ],
+            "double": true,
+            "partner": false
+          },
+          {
+            "id": "route3Dark",
+            "terrain": "grass",
+            "ambient": [
+              {
+                "species": "Pidove",
+                "frame": 19677,
+                "world": [
+                  -8,
+                  0.02,
+                  -18
+                ],
+                "height": 0.55,
+                "bounds": [
+                  99,
+                  131,
+                  159,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19677,
+                  "visible": 27,
+                  "full": 27,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Blitzle",
+                "frame": 19677,
+                "world": [
+                  -5.7,
+                  0.02,
+                  -18
+                ],
+                "height": 0.65,
+                "bounds": [
+                  106,
+                  129,
+                  150,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19677,
+                  "visible": 24,
+                  "full": 24,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Patrat",
+                "frame": 19677,
+                "world": [
+                  -3.4,
+                  0.02,
+                  -18
+                ],
+                "height": 0.5,
+                "bounds": [
+                  93,
+                  128,
+                  163,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19677,
+                  "visible": 25,
+                  "full": 25,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              844,
+              234
+            ],
+            "double": true,
+            "partner": false
+          },
+          {
+            "id": "wellspring",
+            "terrain": "cave",
+            "ambient": [
+              {
+                "species": "Roggenrola",
+                "frame": 19743,
+                "world": [
+                  -2,
+                  0.02,
+                  -13.2
+                ],
+                "height": 0.45,
+                "bounds": [
+                  108,
+                  128,
+                  146,
+                  190
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19743,
+                  "visible": 14,
+                  "full": 14,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Woobat",
+                "frame": 19743,
+                "world": [
+                  -5,
+                  0.02,
+                  -13.2
+                ],
+                "height": 0.6,
+                "bounds": [
+                  62,
+                  123,
+                  190,
+                  178
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 19743,
+                  "visible": 55,
+                  "full": 55,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              844,
+              234
+            ],
+            "double": true,
+            "partner": true
+          },
+          {
+            "id": "nacrene",
+            "terrain": "town",
+            "ambient": [],
+            "dimensions": [
+              844,
+              234
+            ],
+            "double": false,
+            "partner": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "real-double-commands-targets-and-partner-animation",
+      "result": "PASS",
+      "durationMs": 4701,
+      "details": {
+        "formats": [
+          "doubles",
+          "multi"
+        ],
+        "independentCommands": true,
+        "foeAndAllyTargets": true,
+        "enemyAnimations": true,
+        "komorOwnBody": true,
+        "animations": [
+          {
+            "side": "p2",
+            "species": 509,
+            "actor": 509
+          },
+          {
+            "side": "p1",
+            "species": 495,
+            "actor": 495
+          },
+          {
+            "side": "p1",
+            "species": 501,
+            "actor": 501
+          },
+          {
+            "side": "p2",
+            "species": 504,
+            "actor": 504
+          },
+          {
+            "side": "p2",
+            "species": 509,
+            "actor": 509
+          },
+          {
+            "side": "p1",
+            "species": 495,
+            "actor": 495
+          },
+          {
+            "side": "p2",
+            "species": 504,
+            "actor": 504
+          },
+          {
+            "side": "p1",
+            "species": 498,
+            "actor": 498
+          }
+        ]
+      }
+    },
+    {
+      "name": "Interpoke-original-portraits-layout-and-cleanup",
+      "result": "PASS",
+      "durationMs": 8152,
+      "details": {
+        "calls": [
+          {
+            "id": 1,
+            "participants": 4,
+            "expressionFrames": 36,
+            "dialoguePages": 14,
+            "minimumDialogueGap": 8,
+            "cleanClose": true
+          },
+          {
+            "id": 2,
+            "participants": 2,
+            "expressionFrames": 18,
+            "dialoguePages": 14,
+            "minimumDialogueGap": 16.40625,
+            "cleanClose": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "battle-bag-icons-navigation-selection-and-cancel",
+      "result": "PASS",
+      "durationMs": 1723,
+      "details": {
+        "categories": 4,
+        "directions": 400,
+        "originalIcons": true,
+        "cancelPreservesQuantity": true,
+        "selectionRestored": true
+      }
+    },
+    {
+      "name": "repeated-context-recovery",
+      "result": "PASS",
+      "durationMs": 11443,
+      "details": {
+        "restores": 2,
+        "preservedTextures": 762,
+        "renderedAfterRestore": 2
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ],
+  "domDiagnostics": []
+}

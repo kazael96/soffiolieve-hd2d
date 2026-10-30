@@ -16,10 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def startup_pack(site):
     paths=set()
-    for name in ['assets/scene.js','assets/sprites.js','opening-assets.js','opening-sprites.js','accumula-assets.js','route2-assets.js','striaton-assets.js']:
+    for name in ['assets/scene.js','assets/sprites.js','opening-assets.js','opening-sprites.js','accumula-assets.js','route2-assets.js','striaton-assets.js','route3-assets.js']:
         file=site/name
         if not file.exists():continue
-        match=re.search(r'window\.[A-Z_]+\s*=\s*',file.read_text(encoding='utf8'))
+        match=re.search(r'window\.[A-Z][A-Z0-9_]*\s*=\s*',file.read_text(encoding='utf8'))
         if not match:continue
         data=json.JSONDecoder().raw_decode(file.read_text(encoding='utf8')[match.end():])[0]
         def visit(value):
@@ -94,12 +94,12 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.41', 'revision': revision,
+            'version': '0.42', 'revision': revision,
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)
-    print(f"Built Soffiolieve 0.41 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.42 ({revision}) in {target}")
 
 
 if __name__ == '__main__':

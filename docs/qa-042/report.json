@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "build": "0b9691f94130cea8",
+  "created": "2026-10-30T11:31:40.985Z",
+  "result": "PASS",
+  "stages": [
+    {
+      "name": "unit",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 8465,
+      "log": "unit.log"
+    },
+    {
+      "name": "builder",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 23052,
+      "log": "builder.log"
+    },
+    {
+      "name": "built-site",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 3135,
+      "log": "built-site.log"
+    },
+    {
+      "name": "render-assets",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 3005,
+      "log": "render-assets.log"
+    },
+    {
+      "name": "story-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 12364,
+      "log": "story-runtime.log"
+    },
+    {
+      "name": "accumula-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 24266,
+      "log": "accumula-runtime.log"
+    },
+    {
+      "name": "route2-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 9420,
+      "log": "route2-runtime.log"
+    },
+    {
+      "name": "striaton-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 5293,
+      "log": "striaton-runtime.log"
+    },
+    {
+      "name": "route3-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 4728,
+      "log": "route3-runtime.log"
+    },
+    {
+      "name": "double-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 1896,
+      "log": "double-runtime.log"
+    },
+    {
+      "name": "field-stress",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 18269,
+      "log": "field-stress.log"
+    },
+    {
+      "name": "mobile-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 9441,
+      "log": "mobile-runtime.log"
+    },
+    {
+      "name": "opponent-runtime",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 3272,
+      "log": "opponent-runtime.log"
+    },
+    {
+      "name": "checkpoint-stress",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 22852,
+      "log": "checkpoint-stress.log"
+    },
+    {
+      "name": "combat-stress",
+      "result": "PASS",
+      "exitCode": 0,
+      "durationMs": 4937,
+      "log": "combat-stress.log"
+    }
+  ],
+  "browser": {
+    "result": "NOT_RUN",
+    "instruction": "Generate the isolated browser QA site and run it through a browser. CLI success alone does not certify pixels, touch or physical phone GPUs."
+  }
+}

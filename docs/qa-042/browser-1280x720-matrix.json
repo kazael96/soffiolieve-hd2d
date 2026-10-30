@@ -1,0 +1,94 @@
+{
+  "schema": 2,
+  "fixture": "9dac305047482db8",
+  "build": "77ca36bd6399a7d1",
+  "viewport": [
+    1280,
+    720
+  ],
+  "stage": "Controlli conclusi",
+  "running": false,
+  "result": "FAIL",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 8
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 4439,
+      "details": {
+        "frames": 90,
+        "scenes": 30
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3625,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 11954,
+      "details": {
+        "textures": 762,
+        "transparentOriginalSlots": 32,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 10528,
+      "details": {
+        "frames": 2280,
+        "atlases": 38
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "PASS",
+      "durationMs": 1809,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 23,
+      "details": {
+        "cancelPreservesState": true
+      }
+    },
+    {
+      "name": "battle-backgrounds-and-custom-animations",
+      "result": "FAIL",
+      "durationMs": 246704,
+      "error": "Error: Ambient Pokemon cropped or empty Woobat\n    at check (http://127.0.0.1:4208/__qa/browser-qa.js?v=531f66e221df:8:56)\n    at battleCases (http://127.0.0.1:4208/__qa/browser-qa.js?v=531f66e221df:44:70)\n    at async test (http://127.0.0.1:4208/__qa/browser-qa.js?v=531f66e221df:12:103)\n    at async panel.querySelector.onclick (http://127.0.0.1:4208/__qa/browser-qa.js?v=531f66e221df:48:436)"
+    },
+    {
+      "name": "uncaught-errors",
+      "result": "PASS",
+      "durationMs": 2,
+      "details": {
+        "count": 0
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

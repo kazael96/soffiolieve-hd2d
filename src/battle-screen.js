@@ -5,6 +5,7 @@
   const messageCanvas=document.createElement('canvas');messageCanvas.id='nativeBattleMessage';messageCanvas.width=384;messageCanvas.height=72;messageCanvas.setAttribute('role','img');$('battle').append(messageCanvas);const messageContext=messageCanvas.getContext('2d');messageContext.imageSmoothingEnabled=false;let lastMessage='';
   BattleHUD.mount(stage,messageCanvas);panel.inert=true;panel.setAttribute('aria-hidden','true');
   const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
+  let targetRequest=null;
   const resources={},images=new Map(),selectionByMode=new Map();let font,smallFont,battleFont,fontMetrics,moveMetrics,metadata,ready=false,mode='main',buttons=[],selected=0,wasBusy=false,notice=null,bagCategory='medicine',bagPage=0,bagItem=17,lastItem=0,press=null,partyIndex=0,partyMove=0;
   function load(src){if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{images.delete(src);reject(Error('Grafica lotta non disponibile: '+src));};im.src=NativeTextLayout.resource(src);}));return images.get(src);}
   const loading=(async()=>{
@@ -33,7 +34,7 @@
   const text=(s,x,y,white=false,align='left')=>NativeText.draw(c,font,String(s),x,y,white,align);
   const rect=(label,x,y,w,h,action,disabled=false)=>({label,x,y,w,h,action,disabled});
   function choose(next){selectionByMode.set(mode,selected);if(BattleBag.names[next]&&mode!=='itemDetail'&&mode!=='itemTarget'&&mode!==next)bagPage=0;mode=next;notice=null;update();}
-  function back(){if(busy||press)return;if(mode==='itemTarget')return choose(bagCategory);if(mode==='partyContext')return choose('party');if(['partyInfo','partyMoves','partyMoveDetail'].includes(mode))return choose(mode==='partyMoveDetail'?'partyMoves':'partyContext');if(mode==='party'&&session.request()?.forceSwitch?.[0])return;if(mode==='main')return;choose(mode==='itemDetail'?bagCategory:['medicine','balls','statusItems','battleItems'].includes(mode)?'bag':'main');}
+  function back(){if(busy||press)return;if(mode==='targets'){const resolve=targetRequest.resolve;targetRequest=null;choose('moves');resolve(null);return;}if(mode==='main'&&window.DoubleBattles?.undo())return;if(mode==='itemTarget')return choose(bagCategory);if(mode==='partyContext')return choose('party');if(['partyInfo','partyMoves','partyMoveDetail'].includes(mode))return choose(mode==='partyMoveDetail'?'partyMoves':'partyContext');if(mode==='party'&&session.request()?.forceSwitch?.[0])return;if(mode==='main')return;choose(mode==='itemDetail'?bagCategory:['medicine','balls','statusItems','battleItems'].includes(mode)?'bag':'main');}
   function bagView(){return BattleBag.page(BattleBag.inventory(mode,id=>Journey.itemCount(id)),bagPage);}
   function pageBag(delta){bagPage=bagView().number+delta;update();}
   function bagIcon(id){const key='item-'+id,path=window.PARTY_DETAIL_ASSETS?.itemMap?.[id]?.src;if(path&&!resources[key]&&!resources[key+'-pending']){resources[key+'-pending']=true;void load(path).then(im=>{resources[key]=im;draw();}).catch(()=>{}).finally(()=>{resources[key+'-pending']=false;});}return resources[key];}
@@ -42,6 +43,7 @@
   function useBagItem(){
     if(BattleMedicine.ids.includes(bagItem)){if(Journey.itemCount(bagItem)>0){lastItem=bagItem;choose('itemTarget');}return;}
     if(trainer){notice='Non si possono catturare i Pokémon degli altri Allenatori!';mode='notice';update();return;}
+    if(session.double&&session.battle.p2.active.filter(p=>p?.hp>0).length>1){notice='Devi prima mandare KO uno dei due Pokémon selvatici.';mode='notice';update();return;}
     lastItem=bagItem;void throwStoryBall(bagItem);
   }
   function activate(index){const b=buttons[index];if(!b||b.disabled||press||busy)return;void AudioEngine.playSound(1352);if(mode==='moves'&&index<partner.moves.length){press={kind:'move',index,at:performance.now(),action:b.action};draw();return;}if(['party','itemTarget'].includes(mode)&&index<session.party().length){press={kind:'party',index,at:performance.now(),action:b.action};draw();return;}if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)){press={kind:'app',index,at:performance.now(),action:b.action};draw();return;}b.action();}
@@ -58,12 +60,13 @@
     if(wasBusy){wasBusy=false;mode=forced?'party':'main';}
     if(finished){renderButtons(storyBattle==='tutorial'?[]:[rect('Continua',0,0,256,192,()=>endBattle())]);return;}
     if(forced&&!['party','partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode))mode='party';
-    if(mode==='main')renderButtons([rect('LOTTA',0,0,128,96,()=>choose('moves')),rect('BORSA',128,0,128,96,()=>choose('bag')),rect('POKÉMON',0,96,128,96,()=>choose('party')),rect('FUGA',128,96,128,96,run)]);
+    if(mode==='targets')renderButtons([...targetRequest.items.map((t,i)=>rect(t.label,4+i%2*128,12+Math.floor(i/2)*56,120,48,()=>{const resolve=targetRequest.resolve;targetRequest=null;choose('moves');resolve(t.loc);})),rect('Indietro',176,144,80,48,back)]);
+    else if(mode==='main')renderButtons([rect('LOTTA',0,0,128,96,()=>choose('moves')),rect('BORSA',128,0,128,96,()=>choose('bag')),rect('POKÉMON',0,96,128,96,()=>choose('party')),rect('FUGA',128,96,128,96,run)]);
     else if(mode==='moves'){
       const list=[...$('moves').querySelectorAll(':scope > button')];renderButtons([...list.map((b,i)=>rect(b.textContent,i%2*128,32+Math.floor(i/2)*48,128,48,()=>b.onclick(),b.disabled)),rect('Indietro',176,144,80,48,back)]);
     }else if(mode==='bag'){
       const names=metadata.battleText.banks['17'],modes=['medicine','balls','statusItems','battleItems'];
-      renderButtons([...metadata.bag.categories.map((category,i)=>rect(category.messages.map(id=>names[id]).join(' '),...category.panelRect,()=>{bagCategory=modes[i];choose(bagCategory);})),...(lastItem?[rect(names[8],16,160,200,32,()=>{bagItem=lastItem;bagCategory=[22,27].includes(lastItem)?'statusItems':BattleMedicine.ids.includes(lastItem)?'medicine':'balls';choose('itemDetail');})]:[]),rect('Indietro',216,152,40,40,back)]);
+      renderButtons([...metadata.bag.categories.map((category,i)=>rect(category.messages.map(id=>names[id]).join(' '),...category.panelRect,()=>{bagCategory=modes[i];choose(bagCategory);})),...(lastItem?[rect(names[8],16,160,200,32,()=>{bagItem=lastItem;bagCategory=[18,21,22,27,150].includes(lastItem)?'statusItems':BattleMedicine.ids.includes(lastItem)?'medicine':'balls';choose('itemDetail');})]:[]),rect('Indietro',216,152,40,40,back)]);
     }else if(BattleBag.names[mode]){const view=bagView();bagPage=view.number;renderButtons([...view.items.map(item=>rect(ORIGINAL_EVENTS.itemNames[item.id]+' ×'+item.count,...item.rect,()=>{bagItem=item.id;choose('itemDetail');},storyBattle==='tutorial')),rect('Pagina precedente',4,156,32,32,()=>pageBag(-1),!view.previous),rect('Pagina successiva',44,156,32,32,()=>pageBag(1),!view.next),rect('Indietro',220,156,32,32,()=>choose('bag'))]);}
     else if(mode==='itemDetail')renderButtons([rect('USA',56,152,152,40,useBagItem,storyBattle==='tutorial'||!Journey.itemCount(bagItem)),rect('Indietro',216,152,40,40,back)]);
     else if(mode==='party'||mode==='itemTarget'){
@@ -98,6 +101,7 @@
           draw(left+'/'+max,metadata.moves.ppValuesScreen[i],'center',state);
           const type=resources['type-'+id];if(type)c.drawImage(type,x+16,y+24);c.restore();
         });
+      }else if(mode==='targets'){c.drawImage(resources['bag-list'],0,0);targetRequest.items.forEach((t,i)=>{const x=8+i%2*128,y=16+Math.floor(i/2)*56;const icon=resources.partyIcons[t.id];if(icon)c.drawImage(icon,x,y+7);text(t.name,x+28,y+4,true);text(t.loc>0?'NEMICO':'ALLEATO',x+28,y+22,true);text('L. '+t.level,x+106,y+22,true,'right');});
       }else if(mode==='bag'){
         c.drawImage(resources['bag-categories'],0,0);const names=metadata.battleText.banks['17'];
         metadata.bag.categories.forEach(category=>{const w=metadata.bag.windows[category.window];category.messages.forEach((id,i)=>text(names[id],w.pixelRect[0]+w.pixelRect[2]/2,w.pixelRect[1]+i*16,true,'center'));});
@@ -134,7 +138,7 @@
     const forced=!!session.request()?.forceSwitch?.[0],prompt=a.prompt,choice=mode==='itemTarget'?'3':forced?'2':'default';c.fillStyle='#fff';c.fillRect(...prompt.rect);NativeText.draw(c,resources.partyPromptFont,prompt.nativeModes[choice].text,prompt.rect[0],prompt.rect[1],false,'left',a.font.variants.prompt);
   }
   function partyMon(){return session.battle.p1.pokemon[partyIndex];}
-  function switchLabel(){const p=session.party()[partyIndex];return p.active?27:p.hp<=0||session.request()?.active?.[0]?.trapped?26:21;}
+  function switchLabel(){const p=session.party()[partyIndex];return p.active?27:p.hp<=0||window.DoubleBattles?.isReserved(p.index)||session.request()?.active?.[0]?.trapped?26:21;}
   function renderPartyPageButtons(){const a=resources.partyData,t=a.messages,context=mode==='partyContext';if(context){const unavailable=switchLabel();renderButtons([rect(t[unavailable],0,8,240,136,()=>turn('switch '+(partyIndex+1)),unavailable!==21),rect(t[24],0,152,104,40,()=>choose('partyInfo')),rect(t[25],104,152,104,40,()=>choose('partyMoves')),rect('Indietro',216,152,40,40,back)]);return;}
     if(mode==='partyMoveDetail'){renderButtons([...partyMon().moveSlots.map((slot,i)=>rect(GEN5.byMoveKey[slot.id]?.name||slot.move,88+i%2*40,152+Math.floor(i/2)*16,40,16,()=>{partyMove=i;update();})),rect('Indietro',216,152,40,40,back)]);return;}
     renderButtons([...(mode==='partyMoves'?partyMon().moveSlots.map((slot,i)=>rect(GEN5.byMoveKey[slot.id]?.name||slot.move,i%2*128,48+Math.floor(i/2)*48,128,48,()=>{partyMove=i;choose('partyMoveDetail');})):[]),rect('Pokémon precedente',0,152,40,40,()=>{partyIndex--;update();},partyIndex===0),rect('Pokémon successivo',40,152,40,40,()=>{partyIndex++;update();},partyIndex===session.party().length-1),rect(t[mode==='partyInfo'?25:24],96,152,104,40,()=>choose(mode==='partyInfo'?'partyMoves':'partyInfo')),rect('Indietro',216,152,40,40,back)]);
@@ -169,14 +173,15 @@
   }
   function tick(){
     if(!ready||!battling)return;if(press){const ticks=(performance.now()-press.at)*60/1000;if(['party','app'].includes(press.kind)&&ticks>=5)press.released=true;if(ticks>=(press.kind==='move'?metadata.moves.pressed.timing.unlockAfterControllerTicks:7)){const action=press.action;press=null;action();}}if(['moves','party','itemTarget','partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode)&&!busy)draw();
-    let narrative=$('log').lastElementChild;while(narrative&&/^— Turno [0-9]+ —$/.test(narrative.textContent))narrative=narrative.previousElementSibling;const value=mode==='notice'?notice:busy||finished||!['main','moves'].includes(mode)?narrative?.textContent||'':NativeTextLayout.format(metadata.battleText.banks['15'][69],[partner.nickname||partner.name]);
+    let narrative=$('log').lastElementChild;while(narrative&&/^— Turno [0-9]+ —$/.test(narrative.textContent))narrative=narrative.previousElementSibling;const value=mode==='targets'?'Scegli il bersaglio.':mode==='notice'?notice:busy||finished||!['main','moves'].includes(mode)?narrative?.textContent||'':NativeTextLayout.format(metadata.battleText.banks['15'][69],[partner.nickname||partner.name]);
     messageCanvas.hidden=!value;if(!value)return;
     if(value!==lastMessage){lastMessage=value;BattleHUD.message(value,resources.partyNameFont,resources.partyData.font.variants.name);}
   }
   function cards(){
-    if(!ready)return;
-    for(const [id,p,own] of [['enemyCard',enemy,false],['playerCard',partner,true]]){
-      const record=own?Journey.state.party[session.active().storyId]:null,growth=OPENING_DATA[p.name]?.growth;
+    if(!ready)return;window.DoubleBattles?.cards((box,p,own)=>BattleHUD.card(box,p,own,resources,0,false));
+    for(const [id,p,normalOwn] of [['enemyCard',enemy,false],['playerCard',partner,true]]){
+      const role=id==='playerCard'?'p1':'p2',own=window.DoubleBattles?DoubleBattles.backFor(role):normalOwn,actor=window.DoubleBattles?.combatantFor(role)||session.active(role);
+      const record=own?Journey.state.party[actor?.storyId]:null,growth=OPENING_DATA[p.name]?.growth;
       const xp=record&&growth?Math.min(1,(record.xp-growth[p.level])/(growth[p.level+1]-growth[p.level]||1)):0;
       BattleHUD.card($(id),p,own,resources,xp,Journey.state.dex.caught.includes(p.name));
     }
@@ -184,5 +189,5 @@
 
   function itemTarget(s){const original=s.battle.runAction;s.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoPotion'){const target=this.p1.pokemon[(s.potionTarget||action.pokemon.position+1)-1];s.potionTarget=null;BattleMedicine.apply(this,s.potionItem||17,target);return;}return original.call(this,action);};}
 
-  window.BattleScreen={update,cards,tick,reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,loading};
+  window.BattleScreen={update,cards,tick,targets(items){return new Promise(resolve=>{targetRequest={items,resolve};choose('targets');});},commands(){choose('main');},reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,loading};
 })();

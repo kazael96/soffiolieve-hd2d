@@ -1,0 +1,38 @@
+{
+  "old": {
+    "size": 128,
+    "foot": 104,
+    "poses": 480,
+    "uniquePoses": 44,
+    "clipped": 256,
+    "empty": 0,
+    "belowGround": 0,
+    "prefix": 0,
+    "period": 480,
+    "coverage": "Every integer tick, identical render states deduplicated"
+  },
+  "candidate": {
+    "size": 256,
+    "foot": 192,
+    "poses": 480,
+    "uniquePoses": 44,
+    "clipped": 0,
+    "empty": 0,
+    "belowGround": 0,
+    "prefix": 0,
+    "period": 480,
+    "coverage": "Every integer tick, identical render states deduplicated"
+  },
+  "body": 64,
+  "envelope": [
+    -83,
+    -76,
+    80,
+    18
+  ],
+  "reference": "Real Nitro canvas draw; 527-front; normalized to 64px body; all 480 ticks / 44 distinct poses",
+  "assets": {
+    "527-front.json": "92af63c93e9760073f34c874572fc6c93f29307ed6ff09dcadd89b3d0a914ac3",
+    "527-front.png": "b638d0be2cdb34894a75b57a61e81170c52f57c5891d0b76e61d676ac77df039"
+  }
+}

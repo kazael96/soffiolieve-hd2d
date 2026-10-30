@@ -1,0 +1,32 @@
+✔ ambient species stay limited to the two Route 1 catches and have stable, separate ground positions (10.1932ms)
+✔ ambient billboards place opaque feet on the ground with generous animation margins (2.3962ms)
+✔ ambient Pokemon stay deeper, smaller and outside the two battle silhouettes on desktop and phone (37.4796ms)
+✖ all original Woobat wing poses fit ambient padding at unchanged body scale (6.895ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.7867
+
+✖ failing tests:
+
+test at tests\battle-ambient.test.cjs:13:1
+✖ all original Woobat wing poses fit ambient padding at unchanged body scale (6.895ms)
+  AssertionError [ERR_ASSERTION]: Woobat wings must fit without clipping
+      at TestContext.<anonymous> (C:\Users\AlessandroCapoccetti\Documents\Codex\2026-10-23\se\work\faithful-repo\tests\battle-ambient.test.cjs:13:255)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

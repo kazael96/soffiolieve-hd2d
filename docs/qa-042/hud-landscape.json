@@ -1,0 +1,294 @@
+{
+  "schema": 2,
+  "fixture": "7d034197ee25428a",
+  "build": "0b9691f94130cea8",
+  "viewport": [
+    844,
+    390
+  ],
+  "stage": "Prova GPU conclusa",
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 6
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 1754,
+      "details": {
+        "frames": 90,
+        "scenes": 30
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3423,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 4169,
+      "details": {
+        "textures": 762,
+        "transparentOriginalSlots": 32,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 5733,
+      "details": {
+        "frames": 2280,
+        "atlases": 38
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "PASS",
+      "durationMs": 2599,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 16,
+      "details": {
+        "cancelPreservesState": true
+      }
+    },
+    {
+      "name": "battle-backgrounds-and-custom-animations",
+      "result": "PASS",
+      "durationMs": 83619,
+      "details": {
+        "customFrames": 3620,
+        "pairs": 181,
+        "sides": 2,
+        "outcomes": 2,
+        "backgrounds": 14,
+        "ambient": [
+          {
+            "species": "Patrat",
+            "poses": 1540,
+            "uniquePoses": 23,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 1540,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Lillipup",
+            "poses": 3669316,
+            "uniquePoses": 370,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 3669316,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "uniquePoses": 13,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 21600,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Munna",
+            "poses": 6006,
+            "uniquePoses": 269,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 6006,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Pidove",
+            "poses": 1800708,
+            "uniquePoses": 16,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 1800708,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Blitzle",
+            "poses": 122100,
+            "uniquePoses": 235,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 122100,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Roggenrola",
+            "poses": 432,
+            "uniquePoses": 15,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 432,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Woobat",
+            "poses": 480,
+            "uniquePoses": 44,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 480,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "uncaught-errors",
+      "result": "PASS",
+      "durationMs": 3,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "real-double-commands-targets-and-partner-animation",
+      "result": "PASS",
+      "durationMs": 4259,
+      "details": {
+        "formats": [
+          "doubles",
+          "multi"
+        ],
+        "independentCommands": true,
+        "foeAndAllyTargets": true,
+        "enemyAnimations": true,
+        "komorOwnBody": true,
+        "animations": [
+          {
+            "side": "p2",
+            "species": 509,
+            "actor": 509
+          },
+          {
+            "side": "p1",
+            "species": 495,
+            "actor": 495
+          },
+          {
+            "side": "p1",
+            "species": 501,
+            "actor": 501
+          },
+          {
+            "side": "p2",
+            "species": 504,
+            "actor": 504
+          },
+          {
+            "side": "p2",
+            "species": 509,
+            "actor": 509
+          },
+          {
+            "side": "p1",
+            "species": 495,
+            "actor": 495
+          },
+          {
+            "side": "p1",
+            "species": 498,
+            "actor": 498
+          },
+          {
+            "side": "p2",
+            "species": 504,
+            "actor": 504
+          }
+        ]
+      }
+    },
+    {
+      "name": "Interpoke-original-portraits-layout-and-cleanup",
+      "result": "PASS",
+      "durationMs": 7440,
+      "details": {
+        "calls": [
+          {
+            "id": 1,
+            "participants": 4,
+            "expressionFrames": 36,
+            "dialoguePages": 14,
+            "minimumDialogueGap": 8,
+            "cleanClose": true
+          },
+          {
+            "id": 2,
+            "participants": 2,
+            "expressionFrames": 18,
+            "dialoguePages": 14,
+            "minimumDialogueGap": 16.40625,
+            "cleanClose": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "battle-bag-icons-navigation-selection-and-cancel",
+      "result": "PASS",
+      "durationMs": 1627,
+      "details": {
+        "categories": 4,
+        "directions": 400,
+        "originalIcons": true,
+        "cancelPreservesQuantity": true,
+        "selectionRestored": true
+      }
+    },
+    {
+      "name": "repeated-context-recovery",
+      "result": "PASS",
+      "durationMs": 6069,
+      "details": {
+        "restores": 2,
+        "preservedTextures": 762,
+        "renderedAfterRestore": 2
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

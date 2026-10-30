@@ -1,0 +1,123 @@
+PASS event entry ignores non-rendered wanderers x1 {"ticks":3,"excludedActorUnchanged":true}
+PASS event entry ignores non-rendered wanderers x2 {"ticks":3,"excludedActorUnchanged":true}
+PASS event entry ignores non-rendered wanderers x4 {"ticks":3,"excludedActorUnchanged":true}
+PASS early arrival waits for friends without locking x1 {"stationaryTrigger":true,"inputUnlockedWhileWaiting":true}
+PASS early arrival waits for friends without locking x2 {"stationaryTrigger":true,"inputUnlockedWhileWaiting":true}
+PASS early arrival waits for friends without locking x4 {"stationaryTrigger":true,"inputUnlockedWhileWaiting":true}
+PASS no invisible collision at an NPC future destination {"futureCellFree":true,"actualBodySolid":true}
+PASS collision oracle and travel reloads x1 {"queries":390,"reloads":3}
+PASS collision oracle and travel reloads x2 {"queries":390,"reloads":3}
+PASS collision oracle and travel reloads x4 {"queries":390,"reloads":3}
+PASS repeated A while healing cannot start overlapping services {"repeatedInputs":100,"healings":1}
+PASS market purchases, insufficient money, full bag and reload {"purchases":3,"blockedPurchases":2,"savePreserved":true}
+PASS rapid repeated door inputs cannot duplicate map transitions {"transitions":96,"rejectedInputs":3840}
+{
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "event entry ignores non-rendered wanderers x1",
+      "result": "PASS",
+      "details": {
+        "ticks": 3,
+        "excludedActorUnchanged": true
+      }
+    },
+    {
+      "name": "event entry ignores non-rendered wanderers x2",
+      "result": "PASS",
+      "details": {
+        "ticks": 3,
+        "excludedActorUnchanged": true
+      }
+    },
+    {
+      "name": "event entry ignores non-rendered wanderers x4",
+      "result": "PASS",
+      "details": {
+        "ticks": 3,
+        "excludedActorUnchanged": true
+      }
+    },
+    {
+      "name": "early arrival waits for friends without locking x1",
+      "result": "PASS",
+      "details": {
+        "stationaryTrigger": true,
+        "inputUnlockedWhileWaiting": true
+      }
+    },
+    {
+      "name": "early arrival waits for friends without locking x2",
+      "result": "PASS",
+      "details": {
+        "stationaryTrigger": true,
+        "inputUnlockedWhileWaiting": true
+      }
+    },
+    {
+      "name": "early arrival waits for friends without locking x4",
+      "result": "PASS",
+      "details": {
+        "stationaryTrigger": true,
+        "inputUnlockedWhileWaiting": true
+      }
+    },
+    {
+      "name": "no invisible collision at an NPC future destination",
+      "result": "PASS",
+      "details": {
+        "futureCellFree": true,
+        "actualBodySolid": true
+      }
+    },
+    {
+      "name": "collision oracle and travel reloads x1",
+      "result": "PASS",
+      "details": {
+        "queries": 390,
+        "reloads": 3
+      }
+    },
+    {
+      "name": "collision oracle and travel reloads x2",
+      "result": "PASS",
+      "details": {
+        "queries": 390,
+        "reloads": 3
+      }
+    },
+    {
+      "name": "collision oracle and travel reloads x4",
+      "result": "PASS",
+      "details": {
+        "queries": 390,
+        "reloads": 3
+      }
+    },
+    {
+      "name": "repeated A while healing cannot start overlapping services",
+      "result": "PASS",
+      "details": {
+        "repeatedInputs": 100,
+        "healings": 1
+      }
+    },
+    {
+      "name": "market purchases, insufficient money, full bag and reload",
+      "result": "PASS",
+      "details": {
+        "purchases": 3,
+        "blockedPurchases": 2,
+        "savePreserved": true
+      }
+    },
+    {
+      "name": "rapid repeated door inputs cannot duplicate map transitions",
+      "result": "PASS",
+      "details": {
+        "transitions": 96,
+        "rejectedInputs": 3840
+      }
+    }
+  ]
+}

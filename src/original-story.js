@@ -4,12 +4,15 @@
   if(window.ACCUMULA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ACCUMULA_EVENTS[k]);OPENING_TRAINERS[64]=ACCUMULA_EVENTS.trainer;}
   if(window.ROUTE2_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ROUTE2_EVENTS[k]);Object.assign(OPENING_TRAINERS,ROUTE2_TRAINERS);Object.assign(ORIGINAL_EVENTS.itemNames,ROUTE2_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ROUTE2_DATA.itemDescriptions);}
   if(window.STRIATON_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],STRIATON_EVENTS[k]);Object.assign(OPENING_TRAINERS,STRIATON_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,STRIATON_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,STRIATON_DATA.itemDescriptions);}
+  if(window.ROUTE3_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ROUTE3_EVENTS[k]);Object.assign(OPENING_TRAINERS,ROUTE3_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,ROUTE3_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ROUTE3_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
-  for(const z of [7,9,10,15,152]){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
+  for(const z of [7,9,10,15,152,322,323,324,27,20]){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
+  zoneScenes[321]=zoneScenes[16]='town';
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
   if(window.STRIATON_DATA&&!native.chapter040){native.chapter040=true;for(const flag of [530,532,533,534,539,540,541,757,820,707])if(!native.flags.includes(flag))native.flags.push(flag);}
+  if(window.ROUTE3_DATA&&!native.chapter042){native.chapter042=true;for(const flag of [517,572,625,562,614,751,1328])if(!native.flags.includes(flag))native.flags.push(flag);}
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
   const names={74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
@@ -27,13 +30,13 @@
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
   const data=()=>ORIGINAL_EVENTS.zones[native.zone];
-  const origin=()=>[389,317,397,319,6].includes(native.zone)?[784,752]:[16,16];
+  const origin=()=>[389,317,397,319,6,321,16].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   function pose(n,dir,step=0){
-    if(([389,317,397,319,6,7,152].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y);
+    if(([389,317,397,319,6,321,16,7,152,324].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y);
     n.direction=dir;const count=OPENING_SPRITES[n.name]?.length||window.ROM_SPRITES?.[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
     else if(count===7||count===9){n.frame=[0,2,4,4][dir]+(step===1?1:step===2?(dir<2?1:2):0);n.flip=dir===3||(dir<2&&step===2);}
@@ -46,7 +49,7 @@
   }
   function syncActors(){
     const previousActors=[...npcs];npcs.splice(0);for(const n of data().actors){
-      if(n.flag&&has(n.flag))continue;if(native.zone===317&&n.x<773)continue;
+      if(n.flag&&has(n.flag))continue;if(native.zone===321&&[23,24].includes(n.id))continue;if(native.zone===16&&value(16530)<4&&[6,8].includes(n.id))continue;if(native.zone===317&&n.x<773)continue;
       if(native.zone===397&&value(16507)<3&&[521,523,524,525,637,638,1106,1114].includes(n.flag))continue;
       if(native.zone===397&&[1106,1114].includes(n.flag))continue;
       if(native.zone===319&&[8195].includes(n.model))continue;
@@ -54,7 +57,7 @@
       // Curtain records are logical moving mechanisms; meshes are in the scene.
       if(native.zone===152&&(n.model===8195||n.id===8&&native.dreamyardTreeCut))continue;
       if(native.zone===319&&native.routeItems?.includes(n.id))continue;
-      if([398,8].includes(native.zone)&&[657].includes(n.flag))continue;
+      if([398,8,20].includes(native.zone)&&[657].includes(n.flag))continue;
       // Post-game actors use initial hidden flags from the new-game state.
       if([736,681,682,683,684,685,656,675,817,1230,1143].includes(n.flag))continue;
       putActor(n);
@@ -76,10 +79,10 @@
       for(const id of adjacent){const record=ORIGINAL_EVENTS.zones[397].actors.find(n=>n.id===id);const n=putActor({...record,script:2000});Object.assign(n,{fieldZone:397,projection:true});}
     }
     if([319,6].includes(native.zone)&&value(16509)>=2&&value(16532)<2){const n=putActor({id:251,model:134,script:2000,x:804,z:580,direction:3});Object.assign(n,{fieldZone:6,projection:true});}
-    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6].includes(actorZone)&&[389,317,397,319,6].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
+    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6,321,16].includes(actorZone)&&[389,317,397,319,6,321,16].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
-    state.phase=value(16532)>=5?'dreamyardDone':value(16532)>=1?'dreamyard':native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
+    state.phase=native.zone===16||native.nacrene?'nacrene':native.zone===324?'wellspring':native.route3?'route3':value(16532)>=5?'dreamyardDone':value(16532)>=1?'dreamyard':native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
     journey.update();
   }
   function initialize(){
@@ -141,7 +144,7 @@
     const say=async i=>{for(const page of messagePages(ORIGINAL_EVENTS.texts[346][i],vm.words))await showPage(page);};
     await say(2);if(await choice(['SÌ','NO'])!==0){await say(8);return false;}
     await say(6);journey.heal();await AudioEngine.playSound(1369);await say(7);await say(8);
-    native.healZone=native.zone===8?8:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
+    native.healZone=[8,20].includes(native.zone)?native.zone:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
   }
   async function cityService(script){
     if(eventRunning||sceneChanging||journey.processing||failed)return;
@@ -190,6 +193,7 @@
       else if(code>=28&&code<=31){dir=code-28;duration=16/30;}
       else if(code>=48&&code<=51){dir=code-48;duration=8/30;}
       else if(code>=32&&code<=35){dir=code-32;duration=8/30;}
+      else if(code>=36&&code<=39){dir=code-36;duration=4/30;}
       else if(code>=76&&code<=79){dir=code-76;distance=1;duration=6/30;}
       else if(code===61){duration=2/30;}
       else if(code===63){duration=8/30;}
@@ -235,7 +239,7 @@
       if(bank===778&&native.zone===396&&value(16505)===0)await vm.run(792,0);
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
-      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone(native.healZone===8?8:398,7,13);}
+      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone([8,20].includes(native.healZone)?native.healZone:398,7,13);}
       for(let chain=0;chain<5;chain++){if(![9,10].includes(native.zone))break;const next=data().onEnter?.find(e=>value(e.var)===e.value);if(!next||data().script===bank&&next.entry===entry)break;bank=data().script;entry=next.entry;await vm.run(bank,entry);}
       derivePhase();captureActors();if(native.zone===317)syncActors();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
@@ -249,7 +253,7 @@
     const textBank=m.bank===862?283:ORIGINAL_EVENTS.zones[Object.keys(ORIGINAL_EVENTS.zones).find(z=>ORIGINAL_EVENTS.zones[z].script===m.bank)]?.text;
     switch(c.name){
       case 'ActorPauseAll':case 'ActorUnlockAll':case 'RTFinishSubEvents':case 'FieldClose':case 'FieldOpen':case 'InputWaitLast':case 'MsgWaitAdvance':case 'MsgActorClose':case 'MsgSystemClose':case 'MsgWinCloseAll':case 'MsgWinCloseNo':case 'MsgPlaceSignClose':break;
-      case 'MsgActor':case 'MsgActorEx':case 'MsgActorVersioned':await message(a[0]===1024?textBank:v[0],v[1],m);break;
+      case 'MsgActor':case 'MsgActorEx':case 'MsgActorVersioned':case 'ActorMsgVersioned':await message(a[0]===1024?textBank:v[0],v[1],m);break;
       case 'MsgActorGendered':await message(a[0]===1024?textBank:v[0],v[1],m);break;
       case 'MsgInfo':case 'MsgSystem':case 'MsgPlaceSign':await message(textBank,v[0],m);break;
       case 'MsgAt':await message(textBank,v[0],m);break;
@@ -268,12 +272,18 @@
       case 'GymCurtainSwitch':case 'GymCurtainFeedback':case 'GymCurtainReset':native.gymSwitch=v[0];break;
       case 'CGearScene':native.cgear=true;break;
       case 'CGearNotice':await showPage('Il C-Gear è stato attivato. Le funzioni wireless non sono disponibili nella demo.');break;
+      case 'NativeConstant21':m.set(a[0],21);break;
+      case 'NativeOpcode492':{const n=actor(v[0]);if(n){Object.assign(n,world(v[2],v[4]));pose(n,v[1]);}break;}
+      case 'NativeOpcode475':native.route3Survey=v[0];break;
+      case 'NativeOpcode139':break; // Native trainer intro is covered by the battle entry transition.
+      case 'NativeOpcode159':native.music=v[0];AudioEngine.setScene(v[0]);break;
+      case 'NativeOpcode134':{const completed=new Promise(resolve=>pendingBattle=resolve);try{await window.DoubleBattles.partner(v);await completed;}finally{pendingBattle=null;}break;}
       case 'NetworkStateGet':m.set(a[0],0);break;
       case 'CGearFeatureGet':m.set(a[1],0);break;
       case 'PokePartyRecoverAll':journey.heal();break;
       case 'PokePartyIsFullHP':m.set(a[0],state.party[v[1]].hp===journey.unpack(state.party[v[1]]).max?1:0);break;
       case 'PokePartyIsFullPP':m.set(a[0],journey.unpack(state.party[v[1]]).moves.every(move=>move.left===move.pp)?1:0);break;
-      case 'PokePartyGetCount':m.set(a[0],state.party.length);break;
+      case 'PokePartyGetCount':m.set(a[0],v[1]===2?state.party.filter(p=>p.hp>0).length:state.party.length);break;
       case 'TrainerCardGetSex':m.set(a[0],0);break;
       case 'ActorCmdExec':move(v[0],ORIGINAL_EVENTS.scripts[m.bank].movements[a[1]]);break;
       case 'ActorCmdWait':await Promise.all(motions.map(t=>t.promise));break;
@@ -289,7 +299,7 @@
         const trainer=OPENING_TRAINERS[v[0]];if(!trainer)throw Error('Trainer outside opening '+v[0]);
         const kind=trainer.name;if(kind==='Belle'||kind==='Komor')state.phase=kind==='Belle'?'belle':'komor';rival=kind;journey.update();
         const completed=new Promise(resolve=>pendingBattle=resolve);
-        try{await startBattle(true,{story:kind,trainerId:v[0],noBlackout:!!(v[2]&1),aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}break;
+        try{await startBattle(true,{story:kind,trainerId:v[0],noBlackout:!!(v[2]&1),aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}break;
       }
       case 'TrainerBattleIsVictory':m.set(a[0],native.won?1:0);break;
       case 'CallTrainerBattleEnd':break;
@@ -300,7 +310,7 @@
       case 'RTReserveScript':queued=v[0];break;
       case 'RTGetTextFile':m.set(a[0],textBank);break;
       case 'RTCallGlobal':{
-        if([10394,10395,10396].includes(v[0])){native.healZone=native.zone===8?8:398;break;}
+        if([10394,10395,10396].includes(v[0])){native.healZone=[8,20].includes(native.zone)?native.zone:398;break;}
         if(v[0]===10110){await healAtCenter();break;}
         if(![2800,2805].includes(v[0]))throw Error('Global script outside opening '+v[0]);
         const child=new FieldEventVM(ORIGINAL_EVENTS,native,m.host);child.words=m.words;await child.run(862,v[0]-2800);break;
@@ -308,16 +318,16 @@
       case 'ItemCheckSpace':m.set(a[2],1);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],[442,621,626,437].includes(v[0])?4:[410,420].includes(v[0])?2:[17,27,30].includes(v[0])?1:0);break;
+      case 'ItemGetPocket':m.set(a[1],[442,621,626,437].includes(v[0])?4:[373,410,420].includes(v[0])?2:[150,155].includes(v[0])?3:[17,18,21,22,25,26,27,28,30].includes(v[0])?1:0);break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id={410:526,420:15}[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id={373:168,410:526,420:15}[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -337,7 +347,7 @@
       case 'EVCameraEnd':case 'EVCameraRebind':renderer.storyCamera=null;break;
       case 'EVCameraUnbind':renderer.storyCamera??=[...renderer.center];break;
       case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6]);break;
-      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(state.scene==='town'?[player.x*.7,player.y+1.5]:[-10,-10],v[0]);break;
+      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(state.scene==='town'?[([321,16].includes(native.zone)?player.x:player.x*.7),player.y+1.5]:renderer.scene.chapter042?[player.x,player.y+1.5]:[-10,-10],v[0]);break;
       case 'EVCameraWait':if(cameraTask)await cameraTask.promise;break;
       case 'FadeEx':fade(v[1]===0?1:0,v[3]*8,v[0]===3?'#fff':'#000');break;
       case 'FadeExWait':case 'CallLeagueLiftWarp':await fadeTask;break;
@@ -397,7 +407,7 @@
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);departures.clear();fieldModels?.clear();
     captureActors();native.zone=zone;native.music=data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
     for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
-    if(zone===319){native.route2=true;derivePhase();}
+    if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;derivePhase();
     captureActors();if(restoreField)await fade(0,8);
   }
   const warpDirections={1:1,2:0,3:3,4:2};
@@ -425,16 +435,18 @@
       else journey.save(true);
     }catch(error){sceneChanging=false;failed=error;$('world').dataset.eventError=error.message;console.error(error);await showPage(error.message);}
   }
+  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(native.zone===16?'Hai raggiunto Zefiropoli! Il Museo, la palestra e il Bosco Girandola saranno disponibili nel prossimo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
   function tryWarp(dx,dz,x,z){
     if(eventRunning||sceneChanging||journey.processing||warpCooldown||failed)return false;
     const dir=Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0,[ux,uz]=directions[dir];
+    if(native.zone===16&&dir===2&&x< -175.5&&player.x>=-175.5){warpCooldown=.8;return chapterBoundary();}
     for(const w of data().warps){
-      if(warpDirections[w.a]!==dir||!ORIGINAL_EVENTS.zones[w.zone])continue;
+      if(warpDirections[w.a]!==dir)continue;
       const cx=w.x/16-origin()[0],cz=w.z/16-origin()[1];
       const before=(player.x-cx)*ux+(player.y-cz)*uz,after=(x-cx)*ux+(z-cz)*uz,lateral=Math.abs((player.x-cx)*uz-(player.y-cz)*ux);
       // The door/stair tile may be solid. Its boundary is an event checked
       // before collision, exactly when the player attempts to enter it.
-      if(before>=-1.05&&before<.5&&after>=-.68&&lateral<w.width*.5)return enterWarp(w);
+      if(before>=-1.05&&before<.5&&after>=-.68&&lateral<w.width*.5){if(!ORIGINAL_EVENTS.zones[w.zone]){warpCooldown=.8;return chapterBoundary();}return enterWarp(w);}
     }
     return false;
   }
@@ -447,14 +459,14 @@
       if(native.trainerWins?.includes(id)){await say(2);return;}
       n.emote='!';await delay(8);n.emote=null;const dir=Math.abs(player.x-n.x)>Math.abs(player.y-n.y)?player.x>n.x?3:2:player.y>n.y?1:0;face(n.uid,dir);const [dx,dy]=directions[dir],distance=Math.max(Math.abs(player.x-n.x),Math.abs(player.y-n.y)),lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx),steps=lateral<.35?Math.max(0,Math.floor(distance)-1):0;if(steps){move(n.uid,[[8+dir,steps]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));}await say(0);
       const completed=new Promise(resolve=>pendingBattle=resolve);rival=trainer.name;
-      try{await startBattle(true,{story:trainer.name,trainerId:id,aiFlags:trainer.aiFlags,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}
+      try{await startBattle(true,{story:trainer.name,trainerId:id,aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}
       if(native.won){native.trainerWins??=[];if(!native.trainerWins.includes(id))native.trainerWins.push(id);}
-      else{journey.heal();await changeZone(native.healZone===8?8:398,7,13);}
+      else{journey.heal();await changeZone([8,20].includes(native.healZone)?native.healZone:398,7,13);}
     }catch(error){failed=error;console.error(error);$('world').dataset.eventError=error.message;await showPage(error.message);}
     finally{eventRunning=false;n.emote=null;derivePhase();captureActors();if(!failed)journey.save(true);}
   }
   async function routeItem(n){
-    if(eventRunning||!n)return;const item=window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
+    if(eventRunning||!n)return;const item=window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
     eventRunning=true;try{if(!journey.addItem(item.id,item.count)){await showPage('La Borsa è piena.');return;}if(native.zone===319){native.routeItems??=[];native.routeItems.push(n.uid);}native.collectedItems??={};native.collectedItems[native.zone]??=[];native.collectedItems[native.zone].push(n.uid);const record=data().actors.find(a=>a.id===n.uid);if(record?.flag&&!has(record.flag))native.flags.push(record.flag);n.hidden=true;await showPage('Hai trovato '+ORIGINAL_EVENTS.itemNames[item.id]+'!');captureActors();journey.save(true);}finally{eventRunning=false;}
   }
   function target(){
@@ -474,19 +486,26 @@
     return null;
   }
   async function cutTree(n){if(eventRunning)return;eventRunning=true;try{if(!state.party.some(p=>p.pp.some(m=>m.id===15))){await showPage('Questo albero può essere tagliato con la mossa Taglio.');return;}await showPage('Vuoi usare Taglio?');if(await choice(['SÌ','NO'])!==0)return;await showPage('Il Pokémon usa Taglio!');await delay(12);native.dreamyardTreeCut=true;n.hidden=true;captureActors();}finally{eventRunning=false;journey.save(true);}}
+  async function daycareService(){if(eventRunning)return;eventRunning=true;resetInput();try{
+   if(native.daycareRecovery){await showPage('Il Pokémon affidato è conservato nel salvataggio, ma i suoi dati richiedono un recupero. La tua squadra non è stata modificata.');return;}
+   const care=native.daycare;
+   if(care){const p=care.pokemon,fee=100+100*Math.max(0,p.level-care.level);await showPage('Ci siamo presi cura di '+(p.nickname||p.name)+'. Ora è al livello '+p.level+'. Vuoi ritirarlo? Il costo è di '+fee+' ₽.');if(await choice(['SÌ','NO'])!==0)return;if(state.party.length>=6){await showPage('Non hai posto in squadra!');return;}if(state.money<fee){await showPage('Non hai abbastanza soldi.');return;}state.money-=fee;const healed=makeMon(p.name,p.level,p);state.party.push({...p,...journey.pack(healed,p.xp)});delete native.daycare;journey.displayPartner();await showPage('Ecco il tuo Pokémon!');
+   }else{await showPage('Questa è la Pensione Pokémon. Vuoi affidarci un Pokémon?');if(await choice(['SÌ','NO'])!==0)return;const index=await choice([...state.party.map(p=>p.nickname||p.name),'Annulla']);if(index>=state.party.length)return;if(state.party.length<2||state.party.filter((p,i)=>i!==index&&p.hp>0).length===0){await showPage('Devi tenere con te almeno un Pokémon in grado di lottare.');return;}const p=state.party.splice(index,1)[0];native.daycare={pokemon:p,level:p.level,distance:0};journey.displayPartner();await showPage('Ci prenderemo cura di '+(p.nickname||p.name)+'. Torna a trovarci!');}
+   }finally{eventRunning=false;journey.update();journey.save(true);}}
   async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
-  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152].includes(native.zone)&&t.script>=3000&&t.script<4000)return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if([398,8].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324].includes(native.zone)&&t.script>=3000&&t.script<4000)return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
   function step(dt,moved,distance=0){
     if(window.SpeciesStudioMode||failed)return;
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
     try{departures.tick(dt);tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
-    tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;
+    tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     if(!native.intro&&renderer.ready){run(4,782);return;}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
     journey.update();if(key!==lastTile){lastTile=key;
     if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if([6,321].includes(native.zone)&&window.ROUTE3_ASSETS){const at=ROUTE3_ASSETS.scenes[321].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?321:6;if(next!==native.zone){native.zone=next;if(next===321)native.route3=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
     if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===6&&p.z>=609){native.zone=319;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
@@ -496,12 +515,12 @@
       // Recheck a stationary player without locking input while they arrive.
       if(native.zone===317&&trigger.script===5){const bodies=fieldActors();if(![3,4].every(id=>{const n=actor(id);return n&&!n.hidden&&bodies.includes(n);})){lastTile='';return;}}
       run(trigger.script-1);return;}}
-    if([319,7,152].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-3000))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
+    if([319,7,152,321,322,324].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-3000))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
     journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});

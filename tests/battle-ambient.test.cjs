@@ -9,3 +9,5 @@ test('ambient Pokemon stay deeper, smaller and outside the two battle silhouette
   for(const p of Object.values(layout)){const battle={left:p.x-p.height*.7-8,right:p.x+p.height*.7+8,top:p.y-p.height-8,bottom:p.y+8};assert.equal(intersects(rect,battle),false,'Observers must remain outside the combatants silhouette area');}
  }
 });
+
+test('all original Woobat wing poses fit ambient padding at unchanged body scale',()=>{const proof=require('./fixtures/woobat-ambient-envelope.json'),{size,foot,body}=c.window.BattleDiorama.ambientCanvas,e=proof.envelope.map(v=>v*body/proof.body);assert.ok(size/2+e[0]>0&&size/2+e[2]<size,'Woobat wings must fit without clipping');assert.ok(foot+e[1]>0&&foot+e[3]<size,'Woobat vertical motion must fit without clipping');assert.equal(proof.old.clipped,256);assert.equal(proof.candidate.clipped,0);});

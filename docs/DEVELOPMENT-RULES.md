@@ -160,3 +160,7 @@ La richiesta del29 ottobre estende il capitolo fino all’arrivo a Levantopoli e
 ## Estensione palestra e Cantiere · 0.40
 
 Inventario corrente: [STRIATON-DREAMYARD-040.md](STRIATON-DREAMYARD-040.md), matrice [SPECIES-MOVES-040.md](SPECIES-MOVES-040.md), 139 coppie implementate. Le matrici precedenti restano riferimenti storici. Aggiungere la regressione `check-striaton-runtime.cjs` alla suite completa e a Pages. Non confondere superamento dei test matematici dei profili con confronto visivo al gioco DS; riportare separatamente adattamenti, prove nel browser e limiti.
+
+## Estensione Percorso 3 e arrivo a Zefiropoli · 0.42
+
+Applicare [ROUTE3-NACRENE-042.md](ROUTE3-NACRENE-042.md) e [SPECIES-MOVES-042.md](SPECIES-MOVES-042.md): 181 profili complessivi, quattro nuove specie ottenibili, due soltanto avversarie, MT46, lotte doubles e multi reali, limiti 15 e accessi successivi espliciti. Conservare la corrispondenza fra slot nativi p3b/p4b e corpi/bersagli/HUD, la scelta indipendente dei comandi, le riserve non duplicabili e le pose di Pazienza associate al singolo combattente. La Pensione non deve invalidare il salvataggio quando viene depositato lo starter. I nuovi cataloghi con cifre nel nome devono entrare nel trasporto raggruppato senza perdere il ripiego alle immagini individuali. La suite completa include route3-runtime e double-runtime; i rapporti finali determinano cosa è stato effettivamente verificato.

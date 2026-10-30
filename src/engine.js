@@ -31,7 +31,7 @@ function configureOpeningBattle(session,options={}){
  session.trainerHints=new Set();
  const reserves=(session.openingTrainer?.items||[]).filter(id=>id===17);if(reserves.length){const priorAI=session.ai.bind(session),priorAction=session.battle.runAction;session.trainerItems=[...reserves];session.battle.runAction=function(action){if(action.choice==='event'&&action.event==='ChapterTrainerPotion'){const p=action.pokemon;p.sethp(Math.min(p.maxhp,p.hp+20));this.add('-heal',p,p.getHealth,'[from] item: Pozione');this.eachEvent('Update');return;}return priorAction.call(this,action);};session.ai=function(side='p2'){const p=this.active(side),s=this.battle[side];if(side==='p2'&&s.requestState==='move'&&p.hp>0&&p.hp<=Math.floor(p.maxhp/4)&&this.trainerItems.length){this.trainerItems.shift();s.clearChoice();s.choice.actions.push({choice:'event',event:'ChapterTrainerPotion',pokemon:p,priority:6});s.choice.cantUndo=true;if(this.battle.allChoicesDone())this.battle.commitChoices();return;}return priorAI(side);};}
 
- if(options.aiFlags!==16)return;
+ if(session.double||options.aiFlags!==16)return;
  const fallback=session.ai.bind(session);
  session.ai=function(side='p2'){
   const request=this.battle[side].activeRequest;

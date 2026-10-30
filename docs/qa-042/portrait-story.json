@@ -1,0 +1,44 @@
+{
+  "schema": 2,
+  "fixture": "409b612fca48578f",
+  "build": "b74f60f4bdecd5aa",
+  "viewport": [
+    390,
+    844
+  ],
+  "stage": "real-renderer-Route3-Wellspring-Nacrene",
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "real-renderer-Route3-Wellspring-Nacrene",
+      "result": "PASS",
+      "durationMs": 128150,
+      "details": {
+        "twins": true,
+        "rival": true,
+        "cavePartner": true,
+        "rewardHealBalls": 3,
+        "darkGrassLesson": true,
+        "nacrene": true,
+        "chestoBerries": 3,
+        "nOutsideMuseum": true,
+        "nurse": {
+          "healings": 2,
+          "input": "actual A/touch",
+          "hp": true,
+          "pp": true,
+          "status": true
+        },
+        "doubles": 2,
+        "speed": 4
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}
