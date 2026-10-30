@@ -14,7 +14,7 @@ def pixels(raw,w,h,colors):
             p[x,y]=(*colors[ci],255 if ci else 0)
     return image
 
-def extract(rom,output):
+def extract(rom,output,species=None):
     assert rom.idCode==b'IRBI','Expected Italian Pokemon Black IRBI'
     narc=lambda name:[unpack(b) for b in ndspy.narc.NARC(rom.getFileByName(name)).files]
     files=narc('a/1/5/9');fonts=narc('a/0/2/3');foot=narc('a/1/6/7');ui=narc('a/0/8/3');personal=narc('a/0/1/6')
@@ -38,7 +38,7 @@ def extract(rom,output):
     sheet=pixels(raw,256,64,colors[:16]);sheet.crop((8,0,40,24)).save(dest/'caught.png')
     records={};regional=struct.unpack('<650H',personal[-1])
     type_pals=[0,0,1,1,0,0,2,1,0,0,1,2,0,1,1,2,0]
-    for sid in [495,498,501,504,506,509,511,513,515,517,518,519,522,524,527,532,535]:
+    for sid in species or [495,498,501,504,506,509,511,513,515,517,518,519,522,524,527,532,535]:
         types=list(dict.fromkeys(personal[sid][6:8]));name=texts[70][sid]
         records[name]={'id':sid,'number':regional[sid],'category':texts[260][sid],'height':texts[245][sid],'weight':texts[268][sid],'description':texts[236][sid],'types':types}
         # Native NCER has two 16x8 OAMs: tile 1 at (-8,-8), tile 0 at (-8,0), 128-byte mapping.
@@ -77,4 +77,6 @@ def extract(rom,output):
     (output/'pokedex-assets.js').write_text('window.POKEDEX_ASSETS='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf8',newline='\n')
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('rom',type=Path);p.add_argument('output',type=Path);a=p.parse_args();extract(ndspy.rom.NintendoDSRom.fromFile(a.rom),a.output)
+    p=argparse.ArgumentParser();p.add_argument('rom',type=Path);p.add_argument('output',type=Path);p.add_argument('--training',type=Path);a=p.parse_args()
+    data=json.loads(a.training.read_text(encoding='utf8').split('window.TRAINING_DATA=',1)[1].strip().removesuffix(';')) if a.training else None
+    extract(ndspy.rom.NintendoDSRom.fromFile(a.rom),a.output,sorted(p['id'] for p in data['progression'].values()) if data else None)

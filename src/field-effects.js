@@ -28,7 +28,7 @@
   class Player {
     constructor(id,assets=root.FIELD_EFFECT_ASSETS){
       this.assets=assets;this.effect=assets.effects[id];if(!this.effect)throw Error('Original field effect unavailable: '+id);
-      this.panel=document.createElement('section');this.panel.id='nativeFieldEffect';this.panel.setAttribute('aria-label','Ricezione del Pokédex');
+      this.panel=document.createElement('section');this.panel.id='nativeFieldEffect';this.panel.setAttribute('aria-label',this.effect.label||'Ricezione del Pokédex');
       this.canvas=document.createElement('canvas');this.canvas.width=768;this.canvas.height=576;this.particleCanvas=document.createElement('canvas');this.particleCanvas.width=768;this.particleCanvas.height=576;
       this.panel.append(this.canvas,this.particleCanvas);document.body.append(this.panel);this.context=this.particleCanvas.getContext('2d');
       const models=Object.fromEntries([this.effect.background,this.effect.item].map(name=>[name,assets.models[name].url]));

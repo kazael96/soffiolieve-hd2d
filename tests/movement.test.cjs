@@ -6,9 +6,9 @@ const path=require('node:path');
 const Input=require('../src/input.js');
 const source=fs.readFileSync(path.join(__dirname,'../src/game.js'),'utf8');
 const code=source.slice(source.indexOf('function frame(now)'),source.indexOf('}refresh();requestAnimationFrame(frame)')+1);
-function frame(keys,{battling=false,modal=false,blocked=()=>false}={}){
+function frame(keys,{battling=false,modal=false,blocked=()=>false,zone=389,yaw=0}={}){
   const state={Math,last:0,t:0,cooldown:0,moving:false,facing:3,keys:{},controls:{state:()=>keys},
-    player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,document:{querySelector:()=>modal?{}:null},renderer:{ready:true},worldDraws:0,drawWorld(){state.worldDraws++;},drawArena(){},
+    player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,document:{querySelector:()=>modal?{}:null},renderer:{ready:true,scene:{zone}},NativeRails:{cameraYaw:()=>yaw},worldDraws:0,drawWorld(){state.worldDraws++;},drawArena(){},
     window:{Journey:{step(dt,moved,distance){state.travel=distance;}}},requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
   vm.runInNewContext(code+';frame(40)',state);return state;
 }
@@ -32,6 +32,12 @@ test('72 movement cases keep the correct facing, speed and normalized diagonals'
       count++;
     }
   assert.equal(count,72);
+});
+test('Castelia movement follows the screen at rotated camera angles without changing speed',()=>{
+ for(const yaw of [-2,-1,.4,1.8,Math.PI/2])for(const [key,x,z]of [['ArrowUp',0,-1],['ArrowDown',0,1],['ArrowLeft',-1,0],['ArrowRight',1,0]]){
+  const s=frame({[key]:true},{zone:28,yaw}),dx=s.player.x+2,dz=s.player.y;
+  assert.ok(Math.abs(Math.hypot(dx,dz)-.14)<1e-9);assert.ok(Math.abs(dx*Math.cos(yaw)-dz*Math.sin(yaw)-x*.14)<1e-9);assert.ok(Math.abs(dx*Math.sin(yaw)+dz*Math.cos(yaw)-z*.14)<1e-9);
+ }
 });
 test('collisions stop walking animation, and modals/battles stop displacement',()=>{
   for(const options of [{blocked:()=>true},{modal:true},{battling:true}]){

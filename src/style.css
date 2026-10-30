@@ -112,3 +112,11 @@ body.touch-enabled #context{bottom:226px}body.touch-enabled footer{display:none}
 .battle-top>span{display:none}
 
 #animationSpeed{display:none}
+
+/* Evolution keeps the original composites legible in all supported viewports. */
+#evolutionScene{box-sizing:border-box;width:min(94vw,680px);max-height:94dvh;padding:12px;background:#142a36;color:#fff;border:3px solid #d8e8df;overflow:auto;text-align:center}
+#evolutionScene canvas{display:block;width:100%;height:auto;max-height:57dvh;object-fit:contain;image-rendering:pixelated}
+#evolutionScene p{margin:10px 0;min-height:2em;font-size:clamp(14px,2.4vw,19px)}
+#evolutionScene button{padding:12px 20px;margin:5px;background:#263e48;color:#fff;border:2px solid #dbe8e8;border-radius:4px}
+#evolutionScene.native-touch-controls{padding-bottom:min(23dvh,170px)}
+@media(max-height:450px){#evolutionScene{width:min(80vw,680px);padding:8px 12px}#evolutionScene canvas{max-height:47dvh}#evolutionScene p{margin:4px 0;min-height:0}#evolutionScene.native-touch-controls{padding-bottom:8px}}

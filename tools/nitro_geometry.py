@@ -39,6 +39,8 @@ def flatten_glb(file,key,assets,asset_url,units=16):
                 matrices=np.array([sum((joints[j]*w for j,w in zip(js,ws)),np.zeros((4,4))) for js,ws in zip(indices,weights)])
             p=np.einsum('nij,nj->ni',matrices,np.column_stack((p,np.ones(len(p)))))[:,:3]/units
             norm=np.einsum('nij,nj->ni',matrices[:,:3,:3],norm)
+            # Unlit Nitro triangles may carry undefined GLB normals. Keep their baked vertex colour.
+            norm=np.nan_to_num(norm,nan=0.0,posinf=0.0,neginf=0.0)
             colors=accessor(a['COLOR_0'])[:,:3] if 'COLOR_0' in a else np.ones((len(p),3))
             mat=doc['materials'][primitive['material']];pbr=mat.get('pbrMetallicRoughness',{});factor=pbr.get('baseColorFactor',[1,1,1,1]);colors*=factor[:3]
             texid=pbr.get('baseColorTexture',{}).get('index');texture=None;width=height=1;sampler={}
@@ -51,7 +53,7 @@ def flatten_glb(file,key,assets,asset_url,units=16):
             uv=accessor(a['TEXCOORD_0']) if 'TEXCOORD_0' in a else np.zeros((len(p),2));uv*=np.array([width,height])
             packed=np.concatenate([p,uv,colors,norm],axis=1)
             idx=accessor(primitive['indices']).astype(int).flatten() if 'indices' in primitive else range(len(p))
-            groups.append({'texture':texture,'w':width,'h':height,'alpha':factor[3],
+            groups.append({'texture':texture,'w':width,'h':height,'alpha':factor[3],'doubleSided':mat.get('doubleSided',False),
                 'repeatS':sampler.get('wrapS',10497)!=33071,'repeatT':sampler.get('wrapT',10497)!=33071,
                 'mirrorS':sampler.get('wrapS')==33648,'mirrorT':sampler.get('wrapT')==33648,
                 'verts':np.round(packed[idx].flatten(),5).tolist()})

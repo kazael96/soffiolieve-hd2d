@@ -1,16 +1,18 @@
-# Soffiolieve HD-2D — demo 0.42
+# Soffiolieve HD-2D — demo 0.43
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso previsto è **Soffiolieve → Percorso 1 → Quattroventi → Percorso 2 → Levantopoli**.
-Comprende la visita al Centro Pokémon, il comizio del Team Plasma, la prima lotta con N, gli eventi del Percorso 2 e l’arrivo a Levantopoli. La progressione della demo arriva al livello 15; i livelli già superiori dei vecchi salvataggi vengono conservati.
+Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli**.
+Comprende le prime due palestre, gli eventi del Team Plasma e l’arrivo sul lungomare di Austropoli con Centro Pokémon. Il limite di allenamento è 25; i livelli e l’esperienza già superiori dei vecchi salvataggi vengono conservati. Stato della distribuzione e limiti nelle note di collaudo del capitolo.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata a tutte le mosse utilizzabili nella demo, ora 139 coppie. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [477 coppie su 40 specie](docs/SPECIES-MOVES-043.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.43 aggiunge museo, biblioteca e palestra di Aloé, furto e recupero del Teschio, Bosco Girandola, Ponte Freccialuce e arrivo ad Austropoli. Porta il limite a 25, gestisce le evoluzioni per livello e amplia animazioni, menu, strumenti e risorse del Pokédex. Inventario e adattamenti in [NACRENE-CASTELIA-043.md](docs/NACRENE-CASTELIA-043.md); la matrice delle coreografie è in [SPECIES-MOVES-043.md](docs/SPECIES-MOVES-043.md). Non equivale al completamento di tutte le strade o della palestra di Austropoli.
 
 La 0.42 prosegue lungo il Percorso 3, l’asilo e la Grotta Minerale fino a Zefiropoli, con lotte in doppio, Komor alleato, nuove specie, MT46, Centro Pokémon e incontro con N. Il limite resta 15. Museo, palestra di Aloe e Bosco Girandola sono il confine del prossimo capitolo. Inventario e adattamenti in [ROUTE3-NACRENE-042.md](docs/ROUTE3-NACRENE-042.md) e [SPECIES-MOVES-042.md](docs/SPECIES-MOVES-042.md).
 
