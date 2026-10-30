@@ -1,0 +1,123 @@
+{
+  "490": {
+    "spec": {
+      "name": "NativeOpcode490",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b114",
+    "reads": [
+      "0x215b11c",
+      "0x215b126",
+      "0x215b132",
+      "0x215b13e"
+    ]
+  },
+  "389": {
+    "spec": {
+      "name": "NativeOpcode389",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b2344",
+    "reads": [
+      "0x21b235c"
+    ]
+  },
+  "167": {
+    "spec": {
+      "name": "NativeOpcode167",
+      "args": []
+    },
+    "handler": "0x21af1bc",
+    "reads": [],
+    "note": "Direct handler obtains field context and calls music controller; no script reads."
+  },
+  "386": {
+    "spec": {
+      "name": "NativeOpcode386",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x215cc80",
+    "reads": [
+      "0x215cc92"
+    ]
+  },
+  "258": {
+    "spec": {
+      "name": "NativeOpcode258",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b5c0",
+    "reads": [
+      "0x215b5c8",
+      "0x215b5d2"
+    ]
+  },
+  "283": {
+    "spec": {
+      "name": "NativeOpcode283",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b458",
+    "reads": [
+      "0x215b45e",
+      "0x215b468",
+      "0x215b472"
+    ]
+  },
+  "182": {
+    "spec": {
+      "name": "NativeOpcode182",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21af494",
+    "reads": [
+      "0x21af4b4",
+      "0x21af4be",
+      "0x21af4c8"
+    ]
+  },
+  "582": {
+    "spec": {
+      "name": "NativeOpcode582",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21cfffc",
+    "reads": [
+      "0x21d0000"
+    ]
+  },
+  "285": {
+    "spec": {
+      "name": "NativeOpcode285",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b5a70",
+    "reads": [
+      "0x21b5a76"
+    ]
+  }
+}

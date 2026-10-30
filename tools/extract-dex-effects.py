@@ -3,20 +3,22 @@ from pathlib import Path
 import argparse,importlib.util,json,struct,math
 import ndspy.rom,ndspy.narc,ndspy.lz10,ndspy.codeCompression
 
-def extract(rom,out):
+def extract(rom,out,species_ids=None):
  assert rom.idCode==b'IRBI'
  s=importlib.util.spec_from_file_location('gfx',Path(__file__).with_name('extract-menu.py'));g=importlib.util.module_from_spec(s);s.loader.exec_module(g)
  def files(path):return[ndspy.lz10.decompress(b)if b[:1]==b'\x10'else b for b in ndspy.narc.NARC(rom.getFileByName(path)).files]
  f=files('a/1/5/9');rows=list(struct.iter_unpack('<27H',files('a/0/8/6')[0]));hab=files('a/1/7/8');assert len(rows)==61 and len(hab)==649
  anim=g.animations(f[45]);cells=g.cells(f,15,28,5);dest=out/'assets/dex-effects';dest.mkdir(parents=True,exist_ok=True)
+ species_ids=species_ids or [495,498,501,504,506]
+ area_rows=sorted({i for sid in species_ids for season in range(4) for i in range(61) if hab[sid-1][2+season*62+i]})
  areas={};export={}
- for rowIndex in [18,38,39,40]:
+ for rowIndex in area_rows:
   row=rows[rowIndex];animation=row[24];cell=anim[animation]['frames'][0][0];im,box=cells[cell]
   if str(cell)not in export:
    name=f'habitat-mask-{cell}.png';im.save(dest/name);export[str(cell)]={'src':'assets/dex-effects/'+name,'origin':box[:2],'size':box[2:],'nativeCell':cell}
   areas[str(rowIndex)]={'zone':row[0],'townmapRow':rowIndex,'animation':animation,'cell':cell,'anchor':list(row[25:27]),'sourceRow':list(row)}
  species={}
- for sid in [495,498,501,504,506]:
+ for sid in species_ids:
   b=hab[sid-1];assert len(b)==249
   seasons=[]
   for season in range(4):
@@ -69,6 +71,8 @@ def extract(rom,out):
      pos=y*12+x;ci=(cell[3+pos//4]>>(6-(pos%4)*2))&3
      if ci in(1,2):atlas.putpixel((i%16*12+x,i//16*15+y),(*fontPal[ink if ci==1 else 2],255))
   name='font-'+label+'.png';atlas.save(dest/name);data['fonts'][label]={'src':'assets/dex-effects/'+name,'height':15,'glyphs':dict(metrics),'source':{'font':'a/0/2/3:0','palette':'a/0/2/3:5','foreground':ink,'shadow':2,'background':0,'packed':packed},'colors':{'foreground':fontPal[ink],'shadow':fontPal[2]}}
- (out/'dex-effects-assets.js').write_text('window.DEX_EFFECTS_ASSETS='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf8');print('Exported3native masks;5 species distribution;64 exact alpha samples;8frame brightness helper')
+ (out/'dex-effects-assets.js').write_text('window.DEX_EFFECTS_ASSETS='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf8');print('Exported',len(export),'native masks;',len(species),'species distributions;64 exact alpha samples;8frame brightness helper')
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('rom');p.add_argument('--output',default=str(Path(__file__).resolve().parents[1]/'src'));a=p.parse_args();extract(ndspy.rom.NintendoDSRom.fromFile(a.rom),Path(a.output))
+ p=argparse.ArgumentParser();p.add_argument('rom');p.add_argument('--output',default=str(Path(__file__).resolve().parents[1]/'src'));p.add_argument('--training',type=Path);a=p.parse_args()
+ d=json.loads(a.training.read_text(encoding='utf8').split('window.TRAINING_DATA=',1)[1].strip().removesuffix(';')) if a.training else None
+ extract(ndspy.rom.NintendoDSRom.fromFile(a.rom),Path(a.output),sorted(p['id'] for p in d['progression'].values()) if d else None)

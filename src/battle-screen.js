@@ -36,7 +36,7 @@
   const text=(s,x,y,white=false,align='left')=>NativeText.draw(c,font,String(s),x,y,white,align);
   const rect=(label,x,y,w,h,action,disabled=false)=>({label,x,y,w,h,action,disabled});
   function choose(next){selectionByMode.set(mode,selected);if(BattleBag.names[next]&&mode!=='itemDetail'&&mode!=='itemTarget'&&mode!==next)bagPage=0;mode=next;notice=null;update();}
-  function back(){if(busy||press)return;if(mode==='targets'){const resolve=targetRequest.resolve;targetRequest=null;choose('moves');resolve(null);return;}if(mode==='main'&&window.DoubleBattles?.undo())return;if(mode==='itemTarget')return choose(bagCategory);if(mode==='partyContext')return choose('party');if(['partyInfo','partyMoves','partyMoveDetail'].includes(mode))return choose(mode==='partyMoveDetail'?'partyMoves':'partyContext');if(mode==='party'&&session.request()?.forceSwitch?.[0])return;if(mode==='main')return;choose(mode==='itemDetail'?bagCategory:['medicine','balls','statusItems','battleItems'].includes(mode)?'bag':'main');}
+  function back(){if(busy||press)return;if(mode==='targets'){const resolve=targetRequest.resolve;targetRequest=null;choose('moves');resolve(null);return;}if(mode==='main'&&window.DoubleBattles?.undo())return;if(mode==='itemMove'){session.potionMove=null;return choose('itemTarget');}if(mode==='itemTarget'){session.potionMove=null;session.potionTarget=null;session.potionItem=null;return choose(bagCategory);}if(mode==='partyContext')return choose('party');if(['partyInfo','partyMoves','partyMoveDetail'].includes(mode))return choose(mode==='partyMoveDetail'?'partyMoves':'partyContext');if(mode==='party'&&session.request()?.forceSwitch?.[0])return;if(mode==='main')return;choose(mode==='itemDetail'?bagCategory:['medicine','balls','statusItems','battleItems'].includes(mode)?'bag':'main');}
   function bagView(){return BattleBag.page(BattleBag.inventory(mode,id=>Journey.itemCount(id)),bagPage);}
   function pageBag(delta){bagPage=bagView().number+delta;update();}
   function bagIcon(id){const key='item-'+id,path=window.PARTY_DETAIL_ASSETS?.itemMap?.[id]?.src;if(path&&!resources[key]&&!resources[key+'-pending']){resources[key+'-pending']=true;void load(path).then(im=>{resources[key]=im;draw();}).catch(()=>{}).finally(()=>{resources[key+'-pending']=false;});}return resources[key];}
@@ -73,9 +73,9 @@
     else if(mode==='itemDetail')renderButtons([rect('USA',56,152,152,40,useBagItem,storyBattle==='tutorial'||!Journey.itemCount(bagItem)),rect('Indietro',216,152,40,40,back)]);
     else if(mode==='party'||mode==='itemTarget'){
       const item=mode==='itemTarget';renderButtons([...session.party().map((p,i)=>rect(p.name,...resources.partyData.slots[i].rect,()=>{
-        if(item){session.potionTarget=p.index;session.potionItem=bagItem;turn(null,'potion');}else {partyIndex=i;choose('partyContext');}
-      },item&&!BattleMedicine.canUse(bagItem,p))),...(!forced?[rect('Indietro',188,164,64,28,()=>choose(item?bagCategory:'main'))]:[])]);
-    }else if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode))renderPartyPageButtons();
+        if(item){session.potionTarget=p.index;session.potionItem=bagItem;if(bagItem===38){partyIndex=i;choose('itemMove');}else turn(null,'potion');}else {partyIndex=i;choose('partyContext');}
+      },item&&!BattleMedicine.canUse(bagItem,session.battle.p1.pokemon[p.index-1]))),...(!forced?[rect('Indietro',188,164,64,28,()=>item?back():choose('main'))]:[])]);
+    }else if(mode==='itemMove'){const p=session.battle.p1.pokemon[partyIndex];renderButtons([...p.moveSlots.map((m,i)=>rect(GEN5.byMoveKey[m.id].name+'  '+m.pp+' / '+m.maxpp,8,8+i*36,240,32,()=>{session.potionMove=i;turn(null,'potion');},m.pp>=m.maxpp)),rect('Indietro',188,164,64,28,()=>choose('itemTarget'))]);}else if(['partyContext','partyInfo','partyMoves','partyMoveDetail'].includes(mode))renderPartyPageButtons();
     else if(mode==='notice')renderButtons([rect('Continua',0,0,256,192,()=>choose('main'))]);
   }
   function draw(){
@@ -189,7 +189,7 @@
     }
   }
 
-  function itemTarget(s){const original=s.battle.runAction;s.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoPotion'){const target=this.p1.pokemon[(s.potionTarget||action.pokemon.position+1)-1];s.potionTarget=null;BattleMedicine.apply(this,s.potionItem||17,target);return;}return original.call(this,action);};}
+  function itemTarget(s){const original=s.battle.runAction;s.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoPotion'){const target=this.p1.pokemon[(s.potionTarget||action.pokemon.position+1)-1];s.potionTarget=null;BattleMedicine.apply(this,s.potionItem||17,target,s.potionMove);s.potionMove=null;return;}return original.call(this,action);};}
 
   window.BattleScreen={update,cards,tick,prepare,targets(items){return new Promise(resolve=>{targetRequest={items,resolve};choose('targets');});},commands(){choose('main');},reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,get loading(){return prepare();}};
   // Eager loading is optional; a failed attempt must reject at battle entry,

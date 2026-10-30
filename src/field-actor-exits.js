@@ -1,8 +1,8 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello']);
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio']);
  const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
- const outdoor=z=>[389,317,397,319,6,321,16].includes(z);
+ const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
@@ -37,7 +37,15 @@
    p.points=[...route(n,{x:p.anchor.x+1,y:p.anchor.y},blocked),p.anchor,p.points[1]];p.background=true;p.destination=cave?'wellspring-entry':'nacrene-gate';p.itineraryVersion=1;return p;
   }
   if(zone===324){const p=portal(14.5,-10.5,1,0);p.points=[...route(n,{x:13.5,y:-10.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination=n.name==='Komor'?'route3-dark-grass':'route3-exit';p.itineraryVersion=1;return p;}
-  if(zone===16){if(n.name==='Komor')return arrival(-149.5,-164.5,16,7,'museum-wait');const points=[...route(n,{x:-174.5,y:-169.5},blocked),{x:-192.5,y:-169.5}];return {kind:'path',points,clip:null,background:true,destination:'pinwheel-forest',itineraryVersion:1};}
+  if(zone===16){
+   if(n.name==='Komor'&&Math.hypot(n.x+139.5,n.y+170.5)>1.6)return arrival(-149.5,-164.5,16,7,'museum-wait');
+   if(n.name==='Artemisio')return arrival(-193.5,-167.5,154,1,'pinwheel-entrance');
+   const p=portal(-139.5,-170.5,0,-1);p.points=[...route(n,{x:p.anchor.x,y:p.anchor.y+1},blocked),p.anchor,p.points[1]];p.background=true;p.destination='museum';return p;
+  }
+  if(zone===17){const p=portal(-4.5,12.5,0,1);p.points=[...route(n,{x:-4.5,y:11.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='museum-square';return p;}
+  if(zone===19){const p=portal(-11.5,3.5,-1,0,'stairs');p.points=[...route(n,{x:-10.5,y:3.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='museum-theft';return p;}
+  if(zone===154){const points=route(n,{x:-199.5,y:-163.5},blocked);return {kind:'path',points,clip:null,background:true,destination:'pinwheel-search',itineraryVersion:1};}
+  if(zone===155){const points=route(n,n.name==='Aloé'?{x:70.5,y:57.5}:{x:56.5,y:7.5},blocked);return {kind:'path',points,clip:null,background:true,destination:n.name==='Aloé'?'nacrene-museum':'castelia',itineraryVersion:1};}
   if(zone===9)return portal(-7.5,-13.5,0,0,'stairs');
   if(zone===15)return arrival(-6.5,-13.5,15,5,'school-wait');
   if(zone===152){if(n.name==='Belle')return arrival(15.5,11.5,152,1,'dreamyard-search');if(n.name==='Zania')return {kind:'path',points:[...route(n,{x:-7.5,y:10.5},blocked),{x:-36,y:10.5}],clip:null,background:true,destination:'fennel-house'};const points=[...route(n,{x:11.5,y:-5.5},blocked),{x:11.5,y:-25.5}];return {kind:'path',points,clip:null};}
@@ -80,7 +88,7 @@
  class Controller{
   constructor({blocked=()=>false,obstructed=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,obstructed,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
   depart(n,zone,{covered=false,resident=false}={}){
-   if(n.model===208||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
+   if(n.model===208||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
    const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
    this.records.set(key,{key,actor,zone,plan:p,index:0,age:0,travel:0,zero:0,stage:resident?'resident':'walk',sampleSequence:-1});return true;
   }

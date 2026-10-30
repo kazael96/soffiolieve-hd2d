@@ -1,6 +1,7 @@
 /* Party, save and menu services shared with the original field-event host. */
 (() => {
   let storage;try{storage=window.SpeciesStudioMode?null:localStorage;}catch{storage=null;}
+  if(window.TRAINING_DATA)Object.assign(OPENING_DATA,TRAINING_DATA.pokemonData);
   const state=StoryState.read(storage),preferences=JourneyState.read(storage).state;
   if(window.TrainerProfile&&!state.trainer)state.trainer=TrainerProfile.create();
   const outdoor={...ROM_SCENE,instances:[...ROM_SCENE.instances,...OPENING_ASSETS.scenes.north.instances],permissionGrids:[...ROM_SCENE.permissionGrids,...OPENING_ASSETS.scenes.north.permissionGrids]};
@@ -16,20 +17,20 @@
     $('questSummary').textContent=$('storyObjective').textContent=StoryState.objectives[state.phase];
     $('storyBag').textContent=`Denaro: $${state.money} · Poké Ball: ${state.pokeballs} · Pozioni: ${potions}`+(phaseIndex()>=4?' · Interpoké':'')+(phaseIndex()>=6?' · Pokédex':'')+(phaseIndex()>=7?' · Mappa Città':'');
     $('world').dataset.chapter=state.phase;$('world').dataset.scene=state.scene;
-    document.querySelector('.place').firstChild.textContent=(({321:'PERCORSO 3',16:'ZEFIROPOLI',324:'GROTTA MINERALE',322:'SCUOLA MATERNA',323:'PENSIONE POKÉMON',27:'VARCO',20:'CENTRO POKÉMON'})[state.original?.zone])|| (state.original?.zone===6?'LEVANTOPOLI':state.original?.zone===319?'PERCORSO 2':state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):state.scene==='zone8'?'CENTRO POKÉMON':'SOFFIOLIEVE');
+    document.querySelector('.place').firstChild.textContent=(({17:'MUSEO DI ZEFIROPOLI',18:'PALESTRA DI ZEFIROPOLI',19:'PALESTRA DI ZEFIROPOLI',154:'BOSCO GIRANDOLA',155:'BOSCO GIRANDOLA',249:'PONTE FRECCIALUCE',250:'BOSCO GIRANDOLA',251:'VARCO',252:'VARCO',28:'AUSTROPOLI',41:'CENTRO POKÉMON',321:'PERCORSO 3',16:'ZEFIROPOLI',324:'GROTTA MINERALE',322:'SCUOLA MATERNA',323:'PENSIONE POKÉMON',27:'VARCO',20:'CENTRO POKÉMON'})[state.original?.zone])|| (state.original?.zone===6?'LEVANTOPOLI':state.original?.zone===319?'PERCORSO 2':state.scene==='town'?(player.y<-80?'QUATTROVENTI':player.y<-16?'PERCORSO 1':'SOFFIOLIEVE'):state.scene==='zone8'?'CENTRO POKÉMON':'SOFFIOLIEVE');
     $('openTownMap').hidden=!state.original?.map;
     $('openPokedex').hidden=!state.original?.pokedex;
     $('openLab').disabled=!state.starter;
   }
   function save(force=false){
-    if(restarting||renderer.ready===false||renderer.contextLost||renderer.modelsRecovering||battling||window.NativeStory?.locked)return false;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);let saved=encoded===lastSave;
+    if(restarting||processing||renderer.ready===false||renderer.contextLost||renderer.modelsRecovering||battling||window.NativeStory?.locked)return false;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);let saved=encoded===lastSave;
     if(force||encoded!==lastSave){saved=StoryState.write(storage,state);$('saveStatus').textContent=saved?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(saved)lastSave=encoded;}
     Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});
     const changed=Object.fromEntries(Object.keys(lastPreferences).filter(k=>preferences[k]!==lastPreferences[k]).map(k=>[k,preferences[k]]));
     if(Object.keys(changed).length){const latest=JourneyState.read(storage).state;Object.assign(latest,changed);if(JourneyState.write(storage,latest))Object.assign(lastPreferences,changed);}
     return saved;
   }
-  function setScene(name,x,y){state.scene=name;renderer.scene=name==='town'?outdoor:OPENING_ASSETS.scenes[name==='bedroom'&&state.original?.roomMess?'bedroomMess':name];player={x,y};facing=3;resetInput();encounterState.distance=0;cooldown=3;renderer.center=[name==='town'?([321,16].includes(state.original?.zone)?x:x*.7):renderer.scene.chapter042?x:-10,name==='town'||renderer.scene.chapter042?y+1.5:-10];actors();update();save();}
+  function setScene(name,x,y){state.scene=name;renderer.scene=name==='town'?outdoor:OPENING_ASSETS.scenes[name==='bedroom'&&state.original?.roomMess?'bedroomMess':name];player={x,y};facing=3;renderer.elevation=renderer.scene.railZone?renderer.groundHeight(x,y):0;resetInput();encounterState.distance=0;cooldown=3;renderer.center=[name==='town'?([321,16,154].includes(state.original?.zone)?x:x*.7):(renderer.scene.chapter042||renderer.scene.chapter043)?x:-10,name==='town'||(renderer.scene.chapter042||renderer.scene.chapter043)?y+1.5:-10];actors();update();save();}
   function say(speaker,text,done=null,title=speaker){
     resetInput();continuation=done;$('speakerName').textContent=speaker;$('dialogueTitle').textContent=title;$('dialogueText').textContent=text;
     const portrait=['Belle','Komor','Aralia','Mamma','Padre','Viandante'].includes(speaker);$('dialoguePortrait').hidden=!portrait;if(portrait){$('dialoguePortrait').src=`assets/${['Padre','Viandante'].includes(speaker)?'opening':'characters'}/${speaker}-3.png`;$('dialoguePortrait').alt=speaker;}
@@ -72,17 +73,32 @@
       for(const [stat,n] of Object.entries(foeData?.evYield||{})){const total=Object.values(p.evs).reduce((a,b)=>a+b,0);p.evs[stat]+=Math.min(n,255-p.evs[stat],510-total);}
       const power=v=>Math.floor(Math.round(Math.sqrt(v)*4096)/4096*v*v);
       const xp=Math.floor(Math.floor(Math.floor(base*foe.level/5)*(kind==='wild'?1:1.5))/(Math.max(1,receivers.length)*(s.multi?2:1))*power(2*foe.level+10)/power(foe.level+p.level+10))+1;
-      const cap=window.ROUTE2_DATA?Math.max(15,p.level):100;p.xp=Math.min(data.growth[cap],p.xp+xp);await progressText(15,42,[p.nickname||p.name,xp]);
+      const cap=Training.cap(p),award=Training.xp(p,xp,data.growth);p.xp=award.total;if(award.earned)await progressText(15,42,[p.nickname||p.name,award.earned]);
       const species=GEN5.species.find(m=>m.en===p.name);
       while(p.level<cap&&p.xp>=data.growth[p.level+1]){
-        p.level++;await progressText(15,60,[p.nickname||p.name,p.level]);
+        p.level++;leveled.add(id);await progressText(15,60,[p.nickname||p.name,p.level]);
         for(const move of species.learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);
       }
       const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,old.hp+next.max-old.max);
     }
   }
+  const leveled=new Set();
+  async function evolve(p){
+    const e=Training.evolution(p);if(!e)return false;
+    const name=p.name,previous=unpack(p),abilityId=Training.ability(p,e.target);
+    await NativeStory.showPage('Cosa? '+(p.nickname||name)+' si sta evolvendo!');
+    if(!await EvolutionScene.play(SPECIES[name].id,e.targetId)){
+      await NativeStory.showPage('Eh? L’evoluzione di '+(p.nickname||name)+' si è interrotta!');return false;
+    }
+    Object.assign(p,{name:e.target,abilityId});
+    const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,Math.max(0,previous.hp+next.max-previous.max));
+    StoryState.register(state,p.name,true);displayPartner();
+    await NativeStory.showPage('Congratulazioni! '+(p.nickname||name)+' si è evoluto in '+e.target+'!');
+    for(const move of GEN5.species.find(m=>m.en===p.name).learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);
+    return true;
+  }
   async function afterBattle(s,kind,captured,escaped){
-    processing=true;encounterState.reset();try{
+    processing=true;leveled.clear();encounterState.reset();try{
     if(kind==='tutorial'){displayPartner();window.NativeStory?.battleDone(s,kind);return;}
     for(const m of s.battle.p1.pokemon){const id=m.storyId;if(id!==undefined)state.party[id]={...state.party[id],hp:m.hp,status:m.status,pp:m.moveSlots.map(move=>({id:GEN5.byMoveKey[move.id]?.id||0,left:move.pp}))};}
     if(s.double&&(captured||escaped))for(const foe of s.battle.p2.pokemon.filter(p=>p.hp===0))await gainXP(s,kind,foe);
@@ -92,6 +108,7 @@
       await NativeStory.showPage(messagePages(POKEDEX_ASSETS.labels.nickname,[captured.name]).join('\n'));
       if(await NativeStory.choice(['SÌ','NO'])===0)await NativeStory.nickname(index);
     }else if(!escaped&&s.battle.winner==='Alcide'){const defeated=[...s.battle.p2.pokemon,...(s.multi?s.battle.p4.pokemon:[])].filter(p=>p.hp===0);for(const foe of defeated.length?defeated:[s.active('p2')])await gainXP(s,kind,foe);}
+    for(const id of leveled){const p=state.party[id];if(p?.hp>0)await evolve(p);}
     if(s.openingTrainer&&s.battle.winner==='Alcide'){
       for(const page of messagePages(s.openingTrainer.messages[1],[]))await NativeStory.showPage(page,s.openingTrainer.name);
       const reward=s.partnerTrainers?s.partnerTrainers.reduce((sum,id)=>sum+OpeningBattleRules.prize(OPENING_TRAINERS[id]),0):OpeningBattleRules.prize(s.openingTrainer);state.money=Math.min(9999999,state.money+reward);
@@ -109,7 +126,7 @@
   function step(dt,moved){}
   function encounter(dt,moved,distance=0){if(moved&&state.original?.repelRemaining)state.original.repelRemaining=Math.max(0,state.original.repelRemaining-distance);
     if(phaseIndex()<StoryState.phases.indexOf('route')||!moved||battling)return;
-    const next=window.ROUTE3_DATA?.encounters?.[window.NativeStory?.state.zone],route2=window.ROUTE2_DATA&&window.NativeStory?.state.zone===319,dream=window.NativeStory?.state.zone===152,enc=next|| (dream?STRIATON_DATA.encounters:route2?ROUTE2_DATA.encounters:null);const onRoute=!!enc||window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;encounterState.rate=enc?enc.rate:OPENING_ENCOUNTER_RULES.rate;
+    const next=window.PINWHEEL_DATA?.encounters?.[window.NativeStory?.state.zone]||window.ROUTE3_DATA?.encounters?.[window.NativeStory?.state.zone],route2=window.ROUTE2_DATA&&window.NativeStory?.state.zone===319,dream=window.NativeStory?.state.zone===152,enc=next|| (dream?STRIATON_DATA.encounters:route2?ROUTE2_DATA.encounters:null);const onRoute=!!enc||window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;encounterState.rate=enc?enc.rate:OPENING_ENCOUNTER_RULES.rate;
     const g=onRoute?(dream||next?renderer.scene:outdoor).permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
     const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
     const dark=next?.dark&&g?.bytes[tile]===6,table=dark?next.dark.slots:enc?enc.slots:OPENING_ENCOUNTERS;if(dark)encounterState.rate=next.dark.rate;
@@ -135,21 +152,22 @@
   for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',resetInput);
   function moveParty(from,to){if(battling||!state.party[from]||!state.party[to])return false;[state.party[from],state.party[to]]=[state.party[to],state.party[from]];lead=0;displayPartner();save(true);return true;}
   function itemCount(id){return id===4?state.pokeballs:id===17?potions:Math.max(0,Math.min(999,Math.floor(state.original?.extraItems?.[id])||0));}
-  function addItem(id,count=1){if(!([3,4,17,26,50].includes(id)||window.STRIATON_DATA?.itemNames[id]||window.ROUTE3_DATA?.itemNames[id])||!Number.isInteger(count)||count<1||itemCount(id)+count>999)return false;if(id===4)state.pokeballs+=count;else if(id===17)potions+=count;else{state.original.extraItems??={};state.original.extraItems[id]=itemCount(id)+count;}return true;}
+  function addItem(id,count=1){if(!([3,4,17,26,50].includes(id)||window.STRIATON_DATA?.itemNames[id]||window.ROUTE3_DATA?.itemNames[id]||window.PINWHEEL_DATA?.itemNames[id])||!Number.isInteger(count)||count<1||itemCount(id)+count>999)return false;if(id===4)state.pokeballs+=count;else if(id===17)potions+=count;else{state.original.extraItems??={};state.original.extraItems[id]=itemCount(id)+count;}return true;}
   function consumeItem(id,count=1){if(!Number.isInteger(count)||count<1||itemCount(id)<count)return false;if(id===4)state.pokeballs-=count;else if(id===17)potions-=count;else state.original.extraItems[id]=itemCount(id)-count;return true;}
   function usePotion(index,id=17){const p=state.party[index];if(battling||!p||![17,26].includes(id)||itemCount(id)<=0||p.hp<=0)return 0;const m=unpack(p),healed=Math.min(id===26?50:20,m.max-m.hp);if(healed<=0)return 0;p.hp=m.hp+healed;consumeItem(id);displayPartner();save(true);return healed;}
-  async function useRareCandy(index){const p=state.party[index];if(battling||processing||!p||p.level>=15||!itemCount(50))return false;processing=true;try{const old=unpack(p);consumeItem(50);p.level++;p.xp=OPENING_DATA[p.name].growth[p.level];await progressText(15,60,[p.nickname||p.name,p.level]);const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,old.hp+next.max-old.max);displayPartner();return true;}finally{processing=false;save(true);}}
-  function giveItem(id,index){const p=state.party[index];if(battling||!p||!([3,4,14,17,18,21,22,25,26,27,28,30,50,58,79,150,155].includes(id))||!itemCount(id)||p.heldItem&&itemCount(p.heldItem)>=999)return false;consumeItem(id);if(p.heldItem)addItem(p.heldItem);p.heldItem=id;save(true);return true;}
+  async function useRareCandy(index){const p=state.party[index];if(battling||processing||!p||p.level>=Training.limit()||!itemCount(50))return false;processing=true;try{const old=unpack(p);consumeItem(50);p.level++;p.xp=OPENING_DATA[p.name].growth[p.level];await progressText(15,60,[p.nickname||p.name,p.level]);const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level))await learnMove(p,move.id);const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,old.hp+next.max-old.max);await evolve(p);displayPartner();return true;}finally{processing=false;save(true);}}
+  function giveItem(id,index){const p=state.party[index];if(battling||!p||!([3,4,6,14,17,18,21,22,25,26,27,28,30,38,50,58,81,79,150,155,91,217,222,239,296].includes(id))||!itemCount(id)||p.heldItem&&itemCount(p.heldItem)>=999)return false;consumeItem(id);if(p.heldItem)addItem(p.heldItem);p.heldItem=id;save(true);return true;}
   function takeItem(index){const p=state.party[index],id=p?.heldItem;if(battling||!id||!addItem(id))return 0;p.heldItem=0;save(true);return id;}
-  function discardItem(id,count){if(battling||![3,4,14,17,18,21,22,25,26,27,28,30,50,58,79,150,155].includes(id)||!consumeItem(id,count))return false;save(true);return true;}
-  async function useMoonStone(index){const p=state.party[index];if(battling||processing||p?.name!=='Munna'||!itemCount(58))return false;processing=true;try{await NativeStory.showPage('Cosa? Munna si sta evolvendo!');const previous=unpack(p);consumeItem(58);p.name='Musharna';const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,previous.hp+next.max-previous.max);StoryState.register(state,p.name,true);displayPartner();await NativeStory.showPage('Congratulazioni! Munna si è evoluto in Musharna!');return true;}finally{processing=false;save(true);}}
+  function discardItem(id,count){if(battling||![3,4,6,14,17,18,21,22,25,26,27,28,30,38,50,58,81,79,150,155,91,217,222,239,296].includes(id)||!consumeItem(id,count))return false;save(true);return true;}
+  async function useMoonStone(index){const p=state.party[index];if(battling||processing||p?.name!=='Munna'||!itemCount(81))return false;processing=true;try{await NativeStory.showPage('Cosa? Munna si sta evolvendo!');const previous=unpack(p);consumeItem(81);p.name='Musharna';const next=makeMon(p.name,p.level,p);p.hp=Math.min(next.max,previous.hp+next.max-previous.max);StoryState.register(state,p.name,true);displayPartner();await NativeStory.showPage('Congratulazioni! Munna si è evoluto in Musharna!');return true;}finally{processing=false;save(true);}}
   function useMedicine(index,id){const p=state.party[index];if(battling||!p||!itemCount(id))return false;if(p.hp===0&&id!==28)return false;const m=unpack(p),old=p.hp,status=p.status;if([25,30,155].includes(id)&&p.hp>0)p.hp=Math.min(m.max,p.hp+({25:200,30:50,155:10}[id]));else if((id===18&&['psn','tox'].includes(p.status))||(id===21||id===150)&&p.status==='slp')p.status='';else if(id===22&&p.status==='par')p.status='';else if(id===27)p.status='';else if(id===28&&p.hp===0)p.hp=Math.max(1,Math.floor(m.max/2));if(old===p.hp&&status===p.status)return false;consumeItem(id);displayPartner();save(true);return true;}
+  function useEther(index,moveIndex){const p=state.party[index],m=p?.pp[moveIndex],max=m&&GEN5.moves.find(x=>x.id===m.id)?.pp;if(battling||!p?.hp||!m||!max||m.left>=max||!itemCount(38))return false;m.left=Math.min(max,m.left+10);consumeItem(38);displayPartner();save(true);return true;}
   function useRepel(){if(battling||!itemCount(79))return false;consumeItem(79);state.original.repelRemaining=100;save(true);return true;}
-  async function teachMachine(id,index){const p=state.party[index],move={373:168,410:526,420:15}[id];if(battling||processing||!p||!move||!itemCount(id)||!((window.ROUTE3_DATA?.compatibility[p.name]||STRIATON_DATA.compatibility[p.name])?.includes(id)))return false;processing=true;try{await learnMove(p,move);return p.pp.some(m=>m.id===move);}finally{processing=false;save(true);}}
-  function daycareSteps(distance){const care=state.original?.daycare;if(!care||!Number.isFinite(distance)||distance<=0)return;care.distance=(care.distance||0)+distance;const steps=Math.floor(care.distance);if(!steps)return;care.distance-=steps;const p=care.pokemon,data=OPENING_DATA[p.name];if(!data)return;const cap=Math.max(15,p.level),before=p.level;p.xp=Math.min(data.growth[cap],p.xp+steps);while(p.level<cap&&p.xp>=data.growth[p.level+1]){p.level++;const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level)){if(p.pp.some(m=>m.id===move.id))continue;if(p.pp.length>=4)p.pp.shift();p.pp.push({id:move.id,left:GEN5.moves.find(m=>m.id===move.id).pp});}}if(p.level!==before){const m=makeMon(p.name,p.level,p);p.hp=m.max;}}
-  window.Journey={daycareSteps,useMoonStone,useMedicine,useRepel,teachMachine,restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
+  async function teachMachine(id,index){const p=state.party[index],move=({...window.PINWHEEL_DATA?.machines,373:168,410:526,420:15})[id];if(battling||processing||!p||!move||!itemCount(id)||!((window.TRAINING_DATA?.compatibility[p.name]||window.ROUTE3_DATA?.compatibility[p.name]||STRIATON_DATA.compatibility[p.name])?.includes(id)))return false;processing=true;try{await learnMove(p,move);return p.pp.some(m=>m.id===move);}finally{processing=false;save(true);}}
+  function daycareSteps(distance){const care=state.original?.daycare;if(!care||!Number.isFinite(distance)||distance<=0)return;care.distance=(care.distance||0)+distance;const steps=Math.floor(care.distance);if(!steps)return;care.distance-=steps;const p=care.pokemon,data=OPENING_DATA[p.name];if(!data)return;const cap=Training.cap(p),before=p.level;p.xp=Training.xp(p,steps,data.growth).total;while(p.level<cap&&p.xp>=data.growth[p.level+1]){p.level++;const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level)){if(p.pp.some(m=>m.id===move.id))continue;if(p.pp.length>=4)p.pp.shift();p.pp.push({id:move.id,left:GEN5.moves.find(m=>m.id===move.id).pp});}}if(p.level!==before){const m=makeMon(p.name,p.level,p);p.hp=m.max;}}
+  window.Journey={useEther,daycareSteps,useMoonStone,useMedicine,useRepel,teachMachine,restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
   potions=state.potions;renderer.scene=state.scene==='town'?outdoor:OPENING_ASSETS.scenes[state.scene==='bedroom'&&state.original?.roomMess?'bedroomMess':state.scene];player={...state.player};facing=state.facing;
-  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone322:[-8.5,-3.5],zone323:[-8.5,-3.5],zone324:[13.5,-10.5],zone27:[-2.5,-11.5],zone20:[-8.5,-3.5],zone8:[-8.5,-3.5],zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],zone7:[-3.5,26.5],zone9:[-8.5,-6.5],zone10:[-5.5,-12.5],zone15:[-8.5,-1.5],zone152:[-6.5,10.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
+  if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone17:[-7.5,10.5],zone18:[-7.5,13.5],zone19:[-11.5,2.5],zone155:[70.5,55.5],zone250:[-.5,12.5],zone251:[-13.5,-11.5],zone252:[-7.5,-6.5],zone249:[77,259.9],zone28:[55,16],zone41:[-8.5,-3.5],zone322:[-8.5,-3.5],zone323:[-8.5,-3.5],zone324:[13.5,-10.5],zone27:[-2.5,-11.5],zone20:[-8.5,-3.5],zone8:[-8.5,-3.5],zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],zone7:[-3.5,26.5],zone9:[-8.5,-6.5],zone10:[-5.5,-12.5],zone15:[-8.5,-1.5],zone152:[-6.5,10.5],town:[-2,0]}[state.scene];player={x:p[0],y:p[1]};}
   renderer.center=state.scene==='town'?[player.x*.7,player.y+1.5]:[-10,-10];displayPartner();actors();update();
   addEventListener('pagehide',()=>save());document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});setInterval(()=>save(),5000);
 })();

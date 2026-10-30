@@ -36,7 +36,7 @@
   function targets(scene,assets){
     const result=[];
     for(const instance of scene.instances){
-      const chapter=/^(?:route|striaton)-prop-(True|False)-\d+-(\d+)$/.exec(instance.model),match=/^(?:out-|in-)?prop-?(\d+)$/.exec(instance.model)||(chapter&&[chapter[0],chapter[2]]);if(!match)continue;
+      const chapter=/^(?:route|striaton|pw)-prop-(True|False)-\d+-(\d+)$/.exec(instance.model),match=/^(?:out-|in-)?prop-?(\d+)$/.exec(instance.model)||(chapter&&[chapter[0],chapter[2]]);if(!match)continue;
       const id=+match[1],indoor=instance.model.startsWith('in-')||chapter?.[1]==='False',child=indoor?null:assets.children[id],record=assets.models[child?.model??id];if(!record||indoor!==(record.source.archive==='a/2/3/0'))continue;
       const [x,y,z]=child?.offset||[0,0,0],c=Math.cos(instance.rotation),s=Math.sin(instance.rotation);
       result.push({instance,record,child:!!child,x:instance.x+x*c+z*s,y:instance.y+y,z:instance.z-x*s+z*c,rotation:instance.rotation,key:instance.model+':'+instance.x+':'+instance.z});

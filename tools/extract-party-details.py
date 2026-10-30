@@ -41,7 +41,7 @@ def extract(rom,output):
  assert all(f[c][:4]==b'RGCN'and f[p][:4]==b'RLCN'for c,p in pairs)
  spec=importlib.util.spec_from_file_location('events',Path(__file__).with_name('extract-original-events.py'));events=importlib.util.module_from_spec(spec);spec.loader.exec_module(events)
  texts=files('a/0/0/2');names=events.messages(texts[54]);item_graphics={};sheet=Image.new('RGBA',(20*48,32*48),(238,238,238,255));draw=ImageDraw.Draw(sheet)
- for item in [3,4,17,22,25,26,27,28,30,155,442,621,626]:
+ for item in [3,4,6,14,17,18,21,22,25,26,27,28,30,38,50,58,79,81,91,150,155,217,222,239,296,373,394,410,413,420,437,442,471,579,619,621,626]:
   char,palette=pairs[item]
   frames=menu.cells(f,char,1,palette);im,box=frames[0];name=f'item-{item}.png';im.save(dest/name)
   item_graphics[str(item)]={'src':'assets/party-details/'+name,'origin':box[:2],'size':box[2:],'name':names[item]if item<len(names)else None,'source':{'archive':'a/0/2/5','char':char,'cells':1,'animation':0,'palette':palette,'mappingAddress':hex(0x0209EAEC+item*4)}}
