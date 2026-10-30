@@ -20,7 +20,9 @@
  }
  function ground(name){return /(?:fhyuka|hh_shiki|hh_ashiato|grass|michi|kusa_ec|hana|gake|kaidan|sea_|d0yuka|c2_road)/.test(name||'');}
  const ambientSpecs=Object.freeze([{species:'Patrat',id:504,x:3,z:-17,height:.55},{species:'Lillipup',id:506,x:5,z:-23,height:.55}].map(Object.freeze));
- const ambientCanvas=Object.freeze({size:128,foot:104,body:64});
+ // Woobat spreads beyond 160 pixels at this body scale. Keep a power-of-two
+ // canvas and retain body/feet units so padding never enlarges the observer.
+ const ambientCanvas=Object.freeze({size:256,foot:192,body:64});
  function ambientQuad({x,z,height}){const {size,foot,body}=ambientCanvas,verts=[];for(const i of [0,1,2,2,1,3]){const right=i%2,top=i>=2;verts.push(x+(right?size/2:-size/2)/body*height,.02+(top?foot:foot-size)/body*height,z,right?size:0,top?0:size,1,1,1,0,.4,.9);}return verts;}
  function prepare(c){if(!supported(c))return Promise.resolve(false);const id=c.id;if(!records.has(id)){
   const record={ready:false,groups:[]};records.set(id,record);record.pending=(async()=>{const {gl}=setup();for(const ins of instances(c)){const model=OPENING_ASSETS.models[ins.model]||ROM_SCENE.models[ins.model];if(!model)throw Error('Modello originale mancante: '+ins.model);for(const group of model.groups){if(!group.texture)continue;const tex=await loadTexture(group.texture),verts=new Float32Array(group.verts),cos=Math.cos(ins.rotation),sin=Math.sin(ins.rotation);for(let i=0;i<verts.length;i+=11){const x=verts[i],z=verts[i+2],nx=verts[i+8],nz=verts[i+10];verts[i]=x*cos+z*sin+ins.x;verts[i+1]+=ins.y;verts[i+2]=-x*sin+z*cos+ins.z;verts[i+8]=nx*cos+nz*sin;verts[i+10]=-nx*sin+nz*cos;}let staged=verts;if(['wellspring','nacrene'].includes(c.id)&&!['route3-battle-floor','route3-city-floor'].includes(ins.model)){
