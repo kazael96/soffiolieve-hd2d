@@ -1,0 +1,43 @@
+✖ native foreground trees stay out of Route 3 battle clearing while distant geometry remains (7.6129ms)
+✖ new ambient Pokemon avoid all single and double combatant silhouettes and each other (4.0169ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20.5143
+
+✖ failing tests:
+
+test at tests\battle-stage.test.cjs:13:1
+✖ native foreground trees stay out of Route 3 battle clearing while distant geometry remains (7.6129ms)
+  AssertionError [ERR_ASSERTION]: Near tree crossed the battle clearing in route3
+      at TestContext.<anonymous> (C:\Users\AlessandroCapoccetti\Documents\Codex\2026-10-23\se\work\faithful-repo\tests\battle-stage.test.cjs:14:253)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests\battle-stage.test.cjs:16:1
+✖ new ambient Pokemon avoid all single and double combatant silhouettes and each other (4.0169ms)
+  AssertionError [ERR_ASSERTION]: route3 observer overlaps a fighter at 1280x475
+  
+  true !== false
+  
+      at TestContext.<anonymous> (C:\Users\AlessandroCapoccetti\Documents\Codex\2026-10-23\se\work\faithful-repo\tests\battle-stage.test.cjs:26:136)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

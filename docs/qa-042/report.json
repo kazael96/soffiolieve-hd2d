@@ -1,112 +1,112 @@
 {
   "schema": 1,
-  "build": "77ca36bd6399a7d1",
-  "created": "2026-10-30T09:09:16.007Z",
+  "build": "b74f60f4bdecd5aa",
+  "created": "2026-10-30T10:15:24.525Z",
   "result": "PASS",
   "stages": [
     {
       "name": "unit",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 74742,
+      "durationMs": 7943,
       "log": "unit.log"
     },
     {
       "name": "builder",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 40850,
+      "durationMs": 47523,
       "log": "builder.log"
     },
     {
       "name": "built-site",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 5578,
+      "durationMs": 2695,
       "log": "built-site.log"
     },
     {
       "name": "render-assets",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 5107,
+      "durationMs": 3388,
       "log": "render-assets.log"
     },
     {
       "name": "story-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 15457,
+      "durationMs": 11522,
       "log": "story-runtime.log"
     },
     {
       "name": "accumula-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 17935,
+      "durationMs": 19339,
       "log": "accumula-runtime.log"
     },
     {
       "name": "route2-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 6168,
+      "durationMs": 8092,
       "log": "route2-runtime.log"
     },
     {
       "name": "striaton-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 4084,
+      "durationMs": 5944,
       "log": "striaton-runtime.log"
     },
     {
       "name": "route3-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 3580,
+      "durationMs": 5880,
       "log": "route3-runtime.log"
     },
     {
       "name": "double-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 1573,
+      "durationMs": 1861,
       "log": "double-runtime.log"
     },
     {
       "name": "field-stress",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 12791,
+      "durationMs": 31789,
       "log": "field-stress.log"
     },
     {
       "name": "mobile-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 7879,
+      "durationMs": 5412,
       "log": "mobile-runtime.log"
     },
     {
       "name": "opponent-runtime",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 2772,
+      "durationMs": 2358,
       "log": "opponent-runtime.log"
     },
     {
       "name": "checkpoint-stress",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 46845,
+      "durationMs": 13278,
       "log": "checkpoint-stress.log"
     },
     {
       "name": "combat-stress",
       "result": "PASS",
       "exitCode": 0,
-      "durationMs": 12214,
+      "durationMs": 3430,
       "log": "combat-stress.log"
     }
   ],
