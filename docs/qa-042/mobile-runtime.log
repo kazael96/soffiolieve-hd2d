@@ -1,0 +1,9 @@
+PASS mobile pre/post tutorial speed=1 audio=off
+PASS mobile pre/post tutorial speed=1 audio=running
+PASS mobile pre/post tutorial speed=1 audio=suspended
+PASS mobile pre/post tutorial speed=2 audio=off
+PASS mobile pre/post tutorial speed=2 audio=running
+PASS mobile pre/post tutorial speed=2 audio=suspended
+PASS mobile pre/post tutorial speed=4 audio=off
+PASS mobile pre/post tutorial speed=4 audio=running
+PASS mobile pre/post tutorial speed=4 audio=suspended

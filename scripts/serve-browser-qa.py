@@ -53,6 +53,9 @@ class Handler(SimpleHTTPRequestHandler):
         except (ValueError, KeyError, TypeError):
             self.send_error(400)
             return
+        except OSError:
+            self.send_error(507, 'QA artifact could not be saved')
+            return
         self.send_response(204)
         self.end_headers()
 
@@ -62,7 +65,7 @@ class Handler(SimpleHTTPRequestHandler):
             return str(args.qa.resolve() / 'index.html')
         if pathname.startswith('/__qa/'):
             name = pathname.removeprefix('/__qa/')
-            if name not in ('index.html', 'browser-qa.js'):
+            if name not in ('index.html', 'browser-qa.js', 'ambient-audit.js'):
                 return str(args.qa.resolve() / '__not_found__')
             return str(args.qa.resolve() / name)
         return super().translate_path(value)

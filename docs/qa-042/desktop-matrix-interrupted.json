@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "build": "77ca36bd6399a7d1",
+  "viewport": [
+    1280,
+    720
+  ],
+  "stage": "Animazioni: Tympole / 165 / 3620",
+  "running": true,
+  "result": "RUNNING",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 10
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 6720,
+      "details": {
+        "frames": 90,
+        "scenes": 30
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3720,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 19693,
+      "details": {
+        "textures": 762,
+        "transparentOriginalSlots": 32,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 19623,
+      "details": {
+        "frames": 2280,
+        "atlases": 38
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "PASS",
+      "durationMs": 2062,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 40,
+      "details": {
+        "cancelPreservesState": true
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}
