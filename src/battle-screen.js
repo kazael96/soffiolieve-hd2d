@@ -7,9 +7,11 @@
   const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
   let targetRequest=null;
   const resources={},images=new Map(),selectionByMode=new Map();let font,smallFont,battleFont,fontMetrics,moveMetrics,metadata,ready=false,mode='main',buttons=[],selected=0,wasBusy=false,notice=null,bagCategory='medicine',bagPage=0,bagItem=17,lastItem=0,press=null,partyIndex=0,partyMove=0;
-  function load(src){if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{images.delete(src);reject(Error('Grafica lotta non disponibile: '+src));};im.src=NativeTextLayout.resource(src);}));return images.get(src);}
-  const loading=(async()=>{
-    metadata=await fetch(NativeTextLayout.resource('assets/battle-ui/provenance.json')).then(r=>{if(!r.ok)throw Error('Catalogo interfaccia lotta non disponibile');return r.json();});fontMetrics=metadata.fonts['2'];moveMetrics=metadata.fonts['0'];
+  function load(src){if(!images.has(src)){const task=RuntimeAssets.image(NativeTextLayout.resource(src));images.set(src,task);task.catch(()=>{if(images.get(src)===task)images.delete(src);});}return images.get(src);}
+  let loading=null;
+  function prepare(){if(ready)return Promise.resolve(true);if(loading)return loading;stage.dataset.resources='loading';delete stage.dataset.resourceError;loading=initialize().then(()=>{stage.dataset.resources='ready';stage.setAttribute('aria-label','Comandi di lotta');return true;},error=>{ready=false;loading=null;stage.dataset.resources='error';stage.dataset.resourceError=error.message;stage.setAttribute('aria-label',error.message);throw error;});return loading;}
+  async function initialize(){
+    metadata=await RuntimeAssets.json(NativeTextLayout.resource('assets/battle-ui/provenance.json'));fontMetrics=metadata.fonts['2'];moveMetrics=metadata.fonts['0'];
     [font,smallFont,battleFont]=await Promise.all([NativeText.load(),load(fontMetrics.hpPalette162.path),load(moveMetrics.battlePalette13.path)]);
     const paths=['command-view-105.png','command-source-105.png','cell-115-117-0.png','cell-115-117-2.png','cell-165-166-0.png','cell-168-169-0.png','hp-atlas-164.png','moves-layer-111.png'];
     await Promise.all(paths.map(async name=>resources[name]=await load('assets/battle-ui/'+name)));
@@ -20,7 +22,7 @@
     resources.emptyMove=await load(metadata.moves.emptyPanel.path);
     resources.messageFrame=await load(metadata.messageWindow.outerFrame.path);resources.messageFont=await load(metadata.fonts['0'].messagePalette90.path);
     await Promise.all(metadata.moves.keyCursor.cells.map(async(record,i)=>resources['key-cursor-'+i]=await load(record.path)));
-    resources.partyData=await(await fetch(NativeTextLayout.resource('assets/battle-party/provenance.json'))).json();
+    resources.partyData=await RuntimeAssets.json(NativeTextLayout.resource('assets/battle-party/provenance.json'));
     resources.partyBase=await load(resources.partyData.images['0'].path);
     resources.partyPanels=await Promise.all(resources.partyData.panels.map(record=>load(record.path)));
     resources.partyPromptFont=await load(resources.partyData.font.variants.prompt.path);resources.partyNameFont=await load(resources.partyData.font.variants.name.path);resources.partyNumberFont=await load(resources.partyData.font.variants.levelAndHp.path);
@@ -30,7 +32,7 @@
     resources.moveTabs={};await Promise.all(Object.entries(a.detailPages.moveDetail.tabStates).map(async([id,v])=>resources.moveTabs[id]=await load(v.path)));
     resources.heldBadges=await Promise.all(a.heldItemBadge.cells.map(v=>load(v.path)));resources.categoryIcons={};await Promise.all(Object.entries(a.moveCategoryIcons.categories).map(async([id,v])=>resources.categoryIcons[id]=await load(v.cells[0].path)));
     ready=true;if(battling){cards();update();}
-  })().catch(error=>{console.error(error);stage.setAttribute('aria-label',error.message);stage.textContent=error.message;});
+  }
   const text=(s,x,y,white=false,align='left')=>NativeText.draw(c,font,String(s),x,y,white,align);
   const rect=(label,x,y,w,h,action,disabled=false)=>({label,x,y,w,h,action,disabled});
   function choose(next){selectionByMode.set(mode,selected);if(BattleBag.names[next]&&mode!=='itemDetail'&&mode!=='itemTarget'&&mode!==next)bagPage=0;mode=next;notice=null;update();}
@@ -189,5 +191,8 @@
 
   function itemTarget(s){const original=s.battle.runAction;s.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoPotion'){const target=this.p1.pokemon[(s.potionTarget||action.pokemon.position+1)-1];s.potionTarget=null;BattleMedicine.apply(this,s.potionItem||17,target);return;}return original.call(this,action);};}
 
-  window.BattleScreen={update,cards,tick,targets(items){return new Promise(resolve=>{targetRequest={items,resolve};choose('targets');});},commands(){choose('main');},reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,loading};
+  window.BattleScreen={update,cards,tick,prepare,targets(items){return new Promise(resolve=>{targetRequest={items,resolve};choose('targets');});},commands(){choose('main');},reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,get loading(){return prepare();}};
+  // Eager loading is optional; a failed attempt must reject at battle entry,
+  // where the caller can recover, and must be retryable without losing canvases.
+  void prepare().catch(()=>{});
 })();

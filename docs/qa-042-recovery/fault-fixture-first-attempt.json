@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "fixture": "fd35fd63739ce89c",
+  "build": "ef85407600c38c9b",
+  "viewport": [
+    1280,
+    720
+  ],
+  "stage": "battle-ui-startup-error-and-recovery",
+  "running": false,
+  "result": "FAIL",
+  "cases": [
+    {
+      "name": "battle-ui-startup-error-and-recovery",
+      "result": "FAIL",
+      "durationMs": 7,
+      "error": "Error: Open the isolated fixture with ?battleResourceFault=1\n    at check (http://127.0.0.1:4212/__qa/browser-qa.js?v=701939d335ea:11:56)\n    at battleResourceRecovery (http://127.0.0.1:4212/__qa/browser-qa.js?v=701939d335ea:138:42)\n    at test (http://127.0.0.1:4212/__qa/browser-qa.js?v=701939d335ea:15:175)\n    at panel.querySelector.onclick (http://127.0.0.1:4212/__qa/browser-qa.js?v=701939d335ea:139:109)\n    at http://127.0.0.1:4212/__qa/browser-qa.js?v=701939d335ea:162:145"
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

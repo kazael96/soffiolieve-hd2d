@@ -1,0 +1,29 @@
+{
+  "dom": {
+    "build": "20208afb31a0fae4",
+    "dialogue": "Komor: Ehi, Alcide!",
+    "viewport": [
+      1280,
+      720
+    ],
+    "world": {
+      "actors": "[{\"name\":\"Komor\",\"id\":0,\"x\":-9.5,\"y\":-9.5,\"frame\":6,\"hidden\":false},{\"name\":\"Regalo\",\"id\":2,\"x\":-10.5,\"y\":-7.5,\"frame\":0,\"hidden\":false}]",
+      "assets": "ready",
+      "chapter": "gift",
+      "departures": "[]",
+      "facing": "3",
+      "moving": "false",
+      "position": "{\"x\":-10.5,\"y\":-9.5,\"t\":42.509000000000334}",
+      "retired": "[]",
+      "scene": "bedroom"
+    }
+  },
+  "errors": [
+    {
+      "level": "error",
+      "message": "Error: Grafica lotta non disponibile: assets/battle-ui/move-panel-type-11.png\n    at im.onerror (https://kazael96.github.io/soffiolieve-hd2d/battle-screen.js:10:177)",
+      "timestamp": "2026-10-30T12:04:03.846Z",
+      "url": "https://kazael96.github.io/soffiolieve-hd2d/battle-screen.js"
+    }
+  ]
+}

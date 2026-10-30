@@ -1,0 +1,4 @@
+PASS: all script/style dependencies, published hashes, character sprites and reachable exploration characters.
+PASS: original room assets, every required door/NPC and the full walking route to Accumula.
+PASS original Pokedex entry graphics, font, footprint/type assets and regional numbers
+PASS original Unova map, information panel and all marker cells
