@@ -1,0 +1,7 @@
+PASS original Route2 chapter, trainers, Belle, Center, Purrloin save x1 Snivy
+PASS original Route2 chapter, trainers, Belle, Center, Purrloin save x2 Tepig
+PASS original Route2 chapter, trainers, Belle, Center, Purrloin save x4 Oshawott
+PASS route trainer p2 resolves and recovers without a story lock
+PASS route trainer play resolves and recovers without a story lock
+PASS level15 cap, Super Potion, rare candy cap and extra inventory persistence
+PASS walkable route/city continuity, original encounters, level15 learnset and item script

@@ -1,0 +1,19 @@
+PASS field menu healing, ineffective targets, held-item exchange, discard, party order and persistence
+PASS failed storage writes never report a successful save or overwrite the last valid record
+PASS first capture registration, duplicate catch, original nickname prompt and tutorial exclusion
+PASS 62 original sign/furniture interactions and forbidden approach directions
+PASS exploration preferences persist without background-tab overwrites
+PASS keyboard choices, cancellation and nicknames target the correct party slot
+PASS asynchronous battle failures propagate without leaving a waiting field event
+PASS individual stats, EVs, chosen move replacement, healing and persistence
+PASS all 14 original door/stair transitions, direction, collision and re-entry cooldown
+PASS original encounter rate integration, indoor exclusion and scene priority
+PASS original scenes Snivy p1
+PASS original scenes Snivy p2
+PASS original scenes Snivy play
+PASS original scenes Tepig p1
+PASS original scenes Tepig p2
+PASS original scenes Tepig play
+PASS original scenes Oshawott p1
+PASS original scenes Oshawott p2
+PASS original scenes Oshawott play

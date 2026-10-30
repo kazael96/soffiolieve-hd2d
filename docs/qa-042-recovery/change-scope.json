@@ -1,0 +1,10 @@
+{
+  "old": "0b9691f94130cea8",
+  "new": "ef85407600c38c9b",
+  "changedSources": [
+    "app.js",
+    "battle-screen.js"
+  ],
+  "changedAssets": [],
+  "normalization": "CRLF/LF; HTML build/cache tokens only"
+}

@@ -1,0 +1,4 @@
+PASS checkpoint replay starter=Snivy
+PASS checkpoint replay starter=Tepig
+PASS checkpoint replay starter=Oshawott
+{"suite":"checkpoint-stress","reloads":30,"result":"PASS"}
