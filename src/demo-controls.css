@@ -3,4 +3,7 @@
 #demoControls[hidden],#demoControls button[hidden]{display:none}
 #demoControls button{min-height:44px;padding:7px 12px;border:2px solid #b8c6c3;border-radius:2px;background:#25363aeb;color:#f2f4eb;font:600 12px system-ui;box-shadow:2px 2px 0 #102021;touch-action:manipulation}
 #demoSpeed{min-width:48px;font-size:16px!important}#demoControls button:focus-visible{outline:2px solid #edcd75;outline-offset:2px}
+#demoControls[data-battle=true]{left:calc(50% + 17px);right:auto;transform:translateX(-50%)}
+@media(max-width:600px) and (min-height:481px){#demoControls[data-battle=true]{left:auto;right:max(10px,env(safe-area-inset-right));transform:none}}
+@media(max-width:600px) and (max-height:480px){#demoControls[data-battle=true] #demoRestart{min-width:44px;font-size:0}#demoControls[data-battle=true] #demoRestart::before{content:'↺';font-size:16px}}
 #demoRestartConfirm{width:min(440px,94vw);border:3px solid #879b9b;border-radius:2px;background:#25363a;color:#f2f4eb;padding:20px;line-height:1.5}#demoRestartConfirm h2{font:700 20px system-ui;margin:0 0 14px}#demoRestartConfirm p{font:14px/1.5 system-ui;color:#e0e8e1}#demoRestartConfirm>div{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}#demoRestartConfirm button{min-height:44px;border-radius:2px}#demoRestartConfirmButton{border-color:#d9b39f;background:#684439}#demoRestartError{color:#ffd4b8!important}

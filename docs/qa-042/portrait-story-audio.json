@@ -1,0 +1,91 @@
+{
+  "schema": 2,
+  "fixture": "409b612fca48578f",
+  "build": "b74f60f4bdecd5aa",
+  "viewport": [
+    390,
+    844
+  ],
+  "stage": "new-chapter-WebAudio-music-cries-and-speed",
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "real-renderer-Route3-Wellspring-Nacrene",
+      "result": "PASS",
+      "durationMs": 128150,
+      "details": {
+        "twins": true,
+        "rival": true,
+        "cavePartner": true,
+        "rewardHealBalls": 3,
+        "darkGrassLesson": true,
+        "nacrene": true,
+        "chestoBerries": 3,
+        "nOutsideMuseum": true,
+        "nurse": {
+          "healings": 2,
+          "input": "actual A/touch",
+          "hp": true,
+          "pp": true,
+          "status": true
+        },
+        "doubles": 2,
+        "speed": 4
+      }
+    },
+    {
+      "name": "new-chapter-WebAudio-music-cries-and-speed",
+      "result": "PASS",
+      "durationMs": 9191,
+      "details": {
+        "tracks": [
+          1027,
+          1078,
+          1087
+        ],
+        "cries": [
+          {
+            "id": 519,
+            "rate": 1
+          },
+          {
+            "id": 522,
+            "rate": 1
+          },
+          {
+            "id": 524,
+            "rate": 2
+          },
+          {
+            "id": 527,
+            "rate": 2
+          },
+          {
+            "id": 532,
+            "rate": 4
+          },
+          {
+            "id": 535,
+            "rate": 4
+          }
+        ],
+        "speeds": [
+          1,
+          2,
+          4
+        ],
+        "realAudioToggle": true,
+        "disableAndResume": true,
+        "mutedDuringTest": true,
+        "audibleComparison": false
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

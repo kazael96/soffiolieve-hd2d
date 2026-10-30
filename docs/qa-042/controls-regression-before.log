@@ -1,0 +1,37 @@
+✔ restart erases only the adventure and blocks pagehide/interval autosaves before reload (8.9922ms)
+✔ failed storage deletion never reloads or reports a successful restart (1.4306ms)
+✔ direct speed cycle publishes x1/x2/x4 including queued changes during a move (2.7392ms)
+✖ demo controls follow battle and dialogs without repeated hidden mutations (3.0999ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 265.6795
+
+✖ failing tests:
+
+test at tests\demo-controls.test.cjs:6:1
+✖ demo controls follow battle and dialogs without repeated hidden mutations (3.0999ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'false'
+  
+      at TestContext.<anonymous> (C:\Users\AlessandroCapoccetti\Documents\Codex\2026-10-23\se\work\faithful-repo\tests\demo-controls.test.cjs:12:89)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'false',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

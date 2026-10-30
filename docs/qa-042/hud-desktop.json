@@ -1,0 +1,806 @@
+{
+  "schema": 2,
+  "fixture": "7d034197ee25428a",
+  "build": "0b9691f94130cea8",
+  "viewport": [
+    1280,
+    720
+  ],
+  "stage": "Prova GPU conclusa",
+  "running": false,
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "startup",
+      "result": "PASS",
+      "durationMs": 11
+    },
+    {
+      "name": "field-scenes-and-zoom",
+      "result": "PASS",
+      "durationMs": 5831,
+      "details": {
+        "frames": 90,
+        "scenes": 30
+      }
+    },
+    {
+      "name": "new-chapter-scenes",
+      "result": "PASS",
+      "durationMs": 3804,
+      "details": {
+        "frames": 5
+      }
+    },
+    {
+      "name": "NPC-GPU-textures",
+      "result": "PASS",
+      "durationMs": 18527,
+      "details": {
+        "textures": 762,
+        "transparentOriginalSlots": 32,
+        "comparison": "GPU readback versus independently decoded source PNG"
+      }
+    },
+    {
+      "name": "animated-sprite-cycles",
+      "result": "PASS",
+      "durationMs": 19104,
+      "details": {
+        "frames": 2280,
+        "atlases": 38
+      }
+    },
+    {
+      "name": "native-menu-navigation",
+      "result": "PASS",
+      "durationMs": 1756,
+      "details": {
+        "directions": 600,
+        "summary": "Patrat",
+        "selectionRestored": true,
+        "assetFailureRecovered": true
+      }
+    },
+    {
+      "name": "restart-cancel",
+      "result": "PASS",
+      "durationMs": 30,
+      "details": {
+        "cancelPreservesState": true
+      }
+    },
+    {
+      "name": "battle-backgrounds-and-custom-animations",
+      "result": "PASS",
+      "durationMs": 446400,
+      "details": {
+        "customFrames": 3620,
+        "pairs": 181,
+        "sides": 2,
+        "outcomes": 2,
+        "backgrounds": 14,
+        "ambient": [
+          {
+            "species": "Patrat",
+            "poses": 1540,
+            "uniquePoses": 23,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 1540,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Lillipup",
+            "poses": 3669316,
+            "uniquePoses": 370,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 3669316,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Purrloin",
+            "poses": 21600,
+            "uniquePoses": 13,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 21600,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Munna",
+            "poses": 6006,
+            "uniquePoses": 269,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 6006,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Pidove",
+            "poses": 1800708,
+            "uniquePoses": 16,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 1800708,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Blitzle",
+            "poses": 122100,
+            "uniquePoses": 235,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 122100,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Roggenrola",
+            "poses": 432,
+            "uniquePoses": 15,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 432,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          },
+          {
+            "species": "Woobat",
+            "poses": 480,
+            "uniquePoses": 44,
+            "clipped": 0,
+            "empty": 0,
+            "belowGround": 0,
+            "prefix": 0,
+            "period": 480,
+            "coverage": "Every integer tick, identical render states deduplicated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "uncaught-errors",
+      "result": "PASS",
+      "durationMs": 6,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "new-chapter-ground-clearance-and-ambient-visibility",
+      "result": "PASS",
+      "durationMs": 2809,
+      "details": {
+        "scenes": [
+          {
+            "id": "route3",
+            "terrain": "path",
+            "ambient": [
+              {
+                "species": "Pidove",
+                "frame": 33090,
+                "world": [
+                  -8,
+                  0.02,
+                  -18
+                ],
+                "height": 0.55,
+                "bounds": [
+                  99,
+                  131,
+                  159,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33090,
+                  "visible": 100,
+                  "full": 100,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Blitzle",
+                "frame": 33090,
+                "world": [
+                  -5.7,
+                  0.02,
+                  -18
+                ],
+                "height": 0.65,
+                "bounds": [
+                  106,
+                  129,
+                  150,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33090,
+                  "visible": 93,
+                  "full": 93,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Patrat",
+                "frame": 33090,
+                "world": [
+                  -3.4,
+                  0.02,
+                  -18
+                ],
+                "height": 0.5,
+                "bounds": [
+                  93,
+                  128,
+                  166,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33090,
+                  "visible": 107,
+                  "full": 107,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              1280,
+              475
+            ],
+            "double": true,
+            "partner": false,
+            "hud": {
+              "bar": {
+                "id": "demoControls",
+                "left": 579.5703125,
+                "right": 734.4296875,
+                "top": 10,
+                "bottom": 54
+              },
+              "cards": [
+                {
+                  "id": "enemyCard",
+                  "left": 24,
+                  "right": 374,
+                  "top": 45,
+                  "bottom": 141.25
+                },
+                {
+                  "id": "playerCard",
+                  "left": 906,
+                  "right": 1256,
+                  "top": 339.625,
+                  "bottom": 459.203125
+                },
+                {
+                  "id": "double-card double-own",
+                  "left": 12,
+                  "right": 252,
+                  "top": 383.203125,
+                  "bottom": 465.203125
+                },
+                {
+                  "id": "double-card double-foe",
+                  "left": 1028,
+                  "right": 1268,
+                  "top": 42,
+                  "bottom": 108
+                }
+              ],
+              "restartVisible": true,
+              "noOverlaps": true
+            }
+          },
+          {
+            "id": "route3",
+            "terrain": "grass",
+            "ambient": [
+              {
+                "species": "Pidove",
+                "frame": 33237,
+                "world": [
+                  -8,
+                  0.02,
+                  -18
+                ],
+                "height": 0.55,
+                "bounds": [
+                  100,
+                  130,
+                  157,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33237,
+                  "visible": 98,
+                  "full": 98,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Blitzle",
+                "frame": 33237,
+                "world": [
+                  -5.7,
+                  0.02,
+                  -18
+                ],
+                "height": 0.65,
+                "bounds": [
+                  107,
+                  127,
+                  150,
+                  191
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33237,
+                  "visible": 99,
+                  "full": 99,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Patrat",
+                "frame": 33237,
+                "world": [
+                  -3.4,
+                  0.02,
+                  -18
+                ],
+                "height": 0.5,
+                "bounds": [
+                  93,
+                  130,
+                  163,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33237,
+                  "visible": 101,
+                  "full": 101,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              1280,
+              475
+            ],
+            "double": true,
+            "partner": false,
+            "hud": {
+              "bar": {
+                "id": "demoControls",
+                "left": 579.5703125,
+                "right": 734.4296875,
+                "top": 10,
+                "bottom": 54
+              },
+              "cards": [
+                {
+                  "id": "enemyCard",
+                  "left": 24,
+                  "right": 374,
+                  "top": 45,
+                  "bottom": 141.25
+                },
+                {
+                  "id": "playerCard",
+                  "left": 906,
+                  "right": 1256,
+                  "top": 339.625,
+                  "bottom": 459.203125
+                },
+                {
+                  "id": "double-card double-own",
+                  "left": 12,
+                  "right": 252,
+                  "top": 383.203125,
+                  "bottom": 465.203125
+                },
+                {
+                  "id": "double-card double-foe",
+                  "left": 1028,
+                  "right": 1268,
+                  "top": 42,
+                  "bottom": 108
+                }
+              ],
+              "restartVisible": true,
+              "noOverlaps": true
+            }
+          },
+          {
+            "id": "route3Dark",
+            "terrain": "grass",
+            "ambient": [
+              {
+                "species": "Pidove",
+                "frame": 33405,
+                "world": [
+                  -8,
+                  0.02,
+                  -18
+                ],
+                "height": 0.55,
+                "bounds": [
+                  99,
+                  131,
+                  159,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33405,
+                  "visible": 103,
+                  "full": 103,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Blitzle",
+                "frame": 33405,
+                "world": [
+                  -5.7,
+                  0.02,
+                  -18
+                ],
+                "height": 0.65,
+                "bounds": [
+                  106,
+                  128,
+                  150,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33405,
+                  "visible": 96,
+                  "full": 96,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Patrat",
+                "frame": 33405,
+                "world": [
+                  -3.4,
+                  0.02,
+                  -18
+                ],
+                "height": 0.5,
+                "bounds": [
+                  93,
+                  128,
+                  176,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33405,
+                  "visible": 107,
+                  "full": 107,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              1280,
+              475
+            ],
+            "double": true,
+            "partner": false,
+            "hud": {
+              "bar": {
+                "id": "demoControls",
+                "left": 579.5703125,
+                "right": 734.4296875,
+                "top": 10,
+                "bottom": 54
+              },
+              "cards": [
+                {
+                  "id": "enemyCard",
+                  "left": 24,
+                  "right": 374,
+                  "top": 45,
+                  "bottom": 141.25
+                },
+                {
+                  "id": "playerCard",
+                  "left": 906,
+                  "right": 1256,
+                  "top": 339.625,
+                  "bottom": 459.203125
+                },
+                {
+                  "id": "double-card double-own",
+                  "left": 12,
+                  "right": 252,
+                  "top": 383.203125,
+                  "bottom": 465.203125
+                },
+                {
+                  "id": "double-card double-foe",
+                  "left": 1028,
+                  "right": 1268,
+                  "top": 42,
+                  "bottom": 108
+                }
+              ],
+              "restartVisible": true,
+              "noOverlaps": true
+            }
+          },
+          {
+            "id": "wellspring",
+            "terrain": "cave",
+            "ambient": [
+              {
+                "species": "Roggenrola",
+                "frame": 33537,
+                "world": [
+                  -2,
+                  0.02,
+                  -13.2
+                ],
+                "height": 0.45,
+                "bounds": [
+                  110,
+                  128,
+                  146,
+                  192
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33537,
+                  "visible": 64,
+                  "full": 64,
+                  "ratio": 1
+                }
+              },
+              {
+                "species": "Woobat",
+                "frame": 33537,
+                "world": [
+                  -5,
+                  0.02,
+                  -13.2
+                ],
+                "height": 0.6,
+                "bounds": [
+                  72,
+                  121,
+                  184,
+                  185
+                ],
+                "clipped": false,
+                "visibility": {
+                  "frame": 33537,
+                  "visible": 243,
+                  "full": 243,
+                  "ratio": 1
+                }
+              }
+            ],
+            "dimensions": [
+              1280,
+              475
+            ],
+            "double": true,
+            "partner": true,
+            "hud": {
+              "bar": {
+                "id": "demoControls",
+                "left": 579.5703125,
+                "right": 734.4296875,
+                "top": 10,
+                "bottom": 54
+              },
+              "cards": [
+                {
+                  "id": "enemyCard",
+                  "left": 24,
+                  "right": 374,
+                  "top": 45,
+                  "bottom": 141.25
+                },
+                {
+                  "id": "playerCard",
+                  "left": 906,
+                  "right": 1256,
+                  "top": 339.625,
+                  "bottom": 459.203125
+                },
+                {
+                  "id": "double-card double-own",
+                  "left": 12,
+                  "right": 252,
+                  "top": 383.203125,
+                  "bottom": 465.203125
+                },
+                {
+                  "id": "double-card double-foe",
+                  "left": 1028,
+                  "right": 1268,
+                  "top": 42,
+                  "bottom": 108
+                }
+              ],
+              "restartVisible": true,
+              "noOverlaps": true
+            }
+          },
+          {
+            "id": "nacrene",
+            "terrain": "town",
+            "ambient": [],
+            "dimensions": [
+              1280,
+              475
+            ],
+            "double": false,
+            "partner": false,
+            "hud": {
+              "bar": {
+                "id": "demoControls",
+                "left": 579.5703125,
+                "right": 734.4296875,
+                "top": 10,
+                "bottom": 54
+              },
+              "cards": [
+                {
+                  "id": "enemyCard",
+                  "left": 24,
+                  "right": 374,
+                  "top": 45,
+                  "bottom": 141.25
+                },
+                {
+                  "id": "playerCard",
+                  "left": 906,
+                  "right": 1256,
+                  "top": 339.625,
+                  "bottom": 459.203125
+                }
+              ],
+              "restartVisible": true,
+              "noOverlaps": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "real-double-commands-targets-and-partner-animation",
+      "result": "PASS",
+      "durationMs": 10215,
+      "details": {
+        "formats": [
+          "doubles",
+          "multi"
+        ],
+        "independentCommands": true,
+        "foeAndAllyTargets": true,
+        "enemyAnimations": true,
+        "komorOwnBody": true,
+        "animations": [
+          {
+            "side": "p2",
+            "species": 509,
+            "actor": 509
+          },
+          {
+            "side": "p1",
+            "species": 495,
+            "actor": 495
+          },
+          {
+            "side": "p1",
+            "species": 501,
+            "actor": 501
+          },
+          {
+            "side": "p2",
+            "species": 504,
+            "actor": 504
+          },
+          {
+            "side": "p2",
+            "species": 509,
+            "actor": 509
+          },
+          {
+            "side": "p1",
+            "species": 495,
+            "actor": 495
+          },
+          {
+            "side": "p1",
+            "species": 498,
+            "actor": 498
+          },
+          {
+            "side": "p2",
+            "species": 504,
+            "actor": 504
+          }
+        ]
+      }
+    },
+    {
+      "name": "Interpoke-original-portraits-layout-and-cleanup",
+      "result": "PASS",
+      "durationMs": 15799,
+      "details": {
+        "calls": [
+          {
+            "id": 1,
+            "participants": 4,
+            "expressionFrames": 36,
+            "dialoguePages": 13,
+            "minimumDialogueGap": 128.40625,
+            "cleanClose": true
+          },
+          {
+            "id": 2,
+            "participants": 2,
+            "expressionFrames": 18,
+            "dialoguePages": 13,
+            "minimumDialogueGap": 324.40625,
+            "cleanClose": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "battle-bag-icons-navigation-selection-and-cancel",
+      "result": "PASS",
+      "durationMs": 10294,
+      "details": {
+        "categories": 4,
+        "directions": 400,
+        "originalIcons": true,
+        "cancelPreservesQuantity": true,
+        "selectionRestored": true
+      }
+    },
+    {
+      "name": "repeated-context-recovery",
+      "result": "PASS",
+      "durationMs": 13331,
+      "details": {
+        "restores": 2,
+        "preservedTextures": 762,
+        "renderedAfterRestore": 2
+      }
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No audible audio comparison",
+    "No physical Android GPU certification",
+    "Pixel invariants and snapshots; no cartridge pixel-perfect reference"
+  ]
+}

@@ -53,3 +53,5 @@
 #battle .double-card:nth-last-child(2){top:auto;right:auto;left:12px;bottom:calc(var(--battle-controls) + 10px)}
 #battle .double-card[hidden]{display:none}
 @media(max-height:480px){#battle .double-card{width:150px;top:35px}#battle .double-card:nth-last-child(2){left:auto;right:208px;bottom:calc(var(--battle-controls) + 8px)}}
+/* Keep the full speed/restart controls clear of both opponents on phones. */
+@media(max-width:600px) and (min-height:481px){#battle .enemy,#battle .double-foe{top:calc(max(10px,env(safe-area-inset-top)) + 54px)}#battle .double-card{width:min(46vw,240px)}}

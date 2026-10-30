@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "bottom": 54,
+    "height": 44,
+    "left": 786,
+    "right": 834,
+    "top": 10,
+    "width": 48
+  },
+  "build": "b74f60f4bdecd5aa",
+  "cards": [
+    {
+      "bottom": 85.5,
+      "height": 49.5,
+      "id": "enemyCard",
+      "left": 16,
+      "right": 196,
+      "top": 36,
+      "width": 180
+    },
+    {
+      "bottom": 226,
+      "height": 61.5,
+      "id": "playerCard",
+      "left": 648,
+      "right": 828,
+      "top": 164.5,
+      "width": 180
+    },
+    {
+      "bottom": 226,
+      "height": 51.25,
+      "id": "double-card double-own",
+      "left": 486,
+      "right": 636,
+      "top": 174.75,
+      "width": 150
+    },
+    {
+      "bottom": 76.25,
+      "height": 41.25,
+      "id": "double-card double-foe",
+      "left": 682,
+      "right": 832,
+      "top": 35,
+      "width": 150
+    }
+  ],
+  "overlaps": [
+    "double-card double-foe"
+  ],
+  "viewport": [
+    844,
+    390
+  ]
+}

@@ -37,4 +37,4 @@ Fondali espliciti: Percorso 3 normale (sentiero/erba), erba scura, Grotta Minera
 
 Nuovi brani originali renderizzati dal driver DS: 1027, 1078, 1087; gli altri richiesti erano già nel catalogo. Lotte di Komor, Plasma e N selezionano i rispettivi temi. Icone e Pokédex comprendono le sei nuove specie viste o catturabili; le palette delle icone sono controllate visivamente, non dichiarate estratte da un selettore generale portato.
 
-Coreografie e limiti della verifica: [SPECIES-MOVES-042.md](SPECIES-MOVES-042.md). [QA-042.md](QA-042.md) registra 227 test Node, 4 Python e tutte le 15 fasi CLI superate sulla build finale; i controlli browser finali restano incompleti e bloccano la pubblicazione.
+Coreografie e limiti della verifica: [SPECIES-MOVES-042.md](SPECIES-MOVES-042.md). [QA-042.md](QA-042.md) riporta le prove della build finale: regressioni CLI, tre formati browser, replay narrativo, servizi, audio e limiti della verifica.

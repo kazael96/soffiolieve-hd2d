@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "fixture": "bc853da68445a4ad",
+  "fixture": "409b612fca48578f",
   "build": "b74f60f4bdecd5aa",
   "viewport": [
     390,
@@ -11,9 +11,80 @@
   "result": "PASS",
   "cases": [
     {
+      "name": "real-renderer-Route3-Wellspring-Nacrene",
+      "result": "PASS",
+      "durationMs": 128150,
+      "details": {
+        "twins": true,
+        "rival": true,
+        "cavePartner": true,
+        "rewardHealBalls": 3,
+        "darkGrassLesson": true,
+        "nacrene": true,
+        "chestoBerries": 3,
+        "nOutsideMuseum": true,
+        "nurse": {
+          "healings": 2,
+          "input": "actual A/touch",
+          "hp": true,
+          "pp": true,
+          "status": true
+        },
+        "doubles": 2,
+        "speed": 4
+      }
+    },
+    {
+      "name": "new-chapter-WebAudio-music-cries-and-speed",
+      "result": "PASS",
+      "durationMs": 9191,
+      "details": {
+        "tracks": [
+          1027,
+          1078,
+          1087
+        ],
+        "cries": [
+          {
+            "id": 519,
+            "rate": 1
+          },
+          {
+            "id": 522,
+            "rate": 1
+          },
+          {
+            "id": 524,
+            "rate": 2
+          },
+          {
+            "id": 527,
+            "rate": 2
+          },
+          {
+            "id": 532,
+            "rate": 4
+          },
+          {
+            "id": 535,
+            "rate": 4
+          }
+        ],
+        "speeds": [
+          1,
+          2,
+          4
+        ],
+        "realAudioToggle": true,
+        "disableAndResume": true,
+        "mutedDuringTest": true,
+        "audibleComparison": false
+      }
+    },
+    {
       "name": "new-chapter-ground-clearance-and-ambient-visibility",
       "result": "PASS",
-      "durationMs": 3300,
+      "durationMs": 650,
       "details": {
         "scenes": [
           {
@@ -22,7 +93,7 @@
             "ambient": [
               {
                 "species": "Pidove",
-                "frame": 2172,
+                "frame": 49632,
                 "world": [
                   -8,
                   0.02,
@@ -30,22 +101,22 @@
                 ],
                 "height": 0.55,
                 "bounds": [
-                  100,
-                  130,
-                  157,
+                  99,
+                  131,
+                  159,
                   192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2172,
-                  "visible": 37,
-                  "full": 37,
+                  "frame": 49632,
+                  "visible": 38,
+                  "full": 38,
                   "ratio": 1
                 }
               },
               {
                 "species": "Blitzle",
-                "frame": 2172,
+                "frame": 49632,
                 "world": [
                   -5.7,
                   0.02,
@@ -54,21 +125,21 @@
                 "height": 0.65,
                 "bounds": [
                   106,
-                  131,
+                  130,
                   150,
                   192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2172,
-                  "visible": 35,
-                  "full": 35,
+                  "frame": 49632,
+                  "visible": 36,
+                  "full": 36,
                   "ratio": 1
                 }
               },
               {
                 "species": "Patrat",
-                "frame": 2172,
+                "frame": 49632,
                 "world": [
                   -3.4,
                   0.02,
@@ -83,9 +154,9 @@
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2172,
-                  "visible": 37,
-                  "full": 37,
+                  "frame": 49632,
+                  "visible": 36,
+                  "full": 36,
                   "ratio": 1
                 }
               }
@@ -103,7 +174,7 @@
             "ambient": [
               {
                 "species": "Pidove",
-                "frame": 2214,
+                "frame": 49665,
                 "world": [
                   -8,
                   0.02,
@@ -111,14 +182,14 @@
                 ],
                 "height": 0.55,
                 "bounds": [
-                  99,
-                  131,
-                  159,
+                  100,
+                  128,
+                  156,
                   192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2214,
+                  "frame": 49665,
                   "visible": 37,
                   "full": 37,
                   "ratio": 1
@@ -126,7 +197,7 @@
               },
               {
                 "species": "Blitzle",
-                "frame": 2214,
+                "frame": 49665,
                 "world": [
                   -5.7,
                   0.02,
@@ -141,15 +212,15 @@
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2214,
-                  "visible": 34,
-                  "full": 34,
+                  "frame": 49665,
+                  "visible": 33,
+                  "full": 33,
                   "ratio": 1
                 }
               },
               {
                 "species": "Patrat",
-                "frame": 2214,
+                "frame": 49665,
                 "world": [
                   -3.4,
                   0.02,
@@ -164,7 +235,7 @@
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2214,
+                  "frame": 49665,
                   "visible": 38,
                   "full": 38,
                   "ratio": 1
@@ -184,7 +255,7 @@
             "ambient": [
               {
                 "species": "Pidove",
-                "frame": 2244,
+                "frame": 49689,
                 "world": [
                   -8,
                   0.02,
@@ -192,14 +263,14 @@
                 ],
                 "height": 0.55,
                 "bounds": [
-                  100,
-                  130,
-                  157,
+                  99,
+                  131,
+                  159,
                   192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2244,
+                  "frame": 49689,
                   "visible": 37,
                   "full": 37,
                   "ratio": 1
@@ -207,7 +278,7 @@
               },
               {
                 "species": "Blitzle",
-                "frame": 2244,
+                "frame": 49689,
                 "world": [
                   -5.7,
                   0.02,
@@ -216,21 +287,21 @@
                 "height": 0.65,
                 "bounds": [
                   106,
-                  128,
+                  130,
                   150,
                   192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2244,
-                  "visible": 33,
-                  "full": 33,
+                  "frame": 49689,
+                  "visible": 36,
+                  "full": 36,
                   "ratio": 1
                 }
               },
               {
                 "species": "Patrat",
-                "frame": 2244,
+                "frame": 49689,
                 "world": [
                   -3.4,
                   0.02,
@@ -238,16 +309,16 @@
                 ],
                 "height": 0.5,
                 "bounds": [
-                  91,
-                  120,
-                  166,
+                  93,
+                  131,
+                  163,
                   192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2244,
-                  "visible": 40,
-                  "full": 40,
+                  "frame": 49689,
+                  "visible": 36,
+                  "full": 36,
                   "ratio": 1
                 }
               }
@@ -265,7 +336,7 @@
             "ambient": [
               {
                 "species": "Roggenrola",
-                "frame": 2421,
+                "frame": 49713,
                 "world": [
                   -2,
                   0.02,
@@ -273,22 +344,22 @@
                 ],
                 "height": 0.45,
                 "bounds": [
-                  108,
-                  128,
+                  110,
+                  125,
                   146,
-                  190
+                  192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2421,
-                  "visible": 21,
-                  "full": 21,
+                  "frame": 49713,
+                  "visible": 25,
+                  "full": 25,
                   "ratio": 1
                 }
               },
               {
                 "species": "Woobat",
-                "frame": 2421,
+                "frame": 49713,
                 "world": [
                   -5,
                   0.02,
@@ -296,16 +367,16 @@
                 ],
                 "height": 0.6,
                 "bounds": [
-                  62,
-                  130,
-                  190,
-                  185
+                  81,
+                  128,
+                  196,
+                  192
                 ],
                 "clipped": false,
                 "visibility": {
-                  "frame": 2421,
-                  "visible": 84,
-                  "full": 84,
+                  "frame": 49713,
+                  "visible": 85,
+                  "full": 85,
                   "ratio": 1
                 }
               }
@@ -320,54 +391,7 @@
           {
             "id": "nacrene",
             "terrain": "town",
-            "ambient": [
-              {
-                "species": "Roggenrola",
-                "frame": 2421,
-                "world": [
-                  -2,
-                  0.02,
-                  -13.2
-                ],
-                "height": 0.45,
-                "bounds": [
-                  108,
-                  128,
-                  146,
-                  190
-                ],
-                "clipped": false,
-                "visibility": {
-                  "frame": 2421,
-                  "visible": 21,
-                  "full": 21,
-                  "ratio": 1
-                }
-              },
-              {
-                "species": "Woobat",
-                "frame": 2421,
-                "world": [
-                  -5,
-                  0.02,
-                  -13.2
-                ],
-                "height": 0.6,
-                "bounds": [
-                  62,
-                  130,
-                  190,
-                  185
-                ],
-                "clipped": false,
-                "visibility": {
-                  "frame": 2421,
-                  "visible": 84,
-                  "full": 84,
-                  "ratio": 1
-                }
-              }
-            ],
+            "ambient": [],
             "dimensions": [
               390,
               490
