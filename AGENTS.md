@@ -4,6 +4,10 @@
 
 Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md), consolidati il 29 ottobre 2026: continuità degli eventi e posizioni successive degli NPC, fedeltà HD-2D, sfondi e Pokémon ambientali, animazioni e reazioni sui due lati, audio, comandi/servizi, salvataggi e recupero dagli errori, regressioni e consegna. Aggiornare gli inventari e compilare la checklist della PR per gli aspetti interessati. Queste istruzioni persistono per tutte le modifiche future della demo e della versione completa.
 
+## Capitolo corrente · 0.46
+
+La richiesta del 2 novembre prosegue la storia principale di Austropoli fino alla sfida con Belle al varco nord, dopo Team Plasma e terza palestra. Applicare docs/CASTELIA-046.md, docs/SPECIES-MOVES-046.md (553 coppie/44 specie predisposte) e docs/QA-046.md. Il limite resta 25. Conservare caricamento differito della città, collisioni miste griglia/binari, geometria originale del miele, continuità degli NPC, contesti espliciti delle lotte e animazioni/reazioni sui due lati. Il Percorso 4 e le attività facoltative escluse nell'inventario non sono completati. Le sezioni successive descrivono i capitoli precedenti.
+
 ## Continuità richiesta il 28 ottobre 2026
 
 Recupero automatico 0.45: applicare `docs/RECOVERY-045.md`. Riprovare soltanto le risorse fallite, mantenendo la stessa promessa narrativa e la stessa sessione di lotta. Mai usare retry automatici per rieseguire un evento, applicare di nuovo un turno o ricaricare la pagina. Conservare tentativi limitati, pausa senza rete/in background, ripresa online/in primo piano, annullamento con B e controllo manuale finale. Un caricamento vecchio o annullato non deve riaprire schermate né presentare risorse incomplete.

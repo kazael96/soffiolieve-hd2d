@@ -3,6 +3,10 @@
 (()=>{
  const C=ChapterMoves,previousSelect=C.select,previousSample=C.sample,previousDraw=C.draw;
  const fitted={
+  512:[.12,1.03,.83,.21,.11,.07,12,.86,[.18,-.81],[.36,-.5],[-.19,-.87],.74],
+  514:[.17,.92,.9,.18,.14,.075,10,.79,[.2,-.78],[.3,-.45],[-.26,-.32],.69],
+  516:[.1,1.1,1.02,.24,.08,.06,14,.9,[.16,-.83],[.33,-.54],[-.21,-.28],.77],
+  557:[.07,.72,0,.36,.045,.12,18,.53,[.28,-.29],[.34,-.23],[-.1,-.72],.43],
   // head, arms, tail, feet, lean, crouch, step, reach, mouth, hand, leaf, recoil
   496:[-.14,.36,.94,.11,-.09,.045,8,.72,[.18,-.86],[.12,-.61],[-.24,-.34],.83],
   499:[.12,.92,.25,.2,.15,.095,12,.75,[.23,-.76],[.28,-.48],[-.22,-.26],.7],
@@ -32,7 +36,7 @@
   const [head,arms,tail,feet,lean,crouch,step,reach,mouth,hand,leaf,recoil]=v;
   C.rigs[id]={name:GEN5.species.find(p=>p.id===+id).en,head,arms,tail,feet,lean,crouch,step,reach,mouth,hand,leaf,recoil};
  }
- const recipes={
+ const recipes={110:'shellGuard',148:'electricWave',185:'ambush',397:'harden',446:'rockVolley',
   1:'counterPalm',2:'karate',3:'palmFlurry',10:'furySlash',15:'leafBlade',16:'gust',20:'squeeze',21:'tailSlam',22:'vineWhip',24:'doubleKick',28:'sandKick',29:'headRam',33:'bodyRam',35:'squeeze',36:'bodyRam',39:'tailPound',40:'needle',43:'meanLook',44:'crunch',45:'roar',48:'soundWave',52:'flameJet',55:'waterPulse',60:'psybeam',61:'bubbles',67:'lowKick',68:'counterPalm',69:'throw',71:'drain',72:'drain',73:'seed',74:'grow',75:'leafBlade',77:'powder',78:'powder',79:'powder',81:'silk',86:'electricWave',88:'rockVolley',93:'psywave',95:'hypnosis',98:'quick',99:'rally',103:'soundWave',106:'harden',109:'psybeam',111:'curl',116:'focus',117:'bide',122:'tongue',123:'smoke',133:'focus',145:'bubbles',149:'psywave',154:'furySlash',162:'superFang',165:'struggle',168:'thief',178:'powder',182:'shellGuard',189:'mud',197:'watch',205:'roll',206:'leafBlade',207:'roar',209:'flameRush',210:'furySlash',213:'charm',228:'ambush',233:'throw',235:'restore',236:'restore',242:'crunch',249:'counterPalm',252:'counterPalm',253:'chorus',259:'roar',268:'charge',269:'roar',270:'encourage',274:'encourage',279:'counterPalm',281:'yawn',286:'seal',287:'restore',290:'bodyRam',292:'palmFlurry',314:'airCut',316:'watch',320:'chant',328:'sandKick',334:'harden',341:'mud',342:'tailSlam',345:'leafBlade',346:'shellGuard',350:'rockVolley',351:'electricWave',352:'waterPulse',355:'roost',358:'counterPalm',372:'ambush',373:'seal',381:'chant',392:'aquaRing',402:'seed',408:'psybeam',428:'headRam',447:'vineWhip',450:'crunch',468:'swordDance',479:'rockVolley',480:'throw',481:'fireRing',485:'psywave',488:'flameRush',490:'lowKick',494:'encourage',495:'bow',496:'chorus',498:'counterPalm',503:'waterPulse',510:'fireRing',514:'retaliate',522:'soundWave',526:'rally',531:'heartDive',534:'shellSlash',536:'leafVortex'
  };
  const colors={Erba:'#abdb75',Fuoco:'#ffad6a',Acqua:'#8bdded',Elettro:'#ffec86',Veleno:'#b98bd5',Psico:'#f5b5e6',Coleottero:'#c3db77',Roccia:'#c5b48f',Terra:'#cbb182',Lotta:'#eeb887',Buio:'#b3a1d5',Volante:'#cde9ef'};
@@ -79,6 +83,8 @@
   if([540,543].includes(p.species))a.feet+=r.feet*beat*w;
   if(p.species===541)a.crouch+=.035*w;
   if(p.species===542)a.arms+=.3*Math.sin(t*Math.PI*4)*w;
+  if(p.species===557){a.crouch+=.04*w;a.feet+=.11*Math.sin(t*Math.PI*12)*surge;a.arms+=.35*Math.sin(t*Math.PI*4)*w;a.head*=.5;}
+  if([512,514,516].includes(p.species)){a.tail+=r.tail*.16*Math.sin(t*Math.PI*4)*w;a.arms+=r.arms*.12*Math.sin(t*Math.PI*2)*w;}
   return a;
  };
  C.draw=function(c,W,H,x,f,layer){

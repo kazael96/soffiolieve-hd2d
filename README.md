@@ -1,16 +1,18 @@
-# Soffiolieve HD-2D — demo 0.45
+# Soffiolieve HD-2D — demo 0.46
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli**.
-Comprende le prime due palestre, gli eventi del Team Plasma e l’arrivo sul lungomare di Austropoli con Centro Pokémon. Il limite di allenamento è 25; i livelli e l’esperienza già superiori dei vecchi salvataggi vengono conservati. Stato della distribuzione e limiti nelle note di collaudo del capitolo.
+Comprende le prime tre palestre, gli eventi del Team Plasma e la storia principale di Austropoli fino alla sfida con Belle al varco nord. Il limite di allenamento è 25; i livelli e l’esperienza già superiori dei vecchi salvataggi vengono conservati. Stato della distribuzione e limiti nelle note di collaudo del capitolo.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [477 coppie su 40 specie](docs/SPECIES-MOVES-043.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [553 coppie su 44 specie](docs/SPECIES-MOVES-046.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.46 aggiunge le strade di Austropoli, il recupero del Pokémon di Belle dal Team Plasma, il covo, la palestra di miele di Artemisio e la sfida con Belle dopo la terza medaglia. Aggiunge evoluzioni delle tre scimmiette con pietre, MT70/76, coreografie e fondali legati ai nuovi luoghi, mantenendo il limite 25. Geometria della città e risorse della palestra si caricano quando servono. Inventario, confini e adattamenti in [CASTELIA-046.md](docs/CASTELIA-046.md); prove in [QA-046.md](docs/QA-046.md).
 
 La 0.45 riprende automaticamente i caricamenti interrotti di scene, modelli, menu, lotte ed evoluzioni. Attende il ritorno della connessione o della scheda in primo piano e mantiene in attesa la stessa operazione: non riavvia eventi o combattimenti. Dopo tentativi limitati resta disponibile «Riprova»; durante il recupero puoi anticiparlo con «Riprova ora». Le immagini già presenti nel pacchetto possono essere riutilizzate anche senza rete, senza dichiarare l’intera demo disponibile offline. Comportamento, prove e limiti in [RECOVERY-045.md](docs/RECOVERY-045.md).
 
