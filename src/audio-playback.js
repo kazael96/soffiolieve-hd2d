@@ -4,5 +4,6 @@
   if(!loop){let stalled=0;timer=root.setInterval(()=>{if(hidden()||context.state==='running'){stalled=0;return;}if(context.state==='closed'||++stalled>=2){try{source.stop();}catch{}finish();}},250);}return done;
  }
  async function fetchAudio(url){const controller=new AbortController(),timer=root.setTimeout(()=>controller.abort(),15000);try{return await root.fetch(url,{signal:controller.signal});}finally{root.clearTimeout(timer);}}
- const api={ended,fetch:fetchAudio};root.AudioPlayback=api;if(typeof module!=='undefined')module.exports=api;
+ async function bytes(url,{timeout=15000}={}){const controller=new root.AbortController(),timer=root.setTimeout(()=>controller.abort(),timeout);try{const response=await root.fetch(url,{signal:controller.signal});if(!response.ok)throw Error('Audio non disponibile: '+url);return await response.arrayBuffer();}finally{root.clearTimeout(timer);}}
+ const api={ended,fetch:fetchAudio,bytes};root.AudioPlayback=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

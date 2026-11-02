@@ -52,6 +52,7 @@ Riferimento corrente: [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md). Dopo il 
 
 ### G. Salvataggi, risorse e interruzioni
 
+- Preparare le risorse della scena e degli attori necessari prima della presentazione, inclusi tutti i loro fotogrammi. Caricamenti differiti non devono introdurre attori mancanti o superfici bianche. Una transizione fallita resta coperta e si riprende con un controllo raggiungibile sopra la dissolvenza. Annullare o sostituire una schermata invalida i suoi completamenti asincroni; una richiesta vecchia non può riaprirla. Misurare primo uso e riuso separatamente; preservare cache limitate e scadenze che comprendano il corpo delle risposte, non soltanto gli header. Riferimento: [PERFORMANCE-044.md](PERFORMANCE-044.md).
 - Conservare la compatibilità con i salvataggi precedenti; documentare le migrazioni e verificare la ripresa degli eventi e degli itinerari. Non cancellare silenziosamente la partita per aggirare un bug.
 - Errori temporanei di immagini, font, dati o audio non devono restare memorizzati come fallimenti permanenti. Consentire tentativi ripetuti, pulire le schermate incomplete e mostrare un messaggio recuperabile.
 - Verificare perdita e ripristino del contesto grafico, background/ripresa e frame rate basso. Convalidare i dati persistenti interessati; isolare record danneggiati quando possibile senza compromettere quelli validi.
