@@ -9,7 +9,7 @@ Il capitolo prosegue dal lungomare della 0.43 attraverso gli eventi principali d
 | Komor alla palestra | Arrivo ad Austropoli, due medaglie | Komor e Artemisio davanti alla palestra; Artemisio accompagna la ricerca al molo, Komor prosegue verso il futuro incontro sul Percorso 4. |
 | Pokémon di Belle rubato | Primo incontro alla palestra | Belle e Iris al molo; Artemisio riparte verso la palestra e incontra il seguace. Belle e Iris restano coinvolte nel recupero. |
 | Inseguimento Plasma | Scena del molo conclusa | Artemisio e seguaci davanti all'edificio occidentale. I personaggi attraversano la porta laterale verso il covo; non vengono rimossi sulla facciata visibile. |
-| Covo e restituzione | Seguace sconfitto | Ghecis, seguaci, Artemisio, Belle e Iris nei posti nativi. Uscite coperte da porta/occlusione; Artemisio torna alla palestra, Belle e Iris verso il loro allenamento e il prossimo incontro. Fumopalla raccoglibile una sola volta. |
+| Covo e restituzione | Seguace sconfitto | Ghecis, seguaci, Artemisio, Belle e Iris nei posti nativi. Uscite coperte da porta/occlusione; Artemisio torna alla palestra, Belle e Iris verso il loro allenamento e il prossimo incontro. Palla Fumo raccoglibile una sola volta. |
 | Palestra | Recupero concluso | Otto interruttori, metà delle barriere metalliche, pareti di miele attraversabili, quattro allenatori e Artemisio. Le posizioni degli interruttori persistono. Sconfitta: Centro Pokémon, nessuna medaglia o MT anticipata. |
 | Medaglia Scarabeo | Vittoria su Artemisio | Medaglia e MT76 Entomoblocco una volta sola. Squadra e due Iperpozioni del Capopalestra provengono dai dati IRBI. |
 | Belle | Terza medaglia | Chiamata Interpoké con espressioni originali; Belle attende al varco nord, coerentemente con l'appuntamento. La sfida conclude questo capitolo. |
@@ -20,7 +20,7 @@ Zone supportate: 28 lungomare, 29 palestra, 30 piazza, 31 strada della palestra,
 
 Cinque contesti espliciti: palestra, strada della palestra, varco, piazza e vicolo. Materiali e geometria provengono dagli ambienti della città, ricomposti per la camera di lotta HD-2D. Il contesto viene fissato all'avvio. Non sono aggiunti Pokémon selvatici ambientali negli interni o nelle strade di Austropoli: non vi sono catture selvatiche disponibili in queste zone.
 
-Si aggiungono Simisage, Simisear e Simipour tramite Pietrafoglia, Pietrafocaia e Pietraidrica; Dwebble compare fra gli avversari. Matrice complessiva: [553 coppie su 44 specie predisposte](SPECIES-MOVES-046.md), distinta dall'ottenibilità. MT70 Flash e MT76 Entomoblocco rispettano le compatibilità native. Gli strumenti comprendono moneta, Fumopalla, strumenti tenuti, bacche e Conostropoli. Monetamuleto richiede la partecipazione del possessore; Fumopalla garantisce la fuga quando consentita; una bacca consumata non riappare al ritorno sul campo.
+Si aggiungono Simisage, Simisear e Simipour tramite Pietrafoglia, Pietrafocaia e Pietraidrica; Dwebble compare fra gli avversari. Matrice complessiva: [553 coppie su 44 specie predisposte](SPECIES-MOVES-046.md), distinta dall'ottenibilità. MT70 Flash e MT76 Entomoblocco rispettano le compatibilità native. Gli strumenti comprendono moneta, Palla Fumo, strumenti tenuti, bacche e Conostropoli. Monetamuleto richiede la partecipazione del possessore; Palla Fumo garantisce la fuga quando consentita; una bacca consumata non riappare al ritorno sul campo.
 
 ## Risorse, salvataggi e adattamenti
 
