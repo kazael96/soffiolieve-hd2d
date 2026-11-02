@@ -6,18 +6,21 @@
   if(window.STRIATON_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],STRIATON_EVENTS[k]);Object.assign(OPENING_TRAINERS,STRIATON_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,STRIATON_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,STRIATON_DATA.itemDescriptions);}
   if(window.ROUTE3_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ROUTE3_EVENTS[k]);Object.assign(OPENING_TRAINERS,ROUTE3_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,ROUTE3_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ROUTE3_DATA.itemDescriptions);}
   if(window.PINWHEEL_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],PINWHEEL_EVENTS[k]);Object.assign(OPENING_TRAINERS,PINWHEEL_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,PINWHEEL_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,PINWHEEL_DATA.itemDescriptions);}
+  if(window.CASTELIA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],CASTELIA_EVENTS[k]);Object.assign(OPENING_TRAINERS,CASTELIA_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,CASTELIA_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,CASTELIA_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
   for(const z of [7,9,10,15,152,322,323,324,27,20]){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   zoneScenes[321]=zoneScenes[16]=zoneScenes[154]='town';
   for(const z of [17,18,19,155,250,251,252,249,28,41]){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
+  if(window.CasteliaChapter)for(const z of CasteliaChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
   if(window.STRIATON_DATA&&!native.chapter040){native.chapter040=true;for(const flag of [530,532,533,534,539,540,541,757,820,707])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.ROUTE3_DATA&&!native.chapter042){native.chapter042=true;for(const flag of [517,572,625,562,614,751,1328])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.PINWHEEL_DATA&&!native.chapter043){native.chapter043=true;for(const flag of [547,623,648,548,552,551,636,841,641])if(!native.flags.includes(flag))native.flags.push(flag);}
+  if(window.CASTELIA_DATA&&!native.chapter046){native.chapter046=true;for(const flag of [702,703,796,797,798,799,800,843])if(!native.flags.includes(flag))native.flags.push(flag);}
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
-  const names={86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
+  const names={92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let phoneLayout=null;
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
@@ -35,6 +38,8 @@
   const data=()=>ORIGINAL_EVENTS.zones[native.zone];
   const origin=()=>[389,317,397,319,6,321,16,154].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
+  // City WB exits encode the corner and span, alongside rail-position unions.
+  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+(window.CASTELIA_EVENTS?.zones[zone]?(w.width-1)/2:0),z:w.z/16+(window.CASTELIA_EVENTS?.zones[zone]?(w.height-1)/2:0)});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
@@ -48,7 +53,7 @@
   function face(id,dir){const n=actor(id);if(!n)return;if(id===255)facing=frames[dir];else pose(n,dir);}
   function putActor(record){
     const n={...world(record.x,record.z),...(record.railOriginal?{railOriginal:record.railOriginal,railHeight:record.y/65536}:{}),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:(record.y||0)/65536};
-    n.wander=NpcWalk.create(record,{x:n.x,y:n.y});if([185,8198,8199].includes(record.model)){n.noShadow=true;n.gimmick=true;}pose(n,record.direction);npcs.push(n);renderer.requireActors?.(fieldActors());return n;
+    n.wander=NpcWalk.create(record,{x:n.x,y:n.y});if(([185,8198,8199].includes(record.model)||native.zone===29&&record.model===0)){n.noShadow=true;n.gimmick=true;}pose(n,record.direction);npcs.push(n);renderer.requireActors?.(fieldActors());return n;
   }
   function syncActors(){
     const previousActors=[...npcs];npcs.splice(0);for(const n of data().actors){
@@ -82,7 +87,7 @@
       for(const id of adjacent){const record=ORIGINAL_EVENTS.zones[397].actors.find(n=>n.id===id);const n=putActor({...record,script:2000});Object.assign(n,{fieldZone:397,projection:true});}
     }
     if([319,6].includes(native.zone)&&value(16509)>=2&&value(16532)<2){const n=putActor({id:251,model:134,script:2000,x:804,z:580,direction:3});Object.assign(n,{fieldZone:6,projection:true});}
-    if(actorsInitialized&&actorZone===native.zone&&[16,17,19,154,155].includes(native.zone))for(const old of previousActors)if(!old.hidden&&!old.gimmick&&!npcs.some(n=>n.uid===old.uid))departures.depart(old,native.zone,{covered:fieldCovered});
+    if(actorsInitialized&&actorZone===native.zone&&[16,17,19,154,155,28,29,30,31,32,33,34,35,38,40,51,56].includes(native.zone))for(const old of previousActors)if(!old.hidden&&!old.gimmick&&!npcs.some(n=>n.uid===old.uid))departures.depart(old,native.zone,{covered:fieldCovered});
     if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6,321,16,154].includes(actorZone)&&[389,317,397,319,6,321,16,154].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
@@ -252,7 +257,7 @@
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
       if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone([8,20,41].includes(native.healZone)?native.healZone:398,7,13);}
       for(let chain=0;chain<5;chain++){if(![9,10].includes(native.zone))break;const next=data().onEnter?.find(e=>value(e.var)===e.value);if(!next||data().script===bank&&next.entry===entry)break;bank=data().script;entry=next.entry;await vm.run(bank,entry);}
-      derivePhase();captureActors();if(native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,41].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
+      derivePhase();captureActors();if(native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,29,30,31,32,33,34,35,38,40,41,51,56].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
       failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
@@ -280,6 +285,26 @@
       case 'BadgeRegisterParty':native.badgeTeams??={};native.badgeTeams[v[0]]=state.party.map(p=>p.name);break;
       case 'TrainerSetDefeated':native.trainerWins??=[];if(!native.trainerWins.includes(v[0]))native.trainerWins.push(v[0]);break;
       case 'GymCurtainInit':native.gymCurtains=v[0];break;
+      case 'NativeOpcode399':native.casteliaGymSwitches??=Array(8).fill(0);a.forEach((id,i)=>m.set(id,native.casteliaGymSwitches[i]?1:0));break;
+      case 'NativeOpcode6':break; // IRBI 021591A8 resolves a work address; it does not clear it.
+      case 'NativeOpcode396':CasteliaGym.activate(v[0]);break;
+      case 'NativeOpcode397':native.casteliaPoleFeedback=v[0];break;
+      case 'NativeOpcode398':{const child=new FieldEventVM(ORIGINAL_EVENTS,native,m.host);await child.run(58,2+v[0]);break;}
+      case 'NativeOpcode151':m.set(a[1],native.trainerWins?.includes(v[0])?1:0);break;
+      case 'NativeOpcode207':m.set(a[0],new Date().getDay());break;
+      case 'NativeOpcode208':m.set(a[0],new Date().getMonth()+1);m.set(a[1],new Date().getDate());break;
+      case 'NativeOpcode210':m.set(a[0],new Date().getMonth()%4);break;
+      case 'NativeOpcode301':native.casteliaObjectStates??={};native.casteliaObjectStates[v.slice(0,3).join(':')]=v[3];break;
+      case 'NativeOpcode308':native.casteliaPedestrians=true;break;
+      case 'NativeOpcode64':native.moneyWindow=true;break;
+      case 'NativeOpcode65':native.moneyWindow=false;break;
+      case 'NativeOpcode66':break; // Redraw of the DS money window; the browser reads current money.
+      case 'NativeOpcode250':state.money=Math.max(0,state.money-v[0]);journey.update();break;
+      case 'NativeOpcode251':m.set(a[0],state.money>=v[1]?1:0);break;
+      case 'NativeOpcode496':native.itemReceipts??=[];native.itemReceipts.push({kind:v[0],item:v[1]});break;
+      case 'NativeOpcode588':m.set(a[0],0);break; // No secondary field layer in the browser.
+      case 'NativeOpcode117':native.itemPresentation=v[0];break;
+      case 'NativeOpcode285':await showPage('Il collegamento wireless non è disponibile nella demo.');break;
       case 'GymCurtainSwitch':case 'GymCurtainFeedback':case 'GymCurtainReset':native.gymSwitch=v[0];break;
       case 'NativeOpcode386':native.libraryOpening=!!v[0];break;
       case 'NativeOpcode389':native.libraryOpening=true;break;
@@ -330,23 +355,23 @@
       case 'RTCallGlobal':{
         if([10394,10395,10396].includes(v[0])){native.healZone=[8,20,41].includes(native.zone)?native.zone:398;break;}
         if(v[0]===10110){await healAtCenter();break;}
-        if(![2800,2805,2806].includes(v[0]))throw Error('Global script outside opening '+v[0]);
+        if(![2800,2801,2805,2806,2807].includes(v[0]))throw Error('Global script outside opening '+v[0]);
         const child=new FieldEventVM(ORIGINAL_EVENTS,native,m.host);child.words=m.words;await child.run(862,v[0]-2800);break;
       }
       case 'NativeOpcode582':m.set(a[0],0);break; // No Geonet registration in this offline chapter.
       case 'ItemCheckSpace':m.set(a[2],journey.itemCount(v[0])+v[1]<=999?1:0);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],[442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,413,619].includes(v[0])?2:[150,155].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38].includes(v[0])?1:0);break;
+      case 'ItemGetPocket':m.set(a[1],[442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,591].includes(v[0])?1:0);break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id=({...window.PINWHEEL_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id=({...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -400,8 +425,8 @@
     return true;
   }
   async function phoneCall(id,m){
-    if(![1,2].includes(id))throw Error('Call outside opening '+id);
-    const call=id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
+    if(![1,2,3].includes(id))throw Error('Call outside opening '+id);
+    const call=id===3?CASTELIA_PHONE:id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
     const names=['Alcide','Komor','Belle','Aralia','Mamma'],panel=document.createElement('section');panel.id='phoneScene';panel.setAttribute('aria-label','Interpoké');
     const pictures=call.participants.filter(person=>person<5).map(person=>{
       const name=names[person],tile=document.createElement('figure'),image=document.createElement('img'),label=document.createElement('figcaption');
@@ -416,7 +441,7 @@
     try{
       for(const [op,face,param] of call.commands){
         if(op===0)break;
-        if(op===1){talker=face;for(const page of messagePages((id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts)[param],m.words))await showPage(page,pictures[face].name);}
+        if(op===1){talker=face;for(const page of messagePages((id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts)[param],m.words))await showPage(page,pictures[face].name);}
         else if(op===2)await delay(param);else if(op===3)soundTask=AudioEngine.playSound(param);else if(op===4)await soundTask;else throw Error('Unknown phone command '+op);
       }
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
@@ -442,7 +467,7 @@
         // IRBI pre-warp starts passage alongside opening; no additional door wait.
         move(255,[[8+warpDirections[w.a],1]]);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
       }
-      await fade(1,8);await changeZone(w.zone,Math.floor(dw.x/16),Math.floor(dw.z/16));face(255,inward);
+      await fade(1,8);const point=warpPoint(dw,w.zone);await changeZone(w.zone,Math.floor(point.x),Math.floor(point.z));face(255,inward);
       const [dx,dz]=origin(),doorX=dw.x/16-dx,doorZ=dw.z/16-dz;
       const door=fieldModels?.find(1,doorX,doorZ)?fieldModels.create(1,doorX,doorZ):null;
       if(door!==null){await fieldModels.play(door,0);await fieldModels.wait(door);}
@@ -462,33 +487,35 @@
       await settleAmbient();await fade(1,8);
       let p,out,landing;
       if(dw.rail){p=NativeRails.warp(w.zone,dw);out=p.out;landing=NativeRails.landing(w.zone,dw);native.railCurrent={zone:w.zone,line:p.line,height:p.height};}
-      else{p={x:dw.x/16,z:dw.z/16};const [x,z]=directions[warpDirections[dw.a]];out={x,z};delete native.railCurrent;}
+      else{p=warpPoint(dw,w.zone);const [x,z]=directions[warpDirections[dw.a]];out={x,z};delete native.railCurrent;}
       await changeZone(w.zone,p.x-.5,p.z-.5);
       if(landing){player.x=landing.x;player.y=landing.z;}else{player.x-=out.x;player.y-=out.z;}const dir=Math.abs(out.x)>Math.abs(out.z)?out.x>0?2:3:out.z>0?0:1;face(255,dir);
       if(dw.rail){const at=NativeRails.locate(w.zone,player.x,player.y,native.railCurrent);if(at)native.railCurrent={zone:w.zone,...at};}
       renderer.center=[player.x,player.y+1.5];renderer.elevation=renderer.scene.railZone?renderer.groundHeight(player.x,player.y):0;
-      await fade(0,8);sceneChanging=false;warpCooldown=.8;derivePhase();captureActors();journey.save(true);
+      await fade(0,8);sceneChanging=false;warpCooldown=.8;derivePhase();captureActors();
+      const next=data().onEnter?.find(e=>value(e.var)===e.value);
+      if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);else journey.save(true);
     }catch(error){sceneChanging=false;failed=error;$('world').dataset.eventError=error.message;console.error(error);await showPage('Il passaggio non è riuscito. Ricarica la partita dal salvataggio precedente.');}
   }
-  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(native.zone===28?'Hai raggiunto Austropoli! La visita della città e la palestra di Artemisio proseguiranno nel prossimo capitolo.':native.zone===16?'Le altre case di Zefiropoli non fanno parte di questo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
+  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(window.CasteliaChapter?.zones.includes(native.zone)?'Questa parte della città o del viaggio proseguirà nel prossimo capitolo. Puoi continuare gli eventi di Austropoli, la palestra e la sfida di Belle al varco per il Percorso 4.':native.zone===16?'Le altre case di Zefiropoli non fanno parte di questo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
   function tryWarp(dx,dz,x,z){
     if(eventRunning||sceneChanging||journey.processing||warpCooldown||failed)return false;
     const dir=Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0,[ux,uz]=directions[dir];
     if(window.NativeRails?.has(native.zone)){
-      for(const w of data().warps){const p=NativeRails.warp(native.zone,w),cx=p.x-origin()[0],cz=p.z-origin()[1],before=(player.x-cx)*p.out.x+(player.y-cz)*p.out.z,after=(x-cx)*p.out.x+(z-cz)*p.out.z,lateral=Math.abs((player.x-cx)*p.out.z-(player.y-cz)*p.out.x),span=w.b===2?w.width:w.height;
+      for(const w of data().warps){if(!w.rail)continue;const p=NativeRails.warp(native.zone,w),cx=p.x-origin()[0],cz=p.z-origin()[1],before=(player.x-cx)*p.out.x+(player.y-cz)*p.out.z,after=(x-cx)*p.out.x+(z-cz)*p.out.z,lateral=Math.abs((player.x-cx)*p.out.z-(player.y-cz)*p.out.x),span=w.b===2?w.width:w.height;
         if(dx*p.out.x+dz*p.out.z>.1&&before>=-3.5&&before<.5&&lateral<span*.5+.15){if(!ORIGINAL_EVENTS.zones[w.zone]){if(after< -1.25)continue;warpCooldown=.8;return chapterBoundary();}const threshold=-(NativeRails.landing(native.zone,w).distance-.08);if(after<threshold)continue;return enterRailWarp(w);}
       }
-      return false;
     }
     if(!window.PINWHEEL_ASSETS&&native.zone===16&&dir===2&&x< -175.5&&player.x>=-175.5){warpCooldown=.8;return chapterBoundary();}
     for(const w of data().warps){
+      if(w.rail)continue;
       if(native.zone===18&&w.zone===19&&value(16522)!==7)continue;
       if(warpDirections[w.a]!==dir)continue;
-      const cx=w.x/16-origin()[0],cz=w.z/16-origin()[1];
+      const point=warpPoint(w),cx=point.x-origin()[0],cz=point.z-origin()[1];
       const before=(player.x-cx)*ux+(player.y-cz)*uz,after=(x-cx)*ux+(z-cz)*uz,lateral=Math.abs((player.x-cx)*uz-(player.y-cz)*ux);
       // The door/stair tile may be solid. Its boundary is an event checked
       // before collision, exactly when the player attempts to enter it.
-      if(before>=-1.05&&before<.5&&after>=-.68&&lateral<w.width*.5){if(!ORIGINAL_EVENTS.zones[w.zone]){warpCooldown=.8;return chapterBoundary();}return enterWarp(w);}
+      if(before>=-1.05&&before<.5&&after>=-.68&&lateral*2<(dir>=2?w.height:w.width)){if(!ORIGINAL_EVENTS.zones[w.zone]){warpCooldown=.8;return chapterBoundary();}return enterWarp(w);}
     }
     return false;
   }
@@ -509,7 +536,7 @@
     finally{eventRunning=false;n.emote=null;derivePhase();captureActors();if(!failed)journey.save(true);}
   }
   async function routeItem(n){
-    if(eventRunning||!n)return;const item=window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
+    if(eventRunning||!n)return;const item=window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
     eventRunning=true;try{if(!journey.addItem(item.id,item.count)){await showPage('La Borsa è piena.');return;}if(native.zone===319){native.routeItems??=[];native.routeItems.push(n.uid);}native.collectedItems??={};native.collectedItems[native.zone]??=[];native.collectedItems[native.zone].push(n.uid);const record=data().actors.find(a=>a.id===n.uid);if(record?.flag&&!has(record.flag))native.flags.push(record.flag);n.hidden=true;await showPage('Hai trovato '+ORIGINAL_EVENTS.itemNames[item.id]+'!');captureActors();journey.save(true);}finally{eventRunning=false;}
   }
   function target(){
@@ -540,8 +567,8 @@
    }else{await showPage('Questa è la Pensione Pokémon. Vuoi affidarci un Pokémon?');if(await choice(['SÌ','NO'])!==0)return;const index=await choice([...state.party.map(p=>p.nickname||p.name),'Annulla']);if(index>=state.party.length)return;if(state.party.length<2||state.party.filter((p,i)=>i!==index&&p.hp>0).length===0){await showPage('Devi tenere con te almeno un Pokémon in grado di lottare.');return;}const p=state.party.splice(index,1)[0];native.daycare={pokemon:p,level:p.level,distance:0};journey.displayPartner();await showPage('Ci prenderemo cura di '+(p.nickname||p.name)+'. Torna a trovarci!');}
    }finally{eventRunning=false;journey.update();journey.save(true);}}
   async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
-  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
-  function step(dt,moved,distance=0){
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155,29].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
+  function step(dt,moved,distance=0){if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
     if(window.SpeciesStudioMode||failed)return;
     if(window.NativeRails?.has(native.zone)){const hint=native.railCurrent?.zone===native.zone?native.railCurrent:{},at=NativeRails.locate(native.zone,player.x,player.y,hint);if(at)native.railCurrent={zone:native.zone,...at};}
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
@@ -558,13 +585,13 @@
     if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===6&&p.z>=609){native.zone=319;native.music=data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
-    for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height){
+    for(const trigger of data().triggers)if(value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
       // Recheck a stationary player without locking input while they arrive.
       if(native.zone===317&&trigger.script===5){const bodies=fieldActors();if(![3,4].every(id=>{const n=actor(id);return n&&!n.hidden&&bodies.includes(n);})){lastTile='';return;}}
       run(trigger.script-1);return;}}
-    if([319,7,152,321,322,324,18,154,155].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-(n.script>=5000?5000:3000)))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
+    if([319,7,152,321,322,324,18,154,155,29].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-(n.script>=5000?5000:3000)))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
     journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}

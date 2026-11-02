@@ -14,9 +14,9 @@ ARCHIVE_SHA256 = "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def startup_pack(site):
+def startup_pack(site, sources=None, filename='assets/field-pack.bin'):
     paths=set()
-    for name in ['assets/scene.js','assets/sprites.js','opening-assets.js','opening-sprites.js','accumula-assets.js','route2-assets.js','striaton-assets.js','route3-assets.js','pinwheel-assets.js']:
+    for name in sources or ['assets/scene.js','assets/sprites.js','opening-assets.js','opening-sprites.js','accumula-assets.js','route2-assets.js','striaton-assets.js','route3-assets.js','pinwheel-assets.js']:
         file=site/name
         if not file.exists():continue
         match=re.search(r'window\.[A-Z][A-Z0-9_]*\s*=\s*',file.read_text(encoding='utf8'))
@@ -35,7 +35,7 @@ def startup_pack(site):
         if not file.is_file():continue
         raw=file.read_bytes();index[name]=[offset,len(raw)];chunks.append(raw);offset+=len(raw)
     header=json.dumps(index,separators=(',',':')).encode()
-    dest=site/'assets/field-pack.bin';dest.write_bytes(b'SFP1'+struct.pack('<I',len(header))+header+b''.join(chunks))
+    dest=site/filename;dest.write_bytes(b'SFP1'+struct.pack('<I',len(header))+header+b''.join(chunks))
     return {'images':len(index),'bytes':dest.stat().st_size}
 
 
@@ -78,12 +78,14 @@ def build(archive, target):
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, destination)
         packed = startup_pack(site)
+        chapter_pack = startup_pack(site,['castelia-assets.js'],'assets/castelia-pack.bin')
         entrypoints = bundle_entries(site)
         # A content hash changes script/CSS URLs on every source update.
         hashes = {p.relative_to(site).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in sorted(site.glob('*')) if p.suffix in ('.js', '.css', '.html')}
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
+        asset_hashes['assets/castelia-pack.bin'] = hashlib.sha256((site/'assets/castelia-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/field-pack.bin'] = hashlib.sha256((site/'assets/field-pack.bin').read_bytes()).hexdigest()
         revision = hashlib.sha256(json.dumps({'files': hashes, 'assets': asset_hashes}, sort_keys=True).encode()).hexdigest()[:16]
         index = site / 'index.html'
@@ -94,12 +96,12 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.45', 'revision': revision,
-            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints},
+            'version': '0.46', 'revision': revision,
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)
-    print(f"Built Soffiolieve 0.45 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.46 ({revision}) in {target}")
 
 
 if __name__ == '__main__':

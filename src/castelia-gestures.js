@@ -1,0 +1,1 @@
+window.CASTELIA_GESTURES={"Ghecis":{"steps":[[3,10],[12,5],[13,2],[15,10],[14,5],[13,2],[3,10]],"overlay":21,"offset":325080,"model":100,"animationSet":26}};Object.assign(OPENING_GESTURES,CASTELIA_GESTURES);

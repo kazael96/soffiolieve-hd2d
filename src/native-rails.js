@@ -44,10 +44,17 @@
   }
   return best;
  }
+ const warpPoints=new Map();
  function warp(zone,w){
+  const key=[zone,w.x,w.y,w.z,w.width,w.height,w.a,w.b].join(':');if(warpPoints.has(key))return warpPoints.get(key);
   const front=w.y+(w.width-1)*.5,side=(w.z<<16>>16)+(w.height-1)*.5,center=position(zone,w.x,front,side),a=position(zone,w.x,front-.05,side),b=position(zone,w.x,front+.05,side),c=position(zone,w.x,front,side+.1),forward=norm([b.x-a.x,0,b.z-a.z]),lateral=norm([c.x-center.x,0,c.z-center.z]);
   const primary=w.b===2?lateral:forward,secondary=w.b===2?mul(forward,-1):lateral,axis=w.a<=2?primary:secondary,out=mul(axis,[1,4].includes(w.a)?-1:1);
-  return {...center,line:w.x,front,side,out:{x:out[0],z:out[2]}};
+  // A rail's point order is not its screen compass: Castelia plaza lines run
+  // in the opposite direction to the waterfront. Keep the native axis, then
+  // orient the threshold towards the edge with a real walkable inward side.
+  const inward=(dx,dz)=>[1,1.5,2,2.5,3].some(d=>locate(zone,center.x-16-dx*d,center.z-16-dz*d,{height:center.height,line:w.x}));
+  if(!inward(out[0],out[2])&&inward(-out[0],-out[2])){out[0]*=-1;out[2]*=-1;}
+  const result={...center,line:w.x,front,side,out:{x:out[0],z:out[2]}};warpPoints.set(key,result);return result;
  }
  function actor(zone,n){const p=position(zone,n.x,n.z,n.y<<16>>16);return {...n,railOriginal:{...n},x:p.x-.5,z:p.z-.5,y:Math.round(p.height*65536)};}
  const landings=new Map();
@@ -69,5 +76,6 @@
   throw Error('Orientamento nativo non gestito: '+cam.kind);
  }
  function screenDirection(direction,yaw){const [x,z]=[[0,-1],[0,1],[-1,0],[1,0]][direction],c=Math.cos(yaw),s=Math.sin(yaw),dx=x*c-z*s,dz=x*s+z*c;return Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0;}
- const api={landing,cameraYaw,screenDirection,position,halfWidth,mesh,locate,warp,actor,has:zone=>!!tables()[zone]};root.NativeRails=api;if(typeof module!=='undefined')module.exports=api;
+ function trigger(zone,t,x,z,hint){const p=locate(zone,x,z,hint),side=t.width<<16>>16;return !!p&&p.line===t.x&&p.front>=t.z&&p.front<t.z+t.height&&p.side>=side&&p.side<side+t.y;}
+ const api={trigger,landing,cameraYaw,screenDirection,position,halfWidth,mesh,locate,warp,actor,has:zone=>!!tables()[zone]};root.NativeRails=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

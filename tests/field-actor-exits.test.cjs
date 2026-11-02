@@ -3,6 +3,10 @@ const {Controller,route,plan}=require('../src/field-actor-exits.js');
 const actor=(name='Belle')=>({name,uid:3,model:134,fieldZone:389,x:-2.5,y:5.5,height:0,frame:0,direction:0,flip:false});
 test('a removed native mechanism or skull never becomes a walking billboard departure',()=>{const c=new Controller();assert.equal(c.depart({...actor('Original8198'),model:8198,gimmick:true},17),false);assert.equal(c.records.size,0);});
 
+test('a consumed item ball is removed as an object and never walks away like an NPC',()=>{const c=new Controller();assert.equal(c.depart({...actor('Original110'),model:110,fieldZone:56},56),false);assert.equal(c.records.size,0);});
+
+test('Castelia HQ departures cross the west-facing door rather than walking along its facade',()=>{const previous=global.CasteliaChapter;global.CasteliaChapter={zones:[31,56]};try{const p=plan({...actor('Artemisio'),fieldZone:31,uid:5,x:-7.5,y:17.5},31,()=>false);assert.equal(p.kind,'door');assert.equal(p.destination,'plasma-hideout');assert.deepEqual(p.anchor,{x:-9.5,y:16.5});assert.ok(p.points.at(-1).x<p.anchor.x);assert.equal(p.points.at(-1).y,p.anchor.y);assert.ok(p.clip.every((v,i)=>v===[1,0,-0,9.5][i]));}finally{if(previous===undefined)delete global.CasteliaChapter;else global.CasteliaChapter=previous;}});
+
 test('Artemisio reaches his next forest actor; Aloé returns towards the museum',()=>{
  const p=plan({...actor('Artemisio'),fieldZone:16,x:-148.5,y:-162.5},16,()=>false);
  assert.equal(p.kind,'arrival');assert.equal(p.destinationZone,154);assert.equal(p.targetUid,1);assert.deepEqual(p.anchor,{x:-193.5,y:-167.5});
