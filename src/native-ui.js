@@ -52,16 +52,17 @@
   function background(c,key){const im=assets[key]||assets.main;if(im)c.drawImage(im,0,0,256,192,0,0,256,192);else{c.fillStyle='#eff0f0';c.fillRect(0,0,256,192);}}
   function caption(value){screen.text(value,8,174);}
   function box(c,x,y,w,h,selected=false){c.fillStyle=selected?'#d2e9ee':'#f5f7f7';c.fillRect(x,y,w,h);c.strokeStyle='#66747a';c.strokeRect(x,y,w,h);}
+  const retryResources=task=>root.RuntimeAssets?.retry?root.RuntimeAssets.retry(task):task();
   function resetPreparation(error){preparation=mainPreparation=null;screen?.dialog.remove();screen=null;assets={};throw error;}
   async function prepare(scope='all'){
-    if(!mainPreparation)mainPreparation=(async()=>{screen=new Screen();await screen.ready();const jobs=[],put=(key,src)=>jobs.push(image(src).then(im=>assets[key]=im));
+    if(!mainPreparation)mainPreparation=(async()=>{screen=new Screen();return retryResources(async()=>{await screen.ready();const jobs=[],put=(key,src)=>jobs.push(image(src).then(im=>assets[key]=im));
       for(const [key,value]of Object.entries(root.MENU_ASSETS?.images||{}))put(key,typeof value==='string'?value:value.src||value.url);
       for(const key of ['pokemon','pokedex','xtransceiverMale','bag','trainer','save','options']){const group=MENU_ASSETS.groups[key];if(group?.cells[0])put('icon-'+key,group.cells[0].src);}
       put('nativeClose',DEX_BROWSER_ASSETS.groups.detailCommon.cells[0].src);if(MENU_ASSETS.groups.selection)put('selection',MENU_ASSETS.groups.selection.cells[0].src);
       await Promise.all(jobs);assets.main=assets.background;assets.mainButtons=assets.buttons6;assets['icon-options']=assets['icon-pokedex'];assets['icon-pokedex']=assets['icon-xtransceiverMale'];
-    })().catch(resetPreparation);
+    });})().catch(resetPreparation);
     await mainPreparation;if(scope==='main')return true;if(preparation)return preparation;
-    preparation=(async()=>{const jobs=[],put=(key,src)=>jobs.push(image(src).then(im=>assets[key]=im)),group=(key,paths)=>jobs.push(Promise.all(paths.map(image)).then(list=>assets[key]=list));
+    preparation=retryResources(async()=>{const jobs=[],put=(key,src)=>jobs.push(image(src).then(im=>assets[key]=im)),group=(key,paths)=>jobs.push(Promise.all(paths.map(image)).then(list=>assets[key]=list));
       for(const [key,v]of Object.entries(FIELD_POPUP_ASSETS.images))put('field-'+key,v.src);
       group('readyFonts',['normal','highlight'].map(k=>FIELD_POPUP_ASSETS.fonts.variants[k].src));group('quantityControls',FIELD_POPUP_ASSETS.groups.quantityControls.cells.map(v=>v.src));group('readyMarkers',FIELD_POPUP_ASSETS.groups.readyMarkers.cells.map(v=>v.src));
       for(const [key,record]of Object.entries(MENU_ASSETS.groups))if(record.cells[0]&&!assets['icon-'+key])put('icon-'+key,record.cells[0].src);
@@ -73,7 +74,7 @@
       for(const [key,record]of Object.entries(PARTY_POPUP_ASSETS.images))put('popup-'+key,record.src);
       put('popupFont',PARTY_POPUP_ASSETS.font.src);put('partyPrompt',COMMON_DIALOGUE_ASSETS.images.partyPrompt.src);put('messageFrame',COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src);
       await Promise.all(jobs);
-    })().catch(resetPreparation);return preparation;
+    }).catch(resetPreparation);return preparation;
   }
   function loadFailure(error){console.warn(error);root.toast?.('Caricamento del menu non riuscito. Riprova.');return false;}
   async function usable(scope='all'){try{await prepare(scope);return true;}catch(error){return loadFailure(error);}}
@@ -119,7 +120,7 @@
   function inventory(pocket){const s=Journey.state;return pocket===1?[17,18,21,22,25,26,27,28,30,38,50].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===0?[4,3,6,14,58,81,79,91,217,222,239,296].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===2?[373,394,410,413,420,619].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===3?[150,155].map(id=>({id,count:Journey.itemCount(id)})).filter(i=>i.count):pocket===4?[...[471,579].filter(id=>Journey.itemCount(id)).map(id=>({id,count:1})),...(Journey.itemCount(437)?[{id:437,count:1}]:[]),...(s.original?.map?[{id:442,count:1}]:[]),...(s.original?.phone?[{id:621,count:1}]:[])]:[];}
   let fieldBagReady;const bagCursor=[0,0,0,0,0],bagFirst=[0,0,0,0,0];let activePocket=0;const bagRows=6;
   async function prepareFieldBag(){
-    if(!fieldBagReady)fieldBagReady=(async()=>{const url=NativeTextLayout.resource('assets/field-bag/provenance.json');if(root.RuntimeAssets?.json)assets.fieldBag=await root.RuntimeAssets.json(url);else{const response=await fetch(url);if(!response.ok)throw Error('Catalogo Borsa non disponibile');assets.fieldBag=await response.json();}assets.fieldBagImages={};await Promise.all(Object.entries(assets.fieldBag.images).map(async([key,record])=>assets.fieldBagImages[key]=await image(record.path)));assets.fieldBagFont=await image(assets.fieldBag.font.path);})().catch(error=>{fieldBagReady=null;throw error;});return fieldBagReady;
+    if(!fieldBagReady)fieldBagReady=retryResources(async()=>{const url=NativeTextLayout.resource('assets/field-bag/provenance.json');if(root.RuntimeAssets?.json)assets.fieldBag=await root.RuntimeAssets.json(url);else{const response=await fetch(url);if(!response.ok)throw Error('Catalogo Borsa non disponibile');assets.fieldBag=await response.json();}assets.fieldBagImages={};await Promise.all(Object.entries(assets.fieldBag.images).map(async([key,record])=>assets.fieldBagImages[key]=await image(record.path)));assets.fieldBagFont=await image(assets.fieldBag.font.path);}).catch(error=>{fieldBagReady=null;throw error;});return fieldBagReady;
   }
   function bagItemIndex(){return bagFirst[activePocket]+Math.max(0,screen.selected-5);}
   function drawBagTop(c,pocket,selectedItem=bagItemIndex()){

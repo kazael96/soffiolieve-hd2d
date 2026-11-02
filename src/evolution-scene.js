@@ -9,9 +9,9 @@
   canvas.width=640;canvas.height=420;canvas.setAttribute('aria-hidden','true');
   status.setAttribute('role','status');status.textContent='Preparazione dell’evoluzione…';
   cancel.textContent='B · Interrompi';cancel.type='button';dialog.append(canvas,status,cancel);document.body.append(dialog);
-  const c=canvas.getContext('2d');let raf=0,done=false,elapsed=0,last=performance.now();
+  const recovery=window.RuntimeAssets?.Recovery?new RuntimeAssets.Recovery():null;const c=canvas.getContext('2d');let raf=0,done=false,elapsed=0,last=performance.now();
   const clock=()=>performance.now();
-  let finish;const answer=new Promise(resolve=>{finish=result=>{if(done)return;done=true;cancelAnimationFrame(raf);active=null;dialog.close();dialog.remove();resetInput();resolve(result);};});
+  let finish;const answer=new Promise(resolve=>{finish=result=>{if(done)return;done=true;recovery?.dispose();cancelAnimationFrame(raf);active=null;dialog.close();dialog.remove();resetInput();resolve(result);};});
   active=dialog;cancel.onclick=()=>finish(false);
   dialog.addEventListener('cancel',event=>{event.preventDefault();finish(false);});
   dialog.addEventListener('keydown',event=>{const key=event.key.toLowerCase();if(['b','escape'].includes(key)){event.preventDefault();event.stopImmediatePropagation();finish(false);}else if(['a','z','enter',' '].includes(key)&&!event.target.dataset?.retry){event.preventDefault();event.stopImmediatePropagation();}});
@@ -22,9 +22,9 @@
    if(sprites.some(s=>!s.ready)){
     status.textContent='Sprite non disponibile. Puoi riprovare o interrompere.';
     let retry=dialog.querySelector('[data-retry]');if(!retry){retry=document.createElement('button');retry.dataset.retry='true';retry.textContent='Riprova';dialog.append(retry);}
-    retry.onclick=()=>{retry.disabled=true;void load(true).finally(()=>{retry.disabled=false;});};return;
+    retry.onclick=()=>{retry.disabled=true;void (recovery?recovery.run('evolution',true):load(true)).finally(()=>{retry.disabled=false;});};recovery?.register('evolution',()=>load(true),{valid:()=>!done,report:phase=>{retry.disabled=phase==='retrying';status.textContent=phase==='offline'?'Connessione assente. L’evoluzione riprenderà al ritorno della rete.':phase==='manual'?'Sprite non disponibile. Puoi riprovare o interrompere.':'Ripresa automatica delle immagini dell’evoluzione…';}});return false;
    }
-   dialog.querySelector('[data-retry]')?.remove();status.textContent='Premi B per interrompere l’evoluzione.';last=clock();
+   recovery?.clear('evolution');dialog.querySelector('[data-retry]')?.remove();status.textContent='Premi B per interrompere l’evoluzione.';last=clock();
    function draw(){
     if(done)return;const now=clock();if(!document.hidden)elapsed+=Math.min(80,Math.max(0,now-last))*(GameSpeed.rate||1);last=now;
     const t=Math.min(1,elapsed/3000);dialog.dataset.progress=String(Math.round(t*100));
@@ -36,7 +36,7 @@
     ROM_SPRITE_ANIM.draw(c,evolved?to:from,false,320,353,scale,elapsed/33,true);
     if(t>=1){finish(true);return;}raf=requestAnimationFrame(draw);
    }
-   draw();
+   draw();return true;
   }
   void load().catch(error=>{if(!done){console.error(error);status.textContent='Caricamento non riuscito. Interrompi e riprova al prossimo aumento di livello.';}});
   return answer;

@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.44
+# Soffiolieve HD-2D — demo 0.45
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli**.
@@ -11,6 +11,8 @@ Comprende le prime due palestre, gli eventi del Team Plasma e l’arrivo sul lun
 Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [477 coppie su 40 specie](docs/SPECIES-MOVES-043.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.45 riprende automaticamente i caricamenti interrotti di scene, modelli, menu, lotte ed evoluzioni. Attende il ritorno della connessione o della scheda in primo piano e mantiene in attesa la stessa operazione: non riavvia eventi o combattimenti. Dopo tentativi limitati resta disponibile «Riprova»; durante il recupero puoi anticiparlo con «Riprova ora». Le immagini già presenti nel pacchetto possono essere riutilizzate anche senza rete, senza dichiarare l’intera demo disponibile offline. Comportamento, prove e limiti in [RECOVERY-045.md](docs/RECOVERY-045.md).
 
 La 0.44 riduce il lavoro iniziale preparando geometria e texture della scena attiva, con tutti i fotogrammi dei personaggi necessari. Carica i dettagli dei menu quando servono, riutilizza le immagini decodificate con una cache limitata e prepara l’interfaccia di lotta quando una lotta è imminente. Mantiene coperti i cambi mappa incompleti e permette di riprenderli con «Riprova»; annullare un menu durante il caricamento non lo riapre in seguito. Analisi, misure e limiti in [PERFORMANCE-044.md](docs/PERFORMANCE-044.md); prove della candidata e stato della consegna in [QA-044.md](docs/QA-044.md).
 
