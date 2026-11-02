@@ -194,5 +194,5 @@
   window.BattleScreen={update,cards,tick,prepare,targets(items){return new Promise(resolve=>{targetRequest={items,resolve};choose('targets');});},commands(){choose('main');},reset(){selectionByMode.clear();bagPage=0;mode='main';wasBusy=false;lastMessage='';press=null;},itemTarget,get loading(){return prepare();}};
   // Eager loading is optional; a failed attempt must reject at battle entry,
   // where the caller can recover, and must be retryable without losing canvases.
-  void prepare().catch(()=>{});
+  // startBattle awaits prepare; exploration does not pay for the battle panels.
 })();

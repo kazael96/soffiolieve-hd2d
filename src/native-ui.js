@@ -30,6 +30,7 @@
     }
     async ready(){this.font=await NativeText.load();}
     show(title,render,buttons,back,config={}){
+      this.revision=(this.revision||0)+1;
       this.cleanup?.();this.cleanup=null;this.keyHandler=config.key;
       this.exit=config.exit||(()=>{if(this.dialog.id==='nativeMenu')this.close();else this.back?.();});
       this.drawFocus=config.drawFocus!==false;
@@ -44,42 +45,42 @@
     activate(i){const b=this.buttons[i];if(!b||b.disabled)return;void root.AudioEngine?.playSound(1352);b.action();}
     draw(){const c=this.ctx;c.clearRect(0,0,256,192);this.render(c);if(this.topRender){this.upperContext.clearRect(0,0,256,192);this.topRender(this.upperContext);}const b=this.buttons[this.selected];if(this.drawFocus&&b&&!b.disabled&&!['Menu','Pokémon','OPZIONI'].includes(this.title)){c.strokeStyle='#f0a030';c.lineWidth=2;c.strokeRect(b.x+1,b.y+1,b.w-2,b.h-2);}}
     text(value,x,y,white=false,align='left'){NativeText.draw(this.ctx,this.font,String(value),x,y,white,align);}
-    close(){this.cleanup?.();this.cleanup=null;this.dialog.close();resetInput();}
+    close(){this.revision=(this.revision||0)+1;this.cleanup?.();this.cleanup=null;this.dialog.close();resetInput();}
   }
-  let screen=null,preparation=null,assets={},swapFrom=null,mainSelection=null;
+  let screen=null,preparation=null,mainPreparation=null,openingSection=null,assets={},swapFrom=null,mainSelection=null;
   const rect=(label,x,y,w,h,action,disabled=false)=>({label,x,y,w,h,action,disabled});
   function background(c,key){const im=assets[key]||assets.main;if(im)c.drawImage(im,0,0,256,192,0,0,256,192);else{c.fillStyle='#eff0f0';c.fillRect(0,0,256,192);}}
   function caption(value){screen.text(value,8,174);}
   function box(c,x,y,w,h,selected=false){c.fillStyle=selected?'#d2e9ee':'#f5f7f7';c.fillRect(x,y,w,h);c.strokeStyle='#66747a';c.strokeRect(x,y,w,h);}
-  async function prepare(){
-    if(preparation)return preparation;
-    preparation=(async()=>{screen=new Screen();await screen.ready();
-      const records=root.MENU_ASSETS?.images||{};await Promise.all(Object.entries(records).map(async([key,value])=>{assets[key]=await image(typeof value==='string'?value:value.src||value.url);}));
-      for(const [key,v] of Object.entries(FIELD_POPUP_ASSETS.images))assets['field-'+key]=await image(v.src);assets.readyFonts=await Promise.all(['normal','highlight'].map(k=>image(FIELD_POPUP_ASSETS.fonts.variants[k].src)));assets.quantityControls=await Promise.all(FIELD_POPUP_ASSETS.groups.quantityControls.cells.map(v=>image(v.src)));assets.readyMarkers=await Promise.all(FIELD_POPUP_ASSETS.groups.readyMarkers.cells.map(v=>image(v.src)));assets.main=assets.background;assets.mainButtons=assets.buttons6;
-      await Promise.all(Object.entries(root.MENU_ASSETS?.groups||{}).map(async([key,group])=>{if(group.cells[0])assets['icon-'+key]=await image(group.cells[0].src);}));
-      await Promise.all(Object.entries(root.MENU_ASSETS?.pokemonIcons||{}).map(async([id,record])=>{assets['pokemon-'+id]=await image(record.cells[0].src);}));
-      assets['icon-options']=assets['icon-pokedex'];assets['icon-pokedex']=assets['icon-xtransceiverMale'];
-      if(root.MENU_ASSETS?.groups.bagMale)assets.bagSprite=await image(MENU_ASSETS.groups.bagMale.cells[4].src);
-      for(const[key,record]of Object.entries(root.PARTY_DETAIL_ASSETS?.images||{}))assets['detail-'+key]=await image(record.src);
-      for(const[id,record]of Object.entries(root.PARTY_DETAIL_ASSETS?.itemMap||{}))assets['item-'+id]=await image(record.src);
-      assets.bagCells=await Promise.all(MENU_ASSETS.groups.bagMale.cells.map(cell=>image(cell.src)));
-      assets.bagChecks=await Promise.all(MENU_ASSETS.groups.bagPockets.cells.slice(0,2).map(cell=>image(cell.src)));
-      assets.bagButton=await image(MENU_ASSETS.groups.bagButton.cells[0].src);
-      assets.partyNavigation=await Promise.all(PARTY_DETAIL_ASSETS.groups.partyNavigationBlue.cells.map(cell=>image(cell.src)));
-      for(const[key,record]of Object.entries(root.PARTY_POPUP_ASSETS?.images||{}))assets['popup-'+key]=await image(record.src);
-      assets.nativeClose=await image(DEX_BROWSER_ASSETS.groups.detailCommon.cells[0].src);
-      assets.popupFont=await image(PARTY_POPUP_ASSETS.font.src);
-      assets.partyPrompt=await image(COMMON_DIALOGUE_ASSETS.images.partyPrompt.src);
-      assets.messageFrame=await image(COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src);
-      if(root.MENU_ASSETS?.groups.selection)assets.selection=await image(MENU_ASSETS.groups.selection.cells[0].src);
-    })().catch(error=>{preparation=null;screen?.dialog.remove();screen=null;assets={};throw error;});return preparation;
+  function resetPreparation(error){preparation=mainPreparation=null;screen?.dialog.remove();screen=null;assets={};throw error;}
+  async function prepare(scope='all'){
+    if(!mainPreparation)mainPreparation=(async()=>{screen=new Screen();await screen.ready();const jobs=[],put=(key,src)=>jobs.push(image(src).then(im=>assets[key]=im));
+      for(const [key,value]of Object.entries(root.MENU_ASSETS?.images||{}))put(key,typeof value==='string'?value:value.src||value.url);
+      for(const key of ['pokemon','pokedex','xtransceiverMale','bag','trainer','save','options']){const group=MENU_ASSETS.groups[key];if(group?.cells[0])put('icon-'+key,group.cells[0].src);}
+      put('nativeClose',DEX_BROWSER_ASSETS.groups.detailCommon.cells[0].src);if(MENU_ASSETS.groups.selection)put('selection',MENU_ASSETS.groups.selection.cells[0].src);
+      await Promise.all(jobs);assets.main=assets.background;assets.mainButtons=assets.buttons6;assets['icon-options']=assets['icon-pokedex'];assets['icon-pokedex']=assets['icon-xtransceiverMale'];
+    })().catch(resetPreparation);
+    await mainPreparation;if(scope==='main')return true;if(preparation)return preparation;
+    preparation=(async()=>{const jobs=[],put=(key,src)=>jobs.push(image(src).then(im=>assets[key]=im)),group=(key,paths)=>jobs.push(Promise.all(paths.map(image)).then(list=>assets[key]=list));
+      for(const [key,v]of Object.entries(FIELD_POPUP_ASSETS.images))put('field-'+key,v.src);
+      group('readyFonts',['normal','highlight'].map(k=>FIELD_POPUP_ASSETS.fonts.variants[k].src));group('quantityControls',FIELD_POPUP_ASSETS.groups.quantityControls.cells.map(v=>v.src));group('readyMarkers',FIELD_POPUP_ASSETS.groups.readyMarkers.cells.map(v=>v.src));
+      for(const [key,record]of Object.entries(MENU_ASSETS.groups))if(record.cells[0]&&!assets['icon-'+key])put('icon-'+key,record.cells[0].src);
+      for(const [id,record]of Object.entries(MENU_ASSETS.pokemonIcons))put('pokemon-'+id,record.cells[0].src);
+      if(MENU_ASSETS.groups.bagMale)put('bagSprite',MENU_ASSETS.groups.bagMale.cells[4].src);
+      for(const [key,record]of Object.entries(PARTY_DETAIL_ASSETS.images))put('detail-'+key,record.src);
+      for(const [id,record]of Object.entries(PARTY_DETAIL_ASSETS.itemMap))put('item-'+id,record.src);
+      group('bagCells',MENU_ASSETS.groups.bagMale.cells.map(v=>v.src));group('bagChecks',MENU_ASSETS.groups.bagPockets.cells.slice(0,2).map(v=>v.src));put('bagButton',MENU_ASSETS.groups.bagButton.cells[0].src);group('partyNavigation',PARTY_DETAIL_ASSETS.groups.partyNavigationBlue.cells.map(v=>v.src));
+      for(const [key,record]of Object.entries(PARTY_POPUP_ASSETS.images))put('popup-'+key,record.src);
+      put('popupFont',PARTY_POPUP_ASSETS.font.src);put('partyPrompt',COMMON_DIALOGUE_ASSETS.images.partyPrompt.src);put('messageFrame',COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src);
+      await Promise.all(jobs);
+    })().catch(resetPreparation);return preparation;
   }
   function loadFailure(error){console.warn(error);root.toast?.('Caricamento del menu non riuscito. Riprova.');return false;}
-  async function usable(){try{await prepare();return true;}catch(error){return loadFailure(error);}}
-  async function open(){if(battling||root.NativeStory?.locked)return;if(!await usable())return false;main();}
+  async function usable(scope='all'){try{await prepare(scope);return true;}catch(error){return loadFailure(error);}}
+  async function open(){if(battling||root.NativeStory?.locked)return;if(!await usable('main'))return false;main();}
   function main(){
     const s=Journey.state,labels=MENU_ASSETS.texts['34'],entries=[[labels[2],'pokemon',()=>team(),!s.starter],[labels[1],'pokedex',()=>external(()=>Pokedex.browse()),!s.original?.pokedex],[labels[3],'bag',()=>bag()], [s.playerName,'trainer',()=>trainerCard()],[labels[5],'save',()=>saveMenu()],[labels[6],'options',()=>options()]].filter(entry=>!entry[3]);
-    const buttons=entries.map(([label,key,action,disabled],i)=>rect(label,4+(i%2)*128,24+Math.floor(i/2)*48,120,40,()=>{mainSelection=key;return action();},disabled));
+    const buttons=entries.map(([label,key,action,disabled],i)=>rect(label,4+(i%2)*128,24+Math.floor(i/2)*48,120,40,async()=>{const owner=screen,revision=owner.revision;if(openingSection?.owner===owner&&openingSection.revision===revision)return;const request=openingSection={owner,revision};mainSelection=key;try{if(await usable()&&screen===owner&&owner.dialog.open&&owner.revision===revision)return await action();}finally{if(openingSection===request)openingSection=null;}},disabled));
     buttons.push(rect('Chiudi',228,168,28,24,()=>screen.close()));
     screen.show('Menu',c=>{background(c,'main');const layout=assets[entries.length===6?'buttons6':entries.length===5?'buttons1':'buttons2'];if(layout)c.drawImage(layout,0,0,256,192,0,0,256,192);const chosen=buttons[screen.selected];if(chosen&&screen.selected<entries.length&&assets.selection)c.drawImage(assets.selection,chosen.x-1,chosen.y);entries.forEach(([label,key],i)=>{const x=4+i%2*128,y=24+Math.floor(i/2)*48,im=assets['icon-'+key];if(im)c.drawImage(im,x+23-Math.floor(im.width/2),y+20-Math.floor(im.height/2));screen.text(label,x+43,y+12,true);});c.drawImage(assets.nativeClose,237,173);},buttons,()=>screen.close());const remembered=entries.findIndex(entry=>entry[1]===mainSelection);if(remembered>=0){screen.selected=remembered;screen.focus();}
   }
@@ -139,7 +140,7 @@
     c.drawImage(assets.nativeClose,237,173);
   }
   async function bag(pocket=0,context={}){
-    try{await prepareFieldBag();}catch(error){return loadFailure(error);}const items=inventory(pocket),names=ORIGINAL_EVENTS.itemNames,back=context.back||main,group=MENU_ASSETS.groups.bagMale;
+    const owner=screen,revision=owner?.revision,wasOpen=!!owner?.dialog.open;try{await prepareFieldBag();}catch(error){return loadFailure(error);}if(!owner||screen!==owner||owner.revision!==revision||wasOpen&&!owner.dialog.open)return false;const items=inventory(pocket),names=ORIGINAL_EVENTS.itemNames,back=context.back||main,group=MENU_ASSETS.groups.bagMale;
     activePocket=pocket;bagCursor[pocket]=Math.max(0,Math.min(items.length-1,bagCursor[pocket]));bagFirst[pocket]=Math.max(0,Math.min(bagFirst[pocket],Math.max(0,items.length-bagRows)));if(bagCursor[pocket]<bagFirst[pocket])bagFirst[pocket]=bagCursor[pocket];if(bagCursor[pocket]>=bagFirst[pocket]+bagRows)bagFirst[pocket]=bagCursor[pocket]-bagRows+1;const buttons=assets.fieldBag.bagActors.sequencePairs.map(([,inactive],n)=>{const cell=group.cells[group.animations[inactive].frames[0][0]];return rect(MENU_ASSETS.texts['55'][n],Math.max(0,cell.origin[0]),80+cell.origin[1],cell.size[0],cell.size[1],()=>bag(n,context));});
     items.slice(bagFirst[pocket],bagFirst[pocket]+bagRows).forEach((item,i)=>buttons.push(rect(names[item.id]+' ×'+item.count,135,12+i*24,106,24,()=>{bagCursor[pocket]=bagFirst[pocket]+i;return context.giveTo!==undefined?giveItem(item.id,context.giveTo,()=>bag(pocket,context)):bagAction(item.id,pocket);},context.giveTo!==undefined&&[2,4].includes(pocket))));if(items.length>bagRows){for(const [label,x,delta]of [['Scorri strumenti su',135,-bagRows],['Scorri strumenti giù',201,bagRows]])buttons.push(rect(label,x,158,24,20,()=>{bagCursor[pocket]=Math.max(0,Math.min(items.length-1,bagCursor[pocket]+delta));bag(pocket,context);}));}
     if(context.giveTo===undefined&&pocket===4&&items.slice(bagFirst[pocket],bagFirst[pocket]+bagRows).some(item=>item.id===442))buttons.push(rect('Assegna Mappa Città al pulsante Y',116,16+(items.findIndex(item=>item.id===442)-bagFirst[pocket])*24,16,16,()=>{register('item:442');bag(pocket,context);}));
