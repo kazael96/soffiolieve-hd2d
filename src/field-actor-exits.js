@@ -27,7 +27,9 @@
   if(zone===63){const p=portal(-2.5,29.5,0,1);p.points=[...route(n,{x:-2.5,y:28.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='route5-camelia';return p;}
   if(zone===64){const p=portal(-6.5,-2, -1,0);p.points=[...route(n,{x:-5.5,y:-2},blocked),p.anchor,p.points[1]];p.background=true;p.destination=n.name==='N'?'n-next-journey':'plasma-retreat';return p;}
   if(zone===96){
-   if(n.name==='Komor')return arrival(-609.5,-326.5,96,253,'cold-storage-front');
+   // Wait at the south passage while the next map is outside this chapter.
+   // IRBI's next Komor is zone191 actor0 (171,466), beyond this city border.
+   if(n.name==='Komor')return arrival(-606.5,-304.5,96,253,'cold-storage-front');
    const p=portal(-571.5,-351.5,0,-1);p.points=[...route(n,{x:-571.5,y:-350.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='driftveil-gym';return p;
   }
   if(zone===326&&n.name==='Komor'){

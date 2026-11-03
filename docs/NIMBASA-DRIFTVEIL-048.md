@@ -18,7 +18,7 @@ N usa Sandile, Darumaka, Scraggy e Sigilyph al 22. Camelia usa due Emolga al 25 
 
 ## Continuità
 
-N e gli scagnozzi attraversano l’uscita del parco. Camelia esce dalla palestra e compare dal varco est del Percorso 5 con ingresso fisico; al termine riparte verso Sciroccopoli. Komor procede al ponte e viene trasferito fra le mappe solo dopo occultamento; entra da est a Libecciopoli e cammina fino al confronto con Rafan. Se il giocatore anticipa il suo arrivo mantiene il controllo; il trigger si rivaluta anche da fermo. Dopo il confronto Komor raggiunge il fronte del Deposito Frigo e resta presente per il capitolo successivo. Rafan lascia l’incontro attraverso la porta della palestra. Percorsi, record in viaggio e residenti sopravvivono ai salvataggi e al Centro.
+N e gli scagnozzi attraversano l’uscita del parco. Camelia esce dalla palestra e compare dal varco est del Percorso 5 con ingresso fisico; al termine riparte verso Sciroccopoli. Komor procede al ponte e viene trasferito fra le mappe solo dopo occultamento; entra da est a Libecciopoli e cammina fino al confronto con Rafan. Se il giocatore anticipa il suo arrivo mantiene il controllo; il trigger si rivaluta anche da fermo. Dopo il confronto Komor raggiunge il passaggio sud verso il Deposito Frigo (tile nativo177,447) e resta presente al confine del capitolo. La posizione originale successiva è zona191, attore0, tile171,466: il prossimo capitolo deve estendere il viaggio fino a quel corpo senza comparsa o duplicazione. Rafan lascia l’incontro attraverso la porta della palestra. Percorsi, record in viaggio e residenti sopravvivono ai salvataggi e al Centro.
 
 ## Presentazione e meccanismi
 
