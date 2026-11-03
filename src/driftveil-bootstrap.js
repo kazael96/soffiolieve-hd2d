@@ -1,7 +1,7 @@
 /* Native chapter data; heavy map geometry remains deferred until arrival. */
 (()=>{
  const zones=Object.keys(DRIFTVEIL_EVENTS.zones).map(Number).filter(z=>![77,330].includes(z)),globalZones=[62,329,96];
- for(const zone of zones)if(zone!==62)OPENING_ASSETS.scenes['zone'+zone]={...DRIFTVEIL_SCENES[zone],instances:[],zone,chapter048:true,outdoor:globalZones.includes(zone)||[64,253].includes(zone),assetsPending:true,ensureAssets:async()=>{await ensure();if(zone===63)await DriftveilGym.prepare();}};
+ for(const zone of zones)if(zone!==62)OPENING_ASSETS.scenes['zone'+zone]={...DRIFTVEIL_SCENES[zone],instances:[],zone,chapter048:true,...(zone===329?{groundPlane:0}:{}),outdoor:globalZones.includes(zone)||[64,253].includes(zone),assetsPending:true,ensureAssets:async()=>{await ensure();if(zone===63)await DriftveilGym.prepare();}};
  Object.assign(OPENING_DATA,DRIFTVEIL_DATA.pokemonData);
  for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])Object.assign(TRAINING_DATA[key],DRIFTVEIL_DATA[key]);
  TRAINING_DATA.levelCap=DRIFTVEIL_DATA.levelCap;

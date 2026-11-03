@@ -1,7 +1,7 @@
 const path=require('node:path'),assert=require('node:assert/strict');
 const {environment,drain}=require('./check-story-runtime.cjs');
 (async()=>{
- const c=environment({driftveil:true,sourceRoot:process.env.QA_SOURCE_ROOT}),n=c.NativeStory,j=c.Journey;await c.DriftveilChapter.ensure();
+ const c=environment({driftveil:true,sourceRoot:process.env.QA_SOURCE_ROOT}),n=c.NativeStory,j=c.Journey;await c.DriftveilChapter.ensure();assert.equal(c.OPENING_ASSETS.scenes.zone329.groundPlane,0,'Route 5 native floor must not use the lamp cap');
  const battles=[],start=c.startBattle;c.startBattle=(...args)=>{battles.push(args[1]);return start(...args);};
  Object.assign(n.state,{intro:true,initialized:true,badges:[0,1,2],healZone:65});j.state.phase='nimbasa';j.state.starter='Snivy';j.state.party=['Servine','Pignite','Dewott'].map(name=>j.pack(c.makeMon(name,30),c.OPENING_DATA[name].growth[30]));
  await n.changeZone(64,22,13);await drain(c,n.run(4),0,'p1');assert.equal(n.state.vars[16526],1);assert.ok(n.state.flags.includes(553));assert.ok(c.cinematics.includes(3));console.log('PASS N / wheel / battle / departure');

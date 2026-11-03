@@ -58,6 +58,9 @@ class VillageRenderer {
   this.visibility.set(a.source,{visible,sequence:++this.visibilitySequence,view:[w,h,this.zoom,this.yaw||0,this.elevation||0,...this.center].join(':'),pose:[a.source.x,a.source.y,(a.source.height??.04)+(a.source.jumpLift||0),a.source.frame,a.source.flip].join(':')});
  }
  groundHeight(x,z,preferredHeight){
+  // Native Route 5 is flat. Its map mesh also contains the lamp cap;
+  // decorative geometry must not become a floor for actors or the player.
+  if(Number.isFinite(this.scene.groundPlane))return this.scene.groundPlane;
   const zone=this.scene.railZone,hint=window.NativeStory?.state.railCurrent,rail=zone&&window.NativeRails?.locate(zone,x,z,preferredHeight===undefined?(hint?.zone===zone?hint:{}):{height:preferredHeight});
   this.groundCache??=new WeakMap();let cache=this.groundCache.get(this.scene);if(!cache){cache=new Map();this.groundCache.set(this.scene,cache);}
   const key=Math.round(x*16)+':'+Math.round(z*16)+(rail?':'+Math.round(rail.height):'');if(cache.has(key))return cache.get(key);let height=-Infinity;
