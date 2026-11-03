@@ -161,7 +161,7 @@
       if(r.opened||['route4-gate','driftveil-approach'].includes(r.plan.destination)&&r.index===r.plan.points.length-1)a.exitClip=r.plan.clip;
       if(d<=step){a.x=point.x;a.y=point.y;r.travel+=d;r.index++;}else{a.x+=dx/d*step;a.y+=dy/d*step;r.travel+=step;}
       if(d>1e-8)this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);else this.pose(a,a.direction);
-     }else {r.stage=r.plan.kind==='arrival'?'resident':r.plan.kind==='stairs'?'descend':'hold';if(r.plan.kind==='arrival'){a.fieldZone=r.plan.destinationZone;a.uid=r.plan.targetUid;a.exitProbe=false;this.pose(a,r.plan.destination==='center-front'?1:a.direction);}else this.pose(a,a.direction);}
+     }else {r.stage=r.plan.kind==='arrival'?'resident':r.plan.kind==='stairs'?'descend':'hold';if(r.plan.kind==='arrival'){a.fieldZone=r.plan.destinationZone;a.uid=r.plan.targetUid;if(r.plan.destination==='cold-storage-front')a.script=2000;a.exitProbe=false;this.pose(a,r.plan.destination==='center-front'?1:a.direction);}else this.pose(a,a.direction);}
     }
     if(r.stage==='descend'){a.exitClip=r.plan.clip;a.noShadow=true;a.height=Math.max(-2.5,(a.height||0)-dt*1.8);if(a.height===-2.5)r.stage='hold';}
     // A result is valid only for the exact rendered pose. Never interpret a
@@ -183,6 +183,7 @@
     r={...r,actor,plan:plan(actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};
    }
    const stage=r.plan.kind==='resident'?'resident':['rejoin','opening'].includes(r.stage)?'walk':r.stage,actor={...r.actor,exitProbe:stage!=='resident'};
+   if(stage==='resident'&&r.plan.destination==='cold-storage-front')actor.script=2000;
    if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}
    // Door models/handles belong to this renderer instance, not the save file.
    // Keep the portal cut but reopen its model before resuming a saved passage.
