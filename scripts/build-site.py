@@ -79,12 +79,14 @@ def build(archive, target):
                 shutil.copyfile(source, destination)
         packed = startup_pack(site)
         chapter_pack = startup_pack(site,['castelia-assets.js'],'assets/castelia-pack.bin')
+        nimbasa_pack = startup_pack(site,['nimbasa-assets.js'],'assets/nimbasa-pack.bin')
         entrypoints = bundle_entries(site)
         # A content hash changes script/CSS URLs on every source update.
         hashes = {p.relative_to(site).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in sorted(site.glob('*')) if p.suffix in ('.js', '.css', '.html')}
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
+        asset_hashes['assets/nimbasa-pack.bin'] = hashlib.sha256((site/'assets/nimbasa-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/castelia-pack.bin'] = hashlib.sha256((site/'assets/castelia-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/field-pack.bin'] = hashlib.sha256((site/'assets/field-pack.bin').read_bytes()).hexdigest()
         revision = hashlib.sha256(json.dumps({'files': hashes, 'assets': asset_hashes}, sort_keys=True).encode()).hexdigest()[:16]
@@ -96,12 +98,12 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.46', 'revision': revision,
-            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack},
+            'version': '0.47', 'revision': revision,
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)
-    print(f"Built Soffiolieve 0.46 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.47 ({revision}) in {target}")
 
 
 if __name__ == '__main__':
