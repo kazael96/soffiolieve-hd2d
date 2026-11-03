@@ -9,9 +9,32 @@ import shutil
 import struct
 import tempfile
 import zipfile
+import uuid
+from contextlib import contextmanager
 
 ARCHIVE_SHA256 = "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6"
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@contextmanager
+def build_staging():
+    # Python 3.13's private Windows tempfile ACL can exclude a workspace's
+    # restricted capability token. Inherit this workspace directory's ACL;
+    # only generated, non-sensitive build/test files are placed here.
+    parent = (ROOT / '.build-tmp').resolve()
+    parent.mkdir(exist_ok=True)
+    folder = parent / ('stage-' + uuid.uuid4().hex)
+    folder.mkdir()
+    try:
+        yield str(folder)
+    finally:
+        resolved = folder.resolve()
+        if resolved.parent != parent or not resolved.name.startswith('stage-'):
+            raise ValueError('Unsafe staging cleanup path')
+        if any(p.name == '.git' or p.is_symlink() or getattr(p, 'is_junction', lambda: False)()
+               for p in [folder, *folder.rglob('*')]):
+            raise ValueError('Linked or repository staging directory; cleanup refused')
+        shutil.rmtree(resolved)
 
 
 def startup_pack(site, sources=None, filename='assets/field-pack.bin'):
@@ -61,7 +84,7 @@ def build(archive, target):
         raise ValueError("Release SHA-256 mismatch; refusing to publish")
     if target.exists():
         raise ValueError(f"Output already exists: {target}. Choose an empty destination.")
-    with tempfile.TemporaryDirectory() as folder:
+    with build_staging() as folder:
         staging = Path(folder)
         with zipfile.ZipFile(archive) as bundle:
             for name in bundle.namelist():
@@ -80,12 +103,14 @@ def build(archive, target):
         packed = startup_pack(site)
         chapter_pack = startup_pack(site,['castelia-assets.js'],'assets/castelia-pack.bin')
         nimbasa_pack = startup_pack(site,['nimbasa-assets.js'],'assets/nimbasa-pack.bin')
+        driftveil_pack = startup_pack(site,['driftveil-assets.js'],'assets/driftveil-pack.bin')
         entrypoints = bundle_entries(site)
         # A content hash changes script/CSS URLs on every source update.
         hashes = {p.relative_to(site).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in sorted(site.glob('*')) if p.suffix in ('.js', '.css', '.html')}
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
+        asset_hashes['assets/driftveil-pack.bin'] = hashlib.sha256((site/'assets/driftveil-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/nimbasa-pack.bin'] = hashlib.sha256((site/'assets/nimbasa-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/castelia-pack.bin'] = hashlib.sha256((site/'assets/castelia-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/field-pack.bin'] = hashlib.sha256((site/'assets/field-pack.bin').read_bytes()).hexdigest()
@@ -98,12 +123,12 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.47', 'revision': revision,
-            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack},
+            'version': '0.48', 'revision': revision,
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)
-    print(f"Built Soffiolieve 0.47 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.48 ({revision}) in {target}")
 
 
 if __name__ == '__main__':

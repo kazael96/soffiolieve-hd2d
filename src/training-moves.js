@@ -3,6 +3,15 @@
 (()=>{
  const C=ChapterMoves,previousSelect=C.select,previousSample=C.sample,previousDraw=C.draw;
  const fitted={
+  523:[.085,0,.72,.39,.12,.06,20,.94,[.34,-.8],[.33,-.23],[-.3,-.57],.64],
+  545:[.07,.12,.7,.46,.14,.045,24,.89,[.28,-.7],[.34,-.42],[-.34,-.64],.49],
+  552:[.17,.48,.86,.29,.13,.085,16,.87,[.32,-.79],[.37,-.55],[-.31,-.3],.7],
+  561:[.035,1.27,.14,0,.055,.025,18,.67,[.11,-.56],[.48,-.51],[0,-.94],.56],
+  572:[.14,.81,1.08,.22,.095,.08,16,.8,[.17,-.67],[.27,-.49],[-.3,-.33],.81],
+  573:[.1,.68,1.29,.17,.075,.065,14,.77,[.19,-.7],[.28,-.5],[-.33,-.28],.75],
+  574:[.09,.58,0,.13,.045,.07,8,.5,[.11,-.74],[.25,-.45],[0,-.9],.72],
+  580:[.16,1.04,.43,.25,.11,.075,18,.83,[.35,-.73],[.38,-.55],[-.22,-.31],.68],
+  587:[.14,1.16,.91,.2,.08,.065,20,.93,[.2,-.65],[.39,-.47],[-.3,-.31],.78],
   550:[.12,.25,1.1,0,.08,.035,16,.83,[.36,-.52],[.25,-.44],[-.29,-.31],.55],
   554:[.2,.68,0,.27,.14,.12,12,.66,[.22,-.6],[.3,-.5],[-.2,-.5],.72],
   559:[.17,.83,.38,.29,.1,.07,14,.78,[.2,-.72],[.33,-.44],[-.21,-.34],.77],
@@ -45,6 +54,8 @@
   1:'counterPalm',2:'karate',3:'palmFlurry',10:'furySlash',15:'leafBlade',16:'gust',20:'squeeze',21:'tailSlam',22:'vineWhip',24:'doubleKick',28:'sandKick',29:'headRam',33:'bodyRam',35:'squeeze',36:'bodyRam',39:'tailPound',40:'needle',43:'meanLook',44:'crunch',45:'roar',48:'soundWave',52:'flameJet',55:'waterPulse',60:'psybeam',61:'bubbles',67:'lowKick',68:'counterPalm',69:'throw',71:'drain',72:'drain',73:'seed',74:'grow',75:'leafBlade',77:'powder',78:'powder',79:'powder',81:'silk',86:'electricWave',88:'rockVolley',93:'psywave',95:'hypnosis',98:'quick',99:'rally',103:'soundWave',106:'harden',109:'psybeam',111:'curl',116:'focus',117:'bide',122:'tongue',123:'smoke',133:'focus',145:'bubbles',149:'psywave',154:'furySlash',162:'superFang',165:'struggle',168:'thief',178:'powder',182:'shellGuard',189:'mud',197:'watch',205:'roll',206:'leafBlade',207:'roar',209:'flameRush',210:'furySlash',213:'charm',228:'ambush',233:'throw',235:'restore',236:'restore',242:'crunch',249:'counterPalm',252:'counterPalm',253:'chorus',259:'roar',268:'charge',269:'roar',270:'encourage',274:'encourage',279:'counterPalm',281:'yawn',286:'seal',287:'restore',290:'bodyRam',292:'palmFlurry',314:'airCut',316:'watch',320:'chant',328:'sandKick',334:'harden',341:'mud',342:'tailSlam',345:'leafBlade',346:'shellGuard',350:'rockVolley',351:'electricWave',352:'waterPulse',355:'roost',358:'counterPalm',372:'ambush',373:'seal',381:'chant',392:'aquaRing',402:'seed',408:'psybeam',428:'headRam',447:'vineWhip',450:'crunch',468:'swordDance',479:'rockVolley',480:'throw',481:'fireRing',485:'psywave',488:'flameRush',490:'lowKick',494:'encourage',495:'bow',496:'chorus',498:'counterPalm',503:'waterPulse',510:'fireRing',514:'retaliate',522:'soundWave',526:'rally',531:'heartDive',534:'shellSlash',536:'leafVortex'
  };
  const colors={Erba:'#abdb75',Fuoco:'#ffad6a',Acqua:'#8bdded',Elettro:'#ffec86',Veleno:'#b98bd5',Psico:'#f5b5e6',Coleottero:'#c3db77',Roccia:'#c5b48f',Terra:'#cbb182',Lotta:'#eeb887',Buio:'#b3a1d5',Volante:'#cde9ef'};
+ Object.assign(recipes,{348:'leafBlade',535:'flameRush',158:'crunch',244:'focus',46:'roar',163:'furySlash',374:'throw',171:'hypnosis',403:'airCut',23:'tailSlam',521:'electricWave',157:'rockVolley',347:'focus',339:'rally',330:'mud',34:'bodyRam',203:'shellGuard',474:'sludgeJet',97:'quick',202:'drain',204:'charm',366:'gust',401:'tailSlam',37:'bodyRam',187:'rally',188:'sludgeJet',224:'needle',226:'encourage',357:'watch',18:'gust',113:'shellGuard',115:'shellGuard',321:'encourage',227:'encourage',129:'needle',47:'soundWave',541:'tailSlam',331:'seed',313:'charm',473:'psybeam',260:'encourage',432:'gust',17:'airCut',332:'airCut',297:'powder',84:'electricWave',104:'quick',486:'electricWave',512:'quick'});
+ recipes[312]='restore';
  const pairs={};
  for(const [name,row]of Object.entries(TRAINING_DATA.progression)){
   pairs[name]=Training.moves(name);
@@ -52,7 +63,7 @@
    if(SpeciesMoves.select(row.id,id))continue;
    const m=GEN5.moves.find(m=>m.id===id),kind=recipes[id];if(!kind)throw Error('Coreografia non definita: '+name+' / '+id);
    if(!(C.rigs[row.id]||DemoMoves.rigs[row.id]))throw Error('Anatomia non definita: '+name);
-   const self=[7,10,12].includes(m.target),frames=kind==='quick'?86:kind==='throw'?152:kind==='powder'?142:126;
+   const self=id===312||[7,10,12].includes(m.target),frames=kind==='quick'?86:kind==='throw'?152:kind==='powder'?142:126;
    C.profiles[row.id+'-'+id]={species:row.id,id,name:m.name,kind,chapter:true,training:true,nativeEffects:true,key:'training-'+row.id+'-'+id,frames,impact:Math.round(frames*.48),attachment:/leaf|seed|vine|powder|silk/.test(kind)?'leaf':/Palm|palm|Slash|Blade|Kick|kick|throw|thief/.test(kind)?'hand':'mouth',target:self?'self':'foe',damage:m.category!==0,color:colors[m.type]||'#e5edf4'};
   }
  }
@@ -79,6 +90,14 @@
   }
   if(['harden','restore','aquaRing'].includes(k)){a.crouch=k==='harden'?r.crouch*w:-.035*w;a.head=-r.head*w;a.arms=-r.arms*.3*w;a.breath=.05*w;a.glare=k==='harden'?w:0;}
   if(k==='bide'){a.crouch=r.crouch*w;a.head=-r.head*w;a.arms=-r.arms*.45*w;a.tail=-r.tail*.3*w;a.breath=.025*Math.sin(f*.2)*w;if(p.phase===1){a.reach=.22*surge;a.arms=r.arms*surge;}}
+  if(p.species===523){a.feet+=.25*Math.sin(t*Math.PI*16)*surge;a.tail+=.22*Math.sin(t*Math.PI*3)*w;if(['electricWave','charge'].includes(k)){a.head=-.18*w;a.glare=w;a.reach=0;}}
+  if(p.species===545){a.feet+=.22*Math.sin(t*Math.PI*20)*surge;a.tail+=.18*Math.sin(t*Math.PI*3)*w;if(k==='needle'){a.head=-.15*w;a.reach=.28*surge;}}
+  if(p.species===552){a.arms+=.2*Math.sin(t*Math.PI*3)*w;a.tail-=.16*w;if(k==='crunch'){a.head+=.14*Math.sin(t*Math.PI*4)*w;a.crouch+=.04*w;}}
+  if(p.species===561){a.arms+=.35*Math.sin(t*Math.PI*6)*w;a.lift+=.08*w;a.feet=0;if(/psy|hypno|focus|watch/.test(k)){a.glare=w;a.arms+=.32*w;}}
+  if([572,573].includes(p.species)){a.tail+=Math.sin(t*Math.PI*(p.id===541?14:6))*(p.species===573?.5:.37)*w;a.feet+=.12*beat*surge;if(p.id===47){a.head=-.23*w;a.breath=.055*Math.sin(t*Math.PI*8)*w;}if(p.id===321){a.arms+=.4*Math.sin(t*Math.PI*12)*w;}}
+  if(p.species===574){a.head+=.05*Math.sin(t*Math.PI*2)*w;a.arms+=.21*Math.sin(t*Math.PI*2)*w;a.glare=/psy|hypno|watch|focus/.test(k)?w:a.glare;}
+  if(p.species===580){a.arms+=.38*Math.sin(t*Math.PI*10)*w;a.tail+=.17*Math.sin(t*Math.PI*4)*w;if(['gust','airCut','quick'].includes(k))a.lift+=.13*w;}
+  if(p.species===587){a.tail+=.3*Math.sin(t*Math.PI*4)*w;if(['quick','airCut','gust'].includes(k)){a.arms+=.5*w;a.lift+=.18*w;}if(['electricWave','charge'].includes(k)){a.arms+=.38*w;a.glare=w;a.reach=0;}}
   if(p.species===496){a.tail+=.23*Math.sin(t*Math.PI*4)*w;a.lean+=.025*Math.sin(t*Math.PI*2)*w;}
   if(p.species===499&&p.damage){a.crouch+=.025*w;a.arms+=.15*Math.sin(t*Math.PI*2)*w;}
   if(p.species===502&&/Slash|Palm|palm/.test(k)){a.arms+=.24*Math.sin(t*Math.PI*4)*w;a.hip=.055*Math.sin(t*Math.PI*2)*w;}

@@ -1,6 +1,6 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris']);
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan']);
  const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
@@ -20,6 +20,18 @@
   const arrival=(x,y,destinationZone,targetUid,destination)=>({kind:'arrival',points:route(n,{x,y},blocked),anchor:{x,y},clip:null,background:true,destinationZone,targetUid,destination,itineraryVersion:1});
   // Reach the next story position and wait there, even if its native map has
   // not become the player's active map yet. Arrival is not a disappearance.
+  if(zone===329&&n.name==='Komor'){
+   const p=arrival(-456.9,-319.5,329,10,'driftveil-approach');p.points=[...route(n,{x:-453.5,y:-319.5},blocked),{x:-454.5,y:-319.5},p.anchor];p.clip=[1,0,0,455.8];return p;
+  }
+  if(zone===329&&n.name==='Camelia'){const p=portal(-406.5,-313.5,1,0);p.points=[...route(n,{x:-407.5,y:-313.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='nimbasa-gym';return p;}
+  if(zone===63){const p=portal(-2.5,29.5,0,1);p.points=[...route(n,{x:-2.5,y:28.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='route5-camelia';return p;}
+  if(zone===64){const p=portal(-6.5,-2, -1,0);p.points=[...route(n,{x:-5.5,y:-2},blocked),p.anchor,p.points[1]];p.background=true;p.destination=n.name==='N'?'n-next-journey':'plasma-retreat';return p;}
+  if(zone===96){
+   // Wait at the south passage while the next map is outside this chapter.
+   // IRBI's next Komor is zone191 actor0 (171,466), beyond this city border.
+   if(n.name==='Komor')return arrival(-606.5,-304.5,96,253,'cold-storage-front');
+   const p=portal(-571.5,-351.5,0,-1);p.points=[...route(n,{x:-571.5,y:-350.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination='driftveil-gym';return p;
+  }
   if(zone===326&&n.name==='Komor'){
    const p=arrival(-353.5,-265.3,326,11,'route4-gate');
    p.points=[...route(n,{x:-353.5,y:-261.5},blocked),{x:-353.5,y:-262.5},p.anchor];
@@ -146,10 +158,10 @@
      const point=r.plan.points[r.index];if(point){const dx=point.x-a.x,dy=point.y-a.y,d=Math.hypot(dx,dy),step=3.75*dt;
       if(d>0&&this.obstructed(r,{x:a.x+dx/d*Math.min(d,step),y:a.y+dy/d*Math.min(d,step)})){this.pose(a,a.direction);continue;}
       if(['door','stairs'].includes(r.plan.kind)&&r.index===r.plan.points.length-1&&!r.opened){r.stage='opening';Promise.resolve(this.portal(r)).then(handle=>{if(this.records.get(key)!==r){this.finishPortal({...r,handle});return;}r.handle=handle;r.opened=true;r.stage='walk';},error=>{r.error=String(error);r.stage='hold';});continue;}
-      if(r.opened||r.plan.destination==='route4-gate'&&r.index===r.plan.points.length-1)a.exitClip=r.plan.clip;
+      if(r.opened||['route4-gate','driftveil-approach'].includes(r.plan.destination)&&r.index===r.plan.points.length-1)a.exitClip=r.plan.clip;
       if(d<=step){a.x=point.x;a.y=point.y;r.travel+=d;r.index++;}else{a.x+=dx/d*step;a.y+=dy/d*step;r.travel+=step;}
       if(d>1e-8)this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);else this.pose(a,a.direction);
-     }else {r.stage=r.plan.kind==='arrival'?'resident':r.plan.kind==='stairs'?'descend':'hold';if(r.plan.kind==='arrival'){a.fieldZone=r.plan.destinationZone;a.uid=r.plan.targetUid;a.exitProbe=false;this.pose(a,r.plan.destination==='center-front'?1:a.direction);}else this.pose(a,a.direction);}
+     }else {r.stage=r.plan.kind==='arrival'?'resident':r.plan.kind==='stairs'?'descend':'hold';if(r.plan.kind==='arrival'){a.fieldZone=r.plan.destinationZone;a.uid=r.plan.targetUid;if(r.plan.destination==='cold-storage-front')a.script=2000;a.exitProbe=false;this.pose(a,r.plan.destination==='center-front'?1:a.direction);}else this.pose(a,a.direction);}
     }
     if(r.stage==='descend'){a.exitClip=r.plan.clip;a.noShadow=true;a.height=Math.max(-2.5,(a.height||0)-dt*1.8);if(a.height===-2.5)r.stage='hold';}
     // A result is valid only for the exact rendered pose. Never interpret a
@@ -161,7 +173,7 @@
   wait(n){const r=this.records.get(identity(n));if(!r||r.plan.background||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
   clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
   save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
-  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(!r||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)||[326,327,328,90].includes(zone)&&['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)))continue;
+  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(!r||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)||[326,327,328,90].includes(zone)&&['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)||[329,253,96,99].includes(zone)&&['driftveil-approach','cold-storage-front'].includes(r.plan.destination)))continue;
    const lateFriends=(progress.flags||[]).includes(515)||(progress.vars?.[16508]||0)>=2;
    if(r.zone===317&&!r.plan.itineraryVersion&&(r.actor.name==='Aralia'&&['path','resident'].includes(r.plan.kind)||r.actor.name==='Aralia'&&r.plan.destination==='lab'||['Komor','Belle'].includes(r.actor.name)&&(['path'].includes(r.plan.kind)||lateFriends&&r.plan.kind==='resident'))){
     const actor={...r.actor};if(lateFriends&&actor.name!=='Aralia')actor.uid=actor.name==='Komor'?3:4;
@@ -171,6 +183,7 @@
     r={...r,actor,plan:plan(actor,r.zone,this.blocked),stage:'walk',index:0,age:0,travel:0,opened:false};
    }
    const stage=r.plan.kind==='resident'?'resident':['rejoin','opening'].includes(r.stage)?'walk':r.stage,actor={...r.actor,exitProbe:stage!=='resident'};
+   if(stage==='resident'&&r.plan.destination==='cold-storage-front')actor.script=2000;
    if(r.opened){actor.exitClip=r.plan.clip;actor.noShadow=(actor.height||0)<0;}
    // Door models/handles belong to this renderer instance, not the save file.
    // Keep the portal cut but reopen its model before resuming a saved passage.

@@ -2,6 +2,10 @@
 
 Richieste dall'utente il27 ottobre 2026. Valgono per la demo, le revisioni successive e la futura versione completa. Sono criteri di accettazione, non semplici preferenze. La resa rimane HD-2D; queste richieste autorizzano ad adattare la messa in scena originale.
 
+## Progressione fra città e limite di livello
+
+Dal 3 novembre 2026 proseguire per tappe città per città fino al finale della storia principale, inclusi Lega, N e Ghecis, come confermato dall’utente. Ogni nuova tappa richiede integrazione, collaudo e verifica della pubblicazione prima di passare alla successiva. Il cap delle estensioni segue il livello più alto della squadra del prossimo Capopalestra, verificato nei dati originali; conservare livelli ed esperienza già superiori nei salvataggi precedenti.
+
 ## Standard obbligatori per ogni modifica
 
 Consolidamento richiesto il 29 ottobre 2026. Questi standard valgono per demo e futura versione completa, anche quando cambia chi lavora al progetto. Le sezioni storiche sotto documentano l’avanzamento; non riducono il perimetro richiesto successivamente. Registrare uno standard non equivale ad averne completato l’implementazione.
@@ -32,7 +36,7 @@ Riferimento corrente: [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md). Dopo il 
 
 ### D. Mosse, Pokémon e reazioni
 
-- Misurare la copertura per coppia specie/forma–mossa, includendo ogni fonte di apprendimento resa disponibile. La priorità iniziale entro il livello 10 è stata ampliata alle mosse della demo: mantenere e aggiornare la [matrice corrente 0.47](SPECIES-MOVES-047.md), 646 coppie su 49 specie e forme predisposte fino al livello 25, distinguendo sempre specie effettivamente ottenibili e verifiche grafiche dai soli controlli numerici. Le matrici precedenti restano riferimenti storici.
+- Misurare la copertura per coppia specie/forma–mossa, includendo ogni fonte di apprendimento resa disponibile. La priorità iniziale entro il livello 10 è stata ampliata alle mosse della demo: mantenere e aggiornare la [matrice corrente 0.48](SPECIES-MOVES-048.md), 849 coppie su 58 specie e forme predisposte fino al livello 30, distinguendo sempre specie effettivamente ottenibili e verifiche grafiche dai soli controlli numerici. Le matrici precedenti restano riferimenti storici.
 - Animare coerentemente sia la mossa sia il Pokémon che la esegue: corpo, anatomia, punto di emissione/contatto, traiettorie e recupero. Integrare effetti originali, sequenze senza particelle, contesti speciali e movimenti di camera pertinenti.
 - Ogni coreografia e reazione deve funzionare per il giocatore e per l’avversario. Il bersaglio reagisce in modo coerente con impatto, esito, stato e numero dei colpi; distinguere mancato bersaglio, fallimento e mosse rivolte a sé stessi.
 - Conservare danni, precisione, PP, priorità, abilità, stati e altre regole di Pokémon Nero. Nessuna alterazione delle meccaniche per semplificare una coreografia. Una prova di esecuzione senza eccezioni non certifica da sola la fedeltà delle regole.

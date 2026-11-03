@@ -1,4 +1,4 @@
-# Soffiolieve HD-2D — demo 0.47
+# Soffiolieve HD-2D — demo 0.48
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
 Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli → Percorso 4 → Sciroccopoli**.
@@ -11,6 +11,8 @@ Comprende le prime tre palestre, gli eventi del Team Plasma e la storia principa
 Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [646 coppie su 49 specie e forme](docs/SPECIES-MOVES-047.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.48 prosegue fino all’arrivo a Libecciopoli: N e ruota panoramica, palestra di Camelia con carrelli e scambi, Medaglia Volt/MT72, Percorso 5 con Nardo e lotta in coppia, ponte mobile e confronto con Rafan. Limite di allenamento 30, con conservazione dei livelli superiori nei salvataggi precedenti. Nuovi incontri, sette contesti di lotta e coreografie sui due lati; 849 coppie su 58 specie/forme predisposte. Inventario, adattamenti e attività escluse in [NIMBASA-DRIFTVEIL-048.md](docs/NIMBASA-DRIFTVEIL-048.md), matrice in [SPECIES-MOVES-048.md](docs/SPECIES-MOVES-048.md), prove in [QA-048.md](docs/QA-048.md).
 
 La 0.47 aggiunge Percorso 4, sfida con Komor e chiamata di Aralia, dieci Ultra Ball al varco, arrivo a Sciroccopoli, Team Plasma, Bicicletta e Centro Pokémon. Sandile, Darumaka e Scraggy sono catturabili sulla sabbia scura; forme native di Basculin, nuovi fondali, tempesta di sabbia e musiche stagionali conservano le regole del luogo. Limite 25. Teatro Musical, luna park e palestra di Camelia proseguiranno nel capitolo successivo. Inventario in [ROUTE4-NIMBASA-047.md](docs/ROUTE4-NIMBASA-047.md), prove in [QA-047.md](docs/QA-047.md).
 

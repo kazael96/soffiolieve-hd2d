@@ -1,8 +1,8 @@
 /* Exercise the actual story controller against real release maps and Gen V battles. */
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');
 const site=path.resolve(process.argv[2]||'_site');
-function environment({save,sourceRoot,castelia=false,nimbasa=false}={}){
- castelia=castelia||nimbasa;
+function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=false}={}){
+ nimbasa=nimbasa||driftveil;castelia=castelia||nimbasa;
  const read=file=>fs.readFileSync(sourceRoot&&fs.existsSync(path.join(sourceRoot,file))?path.join(sourceRoot,file):path.join(site,file),'utf8');
  const elements=new Map(),records=new Map();
  if(save)records.set('soffiolieve-black-opening-v2',JSON.stringify(save));
@@ -13,11 +13,13 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false}={}){
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','double-rules.js','native-forms.js','engine.js','battle-medicine.js','journey-state.js','training-data.js','training.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js','route2-assets.js','route2-data.js','route2-trainers.js','route2-bootstrap.js','striaton-assets.js','striaton-data.js','striaton-bootstrap.js','route3-assets.js','route3-data.js','route3-bootstrap.js','pinwheel-assets.js','pinwheel-data.js','pinwheel-events.js','pinwheel-rails.js','native-rails.js','pinwheel-bootstrap.js'])vm.runInContext(read(file),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','double-rules.js','native-forms.js','engine.js','battle-medicine.js','journey-state.js','training-data.js','training.js','scene-camera.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js','route2-assets.js','route2-data.js','route2-trainers.js','route2-bootstrap.js','striaton-assets.js','striaton-data.js','striaton-bootstrap.js','route3-assets.js','route3-data.js','route3-bootstrap.js','pinwheel-assets.js','pinwheel-data.js','pinwheel-events.js','pinwheel-rails.js','native-rails.js','pinwheel-bootstrap.js'])vm.runInContext(read(file),c,{filename:file});
  if(castelia){for(const file of ['castelia-assets.js','castelia-events.js','castelia-data.js','castelia-scenes.js','castelia-rails.js','castelia-bootstrap.js','castelia-phone.js','castelia-gym-data.js','castelia-gym.js','castelia-gestures.js'])vm.runInContext(read(file),c,{filename:file});c.RuntimeAssets={preloadImages:async()=>true,image:async()=>({})};c.NativeTextLayout={resource:s=>s};}
  if(nimbasa)for(const file of ['nimbasa-assets.js','nimbasa-events.js','nimbasa-data.js','nimbasa-scenes.js','nimbasa-bootstrap.js','nimbasa-phone.js','nimbasa-field.js'])vm.runInContext(read(file),c,{filename:file});
- c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],groundHeight:()=>0,gl:{},upload(){return {};}};
- c.StarterScene={loadGLB:async()=>({doc:{textures:[]},images:[]})};
+ if(driftveil)for(const file of ['driftveil-assets.js','driftveil-events.js','driftveil-data.js','driftveil-scenes.js','driftveil-gym-data.js','driftveil-bootstrap.js','driftveil-gym.js','driftveil-field.js'])vm.runInContext(read(file),c,{filename:file});
+ c.DriftveilCinematics={play:async id=>{c.cinematics??=[];c.cinematics.push(id);}};
+ c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],groundHeight:()=>[62,64].includes(c.Journey?.state.original?.zone)?1:c.Journey?.state.original?.zone===63?2:0,gl:{},upload(){return {};}};
+ vm.runInContext(read('starter-scene.js'),c,{filename:'starter-scene.js'});c.StarterScene.loadGLB=async()=>({doc:{textures:[]},images:[]});
  for(const file of ['field-model-assets.js','field-models.js'])vm.runInContext(read(file),c,{filename:file});
  const source=read('game.js');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
@@ -29,7 +31,7 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false}={}){
  c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
  for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js','original-story.js'])vm.runInContext(read(file),c,{filename:file});
- c.DoubleBattles={partner:async args=>{const [ally,first,second]=args;c.startBattle(true,{story:'Team Plasma',trainerId:first,doubles:true,ally:c.OPENING_TRAINERS[ally].party,secondFoe:c.OPENING_TRAINERS[second].party,p1:c.Journey.configs(),p2:c.OPENING_TRAINERS[first].party});}};
+ c.DoubleBattles={partner:async args=>{const [ally,first,second]=args;c.startBattle(true,{story:first===401?'Mila e Michelino':'Team Plasma',trainerId:first,doubles:true,ally:c.OPENING_TRAINERS[ally].party,secondFoe:c.OPENING_TRAINERS[second].party,p1:c.Journey.configs(),p2:c.OPENING_TRAINERS[first].party});}};
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
   const {config}=c.lastBattle;if(config.trainerId&&[53,54,55,59,60,61,64].includes(config.trainerId)){assert.equal(config.noBlackout,config.trainerId!==64);const t=c.OPENING_TRAINERS[config.trainerId];assert.equal(config.p2[0].name,config.trainerId===64?'Purrloin':c.StoryState.rivalStarter(c.Journey.state.starter,config.story));assert.equal(config.p2[0].ivs.hp,config.trainerId===64?6:0);assert.equal(config.p2[0].nature,t.party[0].nature);}const s=new c.GEN5.Session(config.p1,config.p2,{enemyName:config.story,seed:[1,2,3,4],doubles:config.doubles,ally:config.ally,secondFoe:config.secondFoe});c.configureOpeningBattle(s,config);c.Journey.attachBattle(s,config.story);
