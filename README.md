@@ -1,16 +1,18 @@
-# Soffiolieve HD-2D — demo 0.46
+# Soffiolieve HD-2D — demo 0.47
 
 Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli**.
-Comprende le prime tre palestre, gli eventi del Team Plasma e la storia principale di Austropoli fino alla sfida con Belle al varco nord. Il limite di allenamento è 25; i livelli e l’esperienza già superiori dei vecchi salvataggi vengono conservati. Stato della distribuzione e limiti nelle note di collaudo del capitolo.
+Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli → Percorso 4 → Sciroccopoli**.
+Comprende le prime tre palestre, gli eventi del Team Plasma e la storia principale di Austropoli fino alla sfida con Belle al varco nord, poi il Percorso 4 e l’arrivo a Sciroccopoli con Team Plasma e Bicicletta. Il limite di allenamento è 25; i livelli e l’esperienza già superiori dei vecchi salvataggi vengono conservati. Stato della distribuzione e limiti nelle note di collaudo del capitolo.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [553 coppie su 44 specie](docs/SPECIES-MOVES-046.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [646 coppie su 49 specie e forme](docs/SPECIES-MOVES-047.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Questa versione
+
+La 0.47 aggiunge Percorso 4, sfida con Komor e chiamata di Aralia, dieci Ultra Ball al varco, arrivo a Sciroccopoli, Team Plasma, Bicicletta e Centro Pokémon. Sandile, Darumaka e Scraggy sono catturabili sulla sabbia scura; forme native di Basculin, nuovi fondali, tempesta di sabbia e musiche stagionali conservano le regole del luogo. Limite 25. Teatro Musical, luna park e palestra di Camelia proseguiranno nel capitolo successivo. Inventario in [ROUTE4-NIMBASA-047.md](docs/ROUTE4-NIMBASA-047.md), prove in [QA-047.md](docs/QA-047.md).
 
 La 0.46 aggiunge le strade di Austropoli, il recupero del Pokémon di Belle dal Team Plasma, il covo, la palestra di miele di Artemisio e la sfida con Belle dopo la terza medaglia. Aggiunge evoluzioni delle tre scimmiette con pietre, MT70/76, coreografie e fondali legati ai nuovi luoghi, mantenendo il limite 25. Geometria della città e risorse della palestra si caricano quando servono. Inventario, confini e adattamenti in [CASTELIA-046.md](docs/CASTELIA-046.md); prove in [QA-046.md](docs/QA-046.md).
 

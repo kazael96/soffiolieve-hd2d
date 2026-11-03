@@ -20,6 +20,20 @@
   const arrival=(x,y,destinationZone,targetUid,destination)=>({kind:'arrival',points:route(n,{x,y},blocked),anchor:{x,y},clip:null,background:true,destinationZone,targetUid,destination,itineraryVersion:1});
   // Reach the next story position and wait there, even if its native map has
   // not become the player's active map yet. Arrival is not a disappearance.
+  if(zone===326&&n.name==='Komor'){
+   const p=arrival(-353.5,-265.3,326,11,'route4-gate');
+   p.points=[...route(n,{x:-353.5,y:-261.5},blocked),{x:-353.5,y:-262.5},p.anchor];
+   p.clip=[0,0,1,263.8];return p;
+  }
+  if(zone===90){
+   if(n.name==='Komor'&&n.uid===3&&!n.leavingGate)return arrival(-10.5,-7.5,90,3,'nimbasa-gate-wait');
+   const p=portal(-10.5,-1.5,0,1);p.points=[...route(n,{x:-10.5,y:-2.5},blocked),p.anchor,p.points[1]];p.background=true;p.destination=n.name==='Komor'?'route4-catching':'route4-aralia';return p;
+  }
+  if(zone===62){
+   if(n.name==='Belle')return arrival(-350.5,-317.5,62,11,'musical-front');
+   const plasma=n.model===98,p=portal(plasma?-347.5:-353.5,plasma?-289.5:-272.5,plasma?1:0,plasma?0:1);
+   p.points=[...route(n,{x:p.anchor.x-(plasma?1:0),y:p.anchor.y-(plasma?0:1)},blocked),p.anchor,p.points[1]];p.background=true;p.destination=plasma?'nimbasa-park':'route3-daycare';return p;
+  }
   if(zone===317){
    if(n.name==='Aralia')return arrival(12.5,-93.5,397,6,'center-front');
    if(n.name==='Komor')return n.uid===250?arrival(8.5,-71.5,317,3,'route-comparison'):arrival(1.5,-93.5,397,10,'plaza');
@@ -132,7 +146,7 @@
      const point=r.plan.points[r.index];if(point){const dx=point.x-a.x,dy=point.y-a.y,d=Math.hypot(dx,dy),step=3.75*dt;
       if(d>0&&this.obstructed(r,{x:a.x+dx/d*Math.min(d,step),y:a.y+dy/d*Math.min(d,step)})){this.pose(a,a.direction);continue;}
       if(['door','stairs'].includes(r.plan.kind)&&r.index===r.plan.points.length-1&&!r.opened){r.stage='opening';Promise.resolve(this.portal(r)).then(handle=>{if(this.records.get(key)!==r){this.finishPortal({...r,handle});return;}r.handle=handle;r.opened=true;r.stage='walk';},error=>{r.error=String(error);r.stage='hold';});continue;}
-      if(r.opened)a.exitClip=r.plan.clip;
+      if(r.opened||r.plan.destination==='route4-gate'&&r.index===r.plan.points.length-1)a.exitClip=r.plan.clip;
       if(d<=step){a.x=point.x;a.y=point.y;r.travel+=d;r.index++;}else{a.x+=dx/d*step;a.y+=dy/d*step;r.travel+=step;}
       if(d>1e-8)this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);else this.pose(a,a.direction);
      }else {r.stage=r.plan.kind==='arrival'?'resident':r.plan.kind==='stairs'?'descend':'hold';if(r.plan.kind==='arrival'){a.fieldZone=r.plan.destinationZone;a.uid=r.plan.targetUid;a.exitProbe=false;this.pose(a,r.plan.destination==='center-front'?1:a.direction);}else this.pose(a,a.direction);}
@@ -147,7 +161,7 @@
   wait(n){const r=this.records.get(identity(n));if(!r||r.plan.background||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
   clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
   save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
-  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(!r||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)))continue;
+  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(!r||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)||[326,327,328,90].includes(zone)&&['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)))continue;
    const lateFriends=(progress.flags||[]).includes(515)||(progress.vars?.[16508]||0)>=2;
    if(r.zone===317&&!r.plan.itineraryVersion&&(r.actor.name==='Aralia'&&['path','resident'].includes(r.plan.kind)||r.actor.name==='Aralia'&&r.plan.destination==='lab'||['Komor','Belle'].includes(r.actor.name)&&(['path'].includes(r.plan.kind)||lateFriends&&r.plan.kind==='resident'))){
     const actor={...r.actor};if(lateFriends&&actor.name!=='Aralia')actor.uid=actor.name==='Komor'?3:4;

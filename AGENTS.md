@@ -4,7 +4,11 @@
 
 Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md), consolidati il 29 ottobre 2026: continuità degli eventi e posizioni successive degli NPC, fedeltà HD-2D, sfondi e Pokémon ambientali, animazioni e reazioni sui due lati, audio, comandi/servizi, salvataggi e recupero dagli errori, regressioni e consegna. Aggiornare gli inventari e compilare la checklist della PR per gli aspetti interessati. Queste istruzioni persistono per tutte le modifiche future della demo e della versione completa.
 
-## Capitolo corrente · 0.46
+## Capitolo corrente · 0.47
+
+La richiesta prosegue dopo Belle al varco nord fino all'arrivo a Sciroccopoli passando per Percorso 4, Komor, chiamata di Aralia, dono delle Ultra Ball e Team Plasma/Bicicletta. Applicare docs/ROUTE4-NIMBASA-047.md, docs/SPECIES-MOVES-047.md (646 coppie/49 specie e forme) e docs/QA-047.md. Il limite resta 25. Preservare il viaggio reale di Komor al varco attraverso mappe/salvataggi, il suo ritorno al Percorso 4 dopo il dono, Belle davanti al Teatro, meteo naturale senza scadenza, distinzione fra le forme e abilità di Basculin, fotogrammi originali della Bicicletta e caricamento differito. Musical, luna park, palestra di Camelia, Deserto e percorsi successivi restano fuori dal perimetro. La pubblicazione richiede controlli e verifica pubblica, non il solo commit.
+
+## Capitolo precedente · 0.46
 
 La richiesta del 2 novembre prosegue la storia principale di Austropoli fino alla sfida con Belle al varco nord, dopo Team Plasma e terza palestra. Applicare docs/CASTELIA-046.md, docs/SPECIES-MOVES-046.md (553 coppie/44 specie predisposte) e docs/QA-046.md. Il limite resta 25. Conservare caricamento differito della città, collisioni miste griglia/binari, geometria originale del miele, continuità degli NPC, contesti espliciti delle lotte e animazioni/reazioni sui due lati. Il Percorso 4 e le attività facoltative escluse nell'inventario non sono completati. Le sezioni successive descrivono i capitoli precedenti.
 

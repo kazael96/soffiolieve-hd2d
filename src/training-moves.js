@@ -3,6 +3,10 @@
 (()=>{
  const C=ChapterMoves,previousSelect=C.select,previousSample=C.sample,previousDraw=C.draw;
  const fitted={
+  550:[.12,.25,1.1,0,.08,.035,16,.83,[.36,-.52],[.25,-.44],[-.29,-.31],.55],
+  554:[.2,.68,0,.27,.14,.12,12,.66,[.22,-.6],[.3,-.5],[-.2,-.5],.72],
+  559:[.17,.83,.38,.29,.1,.07,14,.78,[.2,-.72],[.33,-.44],[-.21,-.34],.77],
+  568:[.06,1.08,0,.13,.055,.11,8,.71,[.14,-.55],[.42,-.44],[-.18,-.25],.58],
   512:[.12,1.03,.83,.21,.11,.07,12,.86,[.18,-.81],[.36,-.5],[-.19,-.87],.74],
   514:[.17,.92,.9,.18,.14,.075,10,.79,[.2,-.78],[.3,-.45],[-.26,-.32],.69],
   516:[.1,1.1,1.02,.24,.08,.06,14,.9,[.16,-.83],[.33,-.54],[-.21,-.28],.77],
@@ -36,7 +40,8 @@
   const [head,arms,tail,feet,lean,crouch,step,reach,mouth,hand,leaf,recoil]=v;
   C.rigs[id]={name:GEN5.species.find(p=>p.id===+id).en,head,arms,tail,feet,lean,crouch,step,reach,mouth,hand,leaf,recoil};
  }
- const recipes={110:'shellGuard',148:'electricWave',185:'ambush',397:'harden',446:'rockVolley',
+ C.rigs[699]=C.rigs[550];
+ const recipes={7:'firePalm',278:'restore',263:'bodyRam',491:'sludgeJet',91:'burrow',124:'sludgeJet',139:'smoke',254:'grow',256:'restore',280:'karate',371:'ambush',390:'poisonTrap',424:'flameBite',453:'waterRush',110:'shellGuard',148:'electricWave',185:'ambush',397:'harden',446:'rockVolley',
   1:'counterPalm',2:'karate',3:'palmFlurry',10:'furySlash',15:'leafBlade',16:'gust',20:'squeeze',21:'tailSlam',22:'vineWhip',24:'doubleKick',28:'sandKick',29:'headRam',33:'bodyRam',35:'squeeze',36:'bodyRam',39:'tailPound',40:'needle',43:'meanLook',44:'crunch',45:'roar',48:'soundWave',52:'flameJet',55:'waterPulse',60:'psybeam',61:'bubbles',67:'lowKick',68:'counterPalm',69:'throw',71:'drain',72:'drain',73:'seed',74:'grow',75:'leafBlade',77:'powder',78:'powder',79:'powder',81:'silk',86:'electricWave',88:'rockVolley',93:'psywave',95:'hypnosis',98:'quick',99:'rally',103:'soundWave',106:'harden',109:'psybeam',111:'curl',116:'focus',117:'bide',122:'tongue',123:'smoke',133:'focus',145:'bubbles',149:'psywave',154:'furySlash',162:'superFang',165:'struggle',168:'thief',178:'powder',182:'shellGuard',189:'mud',197:'watch',205:'roll',206:'leafBlade',207:'roar',209:'flameRush',210:'furySlash',213:'charm',228:'ambush',233:'throw',235:'restore',236:'restore',242:'crunch',249:'counterPalm',252:'counterPalm',253:'chorus',259:'roar',268:'charge',269:'roar',270:'encourage',274:'encourage',279:'counterPalm',281:'yawn',286:'seal',287:'restore',290:'bodyRam',292:'palmFlurry',314:'airCut',316:'watch',320:'chant',328:'sandKick',334:'harden',341:'mud',342:'tailSlam',345:'leafBlade',346:'shellGuard',350:'rockVolley',351:'electricWave',352:'waterPulse',355:'roost',358:'counterPalm',372:'ambush',373:'seal',381:'chant',392:'aquaRing',402:'seed',408:'psybeam',428:'headRam',447:'vineWhip',450:'crunch',468:'swordDance',479:'rockVolley',480:'throw',481:'fireRing',485:'psywave',488:'flameRush',490:'lowKick',494:'encourage',495:'bow',496:'chorus',498:'counterPalm',503:'waterPulse',510:'fireRing',514:'retaliate',522:'soundWave',526:'rally',531:'heartDive',534:'shellSlash',536:'leafVortex'
  };
  const colors={Erba:'#abdb75',Fuoco:'#ffad6a',Acqua:'#8bdded',Elettro:'#ffec86',Veleno:'#b98bd5',Psico:'#f5b5e6',Coleottero:'#c3db77',Roccia:'#c5b48f',Terra:'#cbb182',Lotta:'#eeb887',Buio:'#b3a1d5',Volante:'#cde9ef'};
@@ -52,7 +57,7 @@
   }
  }
  C.select=(sid,id,context={})=>{
-  const p=previousSelect(sid,id,context);if(!p?.training)return p;
+  const p=previousSelect(+sid===699?550:sid,id,context);if(!p?.training)return p;
   if(id===117)return {...p,phase:context.phase===1?1:0,storing:!!context.storing,target:context.phase===1?'foe':'self',frames:context.phase===1?160:126,impact:context.phase===1?49:60};
   return p;
  };
@@ -60,6 +65,7 @@
  C.sample=function(p,f,side='p1',miss=false){
   if(!p.training)return previousSample(p,f,side,miss);
   const a=DemoMoves.sample(p,f,side,miss),r=C.rigs[p.species]||DemoMoves.rigs[p.species],t=a.t,w=a.wind,beat=Math.sin(t*Math.PI*r.step),surge=ease((t-.2)/.25)*(1-ease((t-.57)/.35)),k=p.kind;
+  if(['burrow','sludgeJet','poisonTrap','flameBite','waterRush','grow','firePalm'].includes(k)){a.head=r.head*w;a.tail=r.tail*Math.sin(t*Math.PI*5)*w;a.arms=r.arms*Math.sin(t*Math.PI*2)*w;a.crouch=r.crouch*w;a.lean=r.lean*w;a.reach=r.reach*surge;a.breath=(k==='grow'?.09:.035)*Math.sin(Math.PI*t)*w;if(k==='burrow'){a.head=-r.head*w;a.crouch*=1.7;a.feet=r.feet*Math.sin(t*Math.PI*12)*w;}if(k==='waterRush')a.lift=.06*w;}
   if(['gust','airCut','roost'].includes(k)){a.arms=r.arms*Math.sin(t*Math.PI*8)*w;a.lift=k==='roost'?0:.1*w;a.head=-r.head*w;a.crouch=k==='roost'?r.crouch*w:0;}
   if(['quick','thief','lowKick','doubleKick','karate','palmFlurry','throw','heartDive'].includes(k)){
    a.reach=r.reach*surge*(miss?.65:1);a.lean=r.lean*w;a.head=r.head*w;a.crouch=r.crouch*w;a.feet=r.feet*beat*surge;a.arms=r.arms*Math.sin(t*Math.PI*(k==='palmFlurry'?8:2))*w;a.tail=-r.tail*w;
