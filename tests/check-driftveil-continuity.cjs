@@ -1,0 +1,12 @@
+/* Early arrival, stationary trigger recheck and save/reload during Komor's trip. */
+const assert=require('node:assert/strict'),{environment,drain}=require('./check-story-runtime.cjs');
+(async()=>{
+ const c=environment({driftveil:true,sourceRoot:process.env.QA_SOURCE_ROOT}),n=c.NativeStory,j=c.Journey;await c.DriftveilChapter.ensure();Object.assign(n.state,{intro:true,initialized:true,badges:[0,1,2]});j.state.phase='nimbasa';j.state.starter='Snivy';j.state.party=['Servine','Pignite','Dewott'].map(name=>j.pack(c.makeMon(name,30),c.OPENING_DATA[name].growth[30]));await n.changeZone(63,28,5);await drain(c,n.run(0),0,"p1");await n.changeZone(329,378,438);await drain(c,n.run(0),0,"p1");
+ await n.changeZone(329,337,432);await drain(c,n.run(4),0,'p1');assert.equal(n.state.vars[16531],3);assert.equal(n.departures.records.get('Komor')?.plan.destination,'driftveil-approach');n.captureActors();j.save(true);const saved=c.StoryState.read(c.localStorage);assert.ok(saved.original.departures.some(r=>r.actor.name==='Komor'));
+ for(const speed of [1,2,4]){
+  const r=environment({driftveil:true,sourceRoot:process.env.QA_SOURCE_ROOT,save:saved}),ns=r.NativeStory,jr=r.Journey;await r.DriftveilChapter.ensure();r.testSpeed=speed;await ns.changeZone(96,204,432);assert.ok(ns.departures.records.has('Komor'),'Transit lost on city entry');jr.step(1/30,false);assert.equal(ns.state.vars[16527]||0,0);assert.equal(ns.locked,false,'Early arrival must retain player control');
+  const step=jr.step;let finish;const done=new Promise(resolve=>finish=resolve);jr.step=(...args)=>{step(...args);assert.ok(ns.visualActors().filter(a=>a.name==="Komor").length<=1,"Komor duplicated during adoption");if(ns.state.vars[16527]===1&&!ns.locked)finish();};await drain(r,done,0,'p1');assert.equal(jr.state.phase,'driftveil');const cold=ns.departures.records.get('Komor');assert.equal(cold?.plan.destination,'cold-storage-front');
+  ns.captureActors();jr.save(true);const continued=c.StoryState.normalize(jr.state);assert.ok(continued.original.departures.some(d=>d.plan.destination==='cold-storage-front'));await ns.changeZone(99,7,13);assert.equal(ns.departures.records.get('Komor')?.plan.destination,'cold-storage-front');await ns.changeZone(96,204,432);assert.equal(ns.state.vars[16527],1,'Arrival replayed on return');console.log('PASS Komor: early arrival, stationary trigger, reload and Center return at speed '+speed);
+ }
+})().catch(error=>{console.error(error);process.exitCode=1;});
+

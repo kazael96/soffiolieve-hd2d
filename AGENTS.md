@@ -4,7 +4,11 @@
 
 Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md), consolidati il 29 ottobre 2026: continuità degli eventi e posizioni successive degli NPC, fedeltà HD-2D, sfondi e Pokémon ambientali, animazioni e reazioni sui due lati, audio, comandi/servizi, salvataggi e recupero dagli errori, regressioni e consegna. Aggiornare gli inventari e compilare la checklist della PR per gli aspetti interessati. Queste istruzioni persistono per tutte le modifiche future della demo e della versione completa.
 
-## Capitolo corrente · 0.47
+## Capitolo richiesto · 0.48 in lavorazione
+
+L'utente ha autorizzato esplicitamente il **limite di allenamento 30** il 3 novembre 2026 per proseguire da Sciroccopoli a Libecciopoli, passando per Camelia, Percorso 5 e Ponte Libecciopoli. Questa decisione sostituisce il limite 25 per il nuovo capitolo; conservare XP e livelli superiori dei vecchi salvataggi. Applicare `docs/NIMBASA-DRIFTVEIL-048.md`. Il runtime 0.48 integra N, Camelia, Percorso 5, ponte e arrivo a Libecciopoli; applicare anche `docs/SPECIES-MOVES-048.md` (849 coppie/58 specie e forme) e `docs/QA-048.md`. Distinguere collaudi effettivi e predisposizione dei dati. La versione pubblicata resta 0.47 finché non vengono completati integrazione, collaudo e verifica di Pages.
+
+## Capitolo pubblicato · 0.47
 
 La richiesta prosegue dopo Belle al varco nord fino all'arrivo a Sciroccopoli passando per Percorso 4, Komor, chiamata di Aralia, dono delle Ultra Ball e Team Plasma/Bicicletta. Applicare docs/ROUTE4-NIMBASA-047.md, docs/SPECIES-MOVES-047.md (646 coppie/49 specie e forme) e docs/QA-047.md. Il limite resta 25. Preservare il viaggio reale di Komor al varco attraverso mappe/salvataggi, il suo ritorno al Percorso 4 dopo il dono, Belle davanti al Teatro, meteo naturale senza scadenza, distinzione fra le forme e abilità di Basculin, fotogrammi originali della Bicicletta e caricamento differito. Musical, luna park, palestra di Camelia, Deserto e percorsi successivi restano fuori dal perimetro. La pubblicazione richiede controlli e verifica pubblica, non il solo commit.
 

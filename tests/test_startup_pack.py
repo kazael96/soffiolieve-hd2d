@@ -10,7 +10,7 @@ class StartupPackTest(unittest.TestCase):
         spec=importlib.util.spec_from_file_location('builder',Path(__file__).parents[1]/'scripts/build-site.py')
         builder=importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
-        with tempfile.TemporaryDirectory() as folder:
+        with builder.build_staging() as folder:
             site=Path(folder)
             (site/'assets').mkdir()
             original=b'original PNG payload\x00\xff'

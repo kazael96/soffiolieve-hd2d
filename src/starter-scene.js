@@ -37,7 +37,7 @@
   }
   class Scene {
     constructor(canvas,assets=STARTER_ASSETS){
-      this.assets=assets;this.canvas=canvas;const gl=this.gl=canvas.getContext('webgl',{alpha:!!assets.transparent,antialias:true});if(!gl)throw Error('WebGL non disponibile');
+      this.assets=assets;this.canvas=canvas;const gl=this.gl=canvas.getContext('webgl',{alpha:!!assets.transparent,antialias:true,preserveDrawingBuffer:!!assets.preserveDrawingBuffer});if(!gl)throw Error('WebGL non disponibile');
       const compile=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;};
       this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,`attribute vec3 p;attribute vec2 uv;attribute vec4 color;attribute vec4 joint;attribute vec4 weight;uniform mat4 bones[24];uniform mat4 camera;uniform vec3 offset;uniform vec2 texOffset;varying vec2 tex;varying vec4 tint;void main(){mat4 skin=bones[int(joint.x)]*weight.x+bones[int(joint.y)]*weight.y+bones[int(joint.z)]*weight.z+bones[int(joint.w)]*weight.w;vec4 world=skin*vec4(p,1.);world.xyz+=offset;gl_Position=camera*world;tex=uv+texOffset;tint=color;}`));
       gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,`precision mediump float;uniform sampler2D image;uniform float opacity;varying vec2 tex;varying vec4 tint;void main(){vec4 c=texture2D(image,tex)*tint;c.a*=opacity;if(c.a<.02)discard;gl_FragColor=c;}`));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));

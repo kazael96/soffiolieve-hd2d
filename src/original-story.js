@@ -8,6 +8,7 @@
   if(window.PINWHEEL_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],PINWHEEL_EVENTS[k]);Object.assign(OPENING_TRAINERS,PINWHEEL_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,PINWHEEL_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,PINWHEEL_DATA.itemDescriptions);}
   if(window.CASTELIA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],CASTELIA_EVENTS[k]);Object.assign(OPENING_TRAINERS,CASTELIA_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,CASTELIA_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,CASTELIA_DATA.itemDescriptions);}
   if(window.NIMBASA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],NIMBASA_EVENTS[k]);Object.assign(OPENING_TRAINERS,NIMBASA_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,NIMBASA_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,NIMBASA_DATA.itemDescriptions);}
+  if(window.DRIFTVEIL_EVENTS){for(const k of ['scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],DRIFTVEIL_EVENTS[k]);for(const z of DriftveilChapter.zones)ORIGINAL_EVENTS.zones[z]=DRIFTVEIL_EVENTS.zones[z];Object.assign(OPENING_TRAINERS,DRIFTVEIL_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,DRIFTVEIL_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,DRIFTVEIL_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
@@ -16,14 +17,16 @@
   for(const z of [17,18,19,155,250,251,252,249,28,41]){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   if(window.CasteliaChapter)for(const z of CasteliaChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   if(window.NimbasaChapter)for(const z of NimbasaChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
+  if(window.DriftveilChapter)for(const z of DriftveilChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
   if(window.STRIATON_DATA&&!native.chapter040){native.chapter040=true;for(const flag of [530,532,533,534,539,540,541,757,820,707])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.ROUTE3_DATA&&!native.chapter042){native.chapter042=true;for(const flag of [517,572,625,562,614,751,1328])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.PINWHEEL_DATA&&!native.chapter043){native.chapter043=true;for(const flag of [547,623,648,548,552,551,636,841,641])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.CASTELIA_DATA&&!native.chapter046){native.chapter046=true;for(const flag of [702,703,796,797,798,799,800,843])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.NIMBASA_DATA&&!native.chapter047){native.chapter047=true;for(const flag of [561,639])if(!native.flags.includes(flag))native.flags.push(flag);}
+  if(window.DRIFTVEIL_DATA&&!native.chapter048){native.chapter048=true;for(const flag of [566,567,568,699,735,815,555,557,536,537])if(!native.flags.includes(flag))native.flags.push(flag);}
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
-  const names={92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
+  const names={88:'Camelia',89:'Rafan',97:'Nardo',92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let phoneLayout=null;
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
@@ -39,15 +42,15 @@
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
   const data=()=>ORIGINAL_EVENTS.zones[native.zone];
-  const origin=()=>[389,317,397,319,6,321,16,154,326,62].includes(native.zone)?[784,752]:[16,16];
+  const origin=()=>[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
   // City WB exits encode the corner and span, alongside rail-position unions.
-  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone])?(w.height-1)/2:0)});
+  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   function pose(n,dir,step=0){
-    if(([389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight);
+    if(n.fieldZone===native.zone&&([389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight);
     n.direction=dir;const count=OPENING_SPRITES[n.name]?.length||window.ROM_SPRITES?.[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
     else if(count===7||count===9){n.frame=[0,2,4,4][dir]+(step===1?1:step===2?(dir<2?1:2):0);n.flip=dir===3||(dir<2&&step===2);}
@@ -60,7 +63,8 @@
   }
   function syncActors(){
     const previousActors=[...npcs];npcs.splice(0);for(const n of data().actors){
-      if(n.flag&&has(n.flag))continue;if(native.zone===321&&[23,24].includes(n.id))continue;if(native.zone===16&&value(16530)<3&&[6,8].includes(n.id))continue;if(native.zone===317&&n.x<773)continue;
+      if(native.zone===64&&n.model===162)continue; // Optional repeat ferris-wheel dates are outside this chapter.
+      if(n.flag&&has(n.flag)&&!(native.zone===63&&[0,4].includes(n.id)))continue;if(native.zone===321&&[23,24].includes(n.id))continue;if(native.zone===16&&value(16530)<3&&[6,8].includes(n.id))continue;if(native.zone===317&&n.x<773)continue;
       if(native.zone===397&&value(16507)<3&&[521,523,524,525,637,638,1106,1114].includes(n.flag))continue;
       if(native.zone===397&&[1106,1114].includes(n.flag))continue;
       if(native.zone===319&&[8195].includes(n.model))continue;
@@ -68,7 +72,7 @@
       // Curtain records are logical moving mechanisms; meshes are in the scene.
       if(native.zone===152&&(n.model===8195||n.id===8&&native.dreamyardTreeCut))continue;
       if(native.zone===319&&native.routeItems?.includes(n.id))continue;
-      if([398,8,20,41,65].includes(native.zone)&&[657].includes(n.flag))continue;
+      if([398,8,20,41,65,99].includes(native.zone)&&[657].includes(n.flag))continue;
       // Post-game actors use initial hidden flags from the new-game state.
       if([736,681,682,683,684,685,656,675,817,1230,1143].includes(n.flag))continue;
       putActor(n);
@@ -90,11 +94,11 @@
       for(const id of adjacent){const record=ORIGINAL_EVENTS.zones[397].actors.find(n=>n.id===id);const n=putActor({...record,script:2000});Object.assign(n,{fieldZone:397,projection:true});}
     }
     if([319,6].includes(native.zone)&&value(16509)>=2&&value(16532)<2){const n=putActor({id:251,model:134,script:2000,x:804,z:580,direction:3});Object.assign(n,{fieldZone:6,projection:true});}
-    if(actorsInitialized&&actorZone===native.zone&&[16,17,19,154,155,28,29,30,31,32,33,34,35,38,40,51,56,326,327,328,90,62,65].includes(native.zone))for(const old of previousActors)if(!old.hidden&&!old.gimmick&&!npcs.some(n=>n.uid===old.uid))departures.depart(old,native.zone,{covered:fieldCovered});
-    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6,321,16,154,326,62].includes(actorZone)&&[389,317,397,319,6,321,16,154,326,62].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
+    if(actorsInitialized&&actorZone===native.zone&&[16,17,19,154,155,28,29,30,31,32,33,34,35,38,40,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone))for(const old of previousActors)if(!old.hidden&&!old.gimmick&&!npcs.some(n=>n.uid===old.uid))departures.depart(old,native.zone,{covered:fieldCovered});
+    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6,321,16,154,326,62,329,96].includes(actorZone)&&[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
-    state.phase=native.nimbasa?'nimbasa':native.route4?'route4':native.zone===28||native.castelia?'castelia':[249,250,251,252].includes(native.zone)?'skyarrow':[154,155].includes(native.zone)?'pinwheel':[17,18,19].includes(native.zone)||value(16530)>=3?'nacreneGym':native.zone===16||native.nacrene?'nacrene':native.zone===324?'wellspring':native.route3?'route3':value(16532)>=5?'dreamyardDone':value(16532)>=1?'dreamyard':native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
+    state.phase=native.driftveil?'driftveil':native.nimbasa?'nimbasa':native.route4?'route4':native.zone===28||native.castelia?'castelia':[249,250,251,252].includes(native.zone)?'skyarrow':[154,155].includes(native.zone)?'pinwheel':[17,18,19].includes(native.zone)||value(16530)>=3?'nacreneGym':native.zone===16||native.nacrene?'nacrene':native.zone===324?'wellspring':native.route3?'route3':value(16532)>=5?'dreamyardDone':value(16532)>=1?'dreamyard':native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
     journey.update();
   }
   function initialize(){
@@ -103,7 +107,7 @@
     player=world(5,6);facing=3;
   }
   function clearDepartures(){
-    const carry=departures.save().filter(r=>['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)&&!has(697));
+    const carry=departures.save().filter(r=>['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)&&!has(697)||r.plan.destination==='driftveil-approach'&&value(16527)<1||r.plan.destination==='cold-storage-front'&&value(16527)===1);
     departures.clear();departures.restore(carry,native.zone,native);
   }
   function advanceRoute4Friend(){
@@ -112,6 +116,13 @@
     if(native.zone===326){const sample=renderer.actorVisibility?.(r.actor);if(sample&&sample.sequence!==r.sampleSequence){r.sampleSequence=sample.sequence;r.zero=sample.visible?0:r.zero+1;}if((r.zero||0)<2)return;}
     Object.assign(r.actor,{x:-10.5,y:1.3,height:0,fieldZone:90,uid:3,exitProbe:false,exitClip:[0,0,-1,-1.5]});
     r.zone=90;r.plan={kind:'arrival',points:[{x:-10.5,y:-1.5},{x:-10.5,y:-7.5}],anchor:{x:-10.5,y:-7.5},clip:[0,0,-1,-1.5],background:true,destinationZone:90,targetUid:3,destination:'nimbasa-gate-wait',itineraryVersion:1};r.index=0;r.stage='walk';r.opened=true;r.zero=0;
+  }
+  function advanceDriftveilFriend(){
+    const r=departures.records.get('Komor');if(!r||r.plan.destination!=='driftveil-approach'||r.zone!==329||r.stage!=='resident')return;
+    if(native.zone===329){const sample=renderer.actorVisibility?.(r.actor);if(sample&&sample.sequence!==r.sampleSequence){r.sampleSequence=sample.sequence;r.zero=sample.visible?0:r.zero+1;}if((r.zero||0)<2)return;}
+    const start={x:-536.5,y:-319.5},goal={x:-581.5,y:-319.5},blockedThere=(x,y)=>{const g=DRIFTVEIL_SCENES[96].permissionGrids.find(g=>x>=g.x-16&&x<g.x+16&&y>=g.z-16&&y<g.z+16);if(!g)return true;return !!(g.bytes[8+((Math.floor(y-g.z)+16)*32+Math.floor(x-g.x)+16)*8+2]&1);};
+    Object.assign(r.actor,{...start,height:1,fieldZone:96,uid:13,exitProbe:false,exitClip:[-1,0,0,-537.5]});
+    r.zone=96;r.plan={kind:'arrival',points:[{x:-537.5,y:-319.5},...FieldActorExits.route({x:-537.5,y:-319.5},goal,blockedThere)],anchor:goal,clip:[-1,0,0,-537.5],background:true,destinationZone:96,targetUid:13,destination:'driftveil-approach',itineraryVersion:1};r.index=0;r.stage='walk';r.opened=true;r.zero=0;
   }
   function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs.filter(n=>!n.projection));}
   function delay(frames){return window.GameSpeed?.wait(Math.max(0,frames)*1000/30)||new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
@@ -169,7 +180,7 @@
     const say=async i=>{for(const page of messagePages(ORIGINAL_EVENTS.texts[346][i],vm.words))await showPage(page);};
     await say(2);if(await choice(['SÌ','NO'])!==0){await say(8);return false;}
     await say(6);journey.heal();await AudioEngine.playSound(1369);await say(7);await say(8);
-    native.healZone=[8,20,41,65].includes(native.zone)?native.zone:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
+    native.healZone=[8,20,41,65,99].includes(native.zone)?native.zone:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
   }
   async function cityService(script){
     if(eventRunning||sceneChanging||journey.processing||failed)return;
@@ -237,7 +248,7 @@
       }
       else if(code===62){duration=4/30;}
       else if(code===31){duration=8/30;}
-      else if(code===65){duration=1/30;}
+      else if(code===65||code===66){duration=1/30;n.nativeMovementMode=code;}
       else if(code===71||code===72){duration=1/30;}
       else throw Error('Unsupported original movement '+code);
       if(!task.start){task.start={x:n.x,y:n.y};if(dir!==null)face(task.id,dir);}
@@ -247,7 +258,7 @@
       if(task.elapsed>=duration){n.jumpLift=0;if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
-  function fieldActors(){return departures.visible(npcs.filter(n=>!n.hidden),player).filter(n=>!window.NimbasaChapter?.zones.includes(n.fieldZone)||n.fieldZone===native.zone);}
+  function fieldActors(){return departures.visible(npcs.filter(n=>!n.hidden),player).filter(n=>!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
   function occupied(x,y){return fieldActors().some(n=>!n.gimmick&&(n.height||0)>=0&&(!window.NativeRails?.has(native.zone)||Math.abs((n.railHeight??0)-(native.railCurrent?.height??0))<1.8)&&NpcWalk.occupies(n,x,y));}
   function ambientMoving(){const bodies=fieldActors();return npcs.some(n=>bodies.includes(n)&&!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
@@ -263,15 +274,15 @@
     try{warmBank(bank);await settleAmbient();captureActors();journey.save(true);
       await vm.run(bank,entry);native.intro=true;
       if(bank===778&&entry===13&&queued===1){
-        queued=null;const friends=npcs.filter(n=>n.uid===250||n.uid===240);native.zone=317;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);delete native.actors?.[317];
+        queued=null;const friends=npcs.filter(n=>n.uid===250||n.uid===240);native.zone=317;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);delete native.actors?.[317];
         syncActors();npcs.push(...friends);await vm.run(634,0);
       }
       if(bank===778&&native.zone===396&&value(16505)===0)await vm.run(792,0);
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
-      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone([8,20,41,65].includes(native.healZone)?native.healZone:398,7,13);}
+      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone([8,20,41,65,99].includes(native.healZone)?native.healZone:398,7,13);}
       for(let chain=0;chain<5;chain++){if(![9,10].includes(native.zone))break;const next=data().onEnter?.find(e=>value(e.var)===e.value);if(!next||data().script===bank&&next.entry===entry)break;bank=data().script;entry=next.entry;await vm.run(bank,entry);}
-      derivePhase();captureActors();if(native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,29,30,31,32,33,34,35,38,40,41,51,56,326,327,328,90,62,65].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
+      derivePhase();captureActors();if(native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,29,30,31,32,33,34,35,38,40,41,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
       failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
@@ -299,6 +310,19 @@
       case 'BadgeRegisterParty':native.badgeTeams??={};native.badgeTeams[v[0]]=state.party.map(p=>p.name);break;
       case 'TrainerSetDefeated':native.trainerWins??=[];if(!native.trainerWins.includes(v[0]))native.trainerWins.push(v[0]);break;
       case 'GymCurtainInit':native.gymCurtains=v[0];break;
+      case 'NativeOpcode34':m.set(a[0],0);break;
+      case 'NativeOpcode120':m.set(a[0],window.Bicycle?.mounted()?1:0);break;
+      case 'NativeOpcode595':native.chapterCameraZoom=v;break;
+      case 'NativeOpcode596':native.chapterCameraZoom=null;break;
+      case 'NativeOpcode340':await DriftveilCinematics.play(v[0]);break;
+      case 'NativeOpcode467':native.nPortrait=true;break;
+      case 'NativeOpcode468':native.nPortrait=false;break;
+      case 'NativeOpcode383':native.rollerTrainerState=v;break;
+      case 'NativeOpcode384':DriftveilGym.activate(v[0]);break;
+      case 'NativeOpcode385':native.rollerTrainerClear=v[0];break;
+      case 'NativeOpcode608':await DriftveilGym.prepare();break;
+      case 'NativeOpcode43':native.chapterSeason=v;break;
+      case 'NativeOpcode562':m.set(a[1],0);break;
       case 'NativeOpcode317':native.nimbasaScenePresentation=true;break;
       case 'NativeOpcode318':native.nimbasaScenePresentation=false;break;
       case 'NativeOpcode587':native.nimbasaCameraDuration=v[0];break;
@@ -349,7 +373,7 @@
       case 'ActorCmdWait':await Promise.all(motions.map(t=>t.promise));break;
       case 'ActorSetGPos':{const n=actor(v[0]),before=n&&{...n};if(n)Object.assign(n,world(v[1],v[3]));face(v[0],v[4]);if(n&&v[0]!==255&&renderer.hasPresentedActor?.(n))departures.preserve([before],[n],{covered:fieldCovered,sameField:true});break;}
       case 'ActorSetEyeToEye':{const n=actor(currentActor);if(n){const dx=player.x-n.x,dy=player.y-n.y;face(currentActor,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0);}break;}
-      case 'ActorAdd':{const record=data().actors.find(n=>n.id===v[0]);if(record&&!actor(v[0])){putActor(record);await renderer.prepareScene?.();}if(m.bank===304&&v[0]===19)await fade(0,4,'#fff');break;}
+      case 'ActorAdd':{const record=data().actors.find(n=>n.id===v[0]);if(record&&!actor(v[0])){const n=putActor(record),arriving=native.zone===329&&v[0]===14;if(arriving)Object.assign(n,{x:-404.5,y:-313.5,exitClip:[-1,0,0,-406.4]});await renderer.prepareScene?.();if(arriving){move(n.uid,[[10,17]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));delete n.exitClip;}}if(m.bank===304&&v[0]===19)await fade(0,4,'#fff');break;}
       case 'ActorDelete':{if(m.bank===304&&v[0]===17)await fade(1,4,'#fff');const n=actor(v[0]);if(n){if(native.zone===90)n.leavingGate=true;if(native.zone===62&&n.name==='Belle')native.flags=native.flags.filter(f=>f!==561);departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;await departures.wait(n);const index=npcs.indexOf(n);if(index>=0)npcs.splice(index,1);}break;}
       case 'ActorNew':if(!actor(v[3])){
         const arriving=native.zone===62&&v[3]===251&&v[4]===134,n=putActor({id:v[3],model:v[4],x:v[0],z:v[1],direction:v[2],script:2000,...(arriving?{y:65536}:{})});
@@ -376,7 +400,8 @@
       case 'RTReserveScript':queued=v[0];break;
       case 'RTGetTextFile':m.set(a[0],textBank);break;
       case 'RTCallGlobal':{
-        if([10394,10395,10396].includes(v[0])){native.healZone=[8,20,41,65].includes(native.zone)?native.zone:398;break;}
+        if(v[0]===10456){const item=value(32776),count=value(32777);if(!ORIGINAL_EVENTS.itemNames[item])throw Error('Unknown gift item '+item);const added=journey.addItem(item,count);m.set(32778,added?1:0);await showPage(added?'Hai ricevuto '+ORIGINAL_EVENTS.itemNames[item]+'!':'La Borsa è piena.');break;}
+        if([10394,10395,10396].includes(v[0])){native.healZone=[8,20,41,65,99].includes(native.zone)?native.zone:398;break;}
         if(v[0]===10110){await healAtCenter();break;}
         if(![2800,2801,2805,2806,2807].includes(v[0]))throw Error('Global script outside opening '+v[0]);
         const child=new FieldEventVM(ORIGINAL_EVENTS,native,m.host);child.words=m.words;await child.run(862,v[0]-2800);break;
@@ -385,16 +410,16 @@
       case 'ItemCheckSpace':m.set(a[2],journey.itemCount(v[0])+v[1]<=999?1:0);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],[442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,591].includes(v[0])?1:0);break;
+      case 'ItemGetPocket':m.set(a[1],[442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0);break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id=({...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id=({...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -414,14 +439,14 @@
       case 'EVCameraEnd':case 'EVCameraRebind':renderer.storyCamera=null;break;
       case 'EVCameraUnbind':renderer.storyCamera??=[...renderer.center];break;
       case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6]);break;
-      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(state.scene==='town'?[([321,16].includes(native.zone)?player.x:player.x*.7),player.y+1.5]:(renderer.scene.chapter042||renderer.scene.chapter043||renderer.scene.chapter046||renderer.scene.chapter047)?[player.x,player.y+1.5]:[-10,-10],v[0]);break;
+      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(state.scene==='town'?[([321,16].includes(native.zone)?player.x:player.x*.7),player.y+1.5]:(renderer.scene.chapter042||renderer.scene.chapter043||renderer.scene.chapter046||renderer.scene.chapter047||renderer.scene.chapter048)?[player.x,player.y+1.5]:[-10,-10],v[0]);break;
       case 'EVCameraWait':if(cameraTask)await cameraTask.promise;break;
       case 'FadeEx':fade(v[1]===0?1:0,v[3]*8,v[0]===3?'#fff':'#000');break;
       case 'FadeExWait':case 'CallLeagueLiftWarp':await fadeTask;break;
       case 'CMD_1ad':case 'CMD_1af':fade(0);break;
       case 'CMD_1ae':fade(1);break;
       case 'BGMPlay':native.music=v[0];AudioEngine.setScene(v[0]);break;
-      case 'BGMChangeMap':native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);break;
+      case 'BGMChangeMap':native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);break;
       case 'SEPlay':case 'MEPlay':soundTask=AudioEngine.playSound(v[0]);break;
       case 'SEWait':case 'MEWait':await soundTask;break;
       case 'PVPlay':soundTask=AudioEngine.cry(v[0]);break;
@@ -472,9 +497,9 @@
   async function changeZone(zone,x,z){
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
-    captureActors();native.zone=zone;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
+    captureActors();native.zone=zone;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
     for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
-    if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;derivePhase();
+    if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;derivePhase();
     captureActors();await renderer.prepareScene?.();if(restoreField)await fade(0,8);
   }
   const warpDirections={1:1,2:0,3:3,4:2};
@@ -520,7 +545,7 @@
       if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);else journey.save(true);
     }catch(error){sceneChanging=false;failed=error;$('world').dataset.eventError=error.message;console.error(error);await showPage('Il passaggio non è riuscito. Ricarica la partita dal salvataggio precedente.');}
   }
-  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(window.NimbasaChapter?.zones.includes(native.zone)?'Hai raggiunto Sciroccopoli. Puoi esplorare la città e usare il Centro Pokémon; Teatro Musical, luna park e prossime sfide proseguiranno nel capitolo successivo.':window.CasteliaChapter?.zones.includes(native.zone)?'Questa parte della città o del viaggio proseguirà nel prossimo capitolo. Puoi continuare gli eventi di Austropoli, la palestra e la sfida di Belle al varco per il Percorso 4.':native.zone===16?'Le altre case di Zefiropoli non fanno parte di questo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
+  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(window.DriftveilChapter?.zones.includes(native.zone)?'Puoi proseguire attraverso la palestra di Camelia e il Percorso 5 fino a Libecciopoli. Musical, impianti sportivi, lotte a rotazione e gli eventi dopo l’arrivo proseguiranno in un capitolo successivo.':window.NimbasaChapter?.zones.includes(native.zone)?'Puoi proseguire verso la palestra di Camelia, il Percorso 5 e Libecciopoli.':window.CasteliaChapter?.zones.includes(native.zone)?'Questa parte della città o del viaggio proseguirà nel prossimo capitolo. Puoi continuare gli eventi di Austropoli, la palestra e la sfida di Belle al varco per il Percorso 4.':native.zone===16?'Le altre case di Zefiropoli non fanno parte di questo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
   function tryWarp(dx,dz,x,z){
     if(eventRunning||sceneChanging||journey.processing||warpCooldown||failed)return false;
     const dir=Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0,[ux,uz]=directions[dir];
@@ -555,12 +580,12 @@
       const completed=new Promise(resolve=>pendingBattle=resolve);rival=trainer.name;
       try{await startBattle(true,{story:trainer.name,trainerId:id,aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}
       if(native.won){native.trainerWins??=[];if(!native.trainerWins.includes(id))native.trainerWins.push(id);if(id===546){journey.heal();await showPage('I tuoi Pokémon sono di nuovo in piena forma!');}}
-      else{journey.heal();await changeZone([8,20,41,65].includes(native.healZone)?native.healZone:398,7,13);}
+      else{journey.heal();await changeZone([8,20,41,65,99].includes(native.healZone)?native.healZone:398,7,13);}
     }catch(error){failed=error;console.error(error);$('world').dataset.eventError=error.message;await showPage(error.message);}
     finally{eventRunning=false;n.emote=null;derivePhase();captureActors();if(!failed)journey.save(true);}
   }
   async function routeItem(n){
-    if(eventRunning||!n)return;const item=window.NIMBASA_DATA?.items?.[n.script]||window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
+    if(eventRunning||!n)return;const item=window.DRIFTVEIL_DATA?.items?.[n.script]||window.NIMBASA_DATA?.items?.[n.script]||window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
     eventRunning=true;try{if(!journey.addItem(item.id,item.count)){await showPage('La Borsa è piena.');return;}if(native.zone===319){native.routeItems??=[];native.routeItems.push(n.uid);}native.collectedItems??={};native.collectedItems[native.zone]??=[];native.collectedItems[native.zone].push(n.uid);const record=data().actors.find(a=>a.id===n.uid);if(record?.flag&&!has(record.flag))native.flags.push(record.flag);n.hidden=true;await showPage('Hai trovato '+ORIGINAL_EVENTS.itemNames[item.id]+'!');captureActors();journey.save(true);}finally{eventRunning=false;}
   }
   function target(){
@@ -591,37 +616,37 @@
    }else{await showPage('Questa è la Pensione Pokémon. Vuoi affidarci un Pokémon?');if(await choice(['SÌ','NO'])!==0)return;const index=await choice([...state.party.map(p=>p.nickname||p.name),'Annulla']);if(index>=state.party.length)return;if(state.party.length<2||state.party.filter((p,i)=>i!==index&&p.hp>0).length===0){await showPage('Devi tenere con te almeno un Pokémon in grado di lottare.');return;}const p=state.party.splice(index,1)[0];native.daycare={pokemon:p,level:p.level,distance:0};journey.displayPartner();await showPage('Ci prenderemo cura di '+(p.nickname||p.name)+'. Torna a trovarci!');}
    }finally{eventRunning=false;journey.update();journey.save(true);}}
   async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
-  function interact(){if(eventRunning||sceneChanging||vm.running||failed)return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155,29,326].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle')return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41,65].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
-  function step(dt,moved,distance=0){if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed||window.DriftveilGym?.busy)return;if(window.DriftveilGym?.interact())return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155,29,326,63,329].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle'||native.zone===96&&t.script===21)return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41,65,99].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
+  function step(dt,moved,distance=0){window.DriftveilGym?.tick(dt);if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
     if(window.SpeciesStudioMode||failed)return;
     if(window.NativeRails?.has(native.zone)){const hint=native.railCurrent?.zone===native.zone?native.railCurrent:{},at=NativeRails.locate(native.zone,player.x,player.y,hint);if(at)native.railCurrent={zone:native.zone,...at};}
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
-    try{departures.tick(dt);advanceRoute4Friend();tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    const held=eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
+    try{departures.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
+    const held=!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     if(!native.intro&&renderer.ready){run(4,782);return;}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
     journey.update();if(key!==lastTile){lastTile=key;
-    if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
-    if([16,154].includes(native.zone)&&window.PINWHEEL_ASSETS){const at=PINWHEEL_ASSETS.scenes[154].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?154:16;if(next!==native.zone){native.zone=next;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
-    if([6,321].includes(native.zone)&&window.ROUTE3_ASSETS){const at=ROUTE3_ASSETS.scenes[321].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?321:6;if(next!==native.zone){native.zone=next;if(next===321)native.route3=true;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
-    if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
-    if(native.zone===6&&p.z>=609){native.zone=319;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
-    if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
+    if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if([16,154].includes(native.zone)&&window.PINWHEEL_ASSETS){const at=PINWHEEL_ASSETS.scenes[154].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?154:16;if(next!==native.zone){native.zone=next;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
+    if([6,321].includes(native.zone)&&window.ROUTE3_ASSETS){const at=ROUTE3_ASSETS.scenes[321].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?321:6;if(next!==native.zone){native.zone=next;if(next===321)native.route3=true;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
+    if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if(native.zone===6&&p.z>=609){native.zone=319;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
     for(const trigger of data().triggers)if(!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
       // Recheck a stationary player without locking input while they arrive.
       if(native.zone===317&&trigger.script===5){const bodies=fieldActors();if(![3,4].every(id=>{const n=actor(id);return n&&!n.hidden&&bodies.includes(n);})){lastTile='';return;}}
-      if(native.zone===90&&trigger.script===4&&departures.records.has('Komor')){lastTile='';return;}
+      if(native.zone===90&&trigger.script===4&&departures.records.has('Komor')||native.zone===96&&trigger.script===8&&departures.records.has('Komor')){lastTile='';return;}
       run(trigger.script-1);return;}}
-    if([319,7,152,321,322,324,18,154,155,29,326].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-(n.script>=5000?5000:3000)))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
+    if([319,7,152,321,322,324,18,154,155,29,326,63,329].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-(n.script>=5000?5000:3000)))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
     journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===65?changeZone(65,7,13):native.healZone===41?changeZone(41,7,13):native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return window.Bicycle?.mounted()?1012:window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music;},get locked(){return eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===99?changeZone(99,7,13):native.healZone===65?changeZone(65,7,13):native.healZone===41?changeZone(41,7,13):native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return window.Bicycle?.mounted()?1012:window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music;},get locked(){return !!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});

@@ -15,7 +15,7 @@ spec.loader.exec_module(builder)
 
 class BuildTests(unittest.TestCase):
     def test_checksum_guard(self):
-        with tempfile.TemporaryDirectory() as folder:
+        with builder.build_staging() as folder:
             archive = Path(folder)/'bad.zip'
             archive.write_bytes(b'wrong release')
             with self.assertRaisesRegex(ValueError, 'SHA-256'):
@@ -23,7 +23,7 @@ class BuildTests(unittest.TestCase):
             self.assertFalse((Path(folder)/'site').exists())
 
     def test_build_and_cache_version(self):
-        with tempfile.TemporaryDirectory() as folder:
+        with builder.build_staging() as folder:
             folder=Path(folder);archive=folder/'test.zip'
             with zipfile.ZipFile(archive,'w') as z:
                 z.writestr('soffiolieve/assets/animated/800-front.png',b'test asset')
@@ -54,7 +54,7 @@ class BuildTests(unittest.TestCase):
             finally:builder.ARCHIVE_SHA256=original
 
     def test_unsafe_archive(self):
-        with tempfile.TemporaryDirectory() as folder:
+        with builder.build_staging() as folder:
             folder=Path(folder);archive=folder/'unsafe.zip'
             with zipfile.ZipFile(archive,'w') as z:z.writestr('../escape','bad')
             original=builder.ARCHIVE_SHA256
