@@ -7,11 +7,13 @@
     if(align==='center')x-=Math.floor(width/2);else if(align==='right')x-=width;
     for(const [sx,sy,left,advance] of glyphs){const w=f.cellWidth||12,h=f.height||15;ctx.drawImage(atlas,sx,sy+(f.sourceOffset||0)+(white?f.variantOffset:0),w,h,x+left,y,w,h);x+=advance;}
   }
-  async function entry(name,{caught=true,registration=false}={}){
-    if(!registration&&window.NativePokedexDetails)return NativePokedexDetails.open(name,{caught});
+  async function entry(name,options={}){
+    const {caught=true,registration=false}=options,appearance=window.PokemonVisuals?.appearance(name,options)||{name,id:POKEDEX_ASSETS.species[name]?.id};
+    name=window.TRAINING_DATA?.progression[name]?.dexName||name;
+    if(!registration&&window.NativePokedexDetails)return NativePokedexDetails.open(name,{...options,caught,pokemon:appearance});
     const data=POKEDEX_ASSETS.species[name];if(!data)throw Error('Specie fuori dal Pokédex della demo: '+name);
     const [background,font,foot,mark,...types]=await Promise.all(['entry','font',`foot-${data.id}`,'caught',...data.types.map(t=>'type-'+t)].map(n=>image('assets/pokedex/'+n+'.png?v='+POKEDEX_ASSETS.revision)));
-    const sprite=await image(`assets/pokemon/${data.id}-front.png`),animated=window.ROM_SPRITE_ANIM?.load(data.id+'-front');if(animated)await animated.promise;
+    const graphic=window.PokemonVisuals?.graphic(appearance)||data.id,sprite=await image(window.PokemonVisuals?.portraitSrc(appearance)||`assets/pokemon/${data.id}-front.png`),animated=window.ROM_SPRITE_ANIM?.load(graphic+'-front');if(animated)await animated.promise;
     const dialog=document.createElement('dialog');dialog.id='pokedexEntry';dialog.className='native-screen';dialog.setAttribute('aria-label',registration?'Registrazione Pokédex':'Pokédex');
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=192;canvas.setAttribute('role','img');
     const record=caught?data:POKEDEX_ASSETS.unknown;
@@ -27,7 +29,7 @@
       record.description.split('\\n').forEach((line,i)=>text(ctx,font,line,18,141+i*15,true));
       if(caught){ctx.drawImage(mark,96,32);ctx.drawImage(foot,112,80);types.forEach((im,i)=>ctx.drawImage(im,152+i*40,76));}
       const h=animated?.ready?animated.bounds[3]-animated.bounds[1]:sprite.height;
-      if(!window.ROM_SPRITE_ANIM?.draw(ctx,data.id,false,50,72+h/2,h/80,(now-start)*.06))ctx.drawImage(sprite,50-sprite.width/2,72-sprite.height/2);
+      if(!window.ROM_SPRITE_ANIM?.draw(ctx,graphic,false,50,72+h/2,h/80,(now-start)*.06))ctx.drawImage(sprite,50-sprite.width/2,72-sprite.height/2);
       request=requestAnimationFrame(draw);
     }
     request=requestAnimationFrame(draw);void window.AudioEngine?.cry(data.id);

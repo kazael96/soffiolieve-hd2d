@@ -14,8 +14,9 @@
  }
  async function open(screen,index,back,page=0,detail=-1,reverse=false){
    const r=await resources(),a=SUMMARY_DETAIL_ASSETS,p=Journey.state.party[index],m=Journey.unpack(p),name=p.nickname||p.name,dispatch=a.native.pageDispatch[page],t=a.messages['158'];
-   const sprite=await r.image('assets/pokemon/'+m.spriteId+(reverse?'-back.png':'-front.png'));
-   const types=await Promise.all(POKEDEX_ASSETS.species[p.name].types.map(id=>r.image('assets/pokedex/type-'+id+'.png')));
+   const dex=POKEDEX_ASSETS.species[TRAINING_DATA.progression[p.name]?.dexName||p.name],appearance={...m,...p,id:m.spriteId};
+   const sprite=await r.image(root.PokemonVisuals?.portraitSrc(appearance,reverse)||'assets/pokemon/'+m.spriteId+(reverse?'-back.png':'-front.png'));
+   const types=await Promise.all(dex.types.map(id=>r.image('assets/pokedex/type-'+id+'.png')));
    const text=(c,value,x,y,white=false,align='left')=>NativeText.draw(c,screen.font,String(value),x,y,white,align);
    const change=(next,selected=-1)=>open(screen,index,back,next,selected,reverse),adjacent=delta=>{const next=index+delta;if(next>=0&&next<Journey.state.party.length)open(screen,next,back,page,-1,reverse);};
    const shortcut=['summary:info','summary:moves','summary:ribbons'][page];
@@ -42,7 +43,7 @@
    screen.show('Riepilogo di '+name,c=>{
      c.drawImage(r.layers.mainGrid,0,0);c.drawImage(r.layers[dispatch.bottom],0,0);
      if(page===0){
-       const growth=OPENING_DATA[p.name].growth,values={0:String(POKEDEX_ASSETS.species[p.name].number).padStart(3,'0'),1:p.name,3:Journey.state.playerName,4:String(Journey.state.trainer?.id??0).padStart(5,'0'),6:p.xp,8:Math.max(0,(growth[p.level+1]||p.xp)-p.xp)};
+       const growth=OPENING_DATA[p.name].growth,values={0:String(dex.number).padStart(3,'0'),1:p.name,3:Journey.state.playerName,4:String(Journey.state.trainer?.id??0).padStart(5,'0'),6:p.xp,8:Math.max(0,(growth[p.level+1]||p.xp)-p.xp)};
        a.native.infoText.forEach(entry=>{const w=a.native.infoMainWindows[entry.window],x=w.x+entry.x,y=w.y+entry.y;if(entry.kind==='label')text(c,t[entry.message],x,y,true);else{const value=values[entry.window];text(c,entry.message===null?value:NativeTextLayout.format(t[entry.message],[value]),x,y,x<80);}});
        types.forEach((im,i)=>c.drawImage(im,80+i*34,40));
      }else if(page===1)m.moves.forEach((move,i)=>{

@@ -1,8 +1,9 @@
 /* HD-2D evolution transition using the original front composites, with B to stop. */
 (()=>{
  let active=null;
- async function play(from,to){
+ async function play(from,to,appearance={}){
   if(active)throw Error('Evoluzione già in corso');
+  const mon=appearance.pokemon||appearance,fromGraphic=window.PokemonVisuals?.graphic(typeof from==='object'?from:{...mon,id:from,speciesId:from})||from,toGraphic=window.PokemonVisuals?.graphic(typeof to==='object'?to:{...mon,id:to,speciesId:to})||to;
   const dialog=document.createElement('dialog');dialog.id='evolutionScene';
   dialog.setAttribute('aria-label','Evoluzione Pokémon');
   const canvas=document.createElement('canvas'),status=document.createElement('p'),cancel=document.createElement('button');
@@ -17,7 +18,7 @@
   dialog.addEventListener('keydown',event=>{const key=event.key.toLowerCase();if(['b','escape'].includes(key)){event.preventDefault();event.stopImmediatePropagation();finish(false);}else if(['a','z','enter',' '].includes(key)&&!event.target.dataset?.retry){event.preventDefault();event.stopImmediatePropagation();}});
   dialog.tabIndex=-1;dialog.showModal();resetInput();dialog.focus({preventScroll:true});
   async function load(retryRequested=false){
-   const sprites=[from,to].map(id=>ROM_SPRITE_ANIM.load(id+'-front',{retry:retryRequested}));
+   const sprites=[fromGraphic,toGraphic].map(id=>ROM_SPRITE_ANIM.load(id+'-front',{retry:retryRequested}));
    await Promise.all(sprites.map(s=>s.promise));if(done)return;
    if(sprites.some(s=>!s.ready)){
     status.textContent='Sprite non disponibile. Puoi riprovare o interrompere.';
@@ -33,7 +34,7 @@
     for(let i=0;i<12;i++){const a=i*Math.PI/6+t*9;c.beginPath();c.moveTo(Math.cos(a)*90,Math.sin(a)*45);c.lineTo(Math.cos(a)*300,Math.sin(a)*180);c.stroke();}c.restore();
     c.fillStyle='#102c39';c.beginPath();c.ellipse(320,355,77,13,0,0,2*Math.PI);c.fill();
     const evolved=t>.92||t>.25&&Math.sin(t*t*90)>0,scale=2.45*(.94+.06*Math.cos(t*10));
-    ROM_SPRITE_ANIM.draw(c,evolved?to:from,false,320,353,scale,elapsed/33,true);
+    ROM_SPRITE_ANIM.draw(c,evolved?toGraphic:fromGraphic,false,320,353,scale,elapsed/33,true);
     if(t>=1){finish(true);return;}raf=requestAnimationFrame(draw);
    }
    draw();return true;

@@ -1,8 +1,9 @@
 /* Original Info viewport in browser mode: overlay206 translates all layers by -24. */
 (function(root){
   const cache=new Map();
-  function image(src){if(!cache.has(src))cache.set(src,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=NativeTextLayout.resource(src);}));return cache.get(src);}
-  async function open(initial,{caught=true,mode:initialMode='info'}={}){
+  function image(src){if(!cache.has(src)){const task=new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Risorsa Pokédex non disponibile: '+src));i.src=NativeTextLayout.resource(src);});cache.set(src,task);task.catch(()=>{if(cache.get(src)===task)cache.delete(src);});}return cache.get(src);}
+  async function open(initial,options={}){
+    let {caught=true,mode:initialMode='info'}=options;initial=root.TRAINING_DATA?.progression[initial]?.dexName||initial;
     const a=DEX_BROWSER_ASSETS,screen=new NativeUI.Screen();screen.dialog.id='pokedexEntry';await screen.ready();
     const common=await Promise.all(a.groups.detailCommon.cells.map(c=>image(c.src))),tabs=await Promise.all(a.groups.detailNavigation.cells.map(c=>image(c.src)));
     const background=await image(a.detail.info.reuseImage),font=screen.font,map=await image(a.detail.habitat.mapSrc);
@@ -13,7 +14,7 @@
     const effectFonts={};await Promise.all(Object.entries(DEX_EFFECTS_ASSETS.fonts).map(async([key,record])=>effectFonts[key]=await image(record.src)));
     const shortcut=await NativeShortcuts.checkbox(()=>'pokedex:'+mode,184,172,()=>{});
     const waveform=new NativeCryGraph.Scroll();let waveTick=performance.now(),waveRemainder=0,cryRequest=0;
-    let name=initial,data,record,sprite,foot,mark,types=[],mode=initialMode,request=0,closed=false,generation=0,transition=null,changing=false,closing=false;const dimCache=new WeakMap(),layer=document.createElement('canvas');layer.width=256;layer.height=192;const layerContext=layer.getContext('2d');layerContext.imageSmoothingEnabled=false;
+    let name=initial,data,record,sprite,graphic,foot,mark,types=[],mode=initialMode,request=0,closed=false,generation=0,transition=null,changing=false,closing=false;const dimCache=new WeakMap(),layer=document.createElement('canvas');layer.width=256;layer.height=192;const layerContext=layer.getContext('2d');layerContext.imageSmoothingEnabled=false;
     const known=Object.keys(POKEDEX_ASSETS.species).filter(n=>Journey.state.dex.seen.includes(n)).sort((x,y)=>POKEDEX_ASSETS.species[x].number-POKEDEX_ASSETS.species[y].number);
     let done;const finished=new Promise(resolve=>done=resolve);
     function fade(kind){const key={info:'info',zona:'habitat',verso:'cry',forme:'forms'}[mode],config=DEX_EFFECTS_ASSETS.brightness.modeCalls[key][kind];if(typeof config!=='object')return Promise.resolve();return new Promise(resolve=>transition={kind,config,start:performance.now(),resolve});}
@@ -25,16 +26,16 @@
     const text=(c,value,x,y,white=false,align='left')=>NativeText.draw(c,font,String(value),x,y,white,align);
     const nativeCell=(c,group,loaded,index,x,y)=>{const cell=group.cells[index];c.drawImage(loaded[index],x+cell.origin[0],y+cell.origin[1]);};
     async function select(next){
-      const revision=++generation,nextData=POKEDEX_ASSETS.species[next],nextCaught=Journey.state.dex.caught.includes(next),nextRecord=nextCaught?nextData:POKEDEX_ASSETS.unknown;
-      const loaded=await Promise.all([image('assets/pokemon/'+nextData.id+'-front.png'),image('assets/pokedex/foot-'+nextData.id+'.png'),image('assets/pokedex/caught.png'),...nextData.types.map(t=>image('assets/pokedex/type-'+t+'.png'))]);
-      if(closed||revision!==generation)return;name=next;data=nextData;caught=nextCaught;record=nextRecord;[sprite,foot,mark,...types]=loaded;if(revision===1)void fade('enter');
+      const revision=++generation,nextData=POKEDEX_ASSETS.species[next],nextCaught=Journey.state.dex.caught.includes(next),nextRecord=nextCaught?nextData:POKEDEX_ASSETS.unknown,appearance=root.PokemonVisuals?.appearance(next,next===initial?options:{})||{id:nextData.id},nextGraphic=root.PokemonVisuals?.graphic(appearance)||nextData.id;
+      const loaded=await Promise.all([image(root.PokemonVisuals?.portraitSrc(appearance)||'assets/pokemon/'+nextData.id+'-front.png'),image('assets/pokedex/foot-'+nextData.id+'.png'),image('assets/pokedex/caught.png'),...nextData.types.map(t=>image('assets/pokedex/type-'+t+'.png'))]);
+      if(closed||revision!==generation)return;name=next;data=nextData;graphic=nextGraphic;caught=nextCaught;record=nextRecord;[sprite,foot,mark,...types]=loaded;if(revision===1)void fade('enter');
 
-      const animated=root.ROM_SPRITE_ANIM?.load(data.id+'-front');if(animated)void animated.promise.then(()=>{if(!closed)screen.draw();});
+      const animated=root.ROM_SPRITE_ANIM?.load(graphic+'-front');if(animated)void animated.promise.then(()=>{if(!closed&&revision===generation)screen.draw();});
       render();if(mode==='verso')void replayCry();else void root.AudioEngine?.cry(data.id);
     }
     async function replayCry(){const token=++cryRequest,id=data.id;try{const source=await root.AudioEngine?.cryData(id);if(closed||mode!=='verso'||token!==cryRequest||id!==data.id)return;if(source){waveform.play(NativeCryGraph.columns(source.samples,source.sampleRate,source.speed,source.volume));waveTick=performance.now();waveRemainder=0;}void root.AudioEngine?.cry(id);}catch(error){console.error('Verso non disponibile',error);}}
     function adjacent(delta){if(transition||changing||closing)return;const at=known.indexOf(name),next=known[at+delta];if(next)void select(next);}
-    function portrait(c,x,y){drawLayer(c,c=>{const now=performance.now();if(!root.ROM_SPRITE_ANIM?.draw(c,data.id,false,x,y+sprite.height/2,sprite.height/80,now*.06))c.drawImage(sprite,x-sprite.width/2,y-sprite.height/2);},0);}
+    function portrait(c,x,y){drawLayer(c,c=>{const now=performance.now();if(!root.ROM_SPRITE_ANIM?.draw(c,graphic,false,x,y+sprite.height/2,sprite.height/80,now*.06))c.drawImage(sprite,x-sprite.width/2,y-sprite.height/2);},0);}
     function info(c){
       c.save();c.translate(0,a.detail.info.mainBottomOffsetY);drawBg(c,background,0,0,2);
       text(c,String(data.number).padStart(3,'0'),136,37);text(c,name,176,37);text(c,record.category,188,54,false,'center');

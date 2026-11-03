@@ -15,12 +15,12 @@
       await Promise.all(Object.entries(DEX_EFFECTS_ASSETS.images).filter(([k])=>k==='listFooter'||k.startsWith('list-')).map(async([k,v])=>images[k]=await image(v.src)));
       const pulse={};for(const kind of ['caught','seen','unknown']){const a=images['list-'+kind+'-pulseA'],b=images['list-'+kind+'-pulseB'],temp=document.createElement('canvas');temp.width=160;temp.height=24;const ctx=temp.getContext('2d');ctx.drawImage(a,0,0);const from=ctx.getImageData(0,0,160,24);ctx.clearRect(0,0,160,24);ctx.drawImage(b,0,0);const to=ctx.getImageData(0,0,160,24);pulse[kind]=DEX_EFFECTS_ASSETS.listSelection.blendSamplesPhaseZero.map(factor=>{const canvas=document.createElement('canvas');canvas.width=160;canvas.height=24;const c=canvas.getContext('2d'),data=c.createImageData(160,24);data.data.set(NativeColor.interpolate(from.data,to.data,factor));c.putImageData(data,0,0);return canvas;});}
       const screen=new NativeUI.Screen();screen.dialog.id='pokedexBrowser';await screen.ready();
-      const portraits={};await Promise.all(Object.values(POKEDEX_ASSETS.species).map(async d=>portraits[d.id]=await image('assets/pokemon/'+d.id+'-front.png')));
-      return {screen,images,groups,portraits,pulse};
+      const portraits={};return {screen,images,groups,portraits,pulse,image};
     })();return prepared;
   }
   async function open({searchInitially=false}={}){
     const r=await prepare(),s=r.screen,a=DEX_BROWSER_ASSETS,all=records(a,Journey.state.dex);let list=all;
+    await Promise.all(all.filter(p=>p.seen&&POKEDEX_ASSETS.species[p.name]).map(async p=>{const appearance=root.PokemonVisuals?.appearance(p.name)||{id:p.id};r.portraits[p.id]=await r.image(root.PokemonVisuals?.portraitSrc(appearance)||'assets/pokemon/'+p.id+'-front.png');}));
     let selected=Math.max(0,list.findIndex(p=>p.seen)),start=0,resolve;
     const shortcut=await NativeShortcuts.checkbox('pokedex',188,172,()=>render());
     const finished=new Promise(done=>resolve=done),close=(result='back')=>{s.close();resolve(result);};

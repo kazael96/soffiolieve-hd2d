@@ -1,0 +1,1 @@
+window.MISTRALTON_GESTURES={"N":{"steps":[[3,10],[12,5],[13,2],[15,10],[14,10],[13,1],[3,10]],"overlay":21,"offset":325048,"address":"0x21d73b8","model":103,"animationSet":25,"entry":40,"sha256":"46e89f381985bb478ae85d37d562555d3e698be60a49ab29b75d42dd7e1c1894"}};Object.assign(OPENING_GESTURES,MISTRALTON_GESTURES);

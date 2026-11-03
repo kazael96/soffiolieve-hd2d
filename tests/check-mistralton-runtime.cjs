@@ -1,0 +1,30 @@
+/* Native chapter progression; CLI evidence does not certify pixels or audible fidelity. */
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{chapter,event,trigger,state,drain}=require('./helpers/mistralton-runtime.cjs');
+(async()=>{const c=await chapter(),n=c.NativeStory,j=c.Journey,stages=[];
+ async function run(label,zone,x,z,entry,check){try{const pages=await event(c,zone,x,z,entry);check?.(pages);stages.push({label,pass:true,state:state(c),battles:c.testBattles.map(b=>b.trainerId)});console.log('PASS '+label);}catch(e){console.error('FAIL '+label,JSON.stringify(state(c)));throw e;}}
+ assert.equal(c.Training.limit(),31);
+ await run('Cold Storage yard: Komor joins the native warehouse approach',191,167,475,0,()=>{assert.equal(n.state.vars[16528],1);});
+ await run('Cold Storage entrance: Komor remains available inside',192,7,30,0,()=>{assert.equal(n.state.vars[16523],1);});
+ await run('Cold Storage ice rendezvous',192,6,9,1,()=>{assert.equal(n.state.vars[16523],2);});
+ await run('Cold Storage container: Komor and Plasma',193,3,17,0,()=>{});
+ const beforeGrunts=structuredClone(j.state);
+ for(const [entry,trainer,flag]of [[5,81,282],[7,278,283],[9,276,284],[10,610,285]])await run('Cold Storage native grunt '+trainer,193,4,9,entry,()=>{assert.equal(c.testBattles.at(-1).trainerId,trainer);assert.ok(n.state.flags.includes(flag));});
+ assert.equal(n.state.vars[16527],2,'fourth grunt reserves the native Violante/Rafan cleanup');assert.ok(n.state.flags.includes(626));assert.equal(n.state.vars[16523],8);console.log('PASS Violante surrender and Rafan escort cleanup reserved exactly once');
+ await run('Ghecis returns the captives before the gym',96,206,405,8,()=>{assert.equal(n.state.vars[16527],3);});
+ const beforeClay=structuredClone(j.state);
+ await run('Rafan fifth badge has native31ace and no premature TM78',97,15,6,0,()=>{assert.equal(c.testBattles.at(-1).trainerId,24);assert.equal(Math.max(...c.testBattles.at(-1).p2.map(p=>p.level)),31);assert.ok(n.state.badges.includes(4));assert.equal(c.Training.limit(),35);assert.equal(j.itemCount(405),0);assert.equal(n.state.vars[16538],1);assert.equal(n.state.vars[16527],4);});
+ const beforeBelle=structuredClone(j.state);
+ await trigger(c,96,164,405,15);assert.equal(c.testBattles.at(-1).trainerId,491);assert.deepEqual(Array.from(c.testBattles.at(-1).p2,p=>p.level),[26,26,26,28]);assert.equal(n.state.vars[16527],5);assert.equal(j.itemCount(421),1);console.log('PASS actual westbound Belle trigger, native rival party and Fly gift');
+ await run('Rafan opens the original cave web and awards Bulldoze',194,106,344,0,()=>{assert.ok(n.state.flags.includes(583));assert.equal(j.itemCount(405),1);assert.equal(n.state.vars[16538],2);});
+ await run('Chargestone native entrance Triad and N',195,7,54,6,()=>{assert.equal(n.state.vars[16539],1);});
+ await run('Aralia and Belle give the native Lucky Egg',195,15,41,0,()=>{assert.equal(j.itemCount(231),1);assert.equal(n.state.vars[16539],2);});
+ await run('Aralia explains Chargestone crystals',195,33,25,1,()=>assert.equal(n.state.vars[16539],3));
+ await run('Triad leads toward the Plasma floor',195,38,41,2,()=>assert.equal(n.state.vars[16539],4));
+ await run('N has native team218 and the cave exits remain available',195,66,13,3,()=>{assert.equal(c.testBattles.at(-1).trainerId,218);assert.deepEqual(Array.from(c.testBattles.at(-1).p2,p=>p.name),['Boldore','Ferroseed','Joltik','Klink']);assert.equal(n.state.vars[16539],5);});
+ await run('Ponentopoli Anemone/Rutilo native arrival',107,102,302,7,()=>{assert.equal(n.state.vars[16537],1);assert.equal(j.state.phase,'mistralton');});
+ const restored=await chapter({save:structuredClone(j.state)});assert.equal(restored.Journey.itemCount(421),1);assert.equal(restored.Journey.itemCount(405),1);assert.equal(restored.Journey.itemCount(231),1);assert.equal(restored.NativeStory.state.vars[16539],5);assert.equal(restored.NativeStory.state.vars[16537],1);assert.ok(restored.NativeStory.state.badges.includes(4));console.log('PASS source save reload preserves gifts and native chapter progress');
+ const loss=await chapter({save:beforeBelle});await trigger(loss,96,164,405,15,'p2');assert.equal(loss.Journey.itemCount(421),0,'a loss cannot grant Fly');assert.equal(loss.NativeStory.state.vars[16527],4);assert.ok(loss.NativeStory.state.badges.includes(4));assert.equal(loss.NativeStory.state.zone,99,'native blackout returns to the last nurse');console.log('PASS Belle loss preserves badge/progression and gives no HM');
+ const clayLoss=await chapter({save:beforeClay});await event(clayLoss,97,15,6,0,'p2');assert.ok(!clayLoss.NativeStory.state.badges.includes(4));assert.equal(clayLoss.Training.limit(),31);assert.equal(clayLoss.NativeStory.state.vars[16527],3);assert.equal(clayLoss.NativeStory.state.vars[16538]||0,0);assert.equal(clayLoss.Journey.itemCount(405),0);console.log('PASS Rafan loss gives no badge, cap increase, TM or progression');
+ const gruntLoss=await chapter({save:beforeGrunts});await event(gruntLoss,193,4,9,5,'p2');assert.ok(!gruntLoss.NativeStory.state.flags.includes(282));assert.equal(gruntLoss.NativeStory.state.vars[16523],3);assert.equal(gruntLoss.NativeStory.state.vars[16527],1);console.log('PASS Plasma loss cannot count toward the four-grunt cleanup');
+ const report=path.join(__dirname,'../outputs/chapter049/moves/runtime-check.json');fs.mkdirSync(path.dirname(report),{recursive:true});fs.writeFileSync(report,JSON.stringify({stages,final:state(c),reload:state(restored),losses:{Belle:state(loss),Rafan:state(clayLoss),Plasma:state(gruntLoss)},note:'Source/VM/controller checks; simulator winners are supplied to test native branching. Browser/pixel QA and played-turn battle checks are separate.'},null,2));
+})().catch(e=>{console.error(e);process.exitCode=1;});
