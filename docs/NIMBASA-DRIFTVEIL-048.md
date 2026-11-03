@@ -28,6 +28,8 @@ Ruota e ponte usano modelli e animazioni di a/1/6/0; inquadrature e presentazion
 
 Sette contesti espliciti: palestra di Camelia, parco, sentiero/erba/erba scura del Percorso 5, ponte e città. Le presenze ambientali del Percorso 5 sono Minccino, Gothita e Trubbish, lontane dai combattenti. Nessun Ducklett ambientale viene inserito sul ponte finché non è implementata la cattura tramite ombre. Campo di battaglia e ombre restano fissati durante il turno.
 
+La camera dei capitoli con mappe native usa `scene-camera.js`: l’ancoraggio iniziale, il caricamento del salvataggio e il ritorno da una camera narrativa seguono la stessa regola, compresi i capitoli futuri. Il movimento dipende dal tempo di gioco trascorso e non dal numero dei fotogrammi. Questo evita l’inquadratura vuota rilevata all’ingresso reale a Libecciopoli, mascherata in precedenza dalle fixture che centravano manualmente la scena.
+
 ## Pokémon, strumenti e audio
 
 849 coppie su 58 specie/forme predisposte entro il 30; matrice in SPECIES-MOVES-048.md. Nuovi corpi: Zebstrika, Scolipede, Krokorok, Sigilyph, Minccino, Cinccino, Gothita, Ducklett ed Emolga. Profili e reazioni funzionano sui due lati; la copertura numerica e quella grafica vanno riportate separatamente.

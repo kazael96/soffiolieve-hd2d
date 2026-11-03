@@ -2,6 +2,10 @@
 
 Richieste dall'utente il27 ottobre 2026. Valgono per la demo, le revisioni successive e la futura versione completa. Sono criteri di accettazione, non semplici preferenze. La resa rimane HD-2D; queste richieste autorizzano ad adattare la messa in scena originale.
 
+## Progressione fra città e limite di livello
+
+Dal 3 novembre 2026 proseguire per tappe città per città fino al finale della storia principale, inclusi Lega, N e Ghecis, come confermato dall’utente. Ogni nuova tappa richiede integrazione, collaudo e verifica della pubblicazione prima di passare alla successiva. Il cap delle estensioni segue il livello più alto della squadra del prossimo Capopalestra, verificato nei dati originali; conservare livelli ed esperienza già superiori nei salvataggi precedenti.
+
 ## Standard obbligatori per ogni modifica
 
 Consolidamento richiesto il 29 ottobre 2026. Questi standard valgono per demo e futura versione completa, anche quando cambia chi lavora al progetto. Le sezioni storiche sotto documentano l’avanzamento; non riducono il perimetro richiesto successivamente. Registrare uno standard non equivale ad averne completato l’implementazione.

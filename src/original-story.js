@@ -439,7 +439,7 @@
       case 'EVCameraEnd':case 'EVCameraRebind':renderer.storyCamera=null;break;
       case 'EVCameraUnbind':renderer.storyCamera??=[...renderer.center];break;
       case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6]);break;
-      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(state.scene==='town'?[([321,16].includes(native.zone)?player.x:player.x*.7),player.y+1.5]:(renderer.scene.chapter042||renderer.scene.chapter043||renderer.scene.chapter046||renderer.scene.chapter047||renderer.scene.chapter048)?[player.x,player.y+1.5]:[-10,-10],v[0]);break;
+      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0]);break;
       case 'EVCameraWait':if(cameraTask)await cameraTask.promise;break;
       case 'FadeEx':fade(v[1]===0?1:0,v[3]*8,v[0]===3?'#fff':'#000');break;
       case 'FadeExWait':case 'CallLeagueLiftWarp':await fadeTask;break;
@@ -497,6 +497,7 @@
   async function changeZone(zone,x,z){
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
+    if(SceneCamera.tracks(OPENING_ASSETS.scenes[zoneScenes[zone]])){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
     captureActors();native.zone=zone;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
     for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
     if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;derivePhase();
