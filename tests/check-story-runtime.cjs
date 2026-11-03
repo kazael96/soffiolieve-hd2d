@@ -19,7 +19,7 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  if(driftveil)for(const file of ['driftveil-assets.js','driftveil-events.js','driftveil-data.js','driftveil-scenes.js','driftveil-gym-data.js','driftveil-bootstrap.js','driftveil-gym.js','driftveil-field.js'])vm.runInContext(read(file),c,{filename:file});
  c.DriftveilCinematics={play:async id=>{c.cinematics??=[];c.cinematics.push(id);}};
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],groundHeight:()=>[62,64].includes(c.Journey?.state.original?.zone)?1:c.Journey?.state.original?.zone===63?2:0,gl:{},upload(){return {};}};
- c.StarterScene={loadGLB:async()=>({doc:{textures:[]},images:[]})};
+ vm.runInContext(read('starter-scene.js'),c,{filename:'starter-scene.js'});c.StarterScene.loadGLB=async()=>({doc:{textures:[]},images:[]});
  for(const file of ['field-model-assets.js','field-models.js'])vm.runInContext(read(file),c,{filename:file});
  const source=read('game.js');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
