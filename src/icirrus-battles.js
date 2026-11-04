@@ -26,7 +26,7 @@
  function floor(id){const c=contexts[id];if(!c)return null;if(!OPENING_ASSETS.textures[c.floor])throw Error('Terreno originale non disponibile: '+id);const key='icirrus-battle-'+id;
   if(!OPENING_ASSETS.models[key]){const verts=[];for(const i of [0,1,2,2,1,3])verts.push(i%2?48:-48,0,i>=2?24:-64,i%2?1536:0,i>=2?1408:0,1,1,1,0,1,0);OPENING_ASSETS.models[key]={groups:[{texture:c.floor,verts,repeatS:true,repeatT:true}]};}return key;
  }
- function instances(id){const c=contexts[id];if(!c)return null;const source=ICIRRUS_ASSETS.scenes[c.zone];return [...source.instances.filter(i=>i.actorUid===undefined).map(i=>({...i,x:i.x-c.origin[0],y:i.y-(c.height||0),z:i.z-c.origin[1]-c.back})),{model:floor(id),x:0,y:0,z:0,rotation:0}];}
+ function instances(id){const c=contexts[id];if(!c)return null;const source=ICIRRUS_ASSETS.scenes[c.zone],scenery=[...source.instances,...(ICIRRUS_ASSETS.visualSurroundings?.[c.zone]?.instances||[])];return [...scenery.filter(i=>i.actorUid===undefined).map(i=>({...i,x:i.x-c.origin[0],y:i.y-(c.height||0),z:i.z-c.origin[1]-c.back})),{model:floor(id),x:0,y:0,z:0,rotation:0}];}
  async function prepare(id){if(!contexts[id])return false;await IcirrusChapter.ensure();floor(id);return true;}
  Object.assign(PinwheelBattles.contexts,contexts);const previous=PinwheelBattles.instances,previousAmbient=PinwheelBattles.ambient;PinwheelBattles.instances=id=>contexts[id]?instances(id):previous(id);PinwheelBattles.ambient=id=>ambient(id)??previousAmbient(id);
  window.IcirrusBattles={contexts,instances,ambient,prepare,isGround:name=>/^ic-/.test(name||'')&&/(?:fl0|bedrock|yuka|michi|grass|marsh|gym06_t023)/.test(name),has:id=>!!contexts[id]};

@@ -101,6 +101,7 @@
   function partyActions(i){
     const t=MENU_ASSETS.texts['157'],entries=[[t[109],()=>summary(i)],[t[108],()=>{swapFrom=i;team();}],[t[110],()=>heldActions(i)]];
     if(root.MistraltonFly?.knows(Journey.state.party[i]))entries.push(['VOLO',()=>external(async()=>{if(!MistraltonFly.canUse(Journey.state,i))await NativeStory.showPage('Non è il momento di usarlo!');else await NativeStory.useFly(i);},()=>team({focus:i}))]);
+    if(root.SurfField?.knows(Journey.state.party[i]))entries.push(['SURF',()=>external(async()=>await NativeStory.useSurf(i,{prompt:false})?'close':false,()=>team({focus:i}))]);
     entries.push([t[115],()=>team({focus:i})]);partyPopup(i,entries,()=>team({focus:i}));
   }
   function heldActions(i){

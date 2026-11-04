@@ -25,6 +25,18 @@ scenes = {}
 for zone, scene in assets['scenes'].items():
     scenes[zone] = [dict(member=int(match[1]), x=i['x'], y=i['y'], z=i['z'])
                     for i in scene['instances'] if (match := re.fullmatch(r'ic-map-(\d+)', i['model']))]
+# Previous regions now reachable by Surf need their original WB/GC heights too.
+for filename, zones, prefix in [('route2-assets.js',[6],'acc'),('route3-assets.js',[321,324],'acc'),
+                              ('pinwheel-assets.js',[155],'pw'),('nimbasa-assets.js',[326],'nb'),
+                              ('mistralton-assets.js',[96,191,193,194,331],'mt')]:
+    older=json.loads((a.output/filename).read_text(encoding='utf8').split('=',1)[1].rstrip(';\n'))
+    for zone in zones:
+        scenes[str(zone)]=[dict(member=int(match[1]),x=i['x'],y=i['y'],z=i['z'])
+                          for i in older['scenes'][str(zone)]['instances']
+                          if (match:=re.fullmatch(prefix+r'-map-(\d+)',i['model']))]
+# Original opening export: a/0/0/8 members0..4, before the folded later towns.
+scenes['389']=[dict(member=0,x=0,y=0,z=0),dict(member=1,x=-32,y=0,z=0)]
+scenes['317']=[dict(member=2,x=-32,y=0,z=-32),dict(member=3,x=0,y=0,z=-32),dict(member=4,x=0,y=0,z=-64)]
 lands = NARC(r.getFileByName('a/0/0/8')).files
 members = {i['member'] for scene in scenes.values() for i in scene} | set(range(396, 400))
 grids = {}

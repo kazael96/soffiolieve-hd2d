@@ -20,7 +20,7 @@
    const plan=coast(dir);if(!plan)return false;const ticket=++generation;preparing=true;
    try{await prepare();if(ticket!==generation||state().zone!==plan.zone||mounted()||user(index)<0)return false;
     const current=coast(dir);if(!current||Math.hypot(hero().x-plan.from.x,hero().y-plan.from.y)>.01)return false;
-    state().bicycle=false;state().surf=true;state().surfMotion={...plan,phase:'wait',wait:0,travel:0};music();save();return true;
+    state().bicycle=false;state().surf=true;state().surfMotion={...current,phase:'wait',wait:0,travel:0};music();save();return true;
    }finally{if(ticket===generation)preparing=false;}
   }
   function tryLanding(dx,dy){if(!mounted())return false;if(state().surfMotion||preparing)return true;

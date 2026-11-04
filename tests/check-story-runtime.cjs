@@ -37,7 +37,8 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  c.AudioEngine.setFieldMusicVolume=value=>{c.fieldMusicVolume=value;};
  if(fs.existsSync(path.join(sourceRoot||site,'field-music-fade.js')))vm.runInContext(read('field-music-fade.js'),c,{filename:'field-music-fade.js'});
  if(mistralton)c.FieldEffects={play:async id=>{c.fieldEffects??=[];c.fieldEffects.push(id);}};
- if(icirrus)for(const file of ['icirrus-field-models.js','icirrus-gestures.js','icirrus-field-motion.js'])vm.runInContext(read(file),c,{filename:file});
+ if(icirrus)for(const file of ['icirrus-field-models.js','icirrus-gestures.js','icirrus-field-motion.js','surf-field-assets.js','surf-field-motion.js','surf-field.js'])vm.runInContext(read(file),c,{filename:file});
+ if(icirrus){c.SurfField.play=async mon=>{c.surfCutIns??=[];c.surfCutIns.push(mon.name);};c.renderer.requireActors=async()=>true;c.renderer.queueAssets=async()=>{await c.SurfField.prepareAssets();return true;};}
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
  for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js',...(icirrus?['icirrus-paths.js','icirrus-continuity.js']:[]),...(mistralton?['mistralton-continuity.js','mistralton-puzzle-data.js','mistralton-ice.js','mistralton-puzzles.js','mistralton-services.js']:[]),'original-story.js'])vm.runInContext(read(file),c,{filename:file});
  c.DoubleBattles={partner:async args=>{const [ally,first,second]=args;c.startBattle(true,{story:first===401?'Mila e Michelino':'Team Plasma',trainerId:first,doubles:true,ally:c.OPENING_TRAINERS[ally].party,secondFoe:c.OPENING_TRAINERS[second].party,p1:c.Journey.configs(),p2:c.OPENING_TRAINERS[first].party});}};
