@@ -76,9 +76,9 @@ test('legacy048deferredbootstrap also resolves model192 to its actual Violante a
  const c={console,OPENING_ASSETS:{models:{},textures:{},scenes:{}},OPENING_SPRITES:{},OPENING_DATA:{},TRAINING_DATA:Object.fromEntries(['evolutions','progression','pokemonData','compatibility','machines'].map(k=>[k,{}])),DRIFTVEIL_DATA:{},DRIFTVEIL_EVENTS:{zones:{96:{}}},RuntimeAssets:{preloadImages:async()=>true},NativeTextLayout:{resource:s=>s}};c.window=c;vm.createContext(c);for(const file of ['driftveil-scenes.js','driftveil-assets.js','driftveil-bootstrap.js'])vm.runInContext(fs.readFileSync(path.join(source,file),'utf8'),c,{filename:file});await c.DriftveilChapter.ensure();assert.equal(c.OPENING_SPRITES.Violante.length,7);assert.deepEqual(Array.from(c.OPENING_SPRITES.Violante),Array.from(c.DRIFTVEIL_ASSETS.sprites[192]));
 });
 
-async function offMapDoorCheckpoint(){
+async function offMapDoorCheckpoint(along=1.5){
  const e=environment(96);e.controller.depart(actor('Komor',96,11,-576.5,-346.5),96);e.MistraltonContinuity.coveredTransition();e.native.zone=99;
- for(let i=0;i<3500;i++){await frames(e,1);const r=e.controller.records.get('Komor');if(r.plan.leg===1&&r.stage==='walk'&&r.actor.y<r.plan.anchor.y-1.5)return {e,r};}
+ for(let i=0;i<3500;i++){await frames(e,1);const r=e.controller.records.get('Komor');if(r.plan.leg===1&&r.stage==='walk'&&r.actor.y<r.plan.anchor.y-along)return {e,r};}
  assert.fail('Komor never physically crossed the actual Route6 cave doorway');
 }
 test('off-map portal records physical entry before saving a still-unfinished hidden passage',async()=>{
@@ -91,4 +91,20 @@ test('off-map portal migrates legacy covered checkpoints inside the doorway with
 test('off-map portal recovery does not authorize an unopened uncovered or off-axis forged passage',async()=>{
  const {e}=await offMapDoorCheckpoint(),saved=JSON.parse(JSON.stringify(e.controller.save()));delete saved[0].plan.portalEntered;saved[0].plan.transferAuthorized=false;const next=environment(99);assert.throws(()=>next.controller.restore(saved,99,next.native),/Itinerario non percorribile/);
  saved[0].plan.transferAuthorized=true;saved[0].actor.x+=5;assert.throws(()=>next.controller.restore(saved,99,next.native),/Itinerario non percorribile/);
+});
+
+test('off-map portal retains the observed fractional approach before the door plane',async()=>{
+ const {e}=await offMapDoorCheckpoint(-.7),saved=JSON.parse(JSON.stringify(e.controller.save()));saved[0].actor.y=-411.8495;delete saved[0].plan.portalEntered;
+ const next=environment(99);next.controller.restore(saved,99,next.native);const restored=next.controller.records.get('Komor');assert.equal(restored.actor.y,-411.8495);assert.equal(restored.actor.x,-676.5);assert.notEqual(restored.plan.portalEntered,true,'The approach is not an already-crossed door');assert.deepEqual(JSON.parse(JSON.stringify(restored.plan.points[0])),{x:-676.5,y:-412.5});
+ let previous=restored.actor.y;for(let i=0;i<12;i++){await frames(next,1);if(restored.plan.leg!==1)break;assert.ok(restored.actor.y<=previous+1e-9,'A reload must not route Komor backwards to the staging-cell centre');previous=restored.actor.y;}assert.equal(restored.plan.portalEntered,true);
+});
+test('off-map portal restores the complete original approach and exit corridor at all fractional checkpoints',async()=>{
+ const {e}=await offMapDoorCheckpoint(),templates=[JSON.parse(JSON.stringify(e.controller.save()))[0]];
+ for(const [name,zone,id,x,y,model]of [['Rafan',96,9,-571.5,-349.5,89],['Komor',193,3,-12.5,1.5,7],['Komor',192,1,-2.5,-10.5,7],['Aralia',195,1,58.5,-9.5,105]]){
+  const source=environment(zone);source.controller.depart(actor(name,zone,id,x,y,model),zone);const r=source.controller.records.get(name);assert.equal(r.plan.kind,'door');templates.push(JSON.parse(JSON.stringify(source.controller.save()))[0]);
+ }
+ for(const template of templates)for(const along of [-1,-.99,-.875,-.6505,-.5,-.125,0,.125,.5,1,1.5,2.799,2.8]){
+  const saved=JSON.parse(JSON.stringify(template)),anchor=saved.plan.anchor,dx=-saved.plan.clip[0],dy=-saved.plan.clip[2],label=saved.plan.destination+'/'+along;saved.actor.x=anchor.x+dx*along;saved.actor.y=anchor.y+dy*along;delete saved.plan.portalEntered;saved.opened=false;saved.plan.transferAuthorized=true;const next=environment(99);next.controller.restore([saved],99,next.native);const r=next.controller.records.get(saved.actor.name);assert.equal(r.actor.y,saved.actor.y,'Exact fractional pose '+label);assert.equal(r.actor.x,saved.actor.x);assert.equal(r.plan.portalEntered===true,along>=-.001,'Physical crossing marker '+label);assert.equal(r.plan.points.length,along<-.001?2:1,'Remaining original segment '+label);assert.equal(next.samples.sequence,0);
+  let previous=along;for(let i=0;i<3;i++){await frames(next,1);if(r.plan.leg!==saved.plan.leg||r.plan.destination!==saved.plan.destination)break;const progress=(r.actor.x-anchor.x)*dx+(r.actor.y-anchor.y)*dy;assert.ok(progress>=previous-1e-9,'Backward passage '+label);previous=progress;}
+ }
 });

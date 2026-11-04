@@ -92,13 +92,14 @@
   record.actor.script=2000;
   if(record.plan.nextChapter){const event=nextEvents[record.plan.destination];if(!event)return null;return {...record,zone:337,plan:{...record.plan,kind:'resident',points:[],clip:null,nextEvent:event,nextChapter:true},stage:'resident',index:0};}
   const leg=itineraries[record.plan.destination]()[record.plan.leg],progressAlong=leg.kind!=='arrival'?((record.actor.x-leg.anchor.x)*leg.dx+(record.actor.y-leg.anchor.y)*leg.dy):-1;
-  // Older covered checkpoints could be saved after an off-map actor crossed
-  // the portal plane, without a visible door handle ever being opened. Only
-  // the actual short outbound segment authorizes that legacy continuation.
-  const coveredDoor=leg.kind==='door'&&record.plan.transferAuthorized===true&&progressAlong<=2.801&&Math.abs((record.actor.x-leg.anchor.x)*leg.dy-(record.actor.y-leg.anchor.y)*leg.dx)<.001;
-  if(leg.kind!=='arrival'&&progressAlong>=-.001&&(leg.kind==='path'||record.opened||record.stage==='hold'||record.plan.portalEntered===true||coveredDoor)){
-   const plan=build(record.plan.destination,record.plan.leg,{...record.actor,...leg.anchor});plan.transferAuthorized=record.plan.transferAuthorized===true;plan.portalEntered=leg.kind==='door';
-   const end=point(leg.anchor.x+leg.dx*2.8,leg.anchor.y+leg.dy*2.8),done=Math.hypot(record.actor.x-end.x,record.actor.y-end.y)<.001;plan.points=[end];
+  // The native final staging cell, portal plane and hidden exit form one
+  // continuous segment. Re-running A* halfway through its approach can round
+  // to the staging cell, return no points and falsely reject a valid body.
+  const crossed=progressAlong>=-.000001,doorCorridor=leg.kind==='door'&&progressAlong>=-1.001&&progressAlong<=2.801&&Math.abs((record.actor.x-leg.anchor.x)*leg.dy-(record.actor.y-leg.anchor.y)*leg.dx)<.001;
+  const resumeDoor=doorCorridor&&(!crossed||record.plan.transferAuthorized===true||record.opened||record.stage==='hold'||record.plan.portalEntered===true);
+  if(resumeDoor||leg.kind==='path'&&progressAlong>=-.001){
+   const plan=build(record.plan.destination,record.plan.leg,{...record.actor,...leg.anchor});plan.transferAuthorized=record.plan.transferAuthorized===true;plan.portalEntered=leg.kind==='door'&&crossed;
+   const end=point(leg.anchor.x+leg.dx*2.8,leg.anchor.y+leg.dy*2.8),done=Math.hypot(record.actor.x-end.x,record.actor.y-end.y)<.001;plan.points=resumeDoor&&!crossed?[{...leg.anchor},end]:[end];
    return {...record,plan,index:done?1:0,stage:done?'hold':'walk',opened:record.opened===true||plan.portalEntered,travel:0};
   }
   const plan=build(record.plan.destination,record.plan.leg,record.actor);plan.transferAuthorized=record.plan.transferAuthorized===true;
