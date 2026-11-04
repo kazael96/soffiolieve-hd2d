@@ -7,21 +7,32 @@
   const D=options.data||root.MISTRALTON_GYM_DATA,state=options.state||(()=>root.NativeStory?.state),hero=options.player||(()=>player),actors=options.actors||(()=>root.NativeStory?.visualActors?.()||[]),save=options.save||(()=>root.Journey?.save(true)),run=options.run||(entry=>root.NativeStory?.run(entry)),direction=options.direction||(()=>facing/3),resetInput=options.resetInput||(()=>{if(typeof root.resetInput==='function')root.resetInput();}),loaded=new Map(),instances=[];
   let task=null,installed=false,ride=null,mainHeight=50,anteHeight=0;const resumedSounds=new Set(),audio=options.audio||((id,opts)=>root.AudioEngine?.playSound?.(id,opts)),sound=(id,opts)=>{void audio(id,opts);},stopAudio=options.stopAudio||(id=>root.AudioEngine?.stopSound?.(id)),barrierEnd=()=>D.models.barrier.frames?.[0]||300;
   const active=()=>[97,98].includes(state()?.zone),finite=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  function record(){const n=state();if(!n)return null;if(!Array.isArray(n.clayLifts)||n.clayLifts.length!==6||n.clayLifts.some(v=>v!==0&&v!==1))n.clayLifts=[...D.initialStates];if(!finite(n.clayHeight,-59,55))n.clayHeight=n.zone===98?0:50;n.clayActors??={};return n;}
+  const floorBounds=D.floorBounds,stateMin=Math.floor(floorBounds.min),floorCells=new Map(D.floorSurface.cells),floorPlanes=D.floorSurface.planes,deepEndpoint=Math.min(...D.lifts[5].heights);
+  // WB524 uses original Q12 normals/offsets. Keep its fixed-point division,
+  // including the signed rounding, rather than flattening the native ramp.
+  function floorHeightAt(x,z){
+   if(!Number.isFinite(x)||!Number.isFinite(z))return null;const f=D.floorSurface,nx=x-f.offsetX,nz=z-f.offsetZ,gx=Math.floor(nx),gz=Math.floor(nz);
+   if(gx<0||gz<0||gx>=f.width||gz>=f.depth)return null;const index=floorCells.get(gz*f.width+gx);if(index===undefined)return null;
+   const [a,b,c,offset]=floorPlanes[index],qx=Math.round((nx-f.width/2)*65536),qz=Math.round((nz-f.depth/2)*65536),mul=(n,q)=>Math.floor((n*q+2048)/4096),numerator=-(offset+mul(a,qx)+mul(-c,qz));
+   return Number(((BigInt(numerator)*4294967296n/BigInt(b))+524288n)>>20n)/65536;
+  }
+  function onFloor(h){return finite(h,stateMin,deepEndpoint+.05);}
+  function floorPositionHeight(x,z,h){if(!onFloor(h))return h;for(let i=0;i<D.lifts.length;i++)if(Math.abs(level(i)-h)<.65&&inRect(x,z,D.lifts[i]))return level(i);return floorHeightAt(x,z)??h;}
+  function record(){const n=state();if(!n)return null;if(!Array.isArray(n.clayLifts)||n.clayLifts.length!==6||n.clayLifts.some(v=>v!==0&&v!==1))n.clayLifts=[...D.initialStates];if(!finite(n.clayHeight,stateMin,55))n.clayHeight=n.zone===98?0:50;n.clayActors??={};return n;}
   const level=index=>D.lifts[index].heights[record()?.clayLifts[index]||0];
-  function height(){return active()?record().clayHeight:undefined;}
+  function height(){if(!active())return undefined;const n=record();if(n.zone===97&&!ride){const p=hero();n.clayHeight=floorPositionHeight(p.x,p.y,n.clayHeight);}return n.clayHeight;}
   function inRect(x,z,r,pad=0){return x+16>=r.x+pad&&x+16<r.x+r.width-pad&&z+16>=r.z+pad&&z+16<r.z+r.depth-pad;}
-  function actorHeight(n,fallback=n?.height??0){if(state()?.zone!==97||n?.fieldZone!==undefined&&n.fieldZone!==97)return fallback;if(n.uid===0&&n.model===89||n.uid===0&&n.name==='Rafan')return D.floorHeight;const h=record().clayActors[n.uid];return finite(h,-59,55)?h:fallback;}
+  function actorHeight(n,fallback=n?.height??0){if(state()?.zone!==97||n?.fieldZone!==undefined&&n.fieldZone!==97)return fallback;if(ride?.carried.includes(n.uid))return ride.current;if(n.uid===0&&(n.model===89||n.name==='Rafan')){const p=D.floorSurface.leader;return floorHeightAt(n.x??p.x,n.y??p.z)??fallback;}const h=record().clayActors[n.uid];return finite(h,stateMin,55)?h:fallback;}
   function sameLevel(n){return state()?.zone!==97||Math.abs(actorHeight(n)-height())<1.5;}
   function install(){if(installed)return;const assets=options.assets||root.OPENING_ASSETS;if(!assets)return;Object.assign(assets.models,D.geometry);Object.assign(assets.textures,D.textures);
    function add(kind,id,p,zone){const model=D.models[kind].model+'-'+id;assets.models[model]=D.geometry[D.models[kind].model];const ins={model,gymModel:kind,gymId:id,x:p[0]-16,y:p[1],z:p[2]-16,rotation:0,zone};instances.push(ins);const scene=assets.scenes['zone'+zone]||assets.scenes[zone];if(scene&&!scene.instances.some(v=>v.model===model))scene.instances.push(ins);}
    D.origins.forEach((p,i)=>add('lift',i,p,97));add('main',0,D.mainOrigin,97);add('barrier',0,D.barrierOrigin,97);add('lift','ante',D.antechamberOrigin,98);installed=true;
   }
   function prepare(){install();if(task)return task;task=Promise.all(Object.entries(D.models).map(async([key,m])=>{if(!loaded.has(key))loaded.set(key,await (options.loadGLB||root.StarterScene.loadGLB)(m.url));})).then(()=>true).catch(error=>{task=null;throw error;});return task;}
-  function enter(zone,entryHeight){if(ride&&ride.zone!==zone){ride.resolve?.(false);ride=null;stopAudio(1738);stopAudio(1754);}if(zone!==97)stopAudio(1741);const n=record();if(!n)return;if(zone===97){n.clayHeight=finite(entryHeight,-59,55)?entryHeight:50;mainHeight=50;}else if(zone===98){n.clayHeight=finite(entryHeight,-5,0)?entryHeight:0;anteHeight=n.clayHeight;}else{delete n.clayRide;return;}restore();}
+  function enter(zone,entryHeight){if(ride&&ride.zone!==zone){ride.resolve?.(false);ride=null;stopAudio(1738);stopAudio(1754);}if(zone!==97)stopAudio(1741);const n=record();if(!n)return;if(zone===97){n.clayHeight=finite(entryHeight,stateMin,55)?entryHeight:50;mainHeight=50;}else if(zone===98){n.clayHeight=finite(entryHeight,-5,0)?entryHeight:0;anteHeight=n.clayHeight;}else{delete n.clayRide;return;}restore();height();}
   function resumeSound(id,offset){if(!finite(offset,.000001,11.9))return;const key=id+':'+offset;if(resumedSounds.has(key))return;resumedSounds.add(key);sound(id,{offset});}
   function restore(){const n=record();if(!n)return false;if(n.zone===97&&n.clayBarrier&&finite(n.clayBarrierFrame,.000001,barrierEnd()-.000001))resumeSound(1741,n.clayBarrierFrame/D.tickRate);const r=n.clayRide;if(!r)return false;
-   if(![97,98].includes(r.zone)||r.zone!==n.zone||!['lift','main','ante'].includes(r.kind)||!finite(r.from,-59,55)||!finite(r.to,-59,55)||!finite(r.current,-59,55)||!finite(r.elapsed,0,1000)||!finite(r.speed,.1,20)||!Number.isInteger(r.index)||r.index<0||r.index>5||!['moving','barrier'].includes(r.phase)||r.phase==='barrier'&&!finite(r.pause,0,100/D.tickRate)||!Array.isArray(r.carried)||r.carried.some(id=>!Number.isInteger(id)||id<0||id>65535)){if(r.kind==='lift'&&Number.isInteger(r.index)&&D.lifts[r.index]&&r.hero!==false){n.clayHeight=level(r.index);for(const id of Array.isArray(r.carried)?r.carried:[])if(Number.isInteger(id))n.clayActors[id]=n.clayHeight;}delete n.clayRide;return false;}
+   if(![97,98].includes(r.zone)||r.zone!==n.zone||!['lift','main','ante'].includes(r.kind)||!finite(r.from,stateMin,55)||!finite(r.to,stateMin,55)||!finite(r.current,stateMin,55)||!finite(r.elapsed,0,1000)||!finite(r.speed,.1,20)||!Number.isInteger(r.index)||r.index<0||r.index>5||!['moving','barrier'].includes(r.phase)||r.phase==='barrier'&&!finite(r.pause,0,100/D.tickRate)||!Array.isArray(r.carried)||r.carried.some(id=>!Number.isInteger(id)||id<0||id>65535)){if(r.kind==='lift'&&Number.isInteger(r.index)&&D.lifts[r.index]&&r.hero!==false){n.clayHeight=level(r.index);for(const id of Array.isArray(r.carried)?r.carried:[])if(Number.isInteger(id))n.clayActors[id]=n.clayHeight;}delete n.clayRide;return false;}
    ride={...r,hero:r.hero!==false,carried:[...r.carried],resolve:null};if(ride.hero)n.clayHeight=r.current;if(r.kind==='main')mainHeight=r.current;if(r.kind==='ante')anteHeight=r.current;if(r.phase==='moving'){const age=finite(r.motorAge,0,12)?r.motorAge:r.kind==='lift'&&r.index===5&&r.from===50&&r.current<-40?r.elapsed-6-100/D.tickRate:r.elapsed;resumeSound(r.kind==='main'&&r.from===55||r.kind==='ante'&&r.from===-5?1754:1738,age);}return true;
   }
   function persist(){if(ride){const {resolve,...r}=ride;record().clayRide={...r,carried:[...r.carried]};}else delete record().clayRide;}
@@ -31,7 +42,7 @@
   }
   function moveLift(index){if(!Number.isInteger(index)||index<0||index>5)throw Error('Elevatore di Rafan non valido: '+index);const n=record(),from=level(index),to=D.lifts[index].heights[1-n.clayLifts[index]];return start('lift',index,from,to,index===5?D.deepLiftSpeed:D.liftSpeed);}
   function advanceBarrier(dt){const n=record();if(!n||!n.clayBarrier||!finite(n.clayBarrierFrame,0,barrierEnd())||n.clayBarrierFrame>=barrierEnd())return;n.clayBarrierFrame=Math.min(barrierEnd(),n.clayBarrierFrame+dt*D.tickRate);if(n.clayBarrierFrame>=barrierEnd()){stopAudio(1741);save();}}
-  function tick(dt){if(!finite(dt,0,60))return;const n=record();if(!n)return;if(!ride){if(n.zone===97)advanceBarrier(dt);return;}const r=ride;if(n.zone!==r.zone){r.resolve?.(false);ride=null;delete n.clayRide;for(const id of [1738,1741,1754])stopAudio(id);return;}
+  function tick(dt){if(!finite(dt,0,60))return;const n=record();if(!n)return;if(!ride){if(n.zone===97){height();for(const actor of actors())if(actor.uid===0&&(actor.model===89||actor.name==='Rafan'))actor.height=actorHeight(actor);advanceBarrier(dt);}return;}const r=ride;if(n.zone!==r.zone){r.resolve?.(false);ride=null;delete n.clayRide;for(const id of [1738,1741,1754])stopAudio(id);return;}
    let remaining=dt,barrierTime=n.clayBarrier?dt:0;r.elapsed+=dt;if(r.phase==='moving')r.motorAge=(r.motorAge||0)+dt;
    while(remaining>1e-9){
     if(r.phase==='barrier'){const used=Math.min(remaining,Math.max(0,100/D.tickRate-r.pause));r.pause+=used;remaining-=used;if(r.pause+1e-8<100/D.tickRate)break;r.phase='moving';r.speed=D.liftSpeed;r.motorAge=remaining;sound(1738);}
@@ -46,7 +57,7 @@
   }
   function blocked(x,z){if(state()?.zone!==97)return null;const h=height();if(ride)return true;
    function walkable(x,z){if(D.bridges.some(r=>Math.abs(r.height-h)<.65&&inRect(x,z,r)))return true;if(D.lifts.some((r,i)=>Math.abs(level(i)-h)<.65&&inRect(x,z,r)))return true;
-    if(Math.abs(h-D.floorHeight)<.65){const assets=options.assets||root.OPENING_ASSETS,scene=assets?.scenes.zone97||assets?.scenes[97],grid=scene?.permissionGrids?.[0],gx=Math.floor(x+16),gz=Math.floor(z+16);return !!grid&&gx>=0&&gx<32&&gz>=0&&gz<32&&!(grid.bytes[8+(gz*32+gx)*8+2]&1);}return false;}
+    if(onFloor(h))return floorHeightAt(x,z)!==null;return false;}
    return [[-.12,-.12],[-.12,.12],[.12,-.12],[.12,.12]].some(([dx,dz])=>!walkable(x+dx,z+dz));
   }
   function interact(){if(state()?.zone!==97)return false;if(ride)return true;const n=record(),p=hero(),dir=direction(),[dx,dz]=[[0,-1],[0,1],[-1,0],[1,0]][dir]||[0,-1],background=(options.events||root.MISTRALTON_EVENTS)?.zones[97]?.background||[];
@@ -72,7 +83,7 @@
    }if(renderer.canvas)renderer.canvas.dataset.clayGym=JSON.stringify({height:height(),lifts:n.clayLifts,ride:n.clayRide||null,barrier:!!n.clayBarrier});
   }
   function reset(){ride?.resolve?.(false);ride=null;for(const id of [1738,1741,1754])stopAudio(id);const n=record();if(n){n.clayLifts=[...D.initialStates];n.clayActors={};n.clayHeight=n.zone===98?0:50;if(n.clayBarrier)n.clayBarrierFrame=barrierEnd();if(Array.isArray(n.flags))n.flags=[...n.flags.filter(v=>v<10||v>15),...D.initialFlags.flatMap((v,i)=>v?[10+i]:[])];delete n.clayRide;}mainHeight=50;anteHeight=0;}
-  return {prepare,enter,restore,reset,tick,blocked,interact,command,apply,actorHeight,sameLevel,moveLift,level,heroHeight:fallback=>height()??fallback,cameraHeight:fallback=>height()??fallback,get busy(){return !!ride;},get ride(){return ride;}};
+  return {prepare,enter,restore,reset,tick,blocked,interact,command,apply,actorHeight,sameLevel,moveLift,level,floorHeightAt,floorBounds,heroHeight:fallback=>height()??fallback,cameraHeight:fallback=>height()??fallback,get busy(){return !!ride;},get ride(){return ride;}};
  }
  const api={createController};if(root.MISTRALTON_GYM_DATA)Object.defineProperties(api,Object.getOwnPropertyDescriptors(createController()));root.MistraltonGym=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

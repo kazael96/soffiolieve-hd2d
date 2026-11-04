@@ -7,7 +7,7 @@ const {FieldEventVM}=require('../src/field-event-vm.js'),{createController}=requ
 const source=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),gymCase=source.slice(source.indexOf("case049('qaGym049'"),source.indexOf("case049('qaArrival049'"));
 const browserCalls=[...gymCase.matchAll(/await lift\((\d+),(\d+),(\d+),(\d+),(-?\d+),\{([^}]+)\}\)/g)].map(m=>({index:+m[1],x:+m[2],z:+m[3],dir:+m[4],height:+m[5],script:+m[6].match(/script:(\d+)/)[1],carried:!m[6].includes('carried:false'),eastOfButton:m[6].includes('eastOfButton:true')}));
 function setup(){
- const state={zone:97,vars:{},flags:data.initialFlags.flatMap((v,i)=>v?[10+i]:[]),clayHeight:50,clayLifts:[...data.initialStates],clayActors:{},clayBarrier:0},player={x:1.5,y:9.5},actors=events.zones[97].actors.map(a=>({uid:a.id,model:a.model,fieldZone:97,x:a.x+.5-16,y:a.z+.5-16,height:a.id===0?-59:a.y/65536,gimmick:a.model===185})),calls=[],messages=[],entries=[];
+ const state={zone:97,vars:{},flags:data.initialFlags.flatMap((v,i)=>v?[10+i]:[]),clayHeight:50,clayLifts:[...data.initialStates],clayActors:{},clayBarrier:0},player={x:1.5,y:9.5},actors=events.zones[97].actors.map(a=>({uid:a.id,model:a.model,fieldZone:97,x:a.x+.5-16,y:a.z+.5-16,height:a.y/65536,gimmick:a.model===185})),calls=[],messages=[],entries=[];
  let controller,task,direction=0,done=true,error;
  const eventVM=new FieldEventVM(events,state,{async command(c,a,v){if(c.name==='NativeOpcode400')calls.push(v[0]);if(c.name==='MsgSystem')messages.push(v[0]);const result=controller.command(c.name,a,v);if(result!==false)return result;assert.ok(['ActorPauseAll','ActorUnlockAll','RTFinishSubEvents','SEPlay','SEWait','MsgSystem','InputWaitLast','MsgWinCloseAll'].includes(c.name),'Unexpected switch command '+c.name);return true;}});
  const catalog={models:{},textures:{},scenes:{zone97:{instances:[],permissionGrids:assets.scenes[97].permissionGrids},zone98:{instances:[]}}};
@@ -43,7 +43,7 @@ test('browser gym route presses native scripts with actual actor/body collisions
  for(const speed of [1,2,4]){
   const s=setup();let samples=0;
   for(const call of browserCalls){samples+=s.walk(call.x,call.z);if(call.eastOfButton)s.eastOfButton(call.x);s.setDirection(call.dir);const at=s.calls.length,pose={...s.player};assert.equal(s.controller.interact(),true,'Missing button '+JSON.stringify(call));for(let i=0;i<20&&!s.controller.busy&&!s.done;i++)await Promise.resolve();assert.equal(s.controller.busy,true,'Native button did not move '+JSON.stringify({call,messages:s.messages}));assert.equal(s.entries.at(-1),call.script-1);assert.equal(s.controller.ride.index,call.index);assert.equal(s.controller.ride.hero,call.carried);assert.equal(s.controller.interact(),true,'A while moving must be consumed');assert.equal(s.entries.at(-1),call.script-1);await s.settle(speed);assert.equal(s.calls.length,at+1);assert.equal(s.state.clayHeight,call.height);assert.deepEqual(s.player,pose,'Lift must not teleport horizontally');
-   if(call.height===-59){samples+=s.walk(15,6);assert.equal(s.controller.actorHeight(s.actors[0]),-59);assert.equal(s.state.clayBarrier,1);}
+   if(call.height===-59){samples+=s.walk(15,6);assert.equal(s.controller.actorHeight(s.actors[0]),-62.01512145996094);s.controller.tick(0);assert.equal(s.state.clayHeight,-62.01512145996094);assert.equal(s.state.clayBarrier,1);}
   }
   samples+=s.walk(17,25);assert.ok(samples>500,'Route did not exercise continuous physical samples');assert.equal(s.state.clayHeight,50);assert.deepEqual(s.messages,[],'Correct route should not hit upper/lower limit messages');
  }

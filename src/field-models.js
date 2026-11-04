@@ -49,10 +49,19 @@
       renderer.fieldModels=this;
     }
     async load(records=Object.values(this.assets.models)){const results=await Promise.allSettled(records.map(async record=>{if(this.loaded.has(record.key))return;const model=await root.StarterScene.loadGLB(record.model);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache=new Map();this.loaded.set(record.key,model);}));const failed=results.find(r=>r.status==='rejected');this.error=failed?.reason||null;if(this.error){this.renderer.modelsRecovering=true;this.renderer.status?.('Alcuni modelli non sono disponibili. Riprova il caricamento.',()=>this.renderer.contextLost?this.renderer.restoreContext():this.retry(),{key:'models',valid:()=>!!this.error&&!this.renderer.gl?.isContextLost()});return false;}for(const done of this.waiters.splice(0))done();return true;}
-    async prepareScene(scene=this.renderer.scene){const records=[...new Set(this.records(scene).map(target=>target.record))];if(records.some(record=>!this.loaded.has(record.key)))this.ready=this.load(records);if(!await this.ready)throw this.error||Error('Modelli della scena non disponibili');this.renderer.modelsRecovering=false;this.renderer.recovery?.clear('models');return true;}
+    async prepareScene(scene=this.renderer.scene){const records=[...new Set(this.records(scene,true).map(target=>target.record))];if(records.some(record=>!this.loaded.has(record.key)))this.ready=this.load(records);if(!await this.ready)throw this.error||Error('Modelli della scena non disponibili');this.renderer.modelsRecovering=false;this.renderer.recovery?.clear('models');return true;}
     async retry(){this.ready=this.load();const okay=await this.ready;if(okay){this.renderer.recovery?.clear('models');this.renderer.modelsRecovering=false;if(this.renderer.assetsReady&&!this.renderer.contextLost&&!this.renderer.resourceGates?.size){this.renderer.ready=true;document.getElementById('loading')?.remove();this.renderer.resumeSceneWaiters?.();}this.renderer.recovery?.refresh();}return okay;}
     restoreGraphics(){for(const model of this.loaded.values()){const gl=this.renderer.gl;for(const t of model.textures||[])if(gl?.isTexture?.(t.texture))gl.deleteTexture(t.texture);for(const groups of model.cache.values())for(const group of groups)if(gl?.isBuffer?.(group.buf))gl.deleteBuffer(group.buf);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache.clear();}}
-    records(scene=this.renderer.scene){if(!this.scenes.has(scene))this.scenes.set(scene,targets(scene,this.assets));return this.scenes.get(scene);}
+    records(scene=this.renderer.scene,refresh=false){
+      const cached=this.scenes.get(scene);
+      if(refresh||!cached||cached.instances!==scene.instances||cached.count!==scene.instances.length){
+        // Deferred geometry and newly installed native scopes keep the same
+        // scene identity. Refresh their targets, retaining live handle state.
+        const previous=new Map((cached?.items||[]).map(t=>[t.instance,t])),items=targets(scene,this.assets).map(target=>{const old=previous.get(target.instance);return old?.record===target.record?Object.assign(old,target):target;});
+        this.scenes.set(scene,{instances:scene.instances,count:scene.instances.length,items});
+      }
+      return this.scenes.get(scene).items;
+    }
     find(type,x,z){
       // IRBI 0218C484/0218C8C4: first compatible loaded model, inclusive rectangle.
       return this.records().find(t=>t.record.class===type&&Math.abs(t.x-x)<=2&&Math.abs(t.z-z)<=3)||null;
