@@ -61,3 +61,10 @@ La matrice numerica locale comprende2620 coppie su109 specie/forme entro39, con 
 Un'ispezione del tetto della Torre ha rilevato che la nebbia trasparente scriveva nella profondità e copriva il personaggio. Il catalogo conserva ora142 gruppi con blending nativo e il renderer li ordina dopo i corpi senza scrivere nella profondità. Una regressione verifica ordine e ripristino dello stato GPU; la nuova resa richiede ancora verifica nel browser. I centri geometrici per l'ordinamento vengono calcolati una sola volta per gruppo.
 
 Restano aperti Surf sul campo, PC e servizi facoltativi, varianti geometriche invernali, collaudo completo dei fondali e dei viaggi nel browser, suite condivisa della candidata aggiornata e distribuzione. Questa integrazione non è ancora una consegna050; la049 resta l'ultima versione pubblica verificata.
+
+
+### Preparazione Surf dopo il checkpoint fa31a62
+
+`extract-surf-field.py` riproduce dalla ROM le otto texture originali dei due personaggi, sea_ride, shibuki01 e le animazioni BCA/BTA dai membri49/54/107/133 di a/0/7/5, con hash degli originali. Le rotazioni/scostamenti direzionali provengono dalle tabelle native. `surf-field-motion.js` separa selezione della mossa, rive a una/due celle, quote native, approdo, occupazione, cancellazione delle risorse e checkpoint. Nove test isolati passano a velocita1/2/4. Non aggiunge requisiti di PS, PP o medaglie assenti nel controllo originale.
+
+Questi file non sono ancora collegati a index/controlli/renderer: Surf non e ancora giocabile. La candidata verificata8e94a4aff25628dd precede questa preparazione. Restano da integrare sprite e modello sotto il personaggio, spruzzi, menu Squadra/A, caricamento e recupero, musica/incontri nativi, fondali acquatici espliciti e salvataggi, poi ripetere suite e attraversamenti nel browser. La cadenza della transizione continua e un adattamento HD-2D, non una misura temporale nativa.
