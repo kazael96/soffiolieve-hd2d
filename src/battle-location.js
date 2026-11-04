@@ -3,6 +3,7 @@
  const rooms={bedroom:['bedroom','Camera di Alcide',391],home:['home','Casa di Alcide',390],bianca:['bianca','Casa di Belle',392],biancaRoom:['biancaRoom','Camera di Belle',393],komorHome:['komorHome','Casa di Komor',394],komorRoom:['komorRoom','Camera di Komor',395],lab:['lab','Laboratorio di Aralia',396]};
  function capture(state,native,position,terrain='path'){
   if(!state||!position||!Number.isFinite(position.x)||!Number.isFinite(position.y))throw Error('Posizione del combattimento non disponibile');
+  if(root.ICIRRUS_FIELD){const place=root.ICIRRUS_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.MISTRALTON_FIELD){const place=root.MISTRALTON_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.DRIFTVEIL_FIELD){const place=root.DRIFTVEIL_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.NIMBASA_FIELD){const place=root.NIMBASA_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}

@@ -1,8 +1,8 @@
 /* Exercise the actual story controller against real release maps and Gen V battles. */
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');
 const site=path.resolve(process.argv[2]||'_site');
-function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=false,mistralton=false}={}){
- driftveil=driftveil||mistralton;nimbasa=nimbasa||driftveil;castelia=castelia||nimbasa;
+function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=false,mistralton=false,icirrus=false}={}){
+ mistralton=mistralton||icirrus;driftveil=driftveil||mistralton;nimbasa=nimbasa||driftveil;castelia=castelia||nimbasa;
  const read=file=>fs.readFileSync(sourceRoot&&fs.existsSync(path.join(sourceRoot,file))?path.join(sourceRoot,file):path.join(site,file),'utf8');
  const elements=new Map(),records=new Map();
  if(save)records.set('soffiolieve-black-opening-v2',JSON.stringify(save));
@@ -18,8 +18,10 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  if(nimbasa)for(const file of ['nimbasa-assets.js','nimbasa-events.js','nimbasa-data.js','nimbasa-scenes.js','nimbasa-bootstrap.js','nimbasa-phone.js','nimbasa-field.js'])vm.runInContext(read(file),c,{filename:file});
  if(driftveil)for(const file of ['driftveil-assets.js','driftveil-events.js','driftveil-data.js','driftveil-scenes.js','driftveil-gym-data.js','driftveil-bootstrap.js','driftveil-gym.js','driftveil-field.js'])vm.runInContext(read(file),c,{filename:file});
  if(mistralton)for(const file of ['mistralton-assets.js','mistralton-events.js','mistralton-data.js','mistralton-scenes.js','mistralton-gym-data.js','mistralton-bootstrap.js','mistralton-gym.js','mistralton-field.js','mistralton-badge-assets.js','mistralton-fly-data.js','mistralton-fly.js'])vm.runInContext(read(file),c,{filename:file});
+ if(icirrus){for(const file of ['icirrus-assets.js','native-surface-data.js','native-surfaces.js','icirrus-events.js','icirrus-data.js','icirrus-scenes.js','icirrus-rails.js','icirrus-gym-data.js','icirrus-gym-motion.js','icirrus-cannon-task.js','icirrus-gym.js','icirrus-bootstrap.js','icirrus-field.js','icirrus-phone.js'])vm.runInContext(read(file),c,{filename:file});c.atob=s=>Buffer.from(s,'base64').toString('binary');}
  c.DriftveilCinematics={play:async id=>{c.cinematics??=[];c.cinematics.push(id);}};
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],groundHeight:()=>[62,64].includes(c.Journey?.state.original?.zone)?1:c.Journey?.state.original?.zone===63?2:0,gl:{},upload(){return {};}};
+ if(icirrus){const fallback=c.renderer.groundHeight;c.renderer.groundHeight=(x,z,height)=>{const zone=c.renderer.scene?.zone;if(!c.IcirrusChapter.zones.includes(zone))return fallback(x,z,height);const hint={height:height??c.NativeStory?.state.fieldHeight??0},rail=c.NativeRails.has(zone)&&c.NativeRails.locate(zone,x,z,hint);return rail?.height??c.IcirrusChapter.surfaceAt(zone,x,z,hint.height)?.height??fallback(x,z,height);};}
  if(mistralton)c.renderer.prepareScene=async()=>{await c.renderer.scene?.ensureAssets?.();await c.renderer.fieldModels?.prepareScene?.();return true;};
  vm.runInContext(read('starter-scene.js'),c,{filename:'starter-scene.js'});c.StarterScene.loadGLB=async()=>({doc:{textures:[]},images:[]});
  for(const file of ['field-model-assets.js','field-models.js'])vm.runInContext(read(file),c,{filename:file});
@@ -35,8 +37,9 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  c.AudioEngine.setFieldMusicVolume=value=>{c.fieldMusicVolume=value;};
  if(fs.existsSync(path.join(sourceRoot||site,'field-music-fade.js')))vm.runInContext(read('field-music-fade.js'),c,{filename:'field-music-fade.js'});
  if(mistralton)c.FieldEffects={play:async id=>{c.fieldEffects??=[];c.fieldEffects.push(id);}};
+ if(icirrus)for(const file of ['icirrus-field-models.js','icirrus-gestures.js','icirrus-field-motion.js'])vm.runInContext(read(file),c,{filename:file});
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
- for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js',...(mistralton?['mistralton-continuity.js','mistralton-puzzle-data.js','mistralton-ice.js','mistralton-puzzles.js','mistralton-services.js']:[]),'original-story.js'])vm.runInContext(read(file),c,{filename:file});
+ for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js',...(icirrus?['icirrus-paths.js','icirrus-continuity.js']:[]),...(mistralton?['mistralton-continuity.js','mistralton-puzzle-data.js','mistralton-ice.js','mistralton-puzzles.js','mistralton-services.js']:[]),'original-story.js'])vm.runInContext(read(file),c,{filename:file});
  c.DoubleBattles={partner:async args=>{const [ally,first,second]=args;c.startBattle(true,{story:first===401?'Mila e Michelino':'Team Plasma',trainerId:first,doubles:true,ally:c.OPENING_TRAINERS[ally].party,secondFoe:c.OPENING_TRAINERS[second].party,p1:c.Journey.configs(),p2:c.OPENING_TRAINERS[first].party});}};
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{

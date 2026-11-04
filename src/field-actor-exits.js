@@ -112,8 +112,8 @@
   // The documented old Aralia routes are rebuilt from her valid saved pose;
   // their obsolete path/index must not prevent that compatibility migration.
   if(r.zone===317&&a.name==='Aralia'&&p&&!p.itineraryVersion&&(['path','resident'].includes(p.kind)||p.destination==='lab')){p={kind:'path',points:[],clip:null,...(p.destination==='lab'?{destination:'lab'}:{})};index=0;stage='walk';}
-  if(!p||!['path','door','stairs','resident','arrival'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(point))return null;
-  if(['door','stairs','arrival'].includes(p.kind)&&!point(p.anchor))return null;
+  if(!p||!['path','door','stairs','resident','arrival','cannon'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(point))return null;
+  if(['door','stairs','arrival','cannon'].includes(p.kind)&&!point(p.anchor))return null;
   if(p.clip!=null&&(!Array.isArray(p.clip)||p.clip.length!==4||!p.clip.every(Number.isFinite)))return null;
   if(p.kind==='arrival'&&(!Number.isInteger(p.destinationZone)||!Number.isInteger(p.targetUid)))return null;
   if(!['walk','resident','rejoin','hold','descend','opening'].includes(stage)||!Number.isInteger(index)||index<0||index>p.points.length)return null;

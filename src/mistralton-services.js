@@ -1,6 +1,6 @@
 /* IRBI Center109 common shop871. Prices and stocks come from the native tables. */
 ((root)=>{
- const data=()=>root.MISTRALTON_DATA;
+ const data=()=>root.IcirrusChapter?.zones.includes(root.NativeStory?.state.zone)?root.ICIRRUS_DATA:root.MISTRALTON_DATA;
  function stock(id,badges=[]){const m=data().market,index=id===255?m.badgeStock[Math.min(8,new Set(badges).size)]:m.fixedStocks[id];if(index===undefined||!m.stocks[index])throw Error('Inventario Market non supportato: '+id);return [...m.stocks[index]];}
  const machine=id=>data().itemPockets[id]===2;
  function purchase(j,id,count,shop=255){
@@ -30,7 +30,7 @@
    await say(2);
   }await say(3);
  }
- function install(events){const p=data()?.receiptProgram;if(!p)return;const target=events.scripts[862];Object.assign(target.code,p.code);target.entries[14]=p.entries[14];if(!target.supportedEntries.includes(14))target.supportedEntries.push(14);Object.assign(events.commands,p.commands||{});}
+ function install(events){const p=data()?.receiptProgram||root.MISTRALTON_DATA?.receiptProgram;if(!p)return;const target=events.scripts[862];Object.assign(target.code,p.code);target.entries[14]=p.entries[14];if(!target.supportedEntries.includes(14))target.supportedEntries.push(14);Object.assign(events.commands,p.commands||{});}
  root.MistraltonServices={stock,purchase,sell,salePrice,open,install};
  if(typeof module!=='undefined')module.exports=root.MistraltonServices;
 })(typeof window!=='undefined'?window:globalThis);

@@ -48,3 +48,16 @@ La risorsa dei cannoni è stata convertita di nuovo dalla ROM nel catalogo050:10
 Sono inoltre estratti sei modelli animati di campo e sette collegamenti: la campana originale246frame è ora supportata dal selettore della classe8 con prefisso ic. Le24 specie aggiuntive hanno96 risorse Nitro fronte/dorso,48 ritratti e icone originali; Pokédex esteso a102 specie base. Le palette e i compositi sono stati ispezionati; la riproduzione numerica delle animazioni native non sostituisce le coreografie personalizzate in battaglia. Le evoluzioni finali degli starter sono riconosciute dalla validazione dei salvataggi. Prove e limiti in [QA-050.md](QA-050.md).
 
 Restano aperti: registrazione delle nuove scene, controller e camera completa dei cannoni, campana, collegamento superfici/stagioni, continuità narrativa, Surf/PC/servizi, matrice delle coreografie e relative risorse, fondali, suite completa sulla nuova build, prove browser e distribuzione. La0.49 resta l'ultima versione pubblica verificata.
+
+
+## Integrazione locale successiva alle basi
+
+Il runtime ora registra le27 scene, le quote WB/GC e i binari della Torre, i cannoni con camera e geometria animata, la campana e i salti narrativi di Nardo. Gli itinerari continuano dai record049: Anemone sale alla Torre e torna alla palestra attraversando undici lanci reali; Komor e Rutilo attraversano i portali e le gallerie realmente collegate di Monte Vite. I checkpoint conservano la quota dei piani sovrapposti. N e Rutilo proseguono fisicamente verso il varco settentrionale di Mistralopoli, in attesa dell'estensione seguente.
+
+Il replay dei comandi nativi `check-icirrus-runtime.cjs`, con esiti di lotta forniti dalla fixture, supera introduzione, campana, sesta medaglia/MT62, N all'aeroporto, Komor/Nardo/MN03, Team Plasma e arrivo di Rutilo a Mistralopoli. Riproduce anche il trasferimento di Komor dal controller049. Questa prova certifica la sequenza del controller, non un attraversamento manuale nel browser né le meccaniche delle lotte simulate.
+
+La matrice numerica locale comprende2620 coppie su109 specie/forme entro39, con profili anatomici sui due lati. Quattro tavole dei gesti di24 nuove specie sono state ispezionate. Restano distinti replay numerico, campioni visivi e prova completa nel combattimento reale.
+
+Un'ispezione del tetto della Torre ha rilevato che la nebbia trasparente scriveva nella profondità e copriva il personaggio. Il catalogo conserva ora142 gruppi con blending nativo e il renderer li ordina dopo i corpi senza scrivere nella profondità. Una regressione verifica ordine e ripristino dello stato GPU; la nuova resa richiede ancora verifica nel browser. I centri geometrici per l'ordinamento vengono calcolati una sola volta per gruppo.
+
+Restano aperti Surf sul campo, PC e servizi facoltativi, varianti geometriche invernali, collaudo completo dei fondali e dei viaggi nel browser, suite condivisa della candidata aggiornata e distribuzione. Questa integrazione non è ancora una consegna050; la049 resta l'ultima versione pubblica verificata.
