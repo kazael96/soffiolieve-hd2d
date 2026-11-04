@@ -27,3 +27,7 @@ test('field-model cache populated before a late native scope refreshes without g
 test('refreshing prepared records preserves a live native animation and handle',async()=>{
  const f=setup();await f.control.ready;const instance={model:'prop5',x:0,y:0,z:0,rotation:0},scene={instances:[instance]};f.renderer.scene=scene;await f.control.prepareScene();const handle=f.control.create(1,0,1.25);await f.control.play(handle,0);const target=f.control.handles.get(handle);f.control.tick(3/30);await f.control.prepareScene();assert.equal(f.control.records()[0],target);assert.equal(target.frame,3);f.control.tick(5/30);await f.control.wait(handle);assert.equal(target.playing,false);f.control.release(handle);assert.equal(f.control.handles.size,0);
 });
+
+test('canonical browser replay loads the Center through Mail before retesting the native city door',()=>{
+ const fixture=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),sequence=fixture.match(/const completeActions049=(\[[^;]+\])\.map/);assert.ok(sequence);const actions=JSON.parse(sequence[1].replaceAll("'",'"'));assert.equal(new Set(actions).size,14);assert.ok(actions.indexOf('qaMail049')<actions.indexOf('qaStory049'),'A fresh browser must reproduce the late048 loader before Ghecis opens the049 Gym door');
+});
