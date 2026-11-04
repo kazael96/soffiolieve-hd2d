@@ -8,9 +8,17 @@ Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPME
 
 L’utente ha confermato come destinazione il finale della storia principale, inclusi Lega, N e Ghecis; le attività dopo i titoli di coda restano escluse. Proseguire città per città nella storia, con una tappa implementata, collaudata e pubblicata prima della successiva. Per le prossime estensioni ricavare dalla ROM il livello del Pokémon più forte del prossimo Capopalestra e aumentare di conseguenza il limite; non scegliere arrotondamenti arbitrari. Livelli verificati nelle squadre IRBI (a/0/9/2–3): Rafan 31 (trainer24), Anemone 35 (25), Silvestro 39 (131), Aristide 43 (133). Conservare sempre livelli e XP superiori dei vecchi salvataggi. La 0.48 mantiene il limite 30 già autorizzato; il capitolo della palestra di Rafan passa a 31. Queste richieste si aggiungono agli standard A–H, senza ridurre controlli, continuità, sfondi, coreografie o pulizia delle build.
 
-## Capitolo corrente · 0.49 in lavorazione
+## Capitolo corrente · 0.50 in lavorazione
 
-La 0.48 è pubblicata e verificata (dc9ec7d5874f26dd; riferimento5b49474c22b932f4). Proseguire con `docs/DRIFTVEIL-MISTRALTON-049.md`: Deposito Frigo, Rafan, Percorso6, Cava Pietrelettrica e arrivo a Ponentopoli. Cap31 prima di Rafan e35 dopo la quinta medaglia, secondo i massimi nativi. Non considerare implementati comandi, mappe o specie per la sola estrazione. La matrice verificata resta quella0.48 finché il nuovo inventario non è integrato e collaudato. Nessuna riduzione degli standard A–H.
+La0.49 è pubblicata e verificata: revisione pubblica b22c8656e2bbe29f, riferimento Windows13ee30f6f8c7d45e, main9881d9f24d1fe29c3bf77b615fbb43d549246b88. PR41 contiene la tappa e PR42 corregge l’ordine della pipeline Pages;529 Node/7 Python/38 fasi superati,223 file radice e270 asset serviti confrontati. Build047 rimossa,048/049 conservate con tutti i rapporti esterni. Dettagli e limiti in docs/QA-049.md.
+
+Proseguire con docs/MISTRALTON-ICIRRUS-050.md: Anemone, Torre Cielo, Percorso7, Monte Vite e arrivo a Mistralopoli. Cap35 prima di Anemone e39 dopo la sesta medaglia, secondo i massimi nativi, conservando livelli/XP superiori. La destinazione complessiva resta il primo finale con Lega/N/Ghecis; nessun postgame. Non considerare integrati dati, comandi, superfici, mosse o servizi dalla sola estrazione privata. Le prossime integrazioni devono conservare proprietà dei loader condivisi, corridoi intermedi degli NPC, quote native, cap/forme, matrice specie–mossa, audio e UI. Conservare anche il filtro del tipo6 e il ricalcolo Interpoké per class/style/open con pulizia degli observer.
+
+Per il browser IAB: la scheda non realmente visibile può essere limitata a1fps anche con document.visibilityState=visible. Tracce e risposta queued sono prove del banco, non una collisione del gioco. Catture CUA continue getScreenshot({emit:false}) hanno mantenuto16.7–33.4ms nelle prove; non cambiare fisica o tolleranze per far passare il driver. Chiudere soltanto le proprie schede, ripristinare il viewport e arrestare i propri server.
+
+## Capitolo precedente · 0.49
+
+Deposito Frigo, Rafan, Percorso6, Cava Pietrelettrica e arrivo a Ponentopoli sono integrati, collaudati e pubblicati. Applicare docs/DRIFTVEIL-MISTRALTON-049.md e docs/SPECIES-MOVES-049.md:1760 coppie su85 specie/forme,911 nuove oltre la048. docs/QA-049.md distingue il replay delle nuove coppie, i viewport, i confronti di dipendenza e i limiti. Gli asset e le animazioni restano nativi dove estratti; i gesti anatomici e i fondali sono gli adattamenti HD-2D documentati.
 
 ## Capitolo precedente · 0.48
 

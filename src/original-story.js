@@ -343,8 +343,8 @@
       case 'WordSetTypeName':m.words[a[0]]=['Normale','Lotta','Volante','Veleno','Terra','Roccia','Coleottero','Spettro','Acciaio','Fuoco','Acqua','Erba','Elettro','Psico','Ghiaccio','Drago','Buio'][v[1]]||String(v[1]);break;
       case 'NativeOpcode34':m.set(a[0],0);break;
       case 'NativeOpcode120':m.set(a[0],window.Bicycle?.mounted()?1:0);break;
-      case 'NativeOpcode595':native.chapterCameraZoom=v;break;
-      case 'NativeOpcode596':native.chapterCameraZoom=null;break;
+      case 'NativeOpcode595':AudioEngine.setFieldMusicVolume(FieldMusicFade.start(native,v[0],v[1]));break;
+      case 'NativeOpcode596':AudioEngine.setFieldMusicVolume(FieldMusicFade.start(native,127,v[0]));break;
       case 'NativeOpcode340':await DriftveilCinematics.play(v[0]);break;
       case 'NativeOpcode467':native.nPortrait=true;break;
       case 'NativeOpcode468':native.nPortrait=false;break;
@@ -510,8 +510,10 @@
     return true;
   }
   async function phoneCall(id,m){
-    if(![1,2,3,4].includes(id))throw Error('Call outside opening '+id);
-    const call=id===4?NIMBASA_PHONE:id===3?CASTELIA_PHONE:id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
+    if(![1,2,3,4,6].includes(id))throw Error('Call outside opening '+id);
+    const call=id===6?window.ICIRRUS_PHONE:id===4?NIMBASA_PHONE:id===3?CASTELIA_PHONE:id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
+    if(!call)throw Error('Dati Interpoké non disponibili: '+id);
+    const texts=id===6?call.text:id===4?NIMBASA_PHONE.text:id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts;
     const names=['Alcide','Komor','Belle','Aralia','Mamma'],panel=document.createElement('section');panel.id='phoneScene';panel.setAttribute('aria-label','Interpoké');
     const pictures=call.participants.filter(person=>person<5).map(person=>{
       const name=names[person],tile=document.createElement('figure'),image=document.createElement('img'),label=document.createElement('figcaption');
@@ -529,7 +531,7 @@
     try{
       for(const [op,face,param] of call.commands){
         if(op===0)break;
-        if(op===1){talker=face;for(const page of messagePages((id===4?NIMBASA_PHONE.text:id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts)[param],m.words))await showPage(page,pictures[face].name);}
+        if(op===1){talker=face;for(const page of messagePages(texts[param],m.words))await showPage(page,pictures[face].name);}
         else if(op===2)await delay(param);else if(op===3)soundTask=AudioEngine.playSound(param);else if(op===4)await soundTask;else throw Error('Unknown phone command '+op);
       }
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
@@ -692,7 +694,7 @@
    }finally{eventRunning=false;journey.update();journey.save(true);}}
   async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
   function interact(){if(eventRunning||sceneChanging||vm.running||failed||window.MistraltonPuzzles?.busy||window.MistraltonGym?.busy||window.DriftveilGym?.busy)return;if(window.MistraltonPuzzles?.interact())return;if(window.MistraltonGym?.interact())return;if(window.DriftveilGym?.interact())return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===96&&t.n?.name==='Komor'&&t.n.uid===253&&t.script===2000){vm.words[0]=state.playerName||'Alcide';return neighborMessage(101,5);}if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155,29,326,63,329,97,191,192,193,331,195,196,197].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle'||native.zone===96&&t.n?.uid===28&&t.script===21)return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41,65,99,109].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
-  function step(dt,moved,distance=0){window.DriftveilGym?.tick(dt);if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
+  function step(dt,moved,distance=0){if(window.FieldMusicFade)AudioEngine.setFieldMusicVolume?.(FieldMusicFade.tick(native,dt));window.DriftveilGym?.tick(dt);if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
     if(window.SpeciesStudioMode||failed)return;
     if(window.NativeRails?.has(native.zone)){const hint=native.railCurrent?.zone===native.zone?native.railCurrent:{},at=NativeRails.locate(native.zone,player.x,player.y,hint);if(at)native.railCurrent={zone:native.zone,...at};}
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);

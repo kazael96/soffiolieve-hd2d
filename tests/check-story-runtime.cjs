@@ -32,6 +32,8 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  c.StarterSelection={choose:async({text})=>{assert.match(text(18,'Snivy'),/Snivy/);return c.testStarter||0;}};
  let visibilityFrame=0;c.renderer.actorVisibility=()=>({visible:false,sequence:++visibilityFrame});
  c.AudioEngine=mistralton?{setScene(id){c.musicRequests??=[];c.musicRequests.push(id);},playSound:async(id,options)=>{c.soundRequests??=[];c.soundRequests.push({id,options});},stopSound(id){c.soundStops??=[];c.soundStops.push(id);},cry:async()=>{}}:{setScene(){},playSound:async()=>{},cry:async()=>{}};
+ c.AudioEngine.setFieldMusicVolume=value=>{c.fieldMusicVolume=value;};
+ if(fs.existsSync(path.join(sourceRoot||site,'field-music-fade.js')))vm.runInContext(read('field-music-fade.js'),c,{filename:'field-music-fade.js'});
  if(mistralton)c.FieldEffects={play:async id=>{c.fieldEffects??=[];c.fieldEffects.push(id);}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
  for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js',...(mistralton?['mistralton-continuity.js','mistralton-puzzle-data.js','mistralton-ice.js','mistralton-puzzles.js','mistralton-services.js']:[]),'original-story.js'])vm.runInContext(read(file),c,{filename:file});
