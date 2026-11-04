@@ -73,10 +73,12 @@ body.touch-enabled #context{bottom:226px}body.touch-enabled footer{display:none}
  #journal,#dialogue{padding:20px}#journal h2,#dialogue h2{font-size:24px}
 }
 @media(max-height:500px) and (max-width:1000px){
+ #touch{display:flex;position:fixed;left:14px;right:14px}
  #openJournal{top:70px;width:195px}.companion,body.touch-enabled .companion{bottom:125px;padding:4px 8px}
  #context,body.touch-enabled #context{bottom:125px}#zoomControls,body.touch-enabled #zoomControls{bottom:125px}
  #toast,body.touch-enabled #toast{bottom:185px}#journal,#dialogue{max-height:92dvh}
 }
+@media(pointer:coarse){#touch{display:flex;position:fixed}}
 @media(prefers-reduced-motion:reduce){.hp i{transition:none}}
 #animationInspector{position:absolute;bottom:3%;left:5%;right:5%;z-index:5;background:#123e36f5;border:1px solid #c9d6ab80;border-radius:18px;padding:20px;color:#e6edce;display:flex;flex-wrap:wrap;gap:15px;align-items:center}#animationInspector[hidden]{display:none}#animationInspector label{display:flex;align-items:center;gap:8px}#animationInspector input{width:210px;accent-color:#b9d88d}#animationInspector select{max-width:180px}#animationInspector small{width:100%;font-size:12px}#battle[data-preview=true] .battle-panel{display:none}#inspectAnimation{margin:12px 8px 12px 0}
 

@@ -521,7 +521,10 @@
     panel.dataset.participants=String(pictures.length);document.body.append(panel);$('world').dataset.phone=String(id);await fade(0);
     // Reserve the actual message window, including touch controls and rotation.
     const fitPortraits=()=>{const dialog=$('dialogue');if(!dialog.open)return;const css=getComputedStyle(panel),rows=Math.ceil(pictures.length/2),space=dialog.getBoundingClientRect().top-parseFloat(css.paddingTop)-8-(rows-1)*parseFloat(css.rowGap);panel.style.gridTemplateRows=`repeat(${rows},minmax(0,${Math.max(0,Math.min(192,space/rows))}px))`;};
-    phoneLayout=fitPortraits;const layoutObserver=new ResizeObserver(fitPortraits);layoutObserver.observe($('dialogue'));addEventListener('resize',fitPortraits);
+    phoneLayout=fitPortraits;const layoutObserver=new ResizeObserver(fitPortraits);layoutObserver.observe($('dialogue'));
+    // Moving the touch controls into a modal changes its bottom/class without
+    // resizing the message canvas. Refit before paint on those changes too.
+    const placementObserver=new MutationObserver(fitPortraits);placementObserver.observe($('dialogue'),{attributes:true,attributeFilter:['class','style','open']});addEventListener('resize',fitPortraits);
     let talker=-1,frame=0;const clock=setInterval(()=>{frame++;pictures.forEach((p,i)=>{const blink=frame%28===26?1:frame%28===27?2:0;const mouth=i===talker?[0,1,2,1][frame%4]:0;p.image.src=portraits[p.name][blink*3+mouth];p.tile.classList.toggle('speaking',i===talker);});},1000/15);
     try{
       for(const [op,face,param] of call.commands){
@@ -529,7 +532,7 @@
         if(op===1){talker=face;for(const page of messagePages((id===4?NIMBASA_PHONE.text:id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts)[param],m.words))await showPage(page,pictures[face].name);}
         else if(op===2)await delay(param);else if(op===3)soundTask=AudioEngine.playSound(param);else if(op===4)await soundTask;else throw Error('Unknown phone command '+op);
       }
-    }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
+    }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function changeZone(zone,x,z){
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
