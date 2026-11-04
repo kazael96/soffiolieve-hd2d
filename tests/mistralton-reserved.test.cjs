@@ -1,6 +1,6 @@
 /* Actual source VM, actor continuity and lift clocks; browser pixels are separate. */
 const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
-const oldSite=process.argv[2];process.argv[2]=path.resolve(__dirname,'../../fidelity-build-048-driftveil');
+const oldSite=process.argv[2];process.argv[2]=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site');
 const {environment,drain}=require('./check-story-runtime.cjs');process.argv[2]=oldSite;
 async function setup(speed=1){
  const c=environment({mistralton:true,sourceRoot:path.resolve(__dirname,'../src')});await c.MistraltonChapter.ensure();const n=c.NativeStory,j=c.Journey;
