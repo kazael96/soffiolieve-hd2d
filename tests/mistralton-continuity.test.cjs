@@ -75,3 +75,20 @@ test('native049bootstrap prepares every Violante frame under the actual story ac
 test('legacy048deferredbootstrap also resolves model192 to its actual Violante atlas',async()=>{
  const c={console,OPENING_ASSETS:{models:{},textures:{},scenes:{}},OPENING_SPRITES:{},OPENING_DATA:{},TRAINING_DATA:Object.fromEntries(['evolutions','progression','pokemonData','compatibility','machines'].map(k=>[k,{}])),DRIFTVEIL_DATA:{},DRIFTVEIL_EVENTS:{zones:{96:{}}},RuntimeAssets:{preloadImages:async()=>true},NativeTextLayout:{resource:s=>s}};c.window=c;vm.createContext(c);for(const file of ['driftveil-scenes.js','driftveil-assets.js','driftveil-bootstrap.js'])vm.runInContext(fs.readFileSync(path.join(source,file),'utf8'),c,{filename:file});await c.DriftveilChapter.ensure();assert.equal(c.OPENING_SPRITES.Violante.length,7);assert.deepEqual(Array.from(c.OPENING_SPRITES.Violante),Array.from(c.DRIFTVEIL_ASSETS.sprites[192]));
 });
+
+async function offMapDoorCheckpoint(){
+ const e=environment(96);e.controller.depart(actor('Komor',96,11,-576.5,-346.5),96);e.MistraltonContinuity.coveredTransition();e.native.zone=99;
+ for(let i=0;i<3500;i++){await frames(e,1);const r=e.controller.records.get('Komor');if(r.plan.leg===1&&r.stage==='walk'&&r.actor.y<r.plan.anchor.y-1.5)return {e,r};}
+ assert.fail('Komor never physically crossed the actual Route6 cave doorway');
+}
+test('off-map portal records physical entry before saving a still-unfinished hidden passage',async()=>{
+ const {e,r}=await offMapDoorCheckpoint();assert.equal(r.opened,false,'Off-map traversal must not pretend to open a rendered door');assert.equal(r.plan.transferAuthorized,true);assert.equal(r.plan.portalEntered,true,'Physical entry must survive the next scene change');
+ const pose={x:r.actor.x,y:r.actor.y},next=environment(99);next.controller.restore(JSON.parse(JSON.stringify(e.controller.save())),99,next.native);const restored=next.controller.records.get('Komor');assert.deepEqual({x:restored.actor.x,y:restored.actor.y},pose);await frames(next,3);assert.ok(restored.actor.y<=pose.y,'Restoring a hidden passage must not walk back out of it');assert.equal(next.samples.sequence,0);
+});
+test('off-map portal migrates legacy covered checkpoints inside the doorway without rerouting through a wall',async()=>{
+ const {e,r}=await offMapDoorCheckpoint(),saved=JSON.parse(JSON.stringify(e.controller.save()));delete saved[0].plan.portalEntered;const pose={x:r.actor.x,y:r.actor.y},next=environment(99);next.controller.restore(saved,99,next.native);const restored=next.controller.records.get('Komor');assert.deepEqual({x:restored.actor.x,y:restored.actor.y},pose);assert.equal(restored.plan.portalEntered,true);assert.equal(restored.plan.points.length,1);await frames(next,3500);const final=next.controller.records.get('Komor');assert.equal(final.stage,'resident');assert.equal(final.plan.nextChapter,true);assert.equal(final.plan.nextEvent.zone,198);assert.equal(final.actor.name,'Komor');assert.equal(next.samples.sequence,0);
+});
+test('off-map portal recovery does not authorize an unopened uncovered or off-axis forged passage',async()=>{
+ const {e}=await offMapDoorCheckpoint(),saved=JSON.parse(JSON.stringify(e.controller.save()));delete saved[0].plan.portalEntered;saved[0].plan.transferAuthorized=false;const next=environment(99);assert.throws(()=>next.controller.restore(saved,99,next.native),/Itinerario non percorribile/);
+ saved[0].plan.transferAuthorized=true;saved[0].actor.x+=5;assert.throws(()=>next.controller.restore(saved,99,next.native),/Itinerario non percorribile/);
+});

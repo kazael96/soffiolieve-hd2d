@@ -92,7 +92,11 @@
   record.actor.script=2000;
   if(record.plan.nextChapter){const event=nextEvents[record.plan.destination];if(!event)return null;return {...record,zone:337,plan:{...record.plan,kind:'resident',points:[],clip:null,nextEvent:event,nextChapter:true},stage:'resident',index:0};}
   const leg=itineraries[record.plan.destination]()[record.plan.leg],progressAlong=leg.kind!=='arrival'?((record.actor.x-leg.anchor.x)*leg.dx+(record.actor.y-leg.anchor.y)*leg.dy):-1;
-  if(leg.kind!=='arrival'&&progressAlong>=-.001&&(leg.kind==='path'||record.opened||record.stage==='hold'||record.plan.portalEntered===true)){
+  // Older covered checkpoints could be saved after an off-map actor crossed
+  // the portal plane, without a visible door handle ever being opened. Only
+  // the actual short outbound segment authorizes that legacy continuation.
+  const coveredDoor=leg.kind==='door'&&record.plan.transferAuthorized===true&&progressAlong<=2.801&&Math.abs((record.actor.x-leg.anchor.x)*leg.dy-(record.actor.y-leg.anchor.y)*leg.dx)<.001;
+  if(leg.kind!=='arrival'&&progressAlong>=-.001&&(leg.kind==='path'||record.opened||record.stage==='hold'||record.plan.portalEntered===true||coveredDoor)){
    const plan=build(record.plan.destination,record.plan.leg,{...record.actor,...leg.anchor});plan.transferAuthorized=record.plan.transferAuthorized===true;plan.portalEntered=leg.kind==='door';
    const end=point(leg.anchor.x+leg.dx*2.8,leg.anchor.y+leg.dy*2.8),done=Math.hypot(record.actor.x-end.x,record.actor.y-end.y)<.001;plan.points=[end];
    return {...record,plan,index:done?1:0,stage:done?'hold':'walk',opened:record.opened===true||plan.portalEntered,travel:0};
@@ -105,6 +109,10 @@
  function carry(record){return known(record)||record?.actor?.name==='Komor'&&record?.plan?.destination==='cold-storage-front';}
  function canRestore(record){return known(record);}
  function coveredTransition(){for(const r of options.departures?.records.values()||[])if(known(r))r.plan.transferAuthorized=true;}
+ function markPortalEntry(record){
+  if(record.plan.kind!=='door'||record.plan.portalEntered)return;const leg=itineraries[record.plan.destination]()[record.plan.leg];
+  if((record.actor.x-leg.anchor.x)*leg.dx+(record.actor.y-leg.anchor.y)*leg.dy>=-.000001)record.plan.portalEntered=true;
+ }
  function notifyArrival(record){if(record.stage==='resident'&&!record.arrivalNotified){record.arrivalNotified=true;options.recheck?.();}}
  function enterZone(zone=activeZone(),{covered=false}={}){const phase=options.native?.vars?.[16523]??0,source=zone===192&&phase===0?191:zone===193&&phase===2?192:null;if(source===null||!options.departures||!options.native)return false;
   const flag=zone===192?544:805;if(Array.isArray(options.native?.flags)&&!options.native.flags.includes(flag))return false;
@@ -119,7 +127,7 @@
    if(shouldTick(r)||!r.plan.transferAuthorized)continue;
    // The source field was explicitly covered, or this leg started after a real
    // occlusion proof. Advance a physical route off-map, never a fake GPU sample.
-   if(r.stage==='walk'){const p=r.plan.points[r.index];if(p){const dx=p.x-r.actor.x,dy=p.y-r.actor.y,d=Math.hypot(dx,dy),step=Math.min(d,3.75*dt),next=point(r.actor.x+(d?dx/d*step:0),r.actor.y+(d?dy/d*step:0));if(d&&obstructed(r,next))continue;if(d){Object.assign(r.actor,next);r.actor.direction=Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0;r.travel+=step;}if(d<=step)r.index++;}else{r.stage=r.plan.kind==='arrival'?'resident':'hold';if(r.stage==='resident'){Object.assign(r.actor,{fieldZone:r.plan.destinationZone,uid:r.plan.targetUid,exitProbe:false,script:2000});notifyArrival(r);}}}
+   if(r.stage==='walk'){const p=r.plan.points[r.index];if(p){const dx=p.x-r.actor.x,dy=p.y-r.actor.y,d=Math.hypot(dx,dy),step=Math.min(d,3.75*dt),next=point(r.actor.x+(d?dx/d*step:0),r.actor.y+(d?dy/d*step:0));if(d&&obstructed(r,next))continue;if(d){Object.assign(r.actor,next);r.actor.direction=Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0;r.travel+=step;}markPortalEntry(r);if(d<=step)r.index++;}else{r.stage=r.plan.kind==='arrival'?'resident':'hold';if(r.stage==='resident'){Object.assign(r.actor,{fieldZone:r.plan.destinationZone,uid:r.plan.targetUid,exitProbe:false,script:2000});notifyArrival(r);}}}
    if(r.stage==='hold'){const next=nextLeg(r);if(next?.deferred)continue;if(next){controller.finishPortal(r);Object.assign(r,next);}else{controller.finishPortal(r);controller.records.delete(r.key);r.resolve?.();}}
   }
  }
