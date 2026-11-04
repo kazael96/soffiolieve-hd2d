@@ -37,3 +37,25 @@ test('indoor furniture IDs never select outdoor building door children',()=>{
  const c=environment(),scene={instances:[5,6,93,164,165].map(id=>({model:'in-prop-'+id,x:0,y:0,z:0,rotation:0}))};
  assert.equal(c.FieldModels.targets(scene,c.FIELD_MODEL_ASSETS).length,0);
 });
+
+function chapterDoors(c){for(const file of ['mistralton-assets.js','mistralton-doors.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),c,{filename:file});c.MistraltonDoors.install();}
+test('native Rafan door resolves its exact building child and does not alias repeated bundle IDs',()=>{
+ const c=environment();assert.equal(Object.keys(c.FIELD_MODEL_ASSETS.models).length,8);chapterDoors(c);
+ const targets=c.FieldModels.targets(c.MISTRALTON_ASSETS.scenes[96],c.FIELD_MODEL_ASSETS),door=targets.find(t=>t.record.class===1&&Math.abs(t.x+572)<=2&&Math.abs(t.z+352)<=3);
+ assert.ok(door,'Ghecis script must open the actual Gym building door');assert.equal(door.record.source.member,8);assert.ok(door.record.model.includes('bundle8'));
+ const scope=c.FIELD_MODEL_ASSETS.scopes.mt;assert.notEqual(scope.models['True-8-259'].key,scope.models['True-9-259'].key);assert.notEqual(scope.models['True-8-259'].model,scope.models['True-9-259'].model);
+ assert.equal(c.FieldModels.targets({instances:[{model:'mt-prop-False-8-51',x:0,y:0,z:0,rotation:0}]},c.FIELD_MODEL_ASSETS).length,0,'indoor reused ID must not become outdoor Gym');
+});
+test('chapter doors load on scene entry, keep existing models cached and recover only missing resources',async()=>{
+ const c=environment(),calls=[],original=c.StarterScene.loadGLB;c.StarterScene.loadGLB=async url=>{calls.push(url);return original(url);};
+ const renderer={scene:c.OPENING_ASSETS.scenes.home,gl:{},upload:()=>({})},control=new c.FieldModels.Controller(renderer,c.FIELD_MODEL_ASSETS);await control.ready;assert.equal(calls.length,8);
+ chapterDoors(c);assert.equal(calls.length,8,'chapter catalog registration must not preload new models');renderer.scene=c.MISTRALTON_ASSETS.scenes[96];let fail=true;const first=control.records().find(t=>t.record.key.startsWith('mt-door-')).record.model;
+ c.StarterScene.loadGLB=async url=>{calls.push(url);if(fail&&url===first)throw Error('temporary chapter door failure');return original(url);};
+ await assert.rejects(control.prepareScene(),/temporary chapter door/);const cached=control.loaded.size;assert.ok(cached>8);fail=false;const count=calls.length;await control.prepareScene();assert.equal(calls.length,count+1,'successful chapter and opening models must not reload');assert.equal(renderer.modelsRecovering,false);
+ const handle=control.create(1,-572,-352);await control.play(handle,0);control.tick(8/30);await control.wait(handle);control.release(handle);assert.equal(control.handles.size,0);
+});
+test('new native door joint and texture-transform animations retain finite geometry and changing frames',async()=>{
+ const c=environment();chapterDoors(c);let samples=0,changed=0;
+ for(const record of Object.values(c.MISTRALTON_DOOR_ASSETS.models)){const model=await c.StarterScene.loadGLB(record.model);assert.equal(model.animationSets.length,2);for(const a of Object.values(record.animations)){const first=c.FieldModels.geometry(model,record,a.index,0),last=c.FieldModels.geometry(model,record,a.index,a.frames-1);assert.ok(first.length&&last.length);for(const groups of [first,last])for(const group of groups)assert.ok(group.verts.every(Number.isFinite));if(JSON.stringify(first)!==JSON.stringify(last))changed++;samples+=2;}}
+ assert.equal(samples,28);assert.equal(changed,14);
+});

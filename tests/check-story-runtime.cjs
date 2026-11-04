@@ -1,26 +1,29 @@
 /* Exercise the actual story controller against real release maps and Gen V battles. */
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');
 const site=path.resolve(process.argv[2]||'_site');
-function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=false}={}){
- nimbasa=nimbasa||driftveil;castelia=castelia||nimbasa;
+function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=false,mistralton=false}={}){
+ driftveil=driftveil||mistralton;nimbasa=nimbasa||driftveil;castelia=castelia||nimbasa;
  const read=file=>fs.readFileSync(sourceRoot&&fs.existsSync(path.join(sourceRoot,file))?path.join(sourceRoot,file):path.join(site,file),'utf8');
  const elements=new Map(),records=new Map();
  if(save)records.set('soffiolieve-black-opening-v2',JSON.stringify(save));
  function element(id=''){if(elements.has(id))return elements.get(id);const e={id,style:{},dataset:{},children:[],hidden:false,open:false,checked:false,getBoundingClientRect:()=>({top:300}),firstChild:{},classList:{toggle(){},remove(){}},append(...v){this.children.push(...v);},replaceChildren(...v){this.children=[...v];},setAttribute(){},remove(){},showModal(){this.open=true;},close(){this.open=false;},addEventListener(){},focus(){}};if(id)elements.set(id,e);return e;}
  // Geometry is checked in the real browser fixture; this harness has no layout engine.
- const c={console,Math,Buffer,structuredClone,TextEncoder,TextDecoder,ResizeObserver:class{observe(){}disconnect(){}},setTimeout:(f)=>{queueMicrotask(f);return 0;},clearTimeout,setInterval(){},clearInterval(){},addEventListener(){},removeEventListener(){},performance,
+ const c={console,Math,Buffer,structuredClone,TextEncoder,TextDecoder,ResizeObserver:class{observe(){}disconnect(){}},MutationObserver:class{observe(){}disconnect(){}},setTimeout:(f)=>{queueMicrotask(f);return 0;},clearTimeout,setInterval(){},clearInterval(){},addEventListener(){},removeEventListener(){},performance,
   getComputedStyle(){c.phoneLayouts=(c.phoneLayouts||0)+1;return {paddingTop:'8',rowGap:'4'};},
   localStorage:{getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)},$:element,npcs:[],player:{x:-2,y:0},facing:3,potions:0,battling:false,cooldown:0,partner:null,resetInput(){},refresh(){},toast(){},rival:'Belle',
   document:{hidden:false,body:{classList:{toggle(){}},append(){}},querySelector:s=>element(s),querySelectorAll:()=>[],addEventListener(){},createElement:()=>element(),createTextNode:s=>s},
   menuOpen:()=>[...elements.values()].some(e=>e.open)};c.window=c;vm.createContext(c);
- for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','double-rules.js','native-forms.js','engine.js','battle-medicine.js','journey-state.js','training-data.js','training.js','scene-camera.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js','route2-assets.js','route2-data.js','route2-trainers.js','route2-bootstrap.js','striaton-assets.js','striaton-data.js','striaton-bootstrap.js','route3-assets.js','route3-data.js','route3-bootstrap.js','pinwheel-assets.js','pinwheel-data.js','pinwheel-events.js','pinwheel-rails.js','native-rails.js','pinwheel-bootstrap.js'])vm.runInContext(read(file),c,{filename:file});
+ for(const file of ['assets/scene.js','opening-assets.js','opening-data.js','opening-trainers.js','opening-battle-rules.js','encounter-data.js','encounter-rules.js','opening-sprites.js','assets/battle-data.js','battle-sim.js','double-rules.js',...(mistralton?['pokemon-visuals.js','mistralton-mail-data.js','mistralton-mail.js']:[]),'native-forms.js','engine.js','battle-medicine.js','journey-state.js','training-data.js','training.js','scene-camera.js','story-state.js','pokedex-assets.js','accumula-assets.js','accumula-bootstrap.js','route2-assets.js','route2-data.js','route2-trainers.js','route2-bootstrap.js','striaton-assets.js','striaton-data.js','striaton-bootstrap.js','route3-assets.js','route3-data.js','route3-bootstrap.js','pinwheel-assets.js','pinwheel-data.js','pinwheel-events.js','pinwheel-rails.js','native-rails.js','pinwheel-bootstrap.js'])vm.runInContext(read(file),c,{filename:file});
  if(castelia){for(const file of ['castelia-assets.js','castelia-events.js','castelia-data.js','castelia-scenes.js','castelia-rails.js','castelia-bootstrap.js','castelia-phone.js','castelia-gym-data.js','castelia-gym.js','castelia-gestures.js'])vm.runInContext(read(file),c,{filename:file});c.RuntimeAssets={preloadImages:async()=>true,image:async()=>({})};c.NativeTextLayout={resource:s=>s};}
  if(nimbasa)for(const file of ['nimbasa-assets.js','nimbasa-events.js','nimbasa-data.js','nimbasa-scenes.js','nimbasa-bootstrap.js','nimbasa-phone.js','nimbasa-field.js'])vm.runInContext(read(file),c,{filename:file});
  if(driftveil)for(const file of ['driftveil-assets.js','driftveil-events.js','driftveil-data.js','driftveil-scenes.js','driftveil-gym-data.js','driftveil-bootstrap.js','driftveil-gym.js','driftveil-field.js'])vm.runInContext(read(file),c,{filename:file});
+ if(mistralton)for(const file of ['mistralton-assets.js','mistralton-events.js','mistralton-data.js','mistralton-scenes.js','mistralton-gym-data.js','mistralton-bootstrap.js','mistralton-gym.js','mistralton-field.js','mistralton-badge-assets.js','mistralton-fly-data.js','mistralton-fly.js'])vm.runInContext(read(file),c,{filename:file});
  c.DriftveilCinematics={play:async id=>{c.cinematics??=[];c.cinematics.push(id);}};
  c.renderer={ready:true,scene:c.ROM_SCENE,zoom:1.4,cinema:true,center:[0,0],groundHeight:()=>[62,64].includes(c.Journey?.state.original?.zone)?1:c.Journey?.state.original?.zone===63?2:0,gl:{},upload(){return {};}};
+ if(mistralton)c.renderer.prepareScene=async()=>{await c.renderer.scene?.ensureAssets?.();await c.renderer.fieldModels?.prepareScene?.();return true;};
  vm.runInContext(read('starter-scene.js'),c,{filename:'starter-scene.js'});c.StarterScene.loadGLB=async()=>({doc:{textures:[]},images:[]});
  for(const file of ['field-model-assets.js','field-models.js'])vm.runInContext(read(file),c,{filename:file});
+ if(mistralton)for(const file of ['mistralton-doors.js','mistralton-gestures.js'])vm.runInContext(read(file),c,{filename:file});
  const source=read('game.js');vm.runInContext(source.slice(source.indexOf('function blocked('),source.indexOf('function drawWorld')),c);
  c.startBattle=(trainer,config)=>{c.lastBattle={trainer,config};};
  vm.runInContext(read('story.js'),c,{filename:'story.js'});
@@ -28,9 +31,10 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  c.Pokedex={entry:async(name,options)=>{c.dexEntries??=[];c.dexEntries.push({name,options});}};
  c.StarterSelection={choose:async({text})=>{assert.match(text(18,'Snivy'),/Snivy/);return c.testStarter||0;}};
  let visibilityFrame=0;c.renderer.actorVisibility=()=>({visible:false,sequence:++visibilityFrame});
- c.AudioEngine={setScene(){},playSound:async()=>{},cry:async()=>{}};
+ c.AudioEngine=mistralton?{setScene(id){c.musicRequests??=[];c.musicRequests.push(id);},playSound:async(id,options)=>{c.soundRequests??=[];c.soundRequests.push({id,options});},stopSound(id){c.soundStops??=[];c.soundStops.push(id);},cry:async()=>{}}:{setScene(){},playSound:async()=>{},cry:async()=>{}};
+ if(mistralton)c.FieldEffects={play:async id=>{c.fieldEffects??=[];c.fieldEffects.push(id);}};
  c.playCatchingTutorial=async()=>c.NativeStory.battleDone(null,'tutorial');
- for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js','original-story.js'])vm.runInContext(read(file),c,{filename:file});
+ for(const file of ['original-events.js','accumula-events.js','field-event-vm.js','phone-assets.js','route2-phone.js','route2-events.js','striaton-events.js','route3-events.js','npc-walk.js','field-actor-exits.js',...(mistralton?['mistralton-continuity.js','mistralton-puzzle-data.js','mistralton-ice.js','mistralton-puzzles.js','mistralton-services.js']:[]),'original-story.js'])vm.runInContext(read(file),c,{filename:file});
  c.DoubleBattles={partner:async args=>{const [ally,first,second]=args;c.startBattle(true,{story:first===401?'Mila e Michelino':'Team Plasma',trainerId:first,doubles:true,ally:c.OPENING_TRAINERS[ally].party,secondFoe:c.OPENING_TRAINERS[second].party,p1:c.Journey.configs(),p2:c.OPENING_TRAINERS[first].party});}};
  c.continue=()=>element('dialogueContinue').onclick();
  c.simulate=(winner)=>{
@@ -41,21 +45,21 @@ function environment({save,sourceRoot,castelia=false,nimbasa=false,driftveil=fal
  c.elements=elements;return c;
 }
 
-async function drain(c,promise,starter=0,outcome='play'){
+async function drain(c,promise,starter=0,outcome='play',until=()=>true){
  c.testStarter=starter;let done=false,error;Promise.resolve(promise).then(()=>done=true,e=>{done=true;error=e;});
  const messages=[];
- for(let frame=0;!done&&frame<30000;frame++){
+ for(let frame=0;(!done||!until())&&frame<30000;frame++){
   await Promise.resolve();c.tickAudio?.();for(let step=0;step<(c.testSpeed||1);step++)c.Journey.step(1/30,false);
   if(c.lastBattle){const b=c.lastBattle;c.lastBattle=null;if(b.config.story!=='tutorial'){c.lastBattle=b;c.simulate(outcome);c.lastBattle=null;}}
   const d=c.$('dialogue');if(d.open){messages.push(c.$('dialogueText').textContent);
    if(!c.$('starterChoices').hidden){const choices=c.$('starterChoices').children;const i=choices[0]?.textContent==='Snivy'?starter:0;
     // Decline the optional nickname, accept the Pokédex and comparison.
-    const text=c.$('dialogueText').textContent||'';const button=choices[text.includes('soprannome')?1:i];
+    const text=c.$('dialogueText').textContent||'',selected=c.testChoice?.(choices.map(b=>b.textContent),text)??(c.testChoices?.length?c.testChoices.shift():null);const button=choices[selected??(text.includes('soprannome')?1:i)];
     if(button?.onclick)button.onclick();else throw Error('Unexpected input '+text);
    }else if(!c.$('dialogueContinue').hidden)c.continue();
   }
  }
- if(error)throw error;assert.ok(done,'Original scene did not terminate');
+ if(error)throw error;assert.ok(done&&until(),'Original scene did not terminate');
  assert.equal(c.$('world').dataset.eventError,undefined,c.$('world').dataset.eventError);return messages;
 }
 if(require.main===module)(async()=>{

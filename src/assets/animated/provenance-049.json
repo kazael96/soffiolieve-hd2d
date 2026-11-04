@@ -1,0 +1,619 @@
+{
+  "species": [
+    508,
+    521,
+    529,
+    530,
+    549,
+    555,
+    564,
+    566,
+    575,
+    581,
+    582,
+    583,
+    585,
+    586,
+    588,
+    590,
+    592,
+    595,
+    597,
+    599,
+    602
+  ],
+  "seasonal": [
+    701,
+    702,
+    703,
+    704,
+    705,
+    706
+  ],
+  "female": [
+    521,
+    592
+  ],
+  "records": [
+    {
+      "asset": "src/assets/animated/508-front.json",
+      "source": "soffiolieve/dist/assets/animated/508-front.json",
+      "sha256": "010f410fbc4630d87c24d092b35376009518b583efd016bcab4e4108a1e812e3"
+    },
+    {
+      "asset": "src/assets/animated/508-front.png",
+      "source": "soffiolieve/dist/assets/animated/508-front.png",
+      "sha256": "4dc3f3a4c0bffeebe1cc82310dba3f74e4540fde53b30310967c6edde2afa026"
+    },
+    {
+      "asset": "src/assets/animated/508-back.json",
+      "source": "soffiolieve/dist/assets/animated/508-back.json",
+      "sha256": "d442781e8ec00c8bb3b4b484c143d6ea378aae576816e8e7a0008ff2930e3032"
+    },
+    {
+      "asset": "src/assets/animated/508-back.png",
+      "source": "soffiolieve/dist/assets/animated/508-back.png",
+      "sha256": "1fee9385b666110c0d46eed70d644fe737ba518e9949bbac291734927b47c745"
+    },
+    {
+      "asset": "src/assets/animated/521-front.json",
+      "source": "soffiolieve/dist/assets/animated/521-front.json",
+      "sha256": "2031400edf87205307a0f38c9a9e16884625a53fb749b840ed34feec9c55892d"
+    },
+    {
+      "asset": "src/assets/animated/521-front.png",
+      "source": "soffiolieve/dist/assets/animated/521-front.png",
+      "sha256": "89c842eb9d199bc8979cddaea5718b8b06b1d5ba9ddcee6b589a0f84c1ad6576"
+    },
+    {
+      "asset": "src/assets/animated/521-back.json",
+      "source": "soffiolieve/dist/assets/animated/521-back.json",
+      "sha256": "58f82a4886529243ab135b0e507c88a2a7a05d280554c0df4d938c851fc345d1"
+    },
+    {
+      "asset": "src/assets/animated/521-back.png",
+      "source": "soffiolieve/dist/assets/animated/521-back.png",
+      "sha256": "f9f396d1a33e5331c195f1df15d8068a3bbec180830b01cd963d43eb43a9ee66"
+    },
+    {
+      "asset": "src/assets/animated/529-front.json",
+      "source": "soffiolieve/dist/assets/animated/529-front.json",
+      "sha256": "4961ef3aa6bead3a6856320429c1b9279504ecd8f870399163a25d08c7497666"
+    },
+    {
+      "asset": "src/assets/animated/529-front.png",
+      "source": "soffiolieve/dist/assets/animated/529-front.png",
+      "sha256": "eb42a2a0e57eea7e81335adba2e8ec583563b8a95426d18f401e4f093ac2e1bd"
+    },
+    {
+      "asset": "src/assets/animated/529-back.json",
+      "source": "soffiolieve/dist/assets/animated/529-back.json",
+      "sha256": "7f21f07c4612c7f1020be8b0ae4c88f30fa6b945930cf18234703e7ab51c2b25"
+    },
+    {
+      "asset": "src/assets/animated/529-back.png",
+      "source": "soffiolieve/dist/assets/animated/529-back.png",
+      "sha256": "54fd57e64ecf2c4feb345be11884839cb9c3ec9829e24c8489ef21f254a3b193"
+    },
+    {
+      "asset": "src/assets/animated/530-front.json",
+      "source": "soffiolieve/dist/assets/animated/530-front.json",
+      "sha256": "d38870f860470d6b2a7a0cf82694c33060372a7b508ecdabbf50b0d01975aa50"
+    },
+    {
+      "asset": "src/assets/animated/530-front.png",
+      "source": "soffiolieve/dist/assets/animated/530-front.png",
+      "sha256": "7ec48bbd8c83a0d78ca9cfa81970188c178c898721f7e077a6fd3fc82f2a1827"
+    },
+    {
+      "asset": "src/assets/animated/530-back.json",
+      "source": "soffiolieve/dist/assets/animated/530-back.json",
+      "sha256": "ef1f57c7a4db080a5eeff7f983efd40cf37c3ef226eb2ba8a33c060336013bc3"
+    },
+    {
+      "asset": "src/assets/animated/530-back.png",
+      "source": "soffiolieve/dist/assets/animated/530-back.png",
+      "sha256": "38fbdf2e8246f65ec3e9895d10b7046f2a7daedcc090832915b0e3db800c5bc0"
+    },
+    {
+      "asset": "src/assets/animated/549-front.json",
+      "source": "soffiolieve/dist/assets/animated/549-front.json",
+      "sha256": "cb0c896897f991fcd15d48a8049c658320e6e1a000062dc13cef1f2c01e2a127"
+    },
+    {
+      "asset": "src/assets/animated/549-front.png",
+      "source": "soffiolieve/dist/assets/animated/549-front.png",
+      "sha256": "674b444dfad4c4be0b2597448b937ad77bc19814ad074e9953baf1cdace27ccc"
+    },
+    {
+      "asset": "src/assets/animated/549-back.json",
+      "source": "soffiolieve/dist/assets/animated/549-back.json",
+      "sha256": "53039d4929ad61acead2017bd8dd834de7d54bede4dc65b669fb408194a7da8f"
+    },
+    {
+      "asset": "src/assets/animated/549-back.png",
+      "source": "soffiolieve/dist/assets/animated/549-back.png",
+      "sha256": "a3f7ba7ebdfe6b4ab82bea9d28dc9f41a677fd0d545ce3cb72a215bdb746a4be"
+    },
+    {
+      "asset": "src/assets/animated/555-front.json",
+      "source": "soffiolieve/dist/assets/animated/555-front.json",
+      "sha256": "71d52d27e99fac5d57b630e1e925cce2bda0432f7e89d3a2611dca1bf6fd52c3"
+    },
+    {
+      "asset": "src/assets/animated/555-front.png",
+      "source": "soffiolieve/dist/assets/animated/555-front.png",
+      "sha256": "54c4f823b05a2c31a8bad1e7731344357d4162d457d6a689555b600aecc6bacd"
+    },
+    {
+      "asset": "src/assets/animated/555-back.json",
+      "source": "soffiolieve/dist/assets/animated/555-back.json",
+      "sha256": "9dc96d4e80bccc6db3dbe4666b22210764785487ee558ada0abebd2f15cff8dd"
+    },
+    {
+      "asset": "src/assets/animated/555-back.png",
+      "source": "soffiolieve/dist/assets/animated/555-back.png",
+      "sha256": "783680066e074644c5fa927f8af5c230569d5358a751d0288a7dda3c66877aa7"
+    },
+    {
+      "asset": "src/assets/animated/564-front.json",
+      "source": "soffiolieve/dist/assets/animated/564-front.json",
+      "sha256": "348d0d5efea117e62aa098c31c5ec2c27d2980c70ceabc7d6375c80b856ea688"
+    },
+    {
+      "asset": "src/assets/animated/564-front.png",
+      "source": "soffiolieve/dist/assets/animated/564-front.png",
+      "sha256": "c3fef3481d084a4f2ce756c22ed84a3612a1fceb55798414b917ad3d69d4c0cf"
+    },
+    {
+      "asset": "src/assets/animated/564-back.json",
+      "source": "soffiolieve/dist/assets/animated/564-back.json",
+      "sha256": "692e0305f3550051655257564a45a2363d4c9ac6a35f720a5ceec1def3ef3283"
+    },
+    {
+      "asset": "src/assets/animated/564-back.png",
+      "source": "soffiolieve/dist/assets/animated/564-back.png",
+      "sha256": "c28764cc386b8935e15990c7ad30d1166a8ec8aff18dabed6920f491b0a28833"
+    },
+    {
+      "asset": "src/assets/animated/566-front.json",
+      "source": "soffiolieve/dist/assets/animated/566-front.json",
+      "sha256": "47160558e787493eaabdb649a47af08c6bfcd3a6dee481ae5a6885cf0a8a84ec"
+    },
+    {
+      "asset": "src/assets/animated/566-front.png",
+      "source": "soffiolieve/dist/assets/animated/566-front.png",
+      "sha256": "d5be732c3fdb4d3e1c0003192fc4df4484033ebd6dc0d12b5134e8c52a1b2f0b"
+    },
+    {
+      "asset": "src/assets/animated/566-back.json",
+      "source": "soffiolieve/dist/assets/animated/566-back.json",
+      "sha256": "4d8a4ca054a3198fdbac13ffa5e785033ed30b43be2bcdbc1b726257d42d3bef"
+    },
+    {
+      "asset": "src/assets/animated/566-back.png",
+      "source": "soffiolieve/dist/assets/animated/566-back.png",
+      "sha256": "b6f1a9bd06a404e4ec1b273ea9f2e2401c0f1c3463cab4d0e8ef5e81415b57fc"
+    },
+    {
+      "asset": "src/assets/animated/575-front.json",
+      "source": "soffiolieve/dist/assets/animated/575-front.json",
+      "sha256": "0f0b685c9d161c3086fd73b48194dd9daf6e32f832129e8c48fad23c6993bcec"
+    },
+    {
+      "asset": "src/assets/animated/575-front.png",
+      "source": "soffiolieve/dist/assets/animated/575-front.png",
+      "sha256": "a0de6525b4da14fcaaf02cec400febf35e48e998519a9904faf9a48406a46bf7"
+    },
+    {
+      "asset": "src/assets/animated/575-back.json",
+      "source": "soffiolieve/dist/assets/animated/575-back.json",
+      "sha256": "84b7604be542a499006921863d311517ece7c905f605e3cab1de8595defbf962"
+    },
+    {
+      "asset": "src/assets/animated/575-back.png",
+      "source": "soffiolieve/dist/assets/animated/575-back.png",
+      "sha256": "2600cabb344deb337bd1771ff1e0c30e16bf25cdc53a00374e0a4ce9400a3bc3"
+    },
+    {
+      "asset": "src/assets/animated/581-front.json",
+      "source": "soffiolieve/dist/assets/animated/581-front.json",
+      "sha256": "ca649710744912b6b7c0f0e7418aec64d50e19e045c9946323973abcad9ea1b7"
+    },
+    {
+      "asset": "src/assets/animated/581-front.png",
+      "source": "soffiolieve/dist/assets/animated/581-front.png",
+      "sha256": "7e0874c3d1595d9815292235d22870619246609ef5bc0622e8b99e886ef28377"
+    },
+    {
+      "asset": "src/assets/animated/581-back.json",
+      "source": "soffiolieve/dist/assets/animated/581-back.json",
+      "sha256": "868a07ea35569c9b92d0c61637f653c3c0aedd33f089f24ec555f55b00f83653"
+    },
+    {
+      "asset": "src/assets/animated/581-back.png",
+      "source": "soffiolieve/dist/assets/animated/581-back.png",
+      "sha256": "60ac2e7897a81d6b74880b60bf776cc96ddf3c1b9e2ea2ea4dff4b7633d44597"
+    },
+    {
+      "asset": "src/assets/animated/582-front.json",
+      "source": "soffiolieve/dist/assets/animated/582-front.json",
+      "sha256": "8f2c773cb130680ab0c0609b77fad6dfd525f6de35d3e95b97bd5b24dc1848fe"
+    },
+    {
+      "asset": "src/assets/animated/582-front.png",
+      "source": "soffiolieve/dist/assets/animated/582-front.png",
+      "sha256": "747cc5923c0388acaf9cf082be0b5ebcfb0e0991b53719afe82eb17e5aa43c95"
+    },
+    {
+      "asset": "src/assets/animated/582-back.json",
+      "source": "soffiolieve/dist/assets/animated/582-back.json",
+      "sha256": "a54f64e16e3898ece4477958cf916e4b07d75c0ba9b33d67ba264a0c21e46117"
+    },
+    {
+      "asset": "src/assets/animated/582-back.png",
+      "source": "soffiolieve/dist/assets/animated/582-back.png",
+      "sha256": "7a3840e8278f56385ea14e3156d38f2ddf7cfe1a5c5eae1e5dfabac864f605db"
+    },
+    {
+      "asset": "src/assets/animated/583-front.json",
+      "source": "soffiolieve/dist/assets/animated/583-front.json",
+      "sha256": "2f8d603d9e9f4e5169d553e6e123ba916e0fbdb1adf4eeaa7934561dcbe9e366"
+    },
+    {
+      "asset": "src/assets/animated/583-front.png",
+      "source": "soffiolieve/dist/assets/animated/583-front.png",
+      "sha256": "0068552b5d95ea58538d47617aaf0868ed9473998d34b972d950adf08f746f5c"
+    },
+    {
+      "asset": "src/assets/animated/583-back.json",
+      "source": "soffiolieve/dist/assets/animated/583-back.json",
+      "sha256": "26505152b3e22122a2983faedc839f18be823a3d4b37cc8844f7ba8e18ddd480"
+    },
+    {
+      "asset": "src/assets/animated/583-back.png",
+      "source": "soffiolieve/dist/assets/animated/583-back.png",
+      "sha256": "81164f54ca84c49a9e2e623f194d590f71c9914159845b4e1489af4136e4b766"
+    },
+    {
+      "asset": "src/assets/animated/585-front.json",
+      "source": "soffiolieve/dist/assets/animated/585-front.json",
+      "sha256": "7efb2007e3b2af779156790bf009ecf346c358cd9d45ede4b47c91fe793e7558"
+    },
+    {
+      "asset": "src/assets/animated/585-front.png",
+      "source": "soffiolieve/dist/assets/animated/585-front.png",
+      "sha256": "bbc2080ca3c8c70897c614eabb13db7393ff48febdad685151ddd80f19b3824b"
+    },
+    {
+      "asset": "src/assets/animated/585-back.json",
+      "source": "soffiolieve/dist/assets/animated/585-back.json",
+      "sha256": "53118d065559a2dd851ec3cfb4bbe843d93633c8fd5454a374774f5c0c338baa"
+    },
+    {
+      "asset": "src/assets/animated/585-back.png",
+      "source": "soffiolieve/dist/assets/animated/585-back.png",
+      "sha256": "76dce10b3044471a747934a590c111480ba97f6a3dde5fdf7a45ce3e9d3dc817"
+    },
+    {
+      "asset": "src/assets/animated/586-front.json",
+      "source": "soffiolieve/dist/assets/animated/586-front.json",
+      "sha256": "6895661dbf8965fc0763da6bbbdc5cc32ab636939c65334637df78d6de82d389"
+    },
+    {
+      "asset": "src/assets/animated/586-front.png",
+      "source": "soffiolieve/dist/assets/animated/586-front.png",
+      "sha256": "3a9fe88e75e3a522477a51ab392646d723f542dde94baedf8c66f1e5a4baea91"
+    },
+    {
+      "asset": "src/assets/animated/586-back.json",
+      "source": "soffiolieve/dist/assets/animated/586-back.json",
+      "sha256": "110d6c0984951fb167bace2e4d153b2a7d79a34142e4dca8dfa760112c5ef8c9"
+    },
+    {
+      "asset": "src/assets/animated/586-back.png",
+      "source": "soffiolieve/dist/assets/animated/586-back.png",
+      "sha256": "b6523733f8c6955988dee7bc75a1d02d957c045653b92756fc2e214fd98934b1"
+    },
+    {
+      "asset": "src/assets/animated/588-front.json",
+      "source": "soffiolieve/dist/assets/animated/588-front.json",
+      "sha256": "79173816312ed7620f1adc189bc109d415c5e086500dfee885dbbcd6c830ae8d"
+    },
+    {
+      "asset": "src/assets/animated/588-front.png",
+      "source": "soffiolieve/dist/assets/animated/588-front.png",
+      "sha256": "877053d64a9278ea8d83f611797f9c2918ee7063a9688f9a6aaea9cfa769ab80"
+    },
+    {
+      "asset": "src/assets/animated/588-back.json",
+      "source": "soffiolieve/dist/assets/animated/588-back.json",
+      "sha256": "2330f7ce22c32de25f4e3a23395c7a5c33946b9d063a0e6943c5bec7d2748bb8"
+    },
+    {
+      "asset": "src/assets/animated/588-back.png",
+      "source": "soffiolieve/dist/assets/animated/588-back.png",
+      "sha256": "a450cd44c98addf10b84cbe00e63d63ef6ace5eeff03e41c05082b31ddc85b67"
+    },
+    {
+      "asset": "src/assets/animated/590-front.json",
+      "source": "soffiolieve/dist/assets/animated/590-front.json",
+      "sha256": "f81ac8b6cfcf148b525094c45bfe689ed7245a64f72c7b2b000d641116a7f7eb"
+    },
+    {
+      "asset": "src/assets/animated/590-front.png",
+      "source": "soffiolieve/dist/assets/animated/590-front.png",
+      "sha256": "ff20846c9e13407cfeeeb3a4481e9900b6db8b73285a6f6dd0638aae2779c718"
+    },
+    {
+      "asset": "src/assets/animated/590-back.json",
+      "source": "soffiolieve/dist/assets/animated/590-back.json",
+      "sha256": "4193832c521efd7494c4fa4ee879cb1bc8309a21a7db3039f94f11b55eceda91"
+    },
+    {
+      "asset": "src/assets/animated/590-back.png",
+      "source": "soffiolieve/dist/assets/animated/590-back.png",
+      "sha256": "ffa846b38b08244080d91a6f1033e701cbb6dd146f190a145753446972cc5de4"
+    },
+    {
+      "asset": "src/assets/animated/592-front.json",
+      "source": "soffiolieve/dist/assets/animated/592-front.json",
+      "sha256": "1b5e52adfd2aef6e8de771a3d50381e0118a688f6bc081c7e807cb4c7f03c27e"
+    },
+    {
+      "asset": "src/assets/animated/592-front.png",
+      "source": "soffiolieve/dist/assets/animated/592-front.png",
+      "sha256": "5a109167959810691a9615f3a8f75945cdc96dae852af9c27d4899dc751ba8ed"
+    },
+    {
+      "asset": "src/assets/animated/592-back.json",
+      "source": "soffiolieve/dist/assets/animated/592-back.json",
+      "sha256": "20c16637d0a3a02cd89fa0f9ad4a99347a7a04a225e9cc9801691394bcafa85f"
+    },
+    {
+      "asset": "src/assets/animated/592-back.png",
+      "source": "soffiolieve/dist/assets/animated/592-back.png",
+      "sha256": "378da14d1d0cf67dfba4698b2fc4ce73148e10e8aeed4a845a4a47d4c35e496b"
+    },
+    {
+      "asset": "src/assets/animated/595-front.json",
+      "source": "soffiolieve/dist/assets/animated/595-front.json",
+      "sha256": "39c53268e10a7d456dda9dfbdfb4aa83661a81e1e05ee14054fbd4cd32eefe8f"
+    },
+    {
+      "asset": "src/assets/animated/595-front.png",
+      "source": "soffiolieve/dist/assets/animated/595-front.png",
+      "sha256": "d7ac9a054c98cfc55b71d3ecf102f98cd39d331598de2732397e68eb63b8bcf7"
+    },
+    {
+      "asset": "src/assets/animated/595-back.json",
+      "source": "soffiolieve/dist/assets/animated/595-back.json",
+      "sha256": "aede78e1df489764b00580a41e04fc87f4c72189d0bf29af32af865ecfc2d681"
+    },
+    {
+      "asset": "src/assets/animated/595-back.png",
+      "source": "soffiolieve/dist/assets/animated/595-back.png",
+      "sha256": "e90c510ff019051c3f3b02a5cef55a84408d91809ae5392b7ef2b6ac5a37ba95"
+    },
+    {
+      "asset": "src/assets/animated/597-front.json",
+      "source": "soffiolieve/dist/assets/animated/597-front.json",
+      "sha256": "3532b2aafd2a16c568c364812dedf4fb2de1f25ad63e52bed10a9f7cf6c50770"
+    },
+    {
+      "asset": "src/assets/animated/597-front.png",
+      "source": "soffiolieve/dist/assets/animated/597-front.png",
+      "sha256": "e05c342809551d86c6e2e84f71f5af7ad359e8202012dbfad5dd06c3b6ab4624"
+    },
+    {
+      "asset": "src/assets/animated/597-back.json",
+      "source": "soffiolieve/dist/assets/animated/597-back.json",
+      "sha256": "9c1ef6eec2c53057315b4521b06a8a922ede8657cfcc1ff537310c09d23f5a6a"
+    },
+    {
+      "asset": "src/assets/animated/597-back.png",
+      "source": "soffiolieve/dist/assets/animated/597-back.png",
+      "sha256": "63a53c2c31b085b2261372949a83368bc0be73849d76f5e9f95883dcf01a57b2"
+    },
+    {
+      "asset": "src/assets/animated/599-front.json",
+      "source": "soffiolieve/dist/assets/animated/599-front.json",
+      "sha256": "a31552b80ecd6808cb046cb8cee93523e78527aa142cc5f764299b393878882a"
+    },
+    {
+      "asset": "src/assets/animated/599-front.png",
+      "source": "soffiolieve/dist/assets/animated/599-front.png",
+      "sha256": "f2c4e618d6bb6ab09e7628110c7cdc99ffa4003576269054bd1ed7ad846a1d1e"
+    },
+    {
+      "asset": "src/assets/animated/599-back.json",
+      "source": "soffiolieve/dist/assets/animated/599-back.json",
+      "sha256": "ed3fd34c6f2480b758327bd086225b6c8bc5e5f12139791e5afb7ef71172ab5e"
+    },
+    {
+      "asset": "src/assets/animated/599-back.png",
+      "source": "soffiolieve/dist/assets/animated/599-back.png",
+      "sha256": "d05a345e585a7115b597aa22dcbe4ff40eb6810da3cdb82e36bb789cdaa2a610"
+    },
+    {
+      "asset": "src/assets/animated/602-front.json",
+      "source": "soffiolieve/dist/assets/animated/602-front.json",
+      "sha256": "4ca56c8b8b34df686d75257a2c868f8fc0f4e5875cbd6588c952a84302a64c44"
+    },
+    {
+      "asset": "src/assets/animated/602-front.png",
+      "source": "soffiolieve/dist/assets/animated/602-front.png",
+      "sha256": "e3abd7ab3433d4bd05938764ac78bc78cc83b2c5227ac77d8c9234f15fd908c8"
+    },
+    {
+      "asset": "src/assets/animated/602-back.json",
+      "source": "soffiolieve/dist/assets/animated/602-back.json",
+      "sha256": "0facb1743ecd6568d68b444c2b51c020ad5423c23bd41a19f7a8d6710f0995cd"
+    },
+    {
+      "asset": "src/assets/animated/602-back.png",
+      "source": "soffiolieve/dist/assets/animated/602-back.png",
+      "sha256": "33a2198aca93839885a2f22c5c6c28859c50eb3c421547f7a9714be7a8cf7467"
+    },
+    {
+      "asset": "src/assets/animated/701-front.json",
+      "source": "extra-sprites/701-front.json",
+      "sha256": "7efb2007e3b2af779156790bf009ecf346c358cd9d45ede4b47c91fe793e7558"
+    },
+    {
+      "asset": "src/assets/animated/701-front.png",
+      "source": "extra-sprites/701-front.png",
+      "sha256": "abf17d60c0048ff0126f230af022cdda587f8c46e47ef07f25055f4bd3aa3543"
+    },
+    {
+      "asset": "src/assets/animated/701-back.json",
+      "source": "extra-sprites/701-back.json",
+      "sha256": "53118d065559a2dd851ec3cfb4bbe843d93633c8fd5454a374774f5c0c338baa"
+    },
+    {
+      "asset": "src/assets/animated/701-back.png",
+      "source": "extra-sprites/701-back.png",
+      "sha256": "5f2bc0f1029e4f2f7ce97e1c005886cf6a613f1aff93f392713819b14698a0b0"
+    },
+    {
+      "asset": "src/assets/animated/702-front.json",
+      "source": "extra-sprites/702-front.json",
+      "sha256": "7efb2007e3b2af779156790bf009ecf346c358cd9d45ede4b47c91fe793e7558"
+    },
+    {
+      "asset": "src/assets/animated/702-front.png",
+      "source": "extra-sprites/702-front.png",
+      "sha256": "26d562d604eeda942a91d59d331a8831ba2c9786a7e8729e46826bde7d0ba613"
+    },
+    {
+      "asset": "src/assets/animated/702-back.json",
+      "source": "extra-sprites/702-back.json",
+      "sha256": "53118d065559a2dd851ec3cfb4bbe843d93633c8fd5454a374774f5c0c338baa"
+    },
+    {
+      "asset": "src/assets/animated/702-back.png",
+      "source": "extra-sprites/702-back.png",
+      "sha256": "6a30bd86dd37460463bf7d5f9dfb63036d6a229806d42516dc9cbecfe48d454c"
+    },
+    {
+      "asset": "src/assets/animated/703-front.json",
+      "source": "extra-sprites/703-front.json",
+      "sha256": "7efb2007e3b2af779156790bf009ecf346c358cd9d45ede4b47c91fe793e7558"
+    },
+    {
+      "asset": "src/assets/animated/703-front.png",
+      "source": "extra-sprites/703-front.png",
+      "sha256": "710f8aa1d819a127b5af4697924a06e6e0ee6dc033fbac7106b6ce7b58c10823"
+    },
+    {
+      "asset": "src/assets/animated/703-back.json",
+      "source": "extra-sprites/703-back.json",
+      "sha256": "53118d065559a2dd851ec3cfb4bbe843d93633c8fd5454a374774f5c0c338baa"
+    },
+    {
+      "asset": "src/assets/animated/703-back.png",
+      "source": "extra-sprites/703-back.png",
+      "sha256": "23e1ff0c4056db9e90951897416c92cd3d97761772715787acd2f14ac01a2a6b"
+    },
+    {
+      "asset": "src/assets/animated/704-front.json",
+      "source": "extra-sprites/704-front.json",
+      "sha256": "7cda2b688f11453d9943acbd8d39fd4ef5c7982ab9d5b64b78d116ff20a338de"
+    },
+    {
+      "asset": "src/assets/animated/704-front.png",
+      "source": "extra-sprites/704-front.png",
+      "sha256": "4444a237775c032c5983b2cc84dc2db315ff9a1cf0bfd789306f13b98d3ac826"
+    },
+    {
+      "asset": "src/assets/animated/704-back.json",
+      "source": "extra-sprites/704-back.json",
+      "sha256": "e5e6e2978151e7604e437f813045340bf92bcbabd8024130bf344314f26612c1"
+    },
+    {
+      "asset": "src/assets/animated/704-back.png",
+      "source": "extra-sprites/704-back.png",
+      "sha256": "f51f1e368fa542e7cddd0800e609ddf91f6c2e2f283db833a90f91878b90f23b"
+    },
+    {
+      "asset": "src/assets/animated/705-front.json",
+      "source": "extra-sprites/705-front.json",
+      "sha256": "81a29e334b0272591f39426618893fd467b7494996d486fcb8ea240343ba8a2c"
+    },
+    {
+      "asset": "src/assets/animated/705-front.png",
+      "source": "extra-sprites/705-front.png",
+      "sha256": "54836ef2c1971e4e7c86940b7b8b64dbf9426d300e9126f92b0e8a7a75e4bafd"
+    },
+    {
+      "asset": "src/assets/animated/705-back.json",
+      "source": "extra-sprites/705-back.json",
+      "sha256": "d23d68be9bf4c7606f70cdc126061a02a32689620f2d2fef23fb22c8e0c0e1db"
+    },
+    {
+      "asset": "src/assets/animated/705-back.png",
+      "source": "extra-sprites/705-back.png",
+      "sha256": "5182ff36315fd8653105580c26195dad340dc3b570a75ff02dad0ca5e04379e1"
+    },
+    {
+      "asset": "src/assets/animated/706-front.json",
+      "source": "extra-sprites/706-front.json",
+      "sha256": "70ded50600b1ce99f846546a5e317d1105c3cf979292f9250aa2963029cc8aa8"
+    },
+    {
+      "asset": "src/assets/animated/706-front.png",
+      "source": "extra-sprites/706-front.png",
+      "sha256": "cc77a88bbb639578492afa7286ca91993a869017ea0bafbaab0a468f2ce85aba"
+    },
+    {
+      "asset": "src/assets/animated/706-back.json",
+      "source": "extra-sprites/706-back.json",
+      "sha256": "f6d2d7b134ba3f39f3449939303570e1a14a7d5b4d24b4e3026d926df781e806"
+    },
+    {
+      "asset": "src/assets/animated/706-back.png",
+      "source": "extra-sprites/706-back.png",
+      "sha256": "b4c607f59ddcedfa52dd1e867dad563613aeac062ec3770bce0832707db39185"
+    },
+    {
+      "asset": "src/assets/animated/521-female-front.json",
+      "source": "IRBI a/0/0/4 NCGR 10423; shared 4/5/6/7, palette18",
+      "sha256": "2031400edf87205307a0f38c9a9e16884625a53fb749b840ed34feec9c55892d"
+    },
+    {
+      "asset": "src/assets/animated/521-female-front.png",
+      "source": "IRBI a/0/0/4 NCGR 10423; shared 4/5/6/7, palette18",
+      "sha256": "012dbe7e6274dd403a434753f334e617dbe524e033ad91c55531f786d07f2846"
+    },
+    {
+      "asset": "src/assets/animated/521-female-back.json",
+      "source": "IRBI a/0/0/4 NCGR 10432; shared 13/14/15/16, palette18",
+      "sha256": "58f82a4886529243ab135b0e507c88a2a7a05d280554c0df4d938c851fc345d1"
+    },
+    {
+      "asset": "src/assets/animated/521-female-back.png",
+      "source": "IRBI a/0/0/4 NCGR 10432; shared 13/14/15/16, palette18",
+      "sha256": "2cea45948c2f704fcfd6e8c99b79f9f1bad46ec675e2c6d028fde643658acb87"
+    },
+    {
+      "asset": "src/assets/animated/592-female-front.json",
+      "source": "IRBI a/0/0/4 NCGR 11843; shared 4/5/6/7, palette18",
+      "sha256": "1b5e52adfd2aef6e8de771a3d50381e0118a688f6bc081c7e807cb4c7f03c27e"
+    },
+    {
+      "asset": "src/assets/animated/592-female-front.png",
+      "source": "IRBI a/0/0/4 NCGR 11843; shared 4/5/6/7, palette18",
+      "sha256": "90e04e2b20383b3273bfafdd1fee4f2ab27da4e037971f6c1db452c895d76df0"
+    },
+    {
+      "asset": "src/assets/animated/592-female-back.json",
+      "source": "IRBI a/0/0/4 NCGR 11852; shared 13/14/15/16, palette18",
+      "sha256": "20c16637d0a3a02cd89fa0f9ad4a99347a7a04a225e9cc9801691394bcafa85f"
+    },
+    {
+      "asset": "src/assets/animated/592-female-back.png",
+      "source": "IRBI a/0/0/4 NCGR 11852; shared 13/14/15/16, palette18",
+      "sha256": "d0a84d4925222c284bdc6e6a09d0a6a8283560cc86d931f2e525360eeb442c29"
+    }
+  ]
+}

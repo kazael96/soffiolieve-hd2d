@@ -6,7 +6,7 @@
  const ref=(side,slot)=>session.multi?(slot?(side==='p1'?'p3b':'p4b'):side+'a'):side+(slot?'b':'a');
  const owner=key=>/^p[13]/.test(key)?'p1':'p2';
  function mon(key){const match=/^(p[1-4])([ab])/.exec(key);return match&&session.battle[match[1]]?.active[session.multi?0:match[2]==='b'?1:0];}
- function snapshot(key){const old={...session.focus},side=owner(key),slot=session.multi?(/^p[34]/.test(key)?1:0):key.endsWith('b')?1:0;session.focus[side]=slot;const p=session.snapshot(side),m=mon(key);session.focus=old;return {...p,gender:m?.gender,nickname:m?.name!==m?.species.name?m?.name:''};}
+ function snapshot(key){const old={...session.focus},side=owner(key),slot=session.multi?(/^p[34]/.test(key)?1:0):key.endsWith('b')?1:0;session.focus[side]=slot;const p=session.snapshot(side),m=mon(key);session.focus=old;const view={...p,gender:m?.gender,nickname:m?.name!==m?.species.name?m?.name:''};return typeof battleVisualMon==='function'?battleVisualMon(view,m):view;}
  function rememberStances(){if(!enabled())return;for(const [role,key]of Object.entries(refs))if(views[key]){stances[key]=PatratMoves.stanceSpecies(role);poses[key]=visualState[role]||poses[key]||{};}}
  function restoreStances(){if(!enabled())return;for(const [role,key]of Object.entries(refs))PatratMoves.setStance(role,!!stances[key],stances[key]);}
  function storedStance(key,id){if(stances[key]!==id)return null;const tick=26+(GameSpeed.now()*.06)%40;return id===504?PatratMoves.sample(PatratMoves.bide.store,tick,owner(key)):id===532?ChapterMoves.sample(ChapterMoves.select(532,117,{storing:true}),tick,owner(key)):null;}
@@ -63,8 +63,8 @@
  function undo(){if(!enabled()||!session.queued.some(Boolean))return false;session.queued=[];session.selectionSlot=0;prepareInput();singleSnapshot();updateBattle();return true;}
  function drawIdle(c,w,h){if(!enabled())return;const focused=new Set(Object.values(refs)),active=MoveFX.active;
   for(const [key,p]of Object.entries(views)){if(focused.has(key)||p.hp<=0)continue;const at=position(key,w,h),side=owner(key);
-   if(active&&targets.includes(key)&&active.profile){const role=active.targetSide,oldCry=active.cryIds?.[role],oldState=visualState[role];override={[role]:at};if(active.cryIds)active.cryIds[role]=p.spriteId;visualState[role]=poses[key]||{};try{combatant(c,p.name,at.x,at.y,at.size,side==='p1',role,at);}finally{visualState[role]=oldState;if(active.cryIds)active.cryIds[role]=oldCry;override=null;}}
-   else {passive=key;const oldState=visualState[side];visualState[side]=poses[key]||{};override={[side]:at};try{combatant(c,p.name,at.x,at.y,at.size,side==='p1',side,at);}finally{visualState[side]=oldState;passive=false;override=null;}}
+   if(active&&targets.includes(key)&&active.profile){const role=active.targetSide,oldCry=active.cryIds?.[role],oldState=visualState[role];override={[role]:at};if(active.cryIds)active.cryIds[role]=p.spriteId;visualState[role]=poses[key]||{};try{combatant(c,p.name,at.x,at.y,at.size,side==='p1',role,at,p);}finally{visualState[role]=oldState;if(active.cryIds)active.cryIds[role]=oldCry;override=null;}}
+   else {passive=key;const oldState=visualState[side];visualState[side]=poses[key]||{};override={[side]:at};try{combatant(c,p.name,at.x,at.y,at.size,side==='p1',side,at,p);}finally{visualState[side]=oldState;passive=false;override=null;}}
   }
  }
  function captureTarget(){if(!enabled())return true;const foes=Object.keys(views).filter(k=>owner(k)==='p2'&&mon(k)?.hp>0);if(foes.length!==1)return false;refs={p1:ref('p1',session.selectionSlot),p2:foes[0]};session.focus.p2=foes[0].endsWith('b')?1:0;display();return true;}

@@ -8,6 +8,15 @@
  const multiply=(a,b)=>Number((BigInt(a)*BigInt(b)+2048n)>>12n);
  const divide=(a,b)=>Number((((BigInt(a)<<32n)/BigInt(b))+0x80000n)>>20n);
  const sqrt=a=>Number((integerSqrt(BigInt(a)<<32n)+512n)>>10n);
+ // IRBI overlay93 021cbc48; the Nest modifier truncates its fx32 /10.
+ function ballBonus(id,mon,context={}){
+  if(id===2)return 2;if(id===3)return 1.5;
+  if(id===6){const types=mon.types||String(mon.type||'').split('/'),has=type=>typeof mon.hasType==='function'?mon.hasType(type):types.includes(type)||types.includes(type==='Water'?'Acqua':'Coleottero');return has('Water')||has('Bug')?3:1;}
+  if(id===8)return mon.level<30?Math.floor(Math.min(40,41-mon.level)*ONE/10)/ONE:1;
+  if(id===9)return context.caught?3:1;
+  if(id===13){const periods=context.timePeriods||root.MISTRALTON_BALL?.timePeriods,period=periods?.[context.season??new Date().getMonth()%4]?.[context.hour??new Date().getHours()];return context.terrain==='cave'||context.cave||period===3||period===4?3.5:1;}
+  return 1;
+ }
  // IRBI overlay93 021cbbf4..021cbc48. The health numerator is scaled
  // before multiplying catch rate and ball bonus (not after the final rate).
  function darkFactor(count){return count>600?4096:count>450?3686:count>300?3277:count>150?2867:count>30?2048:1229;}
@@ -29,5 +38,5 @@
   for(;shakes<checks;shakes++)if(random(65536)>=limit)return{caught:false,shakes,critical,rate:value,threshold:limit};
   return{caught:true,shakes,critical,rate:value,threshold:limit};
  }
- root.CaptureRules={rate,threshold,roll,darkFactor};if(typeof module!=='undefined')module.exports=root.CaptureRules;
+ root.CaptureRules={rate,threshold,roll,darkFactor,ballBonus};if(typeof module!=='undefined')module.exports=root.CaptureRules;
 })(typeof window!=='undefined'?window:globalThis);

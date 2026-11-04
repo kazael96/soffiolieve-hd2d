@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),{environment,drain}=require('../check-story-runtime.cjs');
+async function chapter({save,badges=[0,1,2,3],level=31}={}){
+ const c=environment({mistralton:true,sourceRoot:process.env.QA_SOURCE_ROOT,save});await c.MistraltonChapter.ensure();
+ if(!save){Object.assign(c.NativeStory.state,{intro:true,initialized:true,pokedex:true,driftveil:true,badges,healZone:99});c.NativeStory.state.vars[16527]=1;c.Journey.state.phase='driftveil';c.Journey.state.starter='Snivy';c.Journey.state.party=['Servine','Pignite','Dewott'].map(name=>c.Journey.pack(c.makeMon(name,level),c.OPENING_DATA[name].growth[level]));c.Journey.displayPartner();}
+ const battles=[],start=c.startBattle;c.startBattle=(...args)=>{battles.push(args[1]);return start(...args);};c.testBattles=battles;
+ return c;
+}
+async function event(c,zone,x,z,entry,outcome='p1'){await c.NativeStory.changeZone(zone,x,z);const bank=c.ORIGINAL_EVENTS.zones[zone].script,pc=c.ORIGINAL_EVENTS.scripts[bank].entries[entry],at=c.NativeStory.vm.trace.length,until=()=>!!c.$('world').dataset.eventError||c.NativeStory.vm.trace.slice(at).some(([b,p])=>b===bank&&p===pc)&&!c.NativeStory.vm.running&&!c.NativeStory.locked;const pages=await drain(c,c.NativeStory.run(entry),0,outcome,until);assert.equal(c.NativeStory.vm.running,false,'native VM left running');assert.equal(c.NativeStory.locked,false,'event left input locked');return pages;}
+async function trigger(c,zone,x,z,entry,outcome='p1'){await c.NativeStory.changeZone(zone,x,z);const bank=c.ORIGINAL_EVENTS.zones[zone].script,pc=c.ORIGINAL_EVENTS.scripts[bank].entries[entry],at=c.NativeStory.vm.trace.length;return drain(c,Promise.resolve(),0,outcome,()=>!!c.$('world').dataset.eventError||c.NativeStory.vm.trace.slice(at).some(([b,p])=>b===bank&&p===pc)&&!c.NativeStory.vm.running&&!c.NativeStory.locked);}
+function state(c){const n=c.NativeStory.state;return {zone:n.zone,vars:Object.fromEntries([16527,16528,16523,16538,16539,16537].map(id=>[id,n.vars[id]||0])),badges:[...(n.badges||[])],flags:[...n.flags],trainers:[...(n.trainerWins||[])],items:{405:c.Journey.itemCount(405),421:c.Journey.itemCount(421),231:c.Journey.itemCount(231),92:c.Journey.itemCount(92)}};}
+module.exports={chapter,event,trigger,state,drain,environment};

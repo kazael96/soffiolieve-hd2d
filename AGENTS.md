@@ -8,7 +8,11 @@ Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPME
 
 L’utente ha confermato come destinazione il finale della storia principale, inclusi Lega, N e Ghecis; le attività dopo i titoli di coda restano escluse. Proseguire città per città nella storia, con una tappa implementata, collaudata e pubblicata prima della successiva. Per le prossime estensioni ricavare dalla ROM il livello del Pokémon più forte del prossimo Capopalestra e aumentare di conseguenza il limite; non scegliere arrotondamenti arbitrari. Livelli verificati nelle squadre IRBI (a/0/9/2–3): Rafan 31 (trainer24), Anemone 35 (25), Silvestro 39 (131), Aristide 43 (133). Conservare sempre livelli e XP superiori dei vecchi salvataggi. La 0.48 mantiene il limite 30 già autorizzato; il capitolo della palestra di Rafan passa a 31. Queste richieste si aggiungono agli standard A–H, senza ridurre controlli, continuità, sfondi, coreografie o pulizia delle build.
 
-## Capitolo corrente · 0.48
+## Capitolo corrente · 0.49 in lavorazione
+
+La 0.48 è pubblicata e verificata (dc9ec7d5874f26dd; riferimento5b49474c22b932f4). Proseguire con `docs/DRIFTVEIL-MISTRALTON-049.md`: Deposito Frigo, Rafan, Percorso6, Cava Pietrelettrica e arrivo a Ponentopoli. Cap31 prima di Rafan e35 dopo la quinta medaglia, secondo i massimi nativi. Non considerare implementati comandi, mappe o specie per la sola estrazione. La matrice verificata resta quella0.48 finché il nuovo inventario non è integrato e collaudato. Nessuna riduzione degli standard A–H.
+
+## Capitolo precedente · 0.48
 
 L'utente ha autorizzato esplicitamente il **limite di allenamento 30** il 3 novembre 2026 per proseguire da Sciroccopoli a Libecciopoli, passando per Camelia, Percorso 5 e Ponte Libecciopoli. Questa decisione sostituisce il limite 25 per il nuovo capitolo; conservare XP e livelli superiori dei vecchi salvataggi. Applicare `docs/NIMBASA-DRIFTVEIL-048.md`. Il runtime 0.48 integra N, Camelia, Percorso 5, ponte e arrivo a Libecciopoli; applicare anche `docs/SPECIES-MOVES-048.md` (849 coppie/58 specie e forme) e `docs/QA-048.md`. Distinguere collaudi effettivi e predisposizione dei dati. La consegna della 0.48 richiede collaudo e verifica del codice effettivamente servito da Pages, registrati nel rapporto relativo alla tappa.
 

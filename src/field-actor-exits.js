@@ -1,6 +1,6 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan']);
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Rutilo']);
  const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
  const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
@@ -16,6 +16,7 @@
   const path=[];for(let p=best;p&&key(p)!==key(start);p=previous.get(key(p)))path.push({x:p[0]+.5,y:p[1]+.5});return path.reverse();
  }
  function plan(n,zone,blocked){
+  const extension=root.MistraltonContinuity?.planExit(n,zone,blocked);if(extension)return extension;
   const portal=(x,y,dx,dy,kind='door')=>({kind,anchor:{x,y},points:[{x,y},{x:x+dx*2.8,y:y+dy*2.8}],clip:kind==='stairs'?[0,1,0,-.04]:[-dx,0,-dy,dx*x+dy*y+(dy<0?1.3:0)]});
   const arrival=(x,y,destinationZone,targetUid,destination)=>({kind:'arrival',points:route(n,{x,y},blocked),anchor:{x,y},clip:null,background:true,destinationZone,targetUid,destination,itineraryVersion:1});
   // Reach the next story position and wait there, even if its native map has
@@ -122,7 +123,8 @@
  class Controller{
   constructor({blocked=()=>false,obstructed=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,obstructed,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
   depart(n,zone,{covered=false,resident=false}={}){
-   if([110,208].includes(n.model)||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
+   if(root.MistraltonContinuity?.logicalOnlyDelete(n))return false;
+   if([110,208].includes(n.model)||n.fieldObject||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
    const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
    this.records.set(key,{key,actor,zone,plan:p,index:0,age:0,travel:0,zero:0,stage:resident?'resident':'walk',sampleSequence:-1});return true;
   }
@@ -140,6 +142,7 @@
   }
   tick(dt){
    dt=Math.min(.1,Math.max(0,dt));for(const [key,r]of this.records){const a=r.actor;r.age+=dt;
+    if(root.MistraltonContinuity?.shouldTick(r)===false)continue;
     if(r.stage==='resident')continue;
     if(r.stage==='rejoin'){
      const b=r.target;if(!b){r.stage='walk';continue;}const d=Math.hypot(b.x-a.x,b.y-a.y),step=3.75*dt;
@@ -150,13 +153,13 @@
      a.height=b.height||0;delete a.exitClip;this.pose(a,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0,1+Math.floor(r.age*8)%2);continue;
     }
     const sample=this.sample(a);if(!sample)r.zero=0;else if(sample.sequence!==r.sampleSequence){r.sampleSequence=sample.sequence;r.zero=sample.visible?0:r.zero+1;}
-    const canRetire=r.plan.kind==='path'?r.travel>=1.5:r.stage==='hold';
-    if(canRetire&&r.zero>=2){this.records.delete(key);this.finishPortal(r);r.resolve?.();this.retired.push({name:a.name,zone:r.zone,reason:'rendered-invisible',x:a.x,y:a.y,height:a.height||0,sequence:r.sampleSequence});if(this.retired.length>40)this.retired.shift();continue;}
+    const canRetire=root.MistraltonContinuity?.canRetire(r)??(r.plan.kind==='path'?r.travel>=1.5:r.stage==='hold');
+    if(canRetire&&r.zero>=2){const next=root.MistraltonContinuity?.nextLeg(r);if(next?.deferred){r.zero=0;continue;}if(next){this.finishPortal(r);Object.assign(r,next);continue;}this.records.delete(key);this.finishPortal(r);r.resolve?.();this.retired.push({name:a.name,zone:r.zone,reason:'rendered-invisible',x:a.x,y:a.y,height:a.height||0,sequence:r.sampleSequence});if(this.retired.length>40)this.retired.shift();continue;}
     r.unverified=r.stage==='hold'&&!sample?(r.unverified||0)+dt:0;if(r.plan.kind!=='path'&&r.unverified>5)throw Error('Verifica visibilità uscita non disponibile: '+a.name);
     if(r.error)throw Error(r.error);
     if(r.stage==='walk'){
      const point=r.plan.points[r.index];if(point){const dx=point.x-a.x,dy=point.y-a.y,d=Math.hypot(dx,dy),step=3.75*dt;
-      if(d>0&&this.obstructed(r,{x:a.x+dx/d*Math.min(d,step),y:a.y+dy/d*Math.min(d,step)})){this.pose(a,a.direction);continue;}
+      if(d>0&&(this.obstructed(r,{x:a.x+dx/d*Math.min(d,step),y:a.y+dy/d*Math.min(d,step)})||root.MistraltonContinuity?.obstructed(r,{x:a.x+dx/d*Math.min(d,step),y:a.y+dy/d*Math.min(d,step)}))){this.pose(a,a.direction);continue;}
       if(['door','stairs'].includes(r.plan.kind)&&r.index===r.plan.points.length-1&&!r.opened){r.stage='opening';Promise.resolve(this.portal(r)).then(handle=>{if(this.records.get(key)!==r){this.finishPortal({...r,handle});return;}r.handle=handle;r.opened=true;r.stage='walk';},error=>{r.error=String(error);r.stage='hold';});continue;}
       if(r.opened||['route4-gate','driftveil-approach'].includes(r.plan.destination)&&r.index===r.plan.points.length-1)a.exitClip=r.plan.clip;
       if(d<=step){a.x=point.x;a.y=point.y;r.travel+=d;r.index++;}else{a.x+=dx/d*step;a.y+=dy/d*step;r.travel+=step;}
@@ -169,11 +172,11 @@
    }
   }
   preserve(old,next,{covered=false,sameField=false}={}){if(covered||!sameField)return;const targets=new Map(next.filter(n=>!n.hidden).map(n=>[identity(n),n]));for(const n of old){const target=targets.get(identity(n));if(!target||Math.hypot(n.x-target.x,n.y-target.y)>.01)this.depart(n,n.fieldZone,{resident:true});}}
-  occupied(x,y,except=null){return [...this.records.values()].some(r=>r.key!==(except&&identity(except))&&(r.actor.height||0)>=0&&Math.abs(r.actor.x-x)<.55&&Math.abs(r.actor.y-y)<.55);}
+  occupied(x,y,except=null){return [...this.records.values()].some(r=>root.MistraltonContinuity?.occupies(r)!==false&&r.key!==(except&&identity(except))&&(r.actor.height||0)>=0&&Math.abs(r.actor.x-x)<.55&&Math.abs(r.actor.y-y)<.55);}
   wait(n){const r=this.records.get(identity(n));if(!r||r.plan.background||r.plan.kind==='path'||r.plan.kind==='resident')return Promise.resolve();if(!r.promise)r.promise=new Promise(resolve=>r.resolve=resolve);return r.promise;}
   clear(){for(const r of this.records.values()){this.finishPortal(r);r.resolve?.();}this.records.clear();}
   save(){return [...this.records.values()].map(r=>({key:r.key,actor:copy(r.actor),zone:r.zone,plan:r.plan,index:r.index,age:r.age,travel:r.travel,stage:r.stage==='opening'?'walk':r.stage,opened:r.opened}));}
-  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(!r||!(r.zone===zone||outdoor(r.zone)&&outdoor(zone)||[326,327,328,90].includes(zone)&&['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)||[329,253,96,99].includes(zone)&&['driftveil-approach','cold-storage-front'].includes(r.plan.destination)))continue;
+  restore(records,zone,progress={}){if(!Array.isArray(records))return;for(const row of records.slice(0,256)){let r=savedRecord(row);if(r){const restored=root.MistraltonContinuity?.restoreRecord(r,zone,progress);if(restored!==undefined)r=restored;}if(!r||!(root.MistraltonContinuity?.canRestore(r,zone)||r.zone===zone||outdoor(r.zone)&&outdoor(zone)||[326,327,328,90].includes(zone)&&['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)||[329,253,96,99].includes(zone)&&['driftveil-approach','cold-storage-front'].includes(r.plan.destination)))continue;
    const lateFriends=(progress.flags||[]).includes(515)||(progress.vars?.[16508]||0)>=2;
    if(r.zone===317&&!r.plan.itineraryVersion&&(r.actor.name==='Aralia'&&['path','resident'].includes(r.plan.kind)||r.actor.name==='Aralia'&&r.plan.destination==='lab'||['Komor','Belle'].includes(r.actor.name)&&(['path'].includes(r.plan.kind)||lateFriends&&r.plan.kind==='resident'))){
     const actor={...r.actor};if(lateFriends&&actor.name!=='Aralia')actor.uid=actor.name==='Komor'?3:4;

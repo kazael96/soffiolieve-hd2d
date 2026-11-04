@@ -6,7 +6,7 @@ test('all three choices preserve the original rival order and elemental matchups
   assert.equal(s.phase,'belle');assert.equal(Story.choose(s,'Tepig'),false);
   assert.equal(Story.rivalStarter(starter,'Belle'),belle);assert.equal(Story.rivalStarter(starter,'Komor'),komor);
   for(const phase of Story.phases.slice(1,-1)){assert.equal(s.phase,phase);assert.equal(Story.advance(s,phase),true);assert.equal(Story.advance(s,phase),false);}
-  assert.equal(s.phase,'driftveil');assert.equal(Story.advance(s,'route'),false);
+  assert.equal(s.phase,'mistralton');assert.equal(Story.advance(s,'route'),false);
  }
 });
 test('story saves are separate from the removed custom chapter',()=>{
@@ -42,4 +42,15 @@ test('encounter metadata and personality survive saves while malformed history i
  const s=Story.fresh(),met={date:'2026-10-26T12:00:00.000Z',zone:391,level:5};s.party=[{name:'Snivy',level:5,hp:20,pp:[],personality:0xffffffff,met}];
  const restored=Story.normalize(s);assert.deepEqual(restored.party[0].met,met);assert.equal(restored.party[0].personality,0xffffffff);
  s.party[0].met.date='invalid';s.party[0].personality=-1;const invalid=Story.normalize(s);assert.equal('met' in invalid.party[0],false);assert.equal('personality' in invalid.party[0],false);
+});
+test('native deep Gym floor and lift checkpoints survive disk saves below the lift landing',()=>{
+ const values=new Map(),storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)},s=Story.fresh();
+ s.original={zone:97,clayHeight:-63.01536560058594,clayActors:{0:-62.01512145996094,1:-59},clayRide:{kind:'lift',zone:97,index:5,from:-59,to:-63.01536560058594,current:-62.01512145996094,speed:2,elapsed:1}};
+ assert.equal(Story.write(storage,s),true);const restored=Story.read(storage).original;
+ assert.equal(restored.clayHeight,s.original.clayHeight);assert.deepEqual(restored.clayActors,s.original.clayActors);assert.equal(restored.clayRide.current,s.original.clayRide.current);
+});
+test('Gym save sanitation retains native negative floors and rejects out-of-range records',()=>{
+ const s=Story.fresh();s.original={zone:97,clayHeight:-100,clayActors:{0:-63.01536560058594,1:-64.01,2:56,3:NaN},clayRide:{kind:'lift',zone:97,index:5,from:-59,to:-65,current:-63,speed:2,elapsed:1}};
+ const n=Story.normalize(s).original;assert.equal(n.clayHeight,-64);assert.deepEqual(n.clayActors,{0:-63.01536560058594});assert.equal(n.clayRide,undefined);
+ s.original.clayHeight=100;assert.equal(Story.normalize(s).original.clayHeight,55);
 });

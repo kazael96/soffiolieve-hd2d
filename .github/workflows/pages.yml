@@ -48,6 +48,19 @@ jobs:
           node tests/check-nimbasa-moves.cjs _site
           node tests/check-nimbasa-residents.cjs _site
           node tests/check-nimbasa-navigation.cjs _site
+          node tests/check-driftveil-assets.cjs _site
+          node tests/check-driftveil-runtime.cjs _site
+          node tests/check-driftveil-moves.cjs _site
+          node tests/check-driftveil-residents.cjs _site
+          node tests/check-driftveil-navigation.cjs _site
+          node tests/check-driftveil-continuity.cjs _site
+          node tests/check-driftveil-guards.cjs _site
+          node tests/check-mistralton-runtime.cjs _site
+          node tests/check-mistralton-moves.cjs _site
+          node tests/check-mistralton-residents.cjs _site
+          node tests/check-mistralton-navigation.cjs _site
+          node tests/check-mistralton-fly.cjs _site
+          node tests/check-mistralton-story-battles.cjs _site
           node tests/check-double-runtime.cjs _site
           node tests/check-field-stress.cjs _site
           node tests/check-mobile-runtime.cjs _site

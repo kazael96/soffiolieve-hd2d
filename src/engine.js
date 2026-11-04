@@ -1,18 +1,21 @@
 // ROM-backed Gen V facade. Resolution lives in battle-sim.js, not here.
+// All nine native Mail papers share the simulator's existing Mail behavior.
+// Their native paper ID and written body remain on the stored Pokemon.
+for(let id=137;id<=145;id++)if(!GEN5.items.some(item=>item.id===id))GEN5.items.push({key:'mail',en:'Mail',id,name:window.MISTRALTON_MAIL_DATA?.items[id]?.name||'Mail'});
 const SPECIES=Object.fromEntries(GEN5.species.map(p=>[p.en,{id:p.id,type:ROM_BATTLE.typeNames[p.types[0]],base:p.baseStats,abilities:p.abilities}]));
 function makeMon(name,level=8,options={}){
- const p=GEN5.bySpeciesKey[name.toLowerCase().replace(/[^a-z0-9]/g,'')]||GEN5.species.find(s=>s.en===name)||GEN5.species[494];
+ const p=GEN5.bySpeciesKey[name.toLowerCase().replace(/[^a-z0-9]/g,'')]||GEN5.species.find(s=>s.id===window.PokemonVisuals?.speciesId({name}))||GEN5.species.find(s=>s.en===name)||GEN5.species[494];
  const stats=['hp','atk','def','spe','spa','spd'],ivs=Object.fromEntries(stats.map(k=>[k,options.ivs?.[k]??15])),evs=Object.fromEntries(stats.map(k=>[k,options.evs?.[k]??0]));
  const nature=GEN5.dex.natures.get(options.nature||'Serious'),abilityId=options.abilityId||p.abilities[0];
  const value=key=>{const base=Math.floor((2*p.baseStats[key]+ivs[key]+Math.floor(evs[key]/4))*level/100);if(key==='hp')return base+level+10;return Math.floor((base+5)*(nature.plus===key?110:nature.minus===key?90:100)/100);};
  const learned=options.moves||options.pp?.map(m=>m.id)||p.learnset.filter(m=>m.level<=level).map(m=>m.id).filter((id,i,a)=>a.lastIndexOf(id)===i).slice(-4),moves=learned.map(id=>GEN5.moves.find(m=>m.id===id)).filter(Boolean);
- return {name:p.en,...(options.met?{met:options.met}:{}),personality:options.personality??0,nickname:options.nickname||'',heldItem:options.heldItem||0,spriteId:p.id,level,max:value('hp'),hp:value('hp'),stats:Object.fromEntries(stats.map(k=>[k,value(k)])),ivs,evs,nature:nature.name,gender:options.gender||'M',happiness:options.happiness??70,type:p.types.map(t=>ROM_BATTLE.typeNames[t]).join('/'),ability:ROM_BATTLE.abilities[abilityId],abilityId,status:'',stage:{},moves:moves.map(m=>({...m,left:m.pp,cat:['Stato','Fisica','Speciale'][m.category]}))};
+ return {name:p.en,...(window.MistraltonMail?.sanitizeMail?.(options.mail,options.heldItem)?{mail:MistraltonMail.sanitizeMail(options.mail,options.heldItem)}:{}),...([585,586].includes(p.id)?{form:window.PokemonVisuals?.form({name,...options})??0}:{}),...(options.met?{met:options.met}:{}),personality:options.personality??0,nickname:options.nickname||'',heldItem:options.heldItem||0,spriteId:p.id,level,max:value('hp'),hp:value('hp'),stats:Object.fromEntries(stats.map(k=>[k,value(k)])),ivs,evs,nature:nature.name,gender:options.gender||'M',happiness:options.happiness??70,type:p.types.map(t=>ROM_BATTLE.typeNames[t]).join('/'),ability:ROM_BATTLE.abilities[abilityId],abilityId,status:'',stage:{},moves:moves.map(m=>({...m,left:m.pp,cat:['Stato','Fisica','Speciale'][m.category]}))};
 }
 function newStoryMon(name,level,random=Math.random){
- const p=GEN5.species.find(s=>s.en===name),natures=GEN5.dex.natures.all();
+ const p=GEN5.species.find(s=>s.en===name)||GEN5.species.find(s=>s.id===window.PokemonVisuals?.speciesId({name})),natures=GEN5.dex.natures.all();
  const ivs=Object.fromEntries(['hp','atk','def','spe','spa','spd'].map(k=>[k,Math.floor(random()*32)]));
  const gender=p.genderRatio===255?'N':p.genderRatio===254?'F':p.genderRatio===0?'M':Math.floor(random()*256)<p.genderRatio?'F':'M';
- return makeMon(name,level,{ivs,gender,personality:Math.floor(random()*0x100000000),nature:natures[Math.floor(random()*natures.length)].name,abilityId:p.abilities[Math.floor(random()*2)]});
+ return makeMon(name,level,{...([585,586].includes(p.id)?{form:new Date().getMonth()%4}:{}),ivs,gender,personality:Math.floor(random()*0x100000000),nature:natures[Math.floor(random()*natures.length)].name,abilityId:p.abilities[Math.floor(random()*2)]});
 }
 // The initial rivals use only AI flag 4 (IRBI a/1/7/1, member 4).
 // Score each available move; break ties randomly, as in the original routine.

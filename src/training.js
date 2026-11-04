@@ -1,7 +1,13 @@
 /* Shared level policy. Browser I/O, menus and animations belong to Journey. */
 (function(root){
  const data=()=>root.TRAINING_DATA;
- function limit(){return data()?.levelCap||15;}
+ function limit(progress=root.NativeStory?.state||root.Journey?.state?.original){
+  const d=data(),ceiling=d?.levelCap||15,steps=d?.capSteps;
+  if(!Array.isArray(steps)||!steps.length)return ceiling;
+  const badges=Array.isArray(progress?.badges)?progress.badges:[];
+  for(const step of steps)if(Number.isInteger(step.badge)&&Number.isInteger(step.level)&&!badges.includes(step.badge))return Math.min(ceiling,Math.max(1,step.level));
+  return ceiling;
+ }
  function cap(p){return Math.min(100,Math.max(limit(),p.level));}
  function xp(p,amount,growth){
   const before=Math.max(0,Number.isFinite(p.xp)?Math.floor(p.xp):0);
@@ -32,7 +38,7 @@
   for(const id of d.compatibility[name]||[])if(d.machines[id])out.add(d.machines[id]);
   // Retained pre-evolution moves remain legal even if the evolution learns them later.
   for(const [from,entries]of Object.entries(d.evolutions))if(entries.some(e=>e.target===name&&
-   (e.method===4&&e.parameter<=limit()||[1,2,3,8].includes(e.method)))){
+   (e.method===4&&e.parameter<=(d.levelCap||limit())||[1,2,3,8].includes(e.method)))){
    for(const id of moves(from,visited))out.add(id);
   }
   return [...out];

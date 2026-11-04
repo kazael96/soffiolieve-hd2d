@@ -9,6 +9,7 @@
   if(window.CASTELIA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],CASTELIA_EVENTS[k]);Object.assign(OPENING_TRAINERS,CASTELIA_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,CASTELIA_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,CASTELIA_DATA.itemDescriptions);}
   if(window.NIMBASA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],NIMBASA_EVENTS[k]);Object.assign(OPENING_TRAINERS,NIMBASA_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,NIMBASA_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,NIMBASA_DATA.itemDescriptions);}
   if(window.DRIFTVEIL_EVENTS){for(const k of ['scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],DRIFTVEIL_EVENTS[k]);for(const z of DriftveilChapter.zones)ORIGINAL_EVENTS.zones[z]=DRIFTVEIL_EVENTS.zones[z];Object.assign(OPENING_TRAINERS,DRIFTVEIL_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,DRIFTVEIL_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,DRIFTVEIL_DATA.itemDescriptions);}
+  if(window.MISTRALTON_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],MISTRALTON_EVENTS[k]);Object.assign(OPENING_TRAINERS,MISTRALTON_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,MISTRALTON_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,MISTRALTON_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
@@ -18,6 +19,7 @@
   if(window.CasteliaChapter)for(const z of CasteliaChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   if(window.NimbasaChapter)for(const z of NimbasaChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   if(window.DriftveilChapter)for(const z of DriftveilChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
+  if(window.MistraltonChapter)for(const z of MistraltonChapter.zones){zoneScenes[z]='zone'+z;sceneZones['zone'+z]=z;}
   const native=state.original||(state.original={vars:{},flags:[],zone:sceneZones[state.scene],intro:false});
   if(window.STRIATON_DATA&&!native.chapter040){native.chapter040=true;for(const flag of [530,532,533,534,539,540,541,757,820,707])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.ROUTE3_DATA&&!native.chapter042){native.chapter042=true;for(const flag of [517,572,625,562,614,751,1328])if(!native.flags.includes(flag))native.flags.push(flag);}
@@ -25,33 +27,38 @@
   if(window.CASTELIA_DATA&&!native.chapter046){native.chapter046=true;for(const flag of [702,703,796,797,798,799,800,843])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.NIMBASA_DATA&&!native.chapter047){native.chapter047=true;for(const flag of [561,639])if(!native.flags.includes(flag))native.flags.push(flag);}
   if(window.DRIFTVEIL_DATA&&!native.chapter048){native.chapter048=true;for(const flag of [566,567,568,699,735,815,555,557,536,537])if(!native.flags.includes(flag))native.flags.push(flag);}
+  if(window.MISTRALTON_DATA&&!native.chapter049){native.chapter049=true;for(const flag of [544,545,546,582,584,655,804,805,706,839])if(!native.flags.includes(flag))native.flags.push(flag);if((native.vars[16527]||0)<1&&!native.flags.includes(558))native.flags.push(558);}
+  // IRBI common init866 sets662; only Skyla's gym program220 clears it.
+  if(window.MISTRALTON_DATA&&!native.badges?.includes(5)&&!native.flags.includes(662))native.flags.push(662);
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
-  const names={88:'Camelia',89:'Rafan',97:'Nardo',92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
+  const names={90:'Anemone',104:'Rutilo',182:'Triade',192:'Violante',88:'Camelia',89:'Rafan',97:'Nardo',92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let phoneLayout=null;
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
-  let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false;
+  let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false,triadCoverMode=null;
   const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&fieldActors().some(n=>{return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
+  window.MistraltonContinuity?.configure({native,departures,blockedAt:window.MistraltonChapter?.blockedAt,isCovered:()=>fieldCovered,recheck:()=>{lastTile='';}});
   departures.restore(native.departures,native.zone,native);
   const warmedBanks=new Set();
   let tutorialWarm=null;
   function warmTutorial(){if(native.zone!==317||value(16508)>=1||tutorialWarm||!window.BattleEnvironment||!window.ROM_SPRITE_ANIM)return;tutorialWarm=Promise.all([window.BattleScreen?.prepare?.(),BattleEnvironment.prepare(Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass'})),ROM_SPRITE_ANIM.prepare([{id:572,back:true},{id:504,back:false}]),window.NativeCapture?.preload(),window.MoveFX?.preload(1),window.AudioEngine?.preloadMove(1,{p1:572,p2:504})]).catch(()=>{tutorialWarm=null;});}
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
-  let eventRunning=false,queued=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
+  let eventRunning=false,queued=null,reservedLiftArrival=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
   const data=()=>ORIGINAL_EVENTS.zones[native.zone];
-  const origin=()=>[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)?[784,752]:[16,16];
+  const origin=()=>window.MistraltonChapter?.globalZones.includes(native.zone)?[784,752]:[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
   // City WB exits encode the corner and span, alongside rail-position unions.
-  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
+  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   function pose(n,dir,step=0){
-    if(n.fieldZone===native.zone&&([389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight);
-    n.direction=dir;const count=OPENING_SPRITES[n.name]?.length||window.ROM_SPRITES?.[n.name]?.length;
+    if(native.zone!==97&&n.fieldZone===native.zone&&(window.MistraltonChapter?.zones.includes(native.zone)||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight);
+    n.height=window.MistraltonGym?.actorHeight(n,n.height)??n.height;
+    n.direction=dir;const fieldFrame=window.MistraltonPuzzles?.actorFrame?.(n);if(fieldFrame!==null&&fieldFrame!==undefined){n.frame=fieldFrame;n.flip=false;return;}const count=OPENING_SPRITES[n.name]?.length||window.ROM_SPRITES?.[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
     else if(count===7||count===9){n.frame=[0,2,4,4][dir]+(step===1?1:step===2?(dir<2?1:2):0);n.flip=dir===3||(dir<2&&step===2);}
     else {n.frame=frames[dir]+step;n.flip=false;}
@@ -59,7 +66,7 @@
   function face(id,dir){const n=actor(id);if(!n)return;if(id===255)facing=frames[dir];else pose(n,dir);}
   function putActor(record){
     const n={...world(record.x,record.z),...(record.railOriginal?{railOriginal:record.railOriginal,railHeight:record.y/65536}:{}),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:(record.y||0)/65536};
-    n.wander=NpcWalk.create(record,{x:n.x,y:n.y});if(([185,8198,8199].includes(record.model)||native.zone===29&&record.model===0)){n.noShadow=true;n.gimmick=true;}pose(n,record.direction);npcs.push(n);renderer.requireActors?.(fieldActors());return n;
+    n.wander=NpcWalk.create(record,{x:n.x,y:n.y});if(([185,8198,8199].includes(record.model)||native.zone===29&&record.model===0)){n.noShadow=true;n.gimmick=true;}pose(n,record.direction);npcs.push(n);window.MistraltonContinuity?.introduced(n,npcs);renderer.requireActors?.(fieldActors());return n;
   }
   function syncActors(){
     const previousActors=[...npcs];npcs.splice(0);for(const n of data().actors){
@@ -72,7 +79,7 @@
       // Curtain records are logical moving mechanisms; meshes are in the scene.
       if(native.zone===152&&(n.model===8195||n.id===8&&native.dreamyardTreeCut))continue;
       if(native.zone===319&&native.routeItems?.includes(n.id))continue;
-      if([398,8,20,41,65,99].includes(native.zone)&&[657].includes(n.flag))continue;
+      if([398,8,20,41,65,99,109].includes(native.zone)&&[657].includes(n.flag))continue;
       // Post-game actors use initial hidden flags from the new-game state.
       if([736,681,682,683,684,685,656,675,817,1230,1143].includes(n.flag))continue;
       putActor(n);
@@ -94,11 +101,13 @@
       for(const id of adjacent){const record=ORIGINAL_EVENTS.zones[397].actors.find(n=>n.id===id);const n=putActor({...record,script:2000});Object.assign(n,{fieldZone:397,projection:true});}
     }
     if([319,6].includes(native.zone)&&value(16509)>=2&&value(16532)<2){const n=putActor({id:251,model:134,script:2000,x:804,z:580,direction:3});Object.assign(n,{fieldZone:6,projection:true});}
-    if(actorsInitialized&&actorZone===native.zone&&[16,17,19,154,155,28,29,30,31,32,33,34,35,38,40,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone))for(const old of previousActors)if(!old.hidden&&!old.gimmick&&!npcs.some(n=>n.uid===old.uid))departures.depart(old,native.zone,{covered:fieldCovered});
-    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||[389,317,397,319,6,321,16,154,326,62,329,96].includes(actorZone)&&[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
+    if(window.MistraltonChapter?.groups.some(g=>g.includes(native.zone)))for(const adjacent of MistraltonChapter.members(native.zone).filter(z=>z!==native.zone))for(const record of ORIGINAL_EVENTS.zones[adjacent].actors){if(record.flag&&has(record.flag))continue;const n=putActor(record);Object.assign(n,{fieldZone:adjacent,projection:true});}
+    if(actorsInitialized&&actorZone===native.zone&&(window.MistraltonChapter?.zones.includes(native.zone)||[16,17,19,154,155,28,29,30,31,32,33,34,35,38,40,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone)))for(const old of previousActors)if(!old.hidden&&!old.gimmick&&!npcs.some(n=>n.uid===old.uid))departures.depart(old,native.zone,{covered:fieldCovered});
+    if(actorsInitialized)departures.preserve(previousActors,npcs,{covered:fieldCovered,sameField:actorZone===native.zone||window.MistraltonChapter?.sameField(actorZone,native.zone)||[389,317,397,319,6,321,16,154,326,62,329,96].includes(actorZone)&&[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)});actorZone=native.zone;actorsInitialized=true;
   }
   function derivePhase(){
-    state.phase=native.driftveil?'driftveil':native.nimbasa?'nimbasa':native.route4?'route4':native.zone===28||native.castelia?'castelia':[249,250,251,252].includes(native.zone)?'skyarrow':[154,155].includes(native.zone)?'pinwheel':[17,18,19].includes(native.zone)||value(16530)>=3?'nacreneGym':native.zone===16||native.nacrene?'nacrene':native.zone===324?'wellspring':native.route3?'route3':value(16532)>=5?'dreamyardDone':value(16532)>=1?'dreamyard':native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
+    window.MistraltonFly?.migrate(state);
+    state.phase=native.mistralton?'mistralton':[195,196,197].includes(native.zone)?'chargestone':[331,194].includes(native.zone)?'route6':native.driftveil?'driftveil':native.nimbasa?'nimbasa':native.route4?'route4':native.zone===28||native.castelia?'castelia':[249,250,251,252].includes(native.zone)?'skyarrow':[154,155].includes(native.zone)?'pinwheel':[17,18,19].includes(native.zone)||value(16530)>=3?'nacreneGym':native.zone===16||native.nacrene?'nacrene':native.zone===324?'wellspring':native.route3?'route3':value(16532)>=5?'dreamyardDone':value(16532)>=1?'dreamyard':native.striaton?'striaton':native.route2?'route2':value(16506)>=3?'nextRoute':value(16506)>=2?'plasma':value(16507)===1?'centerHeal':value(16507)===2?'centerTour':value(16507)===3&&value(16506)>=1?'plasma':native.arrived?'arrival':value(16508)>=1?'route':value(16512)===3?'tutorial':value(16512)===2?'routeStart':value(16505)===1?'map':value(16504)===1?'lab':value(16517)===1?'biancaHouse':value(16513)===2?'mother':state.starter?'belle':'gift';
     journey.update();
   }
   function initialize(){
@@ -107,7 +116,7 @@
     player=world(5,6);facing=3;
   }
   function clearDepartures(){
-    const carry=departures.save().filter(r=>['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)&&!has(697)||r.plan.destination==='driftveil-approach'&&value(16527)<1||r.plan.destination==='cold-storage-front'&&value(16527)===1);
+    const carry=departures.save().filter(r=>window.MistraltonContinuity?.carry(r)||['route4-gate','nimbasa-gate-wait'].includes(r.plan.destination)&&!has(697)||r.plan.destination==='driftveil-approach'&&value(16527)<1||r.plan.destination==='cold-storage-front'&&value(16527)===1);
     departures.clear();departures.restore(carry,native.zone,native);
   }
   function advanceRoute4Friend(){
@@ -133,7 +142,7 @@
   }
   function fade(to,frames=8,color='#000'){
     let cover=$('fieldFade');if(!cover){cover=document.createElement('div');cover.id='fieldFade';cover.style.cssText='position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0';document.body.append(cover);}
-    const revision=++fadeRevision;if(to===0)fieldCovered=false;cover.style.background=color;cover.style.transition=`opacity ${frames/30/(window.GameSpeed?.rate||1)}s linear`;cover.style.opacity=String(to);fadeTask=delay(frames).then(()=>{if(revision!==fadeRevision)return;cover.style.transition='none';cover.style.opacity=String(to);fieldCovered=to===1;if(fieldCovered)clearDepartures();});return fadeTask;
+    const revision=++fadeRevision;if(to===0)fieldCovered=false;cover.style.background=color;cover.style.transition=`opacity ${frames/30/(window.GameSpeed?.rate||1)}s linear`;cover.style.opacity=String(to);fadeTask=delay(frames).then(()=>{if(revision!==fadeRevision)return;cover.style.transition='none';cover.style.opacity=String(to);fieldCovered=to===1;if(fieldCovered){window.MistraltonContinuity?.coveredTransition();clearDepartures();}});return fadeTask;
   }
   function showPage(text,speaker=''){
     const d=$('dialogue');$('speakerName').textContent=speaker;$('dialogueTitle').textContent='';$('dialogueText').textContent=text;
@@ -180,19 +189,14 @@
     const say=async i=>{for(const page of messagePages(ORIGINAL_EVENTS.texts[346][i],vm.words))await showPage(page);};
     await say(2);if(await choice(['SÌ','NO'])!==0){await say(8);return false;}
     await say(6);journey.heal();await AudioEngine.playSound(1369);await say(7);await say(8);
-    native.healZone=[8,20,41,65,99].includes(native.zone)?native.zone:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
+    native.healZone=[8,20,41,65,99,109].includes(native.zone)?native.zone:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
   }
   async function cityService(script){
     if(eventRunning||sceneChanging||journey.processing||failed)return;
     eventRunning=true;resetInput();
     try{
       if(script===2100){await healAtCenter();if(native.zone===398&&value(16507)===2)await vm.run(796,6);}
-      else if(script===2101){
-        await showPage('Benvenuto al Pokémon-Market!');
-        let buying=true;while(buying){const i=await choice(['Poké Ball — ₽200','Pozione — ₽300','Annulla']);if(i===2)break;
-          const price=i===0?200:300,have=i===0?state.pokeballs:potions;
-          if(state.money<price){await showPage('Non hai abbastanza denaro.');continue;}if(have>=999){await showPage('La Borsa non può contenerne altri.');continue;}
-          if(await choice(['Acquista','Annulla'])!==0)continue;state.money-=price;if(i===0)state.pokeballs++;else potions++;journey.update();}
+      else if(script===2101){await message(346,13);await message(346,24);
       }else if(script===10100||script===10105){await showPage(ORIGINAL_EVENTS.texts[346][24]);}
       else if(script===10397){await showPage('Non ci sono Doni Segreti da ricevere.');}
       else await showPage('Questo servizio non è disponibile nella demo.');
@@ -236,6 +240,7 @@
       else if(code>=32&&code<=35){dir=code-32;duration=8/30;}
       else if(code>=36&&code<=39){dir=code-36;duration=4/30;}
       else if(code>=76&&code<=79){dir=code-76;distance=1;duration=6/30;}
+      else if(code===171){const effect=window.MistraltonPuzzles?.movement?.(n,code,task.elapsed+dt);if(!effect)throw Error('Unsupported original object movement '+code);duration=effect.duration;n.frame=effect.frame;n.flip=false;}
       else if(code===61){duration=2/30;}
       else if(code===63){duration=8/30;}
       else if(code===69){duration=1/30;if(!task.departure){departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;task.departure=true;}const record=departures.records.get(FieldActorExits.identity(n));if(record&&!record.plan.background&&record.plan.kind!=='path'&&record.plan.kind!=='resident')continue;}
@@ -258,8 +263,8 @@
       if(task.elapsed>=duration){n.jumpLift=0;if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
-  function fieldActors(){return departures.visible(npcs.filter(n=>!n.hidden),player).filter(n=>!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
-  function occupied(x,y){return fieldActors().some(n=>!n.gimmick&&(n.height||0)>=0&&(!window.NativeRails?.has(native.zone)||Math.abs((n.railHeight??0)-(native.railCurrent?.height??0))<1.8)&&NpcWalk.occupies(n,x,y));}
+  function fieldActors(){const actors=npcs.filter(n=>!n.hidden),visible=window.MistraltonContinuity?.visibleActors(actors)||actors;return departures.visible(visible,player).filter(n=>n.exitPlan?.chapter049||n.continuityPlan?.chapter049||window.MistraltonChapter?.zones.includes(n.fieldZone)||[337,198,342,113].includes(n.fieldZone)?(window.MistraltonContinuity?.sameField(n.fieldZone,native.zone)??n.fieldZone===native.zone):!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
+  function occupied(x,y){return fieldActors().some(n=>!n.gimmick&&(window.MistraltonGym?.sameLevel(n)??true)&&((n.height||0)>=0||native.zone===97)&&(!window.NativeRails?.has(native.zone)||Math.abs((n.railHeight??0)-(native.railCurrent?.height??0))<1.8)&&NpcWalk.occupies(n,x,y));}
   function ambientMoving(){const bodies=fieldActors();return npcs.some(n=>bodies.includes(n)&&!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
   function tickAmbient(dt,start){
@@ -270,28 +275,45 @@
     if(!ambientMoving()&&settleWaiters.length){const waiting=settleWaiters;settleWaiters=[];waiting.forEach(done=>done());}
   }
   async function run(entry,bank=data().script){
-    if(eventRunning||failed)return;window.Bicycle?.dismount();eventRunning=true;resetInput();const before=structuredClone(state);
+    if(eventRunning||failed)return;
+    const narrative=bank===data().script&&(data().onEnter?.some(e=>e.entry===entry&&value(e.var)===e.value)||data().triggers?.some(e=>e.script===entry+1&&value(e.var)===e.value));
+    if(narrative&&(window.MistraltonContinuity?.prepareEvent(native.zone,entry+1,npcs)===false||[192,193].includes(native.zone)&&window.MistraltonContinuity?.waitingFor(native.zone,['Komor']))){native.pendingZoneEntry={zone:native.zone,bank,entry};lastTile='';journey.save(true);return;}
+    delete native.pendingZoneEntry;window.Bicycle?.dismount();eventRunning=true;resetInput();const before=structuredClone(state);
     try{warmBank(bank);await settleAmbient();captureActors();journey.save(true);
       await vm.run(bank,entry);native.intro=true;
       if(bank===778&&entry===13&&queued===1){
-        queued=null;const friends=npcs.filter(n=>n.uid===250||n.uid===240);native.zone=317;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);delete native.actors?.[317];
+        queued=null;const friends=npcs.filter(n=>n.uid===250||n.uid===240);native.zone=317;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);delete native.actors?.[317];
         syncActors();npcs.push(...friends);await vm.run(634,0);
+      }
+      // IRBI reserves a one-based entry in the destination map. Finish the
+      // current VM first; keep its promise/input lock through the arrival.
+      for(let chain=0;queued!==null;chain++){
+        if(chain>=5)throw Error('Original reserved-script chain exceeded its limit');
+        const next=queued;queued=null;if(!Number.isInteger(next)||next<1)throw Error('Invalid original reserved script '+next);
+        await vm.run(data().script,next-1);
       }
       if(bank===778&&native.zone===396&&value(16505)===0)await vm.run(792,0);
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
-      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone([8,20,41,65,99].includes(native.healZone)?native.healZone:398,7,13);}
+      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone([8,20,41,65,99,109].includes(native.healZone)?native.healZone:398,7,13);}
       for(let chain=0;chain<5;chain++){if(![9,10].includes(native.zone))break;const next=data().onEnter?.find(e=>value(e.var)===e.value);if(!next||data().script===bank&&next.entry===entry)break;bank=data().script;entry=next.entry;await vm.run(bank,entry);}
-      derivePhase();captureActors();if(native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,29,30,31,32,33,34,35,38,40,41,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
+      derivePhase();captureActors();if(window.MistraltonChapter?.zones.includes(native.zone)||native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,29,30,31,32,33,34,35,38,40,41,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
-      failed=error;console.error(error);$('world').dataset.eventError=error.message;
+      queued=null;reservedLiftArrival=null;failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
       state.checkpoint=before;await showPage('La scena originale non può proseguire: '+error.message);
-    }finally{eventRunning=false;
+    }finally{eventRunning=false;if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
     }
   }
   async function command(c,a,v,m){
     const textBank=m.bank===862?283:ORIGINAL_EVENTS.zones[Object.keys(ORIGINAL_EVENTS.zones).find(z=>ORIGINAL_EVENTS.zones[z].script===m.bank)]?.text;
+    if(reservedLiftArrival===native.zone&&['NativeOpcode401','NativeOpcode402'].includes(c.name)){
+      // 394/395 initialize the destination platform under opaque cover. Reveal
+      // that prepared pose before its continuous 55→50 or−5→0 arrival motion.
+      await renderer.prepareScene?.();await fade(0,8);reservedLiftArrival=null;
+    }
+    if(window.MistraltonGym&&await MistraltonGym.command(c.name,a,v,m))return true;
+    if(window.MistraltonPuzzles&&await MistraltonPuzzles.command(c.name,a,v,m))return true;
     switch(c.name){
       case 'ActorPauseAll':case 'ActorUnlockAll':case 'RTFinishSubEvents':case 'FieldClose':case 'FieldOpen':case 'InputWaitLast':case 'MsgWaitAdvance':case 'MsgActorClose':case 'MsgSystemClose':case 'MsgWinCloseAll':case 'MsgWinCloseNo':case 'MsgPlaceSignClose':break;
       case 'MsgActor':case 'MsgActorEx':case 'MsgActorVersioned':case 'ActorMsgVersioned':await message(a[0]===1024?textBank:v[0],v[1],m);break;
@@ -304,12 +326,21 @@
       case 'CallPokeNameInput':m.set(a[0],await nickname(v[1]));break;
       case 'PokePartyGetParam':m.set(a[0],state.party[v[1]].nickname?1:0);break;
       case 'PokePartyAdd':{const name=m.host.speciesName(v[1]);if(state.party.length>=6){m.set(a[0],0);break;}if(!state.starter)state.starter=name;state.party.push(journey.record(newStoryMon(name,v[3]),OPENING_DATA[name].growth[v[3]]));StoryState.register(state,name,true);journey.displayPartner();m.set(a[0],1);break;}
-      case 'StriatonWord86':m.words[a[0]]={9:'Fuoco',10:'Acqua',11:'Erba'}[v[1]]||String(v[1]);break;
+      case 'StriatonWord86':m.words[a[0]]=['Normale','Lotta','Volante','Veleno','Terra','Roccia','Coleottero','Spettro','Acciaio','Fuoco','Acqua','Erba','Elettro','Psico','Ghiaccio','Drago','Buio'][v[1]]||String(v[1]);break;
       case 'BadgeCheck':m.set(a[0],native.badges?.includes(v[1])?1:0);break;
       case 'BadgeSet':native.badges??=[];if(!native.badges.includes(v[0]))native.badges.push(v[0]);break;
       case 'BadgeRegisterParty':native.badgeTeams??={};native.badgeTeams[v[0]]=state.party.map(p=>p.name);break;
       case 'TrainerSetDefeated':native.trainerWins??=[];if(!native.trainerWins.includes(v[0]))native.trainerWins.push(v[0]);break;
       case 'GymCurtainInit':native.gymCurtains=v[0];break;
+      case 'NativeOpcode196':if(queued!==null&&[97,98].includes(v[0])){await fade(1,8);reservedLiftArrival=v[0];}native.clayHeight=v[2]<<16>>16;await changeZone(v[0],v[1],v[3]);facing=frames[v[4]]??facing;break;
+      case 'NativeOpcode223':{const list=v[0]===1?state.dex.caught:state.dex.seen;m.set(a[2],list.some(name=>GEN5.dex.species.get(name).num===v[1])?1:0);break;}
+      case 'NativeOpcode221':{const list=v[0]===1?state.dex.caught:state.dex.seen;m.set(a[1],new Set(list.map(name=>GEN5.dex.species.get(name).num)).size);break;}
+      case 'NativeOpcode466':native.pokedexForms=true;break;
+      case 'NativeOpcode254':m.set(a[0],state.party[v[1]]?GEN5.dex.species.get(state.party[v[1]].name).num:0);break;
+      case 'NativeOpcode263':{const selected=window.NativeUI?.chooseParty?await NativeUI.chooseParty():await choice([...state.party.map(p=>p.nickname||p.name),'Annulla']),valid=Number.isInteger(selected)&&selected>=0&&selected<state.party.length;m.set(a[0],valid?1:0);if(valid)m.set(a[1],selected);break;}
+      case 'NativeOpcode277':m.set(a[0],state.party[v[2]]?.pp.some(x=>x.id===v[1])?1:0);break;
+      case 'NativeOpcode566':{const p=state.party[v[1]];if(!p||!MISTRALTON_DATA.hiddenPowerCompatibility[p.name]){m.set(a[0],65535);break;}const iv=p.ivs||{},stats=['hp','atk','def','spe','spa','spd'],bits=stats.reduce((n,k,i)=>n+(((iv[k]??31)&1)<<i),0);m.set(a[0],Math.floor(bits*15/63)+1);break;}
+      case 'WordSetTypeName':m.words[a[0]]=['Normale','Lotta','Volante','Veleno','Terra','Roccia','Coleottero','Spettro','Acciaio','Fuoco','Acqua','Erba','Elettro','Psico','Ghiaccio','Drago','Buio'][v[1]]||String(v[1]);break;
       case 'NativeOpcode34':m.set(a[0],0);break;
       case 'NativeOpcode120':m.set(a[0],window.Bicycle?.mounted()?1:0);break;
       case 'NativeOpcode595':native.chapterCameraZoom=v;break;
@@ -369,12 +400,17 @@
       case 'PokePartyIsFullPP':m.set(a[0],journey.unpack(state.party[v[1]]).moves.every(move=>move.left===move.pp)?1:0);break;
       case 'PokePartyGetCount':m.set(a[0],v[1]===2?state.party.filter(p=>p.hp>0).length:state.party.length);break;
       case 'TrainerCardGetSex':m.set(a[0],0);break;
-      case 'ActorCmdExec':move(v[0],ORIGINAL_EVENTS.scripts[m.bank].movements[a[1]]);break;
+      case 'ActorCmdExec':{const n=actor(v[0]),sequence=ORIGINAL_EVENTS.scripts[m.bank].movements[a[1]];
+        if(native.zone===195&&n?.model===182&&sequence.some(([op])=>op===184||op===185)){
+          if(sequence.some(([op])=>op===185)){if(triadCoverMode!=='hide'){await fade(1,4);triadCoverMode='hide';}n.hidden=true;move(v[0],sequence.filter(([op])=>op!==185&&op!==69));}
+          else{if(triadCoverMode==='reveal'){await renderer.prepareScene?.();await fade(0,4);triadCoverMode=null;}move(v[0],sequence.filter(([op])=>op!==184));}
+        }else if(!n||!window.MistraltonContinuity?.startExitMotion(n,native.zone,a[1]))move(v[0],sequence);break;}
+
       case 'ActorCmdWait':await Promise.all(motions.map(t=>t.promise));break;
       case 'ActorSetGPos':{const n=actor(v[0]),before=n&&{...n};if(n)Object.assign(n,world(v[1],v[3]));face(v[0],v[4]);if(n&&v[0]!==255&&renderer.hasPresentedActor?.(n))departures.preserve([before],[n],{covered:fieldCovered,sameField:true});break;}
       case 'ActorSetEyeToEye':{const n=actor(currentActor);if(n){const dx=player.x-n.x,dy=player.y-n.y;face(currentActor,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0);}break;}
-      case 'ActorAdd':{const record=data().actors.find(n=>n.id===v[0]);if(record&&!actor(v[0])){const n=putActor(record),arriving=native.zone===329&&v[0]===14;if(arriving)Object.assign(n,{x:-404.5,y:-313.5,exitClip:[-1,0,0,-406.4]});await renderer.prepareScene?.();if(arriving){move(n.uid,[[10,17]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));delete n.exitClip;}}if(m.bank===304&&v[0]===19)await fade(0,4,'#fff');break;}
-      case 'ActorDelete':{if(m.bank===304&&v[0]===17)await fade(1,4,'#fff');const n=actor(v[0]);if(n){if(native.zone===90)n.leavingGate=true;if(native.zone===62&&n.name==='Belle')native.flags=native.flags.filter(f=>f!==561);departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;await departures.wait(n);const index=npcs.indexOf(n);if(index>=0)npcs.splice(index,1);}break;}
+      case 'ActorAdd':{const record=data().actors.find(n=>n.id===v[0]);if(record&&!actor(v[0])){if(native.zone===195&&record.model===182&&triadCoverMode!=='reveal'){await fade(1,4);triadCoverMode='reveal';}const n=putActor(record),arriving=native.zone===329&&v[0]===14;if(arriving)Object.assign(n,{x:-404.5,y:-313.5,exitClip:[-1,0,0,-406.4]});await renderer.prepareScene?.();if(arriving){move(n.uid,[[10,17]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));delete n.exitClip;}}if(m.bank===304&&v[0]===19)await fade(0,4,'#fff');break;}
+      case 'ActorDelete':{if(m.bank===304&&v[0]===17)await fade(1,4,'#fff');const n=actor(v[0]);if(n){if(native.zone===90)n.leavingGate=true;if(native.zone===62&&n.name==='Belle')native.flags=native.flags.filter(f=>f!==561);departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;await departures.wait(n);const index=npcs.indexOf(n);if(index>=0)npcs.splice(index,1);}if(triadCoverMode==='hide'&&!npcs.some(n=>n.model===182)){await fade(0,4);triadCoverMode=null;}break;}
       case 'ActorNew':if(!actor(v[3])){
         const arriving=native.zone===62&&v[3]===251&&v[4]===134,n=putActor({id:v[3],model:v[4],x:v[0],z:v[1],direction:v[2],script:2000,...(arriving?{y:65536}:{})});
         // The HD-2D camera sees the DS spawn tile. Enter through the southern
@@ -401,25 +437,26 @@
       case 'RTGetTextFile':m.set(a[0],textBank);break;
       case 'RTCallGlobal':{
         if(v[0]===10456){const item=value(32776),count=value(32777);if(!ORIGINAL_EVENTS.itemNames[item])throw Error('Unknown gift item '+item);const added=journey.addItem(item,count);m.set(32778,added?1:0);await showPage(added?'Hai ricevuto '+ORIGINAL_EVENTS.itemNames[item]+'!':'La Borsa è piena.');break;}
-        if([10394,10395,10396].includes(v[0])){native.healZone=[8,20,41,65,99].includes(native.zone)?native.zone:398;break;}
-        if(v[0]===10110){await healAtCenter();break;}
-        if(![2800,2801,2805,2806,2807].includes(v[0]))throw Error('Global script outside opening '+v[0]);
+        if([10394,10395,10396].includes(v[0])){native.healZone=[8,20,41,65,99,109].includes(native.zone)?native.zone:398;break;}
+        if(v[0]===10110){if(window.MistraltonServices)await MistraltonServices.open({journey,native,stock:value(32768),type:value(32769),choice,showPage,playSound:id=>AudioEngine.playSound(id)});else await healAtCenter();break;}
+        if(v[0]===2814)window.MistraltonServices?.install(ORIGINAL_EVENTS);
+        if(![2800,2801,2805,2806,2807,2814].includes(v[0]))throw Error('Global script outside opening '+v[0]);
         const child=new FieldEventVM(ORIGINAL_EVENTS,native,m.host);child.words=m.words;await child.run(862,v[0]-2800);break;
       }
       case 'NativeOpcode582':m.set(a[0],0);break; // No Geonet registration in this offline chapter.
       case 'ItemCheckSpace':m.set(a[2],journey.itemCount(v[0])+v[1]<=999?1:0);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],[442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0);break;
+      case 'ItemGetPocket':m.set(a[1],window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id=({...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id=({...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -446,7 +483,7 @@
       case 'CMD_1ad':case 'CMD_1af':fade(0);break;
       case 'CMD_1ae':fade(1);break;
       case 'BGMPlay':native.music=v[0];AudioEngine.setScene(v[0]);break;
-      case 'BGMChangeMap':native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);break;
+      case 'BGMChangeMap':native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);break;
       case 'SEPlay':case 'MEPlay':soundTask=AudioEngine.playSound(v[0]);break;
       case 'SEWait':case 'MEWait':await soundTask;break;
       case 'PVPlay':soundTask=AudioEngine.cry(v[0]);break;
@@ -484,7 +521,10 @@
     panel.dataset.participants=String(pictures.length);document.body.append(panel);$('world').dataset.phone=String(id);await fade(0);
     // Reserve the actual message window, including touch controls and rotation.
     const fitPortraits=()=>{const dialog=$('dialogue');if(!dialog.open)return;const css=getComputedStyle(panel),rows=Math.ceil(pictures.length/2),space=dialog.getBoundingClientRect().top-parseFloat(css.paddingTop)-8-(rows-1)*parseFloat(css.rowGap);panel.style.gridTemplateRows=`repeat(${rows},minmax(0,${Math.max(0,Math.min(192,space/rows))}px))`;};
-    phoneLayout=fitPortraits;const layoutObserver=new ResizeObserver(fitPortraits);layoutObserver.observe($('dialogue'));addEventListener('resize',fitPortraits);
+    phoneLayout=fitPortraits;const layoutObserver=new ResizeObserver(fitPortraits);layoutObserver.observe($('dialogue'));
+    // Moving the touch controls into a modal changes its bottom/class without
+    // resizing the message canvas. Refit before paint on those changes too.
+    const placementObserver=new MutationObserver(fitPortraits);placementObserver.observe($('dialogue'),{attributes:true,attributeFilter:['class','style','open']});addEventListener('resize',fitPortraits);
     let talker=-1,frame=0;const clock=setInterval(()=>{frame++;pictures.forEach((p,i)=>{const blink=frame%28===26?1:frame%28===27?2:0;const mouth=i===talker?[0,1,2,1][frame%4]:0;p.image.src=portraits[p.name][blink*3+mouth];p.tile.classList.toggle('speaking',i===talker);});},1000/15);
     try{
       for(const [op,face,param] of call.commands){
@@ -492,23 +532,25 @@
         if(op===1){talker=face;for(const page of messagePages((id===4?NIMBASA_PHONE.text:id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts)[param],m.words))await showPage(page,pictures[face].name);}
         else if(op===2)await delay(param);else if(op===3)soundTask=AudioEngine.playSound(param);else if(op===4)await soundTask;else throw Error('Unknown phone command '+op);
       }
-    }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
+    }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function changeZone(zone,x,z){
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
     if(SceneCamera.tracks(OPENING_ASSETS.scenes[zoneScenes[zone]])){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
-    captureActors();native.zone=zone;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();warpCooldown=.8;lastTile='';applyRoom();
+    captureActors();native.zone=zone;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
     for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
-    if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;derivePhase();
+    if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;if(zone===107)native.mistralton=true;derivePhase();
     captureActors();await renderer.prepareScene?.();if(restoreField)await fade(0,8);
   }
   const warpDirections={1:1,2:0,3:3,4:2};
+  const warps=(zone=native.zone)=>window.MistraltonPuzzles?.warps(zone,ORIGINAL_EVENTS.zones[zone]?.warps||[])||ORIGINAL_EVENTS.zones[zone]?.warps||[];
   async function enterWarp(w){
-    if(w.rail||ORIGINAL_EVENTS.zones[w.zone]?.warps[w.warp]?.rail)return enterRailWarp(w);
+    if(w.rail||warps(w.zone)[w.warp]?.rail)return enterRailWarp(w);
+    const caveEntry=([194,107].includes(native.zone)&&w.zone===195||native.zone===321&&w.zone===324)?{zone:native.zone,warp:warps().findIndex(r=>r.zone===w.zone&&r.warp===w.warp&&r.x===w.x&&r.z===w.z)}:null;
     sceneChanging=true;resetInput();
     try{
-      const dest=ORIGINAL_EVENTS.zones[w.zone],dw=dest.warps[w.warp],out=warpDirections[dw.a],inward=out^1;
+      const dw=warps(w.zone)[w.warp];if(!dw)throw Error('Destinazione non disponibile');const out=warpDirections[dw.a],inward=out^1;
       await settleAmbient();
       const [ox,oz]=origin(),sourceX=w.x/16-ox,sourceZ=w.z/16-oz;
       if(fieldModels?.find(1,sourceX,sourceZ)){
@@ -522,7 +564,7 @@
       if(door!==null){await fieldModels.play(door,0);await fieldModels.wait(door);}
       move(255,[[8+inward,1]]);await fade(0,8);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
       if(door!==null){await fieldModels.play(door,1);await fieldModels.wait(door);fieldModels.release(door);}
-      sceneChanging=false;warpCooldown=.8;
+      sceneChanging=false;warpCooldown=.8;if(caveEntry&&caveEntry.warp>=0)native.escapeRopeEntry=caveEntry;
       if(w.zone===319){journey.save(true);return;}
       const next=data().onEnter?.find(e=>value(e.var)===e.value);
       if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);
@@ -532,7 +574,7 @@
   async function enterRailWarp(w){
     sceneChanging=true;resetInput();
     try{
-      const dest=ORIGINAL_EVENTS.zones[w.zone],dw=dest?.warps[w.warp];if(!dw)throw Error('Destinazione non disponibile');
+      const dw=warps(w.zone)[w.warp];if(!dw)throw Error('Destinazione non disponibile');
       await settleAmbient();await fade(1,8);
       let p,out,landing;
       if(dw.rail){p=NativeRails.warp(w.zone,dw);out=p.out;landing=NativeRails.landing(w.zone,dw);native.railCurrent={zone:w.zone,line:p.line,height:p.height};}
@@ -546,17 +588,49 @@
       if(next&&ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(next.entry))await run(next.entry);else journey.save(true);
     }catch(error){sceneChanging=false;failed=error;$('world').dataset.eventError=error.message;console.error(error);await showPage('Il passaggio non è riuscito. Ricarica la partita dal salvataggio precedente.');}
   }
-  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(window.DriftveilChapter?.zones.includes(native.zone)?'Puoi proseguire attraverso la palestra di Camelia e il Percorso 5 fino a Libecciopoli. Musical, impianti sportivi, lotte a rotazione e gli eventi dopo l’arrivo proseguiranno in un capitolo successivo.':window.NimbasaChapter?.zones.includes(native.zone)?'Puoi proseguire verso la palestra di Camelia, il Percorso 5 e Libecciopoli.':window.CasteliaChapter?.zones.includes(native.zone)?'Questa parte della città o del viaggio proseguirà nel prossimo capitolo. Puoi continuare gli eventi di Austropoli, la palestra e la sfida di Belle al varco per il Percorso 4.':native.zone===16?'Le altre case di Zefiropoli non fanno parte di questo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
+  async function useEscapeRope(){
+    const entry=native.escapeRopeEntry,door=entry&&warps(entry.zone)[entry.warp];
+    const cave=native.zone===324?324:[195,196,197].includes(native.zone)?195:null,exterior=cave===324?[321]:[194,107];
+    if(eventRunning||sceneChanging||failed||battling||journey.processing||window.MistraltonPuzzles?.busy||!cave||!exterior.includes(entry?.zone)||door?.zone!==cave||!journey.itemCount(78))return false;
+    sceneChanging=true;resetInput();
+    try{await settleAmbient();await fade(1,8);const point=warpPoint(door,entry.zone),inward=warpDirections[door.a]^1;await changeZone(entry.zone,Math.floor(point.x),Math.floor(point.z));face(255,inward);move(255,[[8+inward,1]]);await fade(0,8);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));journey.consumeItem(78);warpCooldown=.8;sceneChanging=false;journey.save(true);return true;}
+    finally{sceneChanging=false;resetInput();}
+  }
+  async function useFly(index,destination){
+    const fly=window.MistraltonFly,unavailable=()=>eventRunning||sceneChanging||failed||battling||journey.processing||window.MistraltonPuzzles?.busy||window.MistraltonGym?.busy||window.DriftveilGym?.busy||!fly?.canUse(state,index);
+    if(unavailable())return false;
+    if(destination===undefined)destination=await TownMap.open({fly:true});
+    if(destination==null||unavailable())return false;
+    const target=fly.destinations(state).find(d=>d.zone===(typeof destination==='number'?destination:destination.zone));
+    if(!target||!zoneScenes[target.zone])return false;
+    const mon=journey.unpack(state.party[index]);sceneChanging=true;resetInput();
+    try{
+      await settleAmbient();await fly.play(mon);await fade(1,8);window.Bicycle?.dismount();
+      const [x,y,z]=target.fly,rail=window.NativeRails?.has(target.zone),point=rail?NativeRails.position(target.zone,x,y,z):null;
+      if(point)native.railCurrent={zone:target.zone,line:x,height:point.height};else delete native.railCurrent;
+      await changeZone(target.zone,point?point.x-.5:x,point?point.z-.5:z);face(255,1);
+      if(point){const at=NativeRails.locate(target.zone,player.x,player.y,native.railCurrent);if(at)native.railCurrent={zone:target.zone,...at};}
+      renderer.center=[player.x,player.y+1.5];renderer.elevation=renderer.scene.railZone?renderer.groundHeight(player.x,player.y):0;
+      await fade(0,8);sceneChanging=false;warpCooldown=.8;captureActors();journey.save(true);return true;
+    }finally{sceneChanging=false;resetInput();}
+  }
+  async function chapterBoundary(){if(eventRunning)return;eventRunning=true;resetInput();try{await showPage(window.MistraltonChapter?.zones.includes(native.zone)?'Puoi completare il Deposito Frigo, la palestra di Rafan e attraversare il Percorso 6 e la Cava Pietrelettrica fino a Ponentopoli. Questo accesso proseguirà in una tappa successiva.':window.DriftveilChapter?.zones.includes(native.zone)?'Puoi proseguire attraverso la palestra di Camelia e il Percorso 5 fino a Libecciopoli. Musical, impianti sportivi, lotte a rotazione e gli eventi dopo l’arrivo proseguiranno in un capitolo successivo.':window.NimbasaChapter?.zones.includes(native.zone)?'Puoi proseguire verso la palestra di Camelia, il Percorso 5 e Libecciopoli.':window.CasteliaChapter?.zones.includes(native.zone)?'Questa parte della città o del viaggio proseguirà nel prossimo capitolo. Puoi continuare gli eventi di Austropoli, la palestra e la sfida di Belle al varco per il Percorso 4.':native.zone===16?'Le altre case di Zefiropoli non fanno parte di questo capitolo.':'Questa parte del viaggio sarà disponibile nel prossimo capitolo.');}finally{eventRunning=false;}}
+  async function enterFieldBoundary(zone,x,y){
+    sceneChanging=true;resetInput();const previousFacing=facing;
+    try{await settleAmbient();await fade(1,6);await changeZone(zone,x+783.5,y+751.5);facing=previousFacing;await fade(0,6);sceneChanging=false;warpCooldown=.8;captureActors();journey.save(true);const next=data().onEnter?.find(e=>value(e.var)===e.value);if(next)await run(next.entry);}
+    catch(error){sceneChanging=false;failed=error;$('world').dataset.eventError=error.message;console.error(error);await showPage(error.message);}
+  }
   function tryWarp(dx,dz,x,z){
     if(eventRunning||sceneChanging||journey.processing||warpCooldown||failed)return false;
     const dir=Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0,[ux,uz]=directions[dir];
+    if(window.MistraltonChapter?.globalZones.includes(native.zone)){const next=MistraltonChapter.fieldAt(x,z);if((native.zone===96&&next===331||native.zone===331&&next===96)&&!MistraltonChapter.blockedAt(next,x,z))return enterFieldBoundary(next,x,z);}
     if(window.NativeRails?.has(native.zone)){
-      for(const w of data().warps){if(!w.rail)continue;const p=NativeRails.warp(native.zone,w),cx=p.x-origin()[0],cz=p.z-origin()[1],before=(player.x-cx)*p.out.x+(player.y-cz)*p.out.z,after=(x-cx)*p.out.x+(z-cz)*p.out.z,lateral=Math.abs((player.x-cx)*p.out.z-(player.y-cz)*p.out.x),span=w.b===2?w.width:w.height;
+      for(const w of warps()){if(!w.rail)continue;const p=NativeRails.warp(native.zone,w),cx=p.x-origin()[0],cz=p.z-origin()[1],before=(player.x-cx)*p.out.x+(player.y-cz)*p.out.z,after=(x-cx)*p.out.x+(z-cz)*p.out.z,lateral=Math.abs((player.x-cx)*p.out.z-(player.y-cz)*p.out.x),span=w.b===2?w.width:w.height;
         if(dx*p.out.x+dz*p.out.z>.1&&before>=-3.5&&before<.5&&lateral<span*.5+.15){if(!ORIGINAL_EVENTS.zones[w.zone]){if(after< -1.25)continue;warpCooldown=.8;return chapterBoundary();}const threshold=-(NativeRails.landing(native.zone,w).distance-.08);if(after<threshold)continue;return enterRailWarp(w);}
       }
     }
     if(!window.PINWHEEL_ASSETS&&native.zone===16&&dir===2&&x< -175.5&&player.x>=-175.5){warpCooldown=.8;return chapterBoundary();}
-    for(const w of data().warps){
+    for(const w of warps()){
       if(w.rail)continue;
       if(native.zone===90&&w.zone===62&&value(16578)===0)continue;
       if(native.zone===18&&w.zone===19&&value(16522)!==7)continue;
@@ -575,23 +649,23 @@
     eventRunning=true;resetInput();
     const say=async key=>{for(const page of messagePages(trainer.messages[key]||'',{}))if(page)await showPage(page,trainer.name);};
     try{await settleAmbient();captureActors();journey.save(true);
-      if(native.trainerWins?.includes(id)){await say(2);if(id===546){journey.heal();await showPage('I tuoi Pokémon sono di nuovo in piena forma!');}return;}
+      if(native.trainerWins?.includes(id)){await say(2);if([150,546].includes(id)){journey.heal();await showPage('I tuoi Pokémon sono di nuovo in piena forma!');}return;}
       if(trainer.battleStyle===1&&state.party.filter(p=>p.hp>0).length<2){await showPage('Per una lotta in doppio servono almeno due Pokémon in grado di lottare.');return;}
       n.emote='!';await delay(8);n.emote=null;const dir=Math.abs(player.x-n.x)>Math.abs(player.y-n.y)?player.x>n.x?3:2:player.y>n.y?1:0;face(n.uid,dir);const [dx,dy]=directions[dir],distance=Math.max(Math.abs(player.x-n.x),Math.abs(player.y-n.y)),lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx),steps=lateral<.35?Math.max(0,Math.floor(distance)-1):0;if(steps){move(n.uid,[[8+dir,steps]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));}await say(0);
       const completed=new Promise(resolve=>pendingBattle=resolve);rival=trainer.name;
       try{await startBattle(true,{story:trainer.name,trainerId:id,aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}
-      if(native.won){native.trainerWins??=[];if(!native.trainerWins.includes(id))native.trainerWins.push(id);if(id===546){journey.heal();await showPage('I tuoi Pokémon sono di nuovo in piena forma!');}}
-      else{journey.heal();await changeZone([8,20,41,65,99].includes(native.healZone)?native.healZone:398,7,13);}
+      if(native.won){native.trainerWins??=[];if(!native.trainerWins.includes(id))native.trainerWins.push(id);if([150,546].includes(id)){journey.heal();await showPage('I tuoi Pokémon sono di nuovo in piena forma!');}}
+      else{journey.heal();await changeZone([8,20,41,65,99,109].includes(native.healZone)?native.healZone:398,7,13);}
     }catch(error){failed=error;console.error(error);$('world').dataset.eventError=error.message;await showPage(error.message);}
     finally{eventRunning=false;n.emote=null;derivePhase();captureActors();if(!failed)journey.save(true);}
   }
   async function routeItem(n){
-    if(eventRunning||!n)return;const item=window.DRIFTVEIL_DATA?.items?.[n.script]||window.NIMBASA_DATA?.items?.[n.script]||window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
+    if(eventRunning||!n)return;const item=window.MISTRALTON_DATA?.items?.[n.script]||window.DRIFTVEIL_DATA?.items?.[n.script]||window.NIMBASA_DATA?.items?.[n.script]||window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
     eventRunning=true;try{if(!journey.addItem(item.id,item.count)){await showPage('La Borsa è piena.');return;}if(native.zone===319){native.routeItems??=[];native.routeItems.push(n.uid);}native.collectedItems??={};native.collectedItems[native.zone]??=[];native.collectedItems[native.zone].push(n.uid);const record=data().actors.find(a=>a.id===n.uid);if(record?.flag&&!has(record.flag))native.flags.push(record.flag);n.hidden=true;await showPage('Hai trovato '+ORIGINAL_EVENTS.itemNames[item.id]+'!');captureActors();journey.save(true);}finally{eventRunning=false;}
   }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
-    const visible=fieldActors().filter(n=>n.fieldZone===native.zone&&Number.isFinite(n.script));
+    const visible=fieldActors().filter(n=>n.fieldZone===native.zone&&Number.isFinite(n.script)&&(window.MistraltonGym?.sameLevel(n)??true));
     if(window.NativeRails?.has(native.zone)){
       const n=visible.filter(n=>!n.gimmick&&Math.abs((n.railHeight??n.height)-(native.railCurrent?.height??n.height))<1.8).map(n=>({n,along:(n.x-player.x)*dx+(n.y-player.y)*dz,lateral:Math.abs((n.x-player.x)*dz-(n.y-player.y)*dx)})).filter(p=>p.along>.1&&p.along<1.9&&p.lateral<.9).sort((a,b)=>a.along-b.along)[0]?.n;
       if(n)return {kind:'actor',n,script:n.script};
@@ -617,37 +691,46 @@
    }else{await showPage('Questa è la Pensione Pokémon. Vuoi affidarci un Pokémon?');if(await choice(['SÌ','NO'])!==0)return;const index=await choice([...state.party.map(p=>p.nickname||p.name),'Annulla']);if(index>=state.party.length)return;if(state.party.length<2||state.party.filter((p,i)=>i!==index&&p.hp>0).length===0){await showPage('Devi tenere con te almeno un Pokémon in grado di lottare.');return;}const p=state.party.splice(index,1)[0];native.daycare={pokemon:p,level:p.level,distance:0};journey.displayPartner();await showPage('Ci prenderemo cura di '+(p.nickname||p.name)+'. Torna a trovarci!');}
    }finally{eventRunning=false;journey.update();journey.save(true);}}
   async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
-  function interact(){if(eventRunning||sceneChanging||vm.running||failed||window.DriftveilGym?.busy)return;if(window.DriftveilGym?.interact())return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===96&&t.n?.name==='Komor'&&t.n.uid===253&&t.script===2000){vm.words[0]=state.playerName||'Alcide';return neighborMessage(101,5);}if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155,29,326,63,329].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle'||native.zone===96&&t.script===21)return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41,65,99].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed||window.MistraltonPuzzles?.busy||window.MistraltonGym?.busy||window.DriftveilGym?.busy)return;if(window.MistraltonPuzzles?.interact())return;if(window.MistraltonGym?.interact())return;if(window.DriftveilGym?.interact())return;const t=target();if(t){currentActor=t.n?.uid;if(native.zone===96&&t.n?.name==='Komor'&&t.n.uid===253&&t.script===2000){vm.words[0]=state.playerName||'Alcide';return neighborMessage(101,5);}if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if([319,7,152,321,322,324,18,154,155,29,326,63,329,97,191,192,193,331,195,196,197].includes(native.zone)&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle'||native.zone===96&&t.n?.uid===28&&t.script===21)return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if([398,8,20,41,65,99,109].includes(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
   function step(dt,moved,distance=0){window.DriftveilGym?.tick(dt);if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
     if(window.SpeciesStudioMode||failed)return;
     if(window.NativeRails?.has(native.zone)){const hint=native.railCurrent?.zone===native.zone?native.railCurrent:{},at=NativeRails.locate(native.zone,player.x,player.y,hint);if(at)native.railCurrent={zone:native.zone,...at};}
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
-    try{departures.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    const held=!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
+    try{departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
+    window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
+    const held=!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     if(!native.intro&&renderer.ready){run(4,782);return;}
+    const pending=native.pendingZoneEntry;if(pending){const valid=pending.zone===native.zone&&pending.bank===data().script&&Number.isInteger(pending.entry)&&ORIGINAL_EVENTS.scripts[pending.bank]?.supportedEntries.includes(pending.entry)&&(data().onEnter?.some(e=>e.entry===pending.entry&&value(e.var)===e.value)||data().triggers?.some(e=>e.script===pending.entry+1&&value(e.var)===e.value));if(!valid)delete native.pendingZoneEntry;else if(!window.MistraltonContinuity?.waitingFor(native.zone,['Komor'])&&window.MistraltonContinuity?.prepareEvent(native.zone,pending.entry+1,npcs)!==false){run(pending.entry,pending.bank);return;}}
+
+    if(window.MistraltonChapter){const next=MistraltonChapter.zoneAt(native.zone,player);if(next!==native.zone){native.zone=next;native.music=MISTRALTON_FIELD.music(next)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();lastTile='';journey.save(true);return;}}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
     journey.update();if(key!==lastTile){lastTile=key;
-    if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
-    if([16,154].includes(native.zone)&&window.PINWHEEL_ASSETS){const at=PINWHEEL_ASSETS.scenes[154].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?154:16;if(next!==native.zone){native.zone=next;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
-    if([6,321].includes(native.zone)&&window.ROUTE3_ASSETS){const at=ROUTE3_ASSETS.scenes[321].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?321:6;if(next!==native.zone){native.zone=next;if(next===321)native.route3=true;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
-    if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
-    if(native.zone===6&&p.z>=609){native.zone=319;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
-    if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
-    for(const trigger of data().triggers)if(!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
+    if(native.zone===317&&p.z<=671){native.zone=397;native.arrived=true;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if([16,154].includes(native.zone)&&window.PINWHEEL_ASSETS){const at=PINWHEEL_ASSETS.scenes[154].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?154:16;if(next!==native.zone){native.zone=next;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
+    if([6,321].includes(native.zone)&&window.ROUTE3_ASSETS){const at=ROUTE3_ASSETS.scenes[321].permissionGrids.some(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16);const next=at?321:6;if(next!==native.zone){native.zone=next;if(next===321)native.route3=true;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}}
+    if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if(native.zone===6&&p.z>=609){native.zone=319;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
+    if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
+    // Native type6 uses the separate header-gated query2162780/2162830.
+    // It is not an unconditional footstep script (Cold Storage contains2000).
+    for(const trigger of data().triggers)if(trigger.type!==6&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
       // Recheck a stationary player without locking input while they arrive.
       if(native.zone===317&&trigger.script===5){const bodies=fieldActors();if(![3,4].every(id=>{const n=actor(id);return n&&!n.hidden&&bodies.includes(n);})){lastTile='';return;}}
       if(native.zone===90&&trigger.script===4&&departures.records.has('Komor')||native.zone===96&&trigger.script===8&&departures.records.has('Komor')){lastTile='';return;}
-      run(trigger.script-1);return;}}
-    if([319,7,152,321,322,324,18,154,155,29,326,63,329].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||native.trainerWins?.includes(n.script-(n.script>=5000?5000:3000)))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
+      if(window.MistraltonContinuity?.prepareEvent(native.zone,trigger.script,npcs)===false){lastTile='';return;}run(trigger.script-1);return;}}
+    if([319,7,152,321,322,324,18,154,155,29,326,63,329,97,191,192,193,331,195,196,197].includes(native.zone)){const seen=fieldActors().find(n=>{const r=data().actors.find(a=>a.id===n.uid);if(!r||r.type!==1||!(window.MistraltonGym?.sameLevel(n)??true)||native.trainerWins?.includes(n.script-(n.script>=5000?5000:3000)))return false;const [dx,dy]=directions[n.direction],along=(player.x-n.x)*dx+(player.y-n.y)*dy,lateral=Math.abs((player.x-n.x)*dy-(player.y-n.y)*dx);if(along<.5||along>r.p0+.3||lateral>.35)return false;for(let d=.5;d<along;d+=.5)if(blocked(n.x+dx*d,n.y+dy*d))return false;return true;});if(seen){routeTrainer(seen);return;}}
     journey.encounter(dt,moved,distance);
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===99?changeZone(99,7,13):native.healZone===65?changeZone(65,7,13):native.healZone===41?changeZone(41,7,13):native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return window.Bicycle?.mounted()?1012:window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music;},get locked(){return !!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===109?changeZone(109,7,13):native.healZone===99?changeZone(99,7,13):native.healZone===65?changeZone(65,7,13):native.healZone===41?changeZone(41,7,13):native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return window.Bicycle?.mounted()?1012:window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music;},get locked(){return !!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
+  NativeStory.useEscapeRope=useEscapeRope;
+  NativeStory.useFly=useFly;
+  window.MistraltonGym?.restore();window.MistraltonPuzzles?.restore();window.MistraltonContinuity?.enterZone(native.zone,{covered:fieldCovered});
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});
