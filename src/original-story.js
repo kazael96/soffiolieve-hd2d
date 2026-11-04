@@ -710,7 +710,9 @@
     if(native.zone===319&&p.z<=608){native.zone=6;native.striaton=true;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===6&&p.z>=609){native.zone=319;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();journey.save(true);return;}
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
-    for(const trigger of data().triggers)if(!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
+    // Native type6 uses the separate header-gated query2162780/2162830.
+    // It is not an unconditional footstep script (Cold Storage contains2000).
+    for(const trigger of data().triggers)if(trigger.type!==6&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
       // Recheck a stationary player without locking input while they arrive.
