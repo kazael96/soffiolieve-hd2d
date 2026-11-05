@@ -37,13 +37,17 @@ def build_staging():
         shutil.rmtree(resolved)
 
 
-def startup_pack(site, sources=None, filename='assets/field-pack.bin'):
+def startup_pack(site, sources=None, filename='assets/field-pack.bin', strict=False):
     paths=set()
     for name in sources or ['assets/scene.js','assets/sprites.js','opening-assets.js','opening-sprites.js','accumula-assets.js','route2-assets.js','striaton-assets.js','route3-assets.js','pinwheel-assets.js']:
         file=site/name
-        if not file.exists():continue
+        if not file.exists():
+            if strict:raise ValueError(f'Missing pack catalogue: {name}')
+            continue
         match=re.search(r'window\.[A-Z][A-Z0-9_]*\s*=\s*',file.read_text(encoding='utf8'))
-        if not match:continue
+        if not match:
+            if strict:raise ValueError(f'Invalid pack catalogue: {name}')
+            continue
         data=json.JSONDecoder().raw_decode(file.read_text(encoding='utf8')[match.end():])[0]
         def visit(value):
             if isinstance(value,str) and re.search(r'\.png(?:\?|$)',value):paths.add(value.split('?')[0])
@@ -55,11 +59,30 @@ def startup_pack(site, sources=None, filename='assets/field-pack.bin'):
     index={};chunks=[];offset=0
     for name in sorted(paths):
         file=site/name
-        if not file.is_file():continue
+        if not file.is_file():
+            if strict:raise ValueError(f'Missing pack image: {name}')
+            continue
         raw=file.read_bytes();index[name]=[offset,len(raw)];chunks.append(raw);offset+=len(raw)
     header=json.dumps(index,separators=(',',':')).encode()
     dest=site/filename;dest.write_bytes(b'SFP1'+struct.pack('<I',len(header))+header+b''.join(chunks))
     return {'images':len(index),'bytes':dest.stat().st_size}
+
+
+def geographic_packs(site):
+    """Keep chapter051 transport separated by area, including dynamic gym images."""
+    file=site/'opelucid-parts.js'
+    if not file.exists():return {}
+    text=file.read_text(encoding='utf8')
+    match=re.match(r'\s*window\.OPELUCID_PARTS\s*=\s*',text)
+    if not match:raise ValueError('Invalid geographic pack manifest')
+    data=json.JSONDecoder().raw_decode(text[match.end():])[0]
+    result={}
+    for name,part in data['families'].items():
+        # These are source-controlled paths, nevertheless reject escapes before writing.
+        if not re.fullmatch(r'[a-z0-9]+',name) or part['src']!=f'opelucid-{name}-assets.js' or part['pack']!=f'assets/opelucid-{name}-pack.bin':
+            raise ValueError('Invalid geographic pack path')
+        result[name]={'pack':part['pack'],**startup_pack(site,[part['src']],part['pack'],strict=True)}
+    return result
 
 
 def bundle_entries(site):
@@ -106,6 +129,7 @@ def build(archive, target):
         driftveil_pack = startup_pack(site,['driftveil-assets.js'],'assets/driftveil-pack.bin')
         mistralton_pack = startup_pack(site,['mistralton-assets.js'],'assets/mistralton-pack.bin')
         icirrus_pack = startup_pack(site,['icirrus-assets.js'],'assets/icirrus-pack.bin')
+        opelucid_packs = geographic_packs(site)
         for season in range(4):
             if (site / f'field-season-{season}-assets.js').exists():
                 startup_pack(site,[f'field-season-{season}-assets.js'],f'assets/field-season-{season}-pack.bin')
@@ -120,6 +144,8 @@ def build(archive, target):
             if pack.exists():
                 asset_hashes[pack.relative_to(site).as_posix()] = hashlib.sha256(pack.read_bytes()).hexdigest()
         asset_hashes['assets/icirrus-pack.bin'] = hashlib.sha256((site/'assets/icirrus-pack.bin').read_bytes()).hexdigest()
+        for part in opelucid_packs.values():
+            asset_hashes[part['pack']] = hashlib.sha256((site/part['pack']).read_bytes()).hexdigest()
         asset_hashes['assets/mistralton-pack.bin'] = hashlib.sha256((site/'assets/mistralton-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/driftveil-pack.bin'] = hashlib.sha256((site/'assets/driftveil-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/nimbasa-pack.bin'] = hashlib.sha256((site/'assets/nimbasa-pack.bin').read_bytes()).hexdigest()
@@ -135,7 +161,7 @@ def build(archive, target):
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
             'version': '0.50', 'revision': revision,
-            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack},
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(site, target)

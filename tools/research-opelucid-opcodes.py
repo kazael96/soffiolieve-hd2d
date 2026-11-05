@@ -13,10 +13,11 @@ parser.add_argument('rom', type=Path)
 parser.add_argument('opcodes', type=int, nargs='*')
 parser.add_argument('--address', type=lambda s: int(s, 0), action='append', default=[])
 parser.add_argument('--bytes', type=lambda s: int(s, 0), default=384)
+parser.add_argument('--overlay', type=int, action='append', default=[])
 args = parser.parse_args()
 rom = NintendoDSRom.fromFile(args.rom)
 assert rom.idCode == b'IRBI'
-overlays = rom.loadArm9Overlays([10, 21])
+overlays = rom.loadArm9Overlays([10, 21, *args.overlay])
 regions = [(f'overlay{key}', value.ramAddress, value.data) for key, value in overlays.items()]
 regions.append(('arm9', rom.arm9RamAddress, code_decompress(rom.arm9)))
 for name, base, data in regions:

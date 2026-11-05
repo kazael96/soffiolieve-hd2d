@@ -39,3 +39,10 @@ test('the decoded surface cache is bounded and evicted grids decode on demand',(
  for(let i=0;i<90;i++)assert.ok(bounded.sample(10000+i,.5,.5));
  assert.equal(bounded.cacheSize(),64);assert.equal(bounded.sample(first,.5,.5).heightRaw,expected);assert.equal(bounded.cacheSize(),64);
 });
+
+test('multiple loaded chapters share the64 decoded-grid budget and evicted heights remain exact',()=>{
+ const first=Object.keys(data.grids)[0],source=data.grids[first],contexts=[];
+ for(let owner=0;owner<3;owner++){const copy={...data,grids:{}};for(let i=0;i<30;i++)copy.grids[10000+i]=source;const surface=c.window.NativeSurfaces.create(copy);contexts.push(surface);for(let i=0;i<30;i++)assert.ok(surface.sample(10000+i,.5,.5));}
+ assert.ok(contexts.reduce((sum,s)=>sum+s.cacheSize(),0)<=64,'Independent chapter caches exceed shared budget');
+ const expected=api.sample(first,.5,.5).heightRaw;for(const surface of contexts)assert.equal(surface.sample(10000,.5,.5).heightRaw,expected);assert.ok(contexts.reduce((sum,s)=>sum+s.cacheSize(),0)<=64);
+});
