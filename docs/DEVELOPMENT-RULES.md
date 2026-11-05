@@ -13,6 +13,7 @@ Consolidamento richiesto il 29 ottobre 2026. Questi standard valgono per demo e 
 ### A. Continuità degli eventi e degli NPC
 
 - Ogni evento deve dichiarare prerequisiti, attori necessari, posizione iniziale, percorso di uscita, destinazione e prossimo evento. Aggiornare l’inventario narrativo insieme al codice.
+- Quando un cambio coperto aggiorna stagione o topologia, sincronizzare anche i metadati delle mappe percorse dagli NPC fuori scena prima di avviare gli itinerari; mantenere le immagini differite. Verificare la sequenza cambio variante→evento e il filtro degli attori in tutti gli interni del capitolo, non soltanto nelle aree esterne.
 - La destinazione deve essere coerente con il prossimo incontro. Un NPC arrivato resta disponibile nella posizione prevista; non viene ritirato perché fuori camera. Nessuna duplicazione, teletrasporto o sparizione visibile durante i passaggi fra mappe, porte e salvataggi.
 - Collisioni e interazioni seguono il corpo effettivamente presente e il suo movimento. Una futura posizione logica ancora vuota non deve bloccare il giocatore. Un personaggio proiettato da una mappa adiacente non deve eseguire lo script della mappa sbagliata.
 - Un evento che richiede più personaggi parte quando sono effettivamente arrivati. Se il giocatore arriva prima mantiene il controllo; il trigger viene rivalutato anche se resta fermo. Impedire avvii duplicati e sovrapposizioni di script.
@@ -36,10 +37,12 @@ Riferimento corrente: [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md). Dopo il 
 
 ### D. Mosse, Pokémon e reazioni
 
-- Misurare la copertura per coppia specie/forma–mossa, includendo ogni fonte di apprendimento resa disponibile. La priorità iniziale entro il livello 10 è stata ampliata alle mosse della demo: mantenere e aggiornare la [matrice corrente 0.48](SPECIES-MOVES-048.md), 849 coppie su 58 specie e forme predisposte fino al livello 30, distinguendo sempre specie effettivamente ottenibili e verifiche grafiche dai soli controlli numerici. Le matrici precedenti restano riferimenti storici.
+- Misurare la copertura per coppia specie/forma–mossa, includendo ogni fonte di apprendimento resa disponibile. La priorità iniziale entro il livello 10 è stata ampliata alle mosse della demo: mantenere e aggiornare la [matrice corrente 0.49](SPECIES-MOVES-049.md),1760 coppie su85 specie e forme predisposte fino al livello35, distinguendo sempre specie effettivamente ottenibili e verifiche grafiche dai soli controlli numerici. Le matrici precedenti restano riferimenti storici.
 - Animare coerentemente sia la mossa sia il Pokémon che la esegue: corpo, anatomia, punto di emissione/contatto, traiettorie e recupero. Integrare effetti originali, sequenze senza particelle, contesti speciali e movimenti di camera pertinenti.
 - Ogni coreografia e reazione deve funzionare per il giocatore e per l’avversario. Il bersaglio reagisce in modo coerente con impatto, esito, stato e numero dei colpi; distinguere mancato bersaglio, fallimento e mosse rivolte a sé stessi.
 - Conservare danni, precisione, PP, priorità, abilità, stati e altre regole di Pokémon Nero. Nessuna alterazione delle meccaniche per semplificare una coreografia. Una prova di esecuzione senza eccezioni non certifica da sola la fedeltà delle regole.
+
+Richiesta successiva del5 novembre2026: dopo il completamento della storia principale, estendere le coreografie personalizzate alle MN nel mondo di gioco, per ogni specie/forma compatibile, comprese Volo e Surf. Verificare corpo, contatto con il protagonista e il terreno, orientamento, spostamento, partenza/arrivo e uso concreto dell'azione. Un cut-in o un profilo di lotta da soli non completano una coppia specie/forma–MN sul campo. Conservare disponibilità e meccaniche native e una matrice distinta dalle mosse in combattimento.
 
 ### E. Audio e sincronizzazione
 

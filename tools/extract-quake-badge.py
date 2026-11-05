@@ -37,19 +37,24 @@ INSTALLER = """;
 """
 
 
-def export(rom, output, apicula, work_dir):
+def export(rom, output, apicula, work_dir, *, badge='quake'):
+    variants = {
+        'quake': ([(7, 'quakeBadgeM'), (46, 'quakeBadgeF')], 'Medaglia Sisma', 'MISTRALTON_BADGE_ASSETS', 'MistraltonBadgeAssets', 'mistralton-badge-assets.js'),
+        'jet': ([(8, 'jetBadgeM'), (47, 'jetBadgeF')], 'Medaglia Jet', 'ICIRRUS_BADGE_ASSETS', 'IcirrusBadgeAssets', 'icirrus-badge-assets.js'),
+    }
+    effects, label, global_name, api_name, catalog_name = variants[badge]
     rom = ndspy.rom.NintendoDSRom.fromFile(rom)
     if rom.idCode != b'IRBI':
         raise ValueError('Expected Italian Pokemon Black IRBI ROM')
     models = ndspy.narc.NARC(rom.getFileByName('a/1/1/5')).files
     descriptors = ndspy.narc.NARC(rom.getFileByName('a/1/1/7')).files
     data = {
-        'source': 'IRBI a/1/1/7:7,46 + a/1/1/5; native fifth badge receipt',
+        'source': 'IRBI a/1/1/7:' + ','.join(str(i) for i, _ in effects) + ' + a/1/1/5; native ' + badge + ' badge receipt',
         'backgroundSha256': hashlib.sha256(models[16]).hexdigest(),
         'models': {}, 'materialAlpha': {}, 'effects': {}, 'hashes': {},
     }
     report = {'effects': [], 'files': {}}
-    for identifier, name in [(7, 'quakeBadgeM'), (46, 'quakeBadgeF')]:
+    for identifier, name in effects:
         descriptor = struct.unpack('<18H', descriptors[identifier])
         if descriptor[4] != 16 or descriptor[8:12] != (18, 19, 20, 65535):
             raise ValueError('Unexpected badge background or animation descriptor')
@@ -92,15 +97,16 @@ def export(rom, output, apicula, work_dir):
             'descriptor': descriptor, 'background': 'badgeBackground', 'item': name,
             'frames': 361, 'particles': False,
             'descriptorSha256': hashlib.sha256(descriptors[identifier]).hexdigest(),
-            'label': 'Medaglia Sisma',
+            'label': label,
             'adaptation': 'Original models, joint animation and shared background alpha; visibility/pattern and SPL15 are not reconstructed',
         }
         report['effects'].append({'id': identifier, 'item': name, 'members': indices,
                                   'animations': [a.get('name') for a in doc['animations']],
                                   'images': len(doc.get('images', []))})
     output.mkdir(parents=True, exist_ok=True)
-    (output / 'mistralton-badge-assets.js').write_text(
-        'window.MISTRALTON_BADGE_ASSETS=' + json.dumps(data, separators=(',', ':')) + INSTALLER,
+    installer = INSTALLER.replace('MISTRALTON_BADGE_ASSETS', global_name).replace('MistraltonBadgeAssets', api_name)
+    (output / catalog_name).write_text(
+        'window.' + global_name + '=' + json.dumps(data, separators=(',', ':')) + installer,
         encoding='utf8', newline='\n')
     work_dir.mkdir(parents=True, exist_ok=True)
     (work_dir / 'extraction-report.json').write_text(json.dumps(report, indent=2), encoding='utf8')

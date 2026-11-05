@@ -40,9 +40,11 @@ def extract(rom,output,apicula):
             raw_model=bundle[model_start:model_start+u32(bundle,model_start+8)]
             kind=struct.unpack_from('<H',bundle,p+2)[0];mode,unknown,per_set,sets=struct.unpack_from('<4B',bundle,p+16)
             offsets_anim=struct.unpack_from('<4I',bundle,p+20)
-            assert mode==2 and per_set*sets==2
+            assert mode==2 and 1<=per_set*sets<=4
+            assert per_set>=1 and sets>=1
             resources=[];alpha={};frames=[]
-            for ai,ao in enumerate(offsets_anim[:2]):
+            for ai,ao in enumerate(offsets_anim[:per_set*sets]):
+                assert ao!=0xffffffff, ('Missing native animation',model_id,ai)
                 start=p+16+ao;raw=bundle[start:start+u32(bundle,start+8)]
                 assert raw[:4] in (b'BCA0',b'BMA0')
                 section=0x44;duration=struct.unpack_from('<H',raw,section+4)[0]

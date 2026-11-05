@@ -1,0 +1,188 @@
+{
+  "103": {
+    "spec": {
+      "name": "NativeOpcode103",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b166c",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "119": {
+    "spec": {
+      "name": "NativeOpcode119",
+      "args": []
+    },
+    "handler": "0x21b1d80",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "123": {
+    "spec": {
+      "name": "NativeOpcode123",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b1eb8",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "185": {
+    "spec": {
+      "name": "NativeOpcode185",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21af584",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "310": {
+    "spec": {
+      "name": "NativeOpcode310",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x2166e0c",
+    "overlay": 10,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "347": {
+    "spec": {
+      "name": "NativeOpcode347",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21d18ec",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "348": {
+    "spec": {
+      "name": "NativeOpcode348",
+      "args": []
+    },
+    "handler": "0x21d193c",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "349": {
+    "spec": {
+      "name": "NativeOpcode349",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21d195c",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "350": {
+    "spec": {
+      "name": "NativeOpcode350",
+      "args": []
+    },
+    "handler": "0x21d1998",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "444": {
+    "spec": {
+      "name": "NativeOpcode444",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b5038",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "445": {
+    "spec": {
+      "name": "NativeOpcode445",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x216be28",
+    "overlay": 10,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "493": {
+    "spec": {
+      "name": "NativeOpcode493",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x2166c20",
+    "overlay": 10,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "525": {
+    "spec": {
+      "name": "NativeOpcode525",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21d2350",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "595": {
+    "spec": {
+      "name": "NativeOpcode595",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21aee10",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "596": {
+    "spec": {
+      "name": "NativeOpcode596",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21aee60",
+    "overlay": 21,
+    "source": "IRBI native operand reads reviewed in overlays10/21. Decoding alone does not implement command semantics."
+  },
+  "74": {
+    "spec": {
+      "name": "NativeOpcode74",
+      "args": [
+        "u16",
+        "u8"
+      ]
+    },
+    "handler": "0x21b0fdc",
+    "overlay": 21,
+    "source": "IRBI021b0fdc→021b0f08 mode1: value u16 plus byte. Native message context; not an invented padding word."
+  }
+}

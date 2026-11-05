@@ -31,3 +31,30 @@ test('refreshing prepared records preserves a live native animation and handle',
 test('canonical browser replay loads the Center through Mail before retesting the native city door',()=>{
  const fixture=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),sequence=fixture.match(/const completeActions049=(\[[^;]+\])\.map/);assert.ok(sequence);const actions=JSON.parse(sequence[1].replaceAll("'",'"'));assert.equal(new Set(actions).size,14);assert.ok(actions.indexOf('qaMail049')<actions.indexOf('qaStory049'),'A fresh browser must reproduce the late048 loader before Ghecis opens the049 Gym door');
 });
+
+test('late049 Center preparation preserves the next chapter owner of city107',async()=>{
+ const f=setup(),old=f.scene(107),replacement={zone:107,chapter050:true,assetsPending:true,instances:[],permissionGrids:[],nativeScope:'next-chapter'};
+ f.c.OPENING_ASSETS.scenes.zone107=replacement;
+ await f.scene(109).ensureAssets();
+ assert.equal(f.scene(107),replacement);
+ assert.equal(replacement.assetsPending,true,'A previous chapter cannot finish the new owner preparation');
+ assert.equal(replacement.instances.length,0,'A previous chapter cannot overwrite new geometry');
+ assert.equal(replacement.nativeScope,'next-chapter');
+ assert.equal(old.assetsPending,true,'Replaced descriptors remain unused');
+ assert.equal(f.scene(109).assetsPending,false,'The requested049 Center still loads');
+});
+
+test('049 bootstrap evaluated after a050 descriptor leaves its owner untouched',async()=>{
+ const f=setup(),replacement={zone:107,chapter050:true,assetsPending:true,instances:[],permissionGrids:[]};
+ f.c.OPENING_ASSETS.scenes.zone107=replacement;
+ vm.runInContext(fs.readFileSync(path.join(source,'mistralton-bootstrap.js'),'utf8'),f.c);
+ await f.scene(109).ensureAssets();assert.equal(f.scene(107),replacement);assert.equal(replacement.assetsPending,true);assert.equal(replacement.instances.length,0);
+});
+
+test('a050 owner installed during the049 resource request survives its completion',async()=>{
+ const f=setup();let release,started=false;const read=f.c.RuntimeAssets.bytes;
+ f.c.RuntimeAssets.bytes=async url=>{if(url==='mistralton-assets.js'){started=true;await new Promise(done=>release=done);}return read(url);};
+ const pending=f.c.MistraltonChapter.ensure();for(let i=0;i<30&&!started;i++)await Promise.resolve();assert.equal(started,true);
+ const replacement={zone:107,chapter050:true,assetsPending:true,instances:[],permissionGrids:[]};f.c.OPENING_ASSETS.scenes.zone107=replacement;
+ release();await pending;assert.equal(f.scene(107),replacement);assert.equal(replacement.assetsPending,true);assert.equal(replacement.instances.length,0);assert.equal(f.scene(109).assetsPending,false);
+});

@@ -30,7 +30,7 @@
   return to[slot]||to[0];
  }
  function starterFamily(name,starter){return name===starter||
-  ({Snivy:['Servine'],Tepig:['Pignite'],Oshawott:['Dewott']}[starter]||[]).includes(name);}
+  ({Snivy:['Servine','Serperior'],Tepig:['Pignite','Emboar'],Oshawott:['Dewott','Samurott']}[starter]||[]).includes(name);}
  function moves(name,visited=new Set()){
   if(visited.has(name))return [];visited.add(name);
   const d=data(),p=d?.progression[name];if(!p)return [];

@@ -3,6 +3,31 @@
 (()=>{
  const C=ChapterMoves,previousSelect=C.select,previousSample=C.sample,previousDraw=C.draw;
  const fitted={
+  // Chapter050: new body proportions and emission points (authored HD-2D).
+  497:[-.08,0,1.4,0,-.065,.035,6,.85,[.22,-.9],[.06,-.58],[-.24,-.4],.45],
+  500:[.08,1.45,.15,.18,.19,.085,10,.86,[.22,-.83],[.44,-.5],[-.26,-.25],.4],
+  503:[.11,.42,.44,.3,.12,.05,16,.91,[.3,-.75],[.34,-.3],[-.31,-.34],.47],
+  537:[.09,1.15,0,.25,.13,.09,12,.77,[.14,-.64],[.45,-.42],[.16,-.78],.53],
+  560:[.13,1.1,.37,.37,.11,.055,18,.85,[.18,-.77],[.37,-.49],[-.19,-.34],.69],
+  562:[.065,.85,.36,0,.04,.03,8,.49,[.02,-.7],[.4,-.42],[-.2,-.6],.43],
+  569:[.04,1.35,0,.08,.09,.13,6,.64,[.09,-.6],[.46,-.57],[.12,-.79],.31],
+  577:[.04,0,0,0,.035,.04,6,.42,[.04,-.5],[.11,-.49],[0,-.67],.58],
+  578:[.035,0,.08,0,.025,.045,8,.46,[.06,-.48],[.16,-.43],[0,-.7],.52],
+  591:[.05,.42,0,.1,.045,.065,8,.46,[.02,-.43],[.43,-.36],[.02,-.92],.48],
+  594:[.07,.58,.93,0,.06,.035,14,.69,[.2,-.54],[.34,-.6],[-.25,-.35],.57],
+  596:[.075,.22,.23,.58,.09,.07,26,.83,[.24,-.43],[.4,-.32],[-.31,-.33],.61],
+  600:[0,.12,0,0,.035,.02,10,.52,[.06,-.53],[.31,-.47],[-.27,-.73],.27],
+  603:[.09,.25,1.1,0,.07,.035,16,.78,[.34,-.65],[.28,-.47],[-.3,-.29],.49],
+  604:[.075,1.03,1.2,.12,.13,.065,14,.89,[.3,-.76],[.4,-.49],[-.32,-.28],.39],
+  605:[.045,.62,0,.12,.04,.055,8,.49,[.06,-.71],[.29,-.46],[0,-.86],.57],
+  607:[.045,.15,0,0,.025,.035,6,.39,[.04,-.51],[.18,-.4],[0,-.95],.51],
+  610:[.17,.68,.8,.28,.12,.075,16,.87,[.24,-.71],[.34,-.42],[-.29,-.3],.73],
+  613:[.12,.72,.14,.26,.075,.08,12,.69,[.12,-.71],[.29,-.39],[-.13,-.25],.78],
+  614:[.07,1.25,.13,.23,.15,.055,10,.85,[.16,-.81],[.43,-.5],[-.21,-.32],.4],
+  615:[0,.22,.18,0,.035,.02,8,.48,[.02,-.48],[.31,-.52],[0,-.93],.29],
+  616:[.08,0,0,0,.035,.07,6,.38,[.31,-.33],[.25,-.24],[-.18,-.55],.34],
+  618:[0,.67,.65,0,.025,.04,14,.54,[.13,-.2],[.42,-.15],[-.31,-.18],.24],
+  622:[.035,1.16,0,.2,.11,.06,10,.79,[.02,-.69],[.45,-.43],[-.2,-.27],.36],
   508:[.08,0,.82,.28,.09,.045,14,.78,[.35,-.67],[.29,-.13],[-.34,-.35],.54],
   521:[.09,1.24,.66,.16,.07,.04,16,.9,[.15,-.85],[.32,-.52],[-.26,-.28],.62],
   529:[.12,1.12,.16,.2,.14,.12,18,.74,[.19,-.53],[.44,-.54],[-.25,-.25],.73],
@@ -80,6 +105,7 @@
  Object.assign(recipes,{19:'flyDive',64:'headRam',101:'psywave',105:'restore',119:'watch',126:'flameJet',136:'doubleKick',141:'drain',151:'harden',174:'focus',175:'flail',179:'flail',184:'meanLook',196:'iceWind',201:'sandKick',212:'meanLook',223:'counterPalm',225:'psybeam',229:'roll',230:'powder',232:'furySlash',240:'aquaRing',246:'rockVolley',248:'psybeam',275:'root',293:'camouflage',298:'dance',300:'mud',310:'ambush',324:'psybeam',333:'iceShard',359:'counterPalm',360:'gyro',362:'waterPulse',365:'airCut',377:'seal',380:'sludgeJet',394:'flameRush',404:'furySlash',405:'soundWave',412:'energyBall',419:'iceShard',422:'flameBite',423:'flameBite',429:'psybeam',435:'electricWave',445:'charm',451:'electricWave',466:'spiritWind',469:'shellGuard',475:'harden',483:'dance',487:'waterPulse',489:'coil',497:'soundWave',501:'shellGuard',523:'groundStamp',527:'web',537:'roll',11:'gearGrind',26:'doubleKick',32:'hornDrill',53:'flameJet',89:'groundStamp',136:'doubleKick',221:'firePalm',240:'aquaRing',398:'sludgeJet',430:'psybeam',544:'gearGrind'});
  Object.assign(recipes,{13:'airCut',26:'jumpKick',31:'headRam',42:'needle',54:'shellGuard',58:'psybeam',92:'poisonTrap',136:'jumpKick',169:'web',499:'smoke',505:'healingWave',11:'gearGrip'});
  Object.assign(recipes,{258:'hailCall',241:'sunCall',240:'rainCall',201:'sandCall',216:'bodyRam',218:'bodyRam',219:'shellGuard'});
+ Object.assign(recipes,{378:'squeeze',164:'shellGuard',457:'headRam',261:'spiritWind',57:'waterPulse',59:'iceWind',87:'electricWave',387:'bodyRam',400:'furySlash',289:'thief',421:'furySlash',94:'psybeam',528:'flameRush',444:'rockVolley',509:'throw',538:'shellGuard',492:'ambush',14:'swordDance',51:'sludgeJet',38:'bodyRam',276:'counterPalm',504:'shellGuard',356:'groundStamp',50:'seal',114:'smoke',506:'spiritWind',471:'psywave',470:'psywave',247:'psywave',283:'flail',237:'energyBall',220:'healingWave',532:'headRam',273:'restore',120:'fireRing',306:'furySlash',493:'psybeam',107:'curl',83:'fireRing',262:'focus',517:'fireRing',82:'flameJet',530:'doubleKick',337:'furySlash',349:'dance',181:'iceWind',556:'iceShard',420:'iceShard',159:'harden',62:'psybeam',426:'mud',340:'flyDive',325:'counterPalm',5:'counterPalm',222:'groundStamp'});
  const pairs={};
  for(const [name,row]of Object.entries(TRAINING_DATA.progression)){
   pairs[name]=Training.moves(name);
@@ -88,7 +114,7 @@
    const m=GEN5.moves.find(m=>m.id===id),kind=row.id===586&&id===224?'hornJab':recipes[id];if(!kind)throw Error('Coreografia non definita: '+name+' / '+id);
    if(!(C.rigs[row.id]||DemoMoves.rigs[row.id]))throw Error('Anatomia non definita: '+name);
    const self=id===312||id===174&&row.id!==592||[7,10,12].includes(m.target),frames=kind==='quick'?86:kind==='flyDive'?152:kind==='throw'?152:['powder','dance','energyBall'].includes(kind)?142:126;
-   const attachment=kind==='hornJab'?'leaf':[519,520,521,527,528,561,566,580,581,587].includes(row.id)&&['gust','airCut','flyDive'].includes(kind)?'hand':['groundStamp','root'].includes(kind)?'ground':/leaf|seed|vine|powder|silk|energyBall/.test(kind)?'leaf':/Palm|palm|Slash|Blade|Kick|kick|throw|thief|gear|gyro/.test(kind)?'hand':'mouth';
+   const attachment=row.id===607&&m.type==='Fuoco'?'leaf':kind==='hornJab'?'leaf':[519,520,521,527,528,561,566,580,581,587].includes(row.id)&&['gust','airCut','flyDive'].includes(kind)?'hand':['groundStamp','root'].includes(kind)?'ground':/leaf|seed|vine|powder|silk|energyBall/.test(kind)?'leaf':/Palm|palm|Slash|Blade|Kick|kick|throw|thief|gear|gyro/.test(kind)?'hand':'mouth';
    C.profiles[row.id+'-'+id]={species:row.id,id,name:m.name,kind,chapter:true,training:true,nativeEffects:true,key:'training-'+row.id+'-'+id,frames,impact:Math.round(frames*.48),attachment,target:self?'self':'foe',damage:m.category!==0,color:colors[m.type]||({Ghiaccio:'#b5ecff',Spettro:'#b9a1ed',Acciaio:'#d2dfe0'}[m.type])||'#e5edf4'};
   }
  }
@@ -164,6 +190,29 @@
   if(p.species===597){a.feet=0;a.arms=0;a.lean+=.08*Math.sin(t*Math.PI*4)*w;if(k==='roll')a.tail=0;}
   if(p.species===599){a.feet=0;a.arms=0;a.gears=(k==='gearGrip'?Math.sin(t*Math.PI*2):Math.sin(t*Math.PI*8)*(k==='gearGrind'?1:.4))*w;a.lean+=.03*Math.sin(t*Math.PI*4)*w;}
   if(p.species===602){a.feet=0;a.arms=0;a.tail+=.4*Math.sin(t*Math.PI*6)*w;a.lift+=.035*Math.sin(t*Math.PI*2)*w;if(k==='electricWave'){a.reach=0;a.glare=w;}}
+  // Chapter050 anatomy: serpentine, gelatinous, floating and articulated bodies.
+  if(p.species===497){a.feet=0;a.arms=0;a.tail+=.48*Math.sin(t*Math.PI*4)*w;a.lean+=.035*Math.sin(t*Math.PI*2)*w;if(k==='squeeze')a.coil=surge;}
+  if(p.species===500){a.arms+=.32*Math.sin(t*Math.PI*2)*w;a.crouch+=.025*w;a.breath+=.04*w;}
+  if(p.species===503){a.feet+=.14*beat*surge;a.head+=.045*w;if(/Slash|Blade|karate/.test(k))a.arms+=.44*Math.sin(t*Math.PI*2)*w;}
+  if(p.species===537){a.arms+=.28*Math.sin(t*Math.PI*4)*w;a.crouch+=.04*w;a.breath+=.025*Math.sin(t*Math.PI*6)*w;}
+  if(p.species===560){a.feet+=.21*beat*surge;a.arms+=.2*Math.sin(t*Math.PI*3)*w;a.tail+=.12*Math.sin(t*Math.PI*2)*w;}
+  if(p.species===562){a.feet=0;a.arms+=.23*Math.sin(t*Math.PI*4)*w;a.lift+=.04*w;a.tail+=.13*Math.sin(t*Math.PI*3)*w;}
+  if(p.species===569){a.arms+=.3*Math.sin(t*Math.PI*3)*w;a.crouch+=.045*w;a.head*=.4;}
+  if(p.species===577||p.species===578){a.feet=0;a.arms=0;a.breath+=.035*Math.sin(t*Math.PI*4)*w;a.lift+=.045*w;a.lean*=.55;}
+  if(p.species===591){a.arms+=.26*Math.sin(t*Math.PI*2)*w;a.crouch+=.025*w;if(k==='powder')a.lean+=.05*Math.sin(t*Math.PI*4)*w;}
+  if(p.species===594){a.feet=0;a.tail+=.3*Math.sin(t*Math.PI*5)*w;a.arms+=.2*Math.sin(t*Math.PI*4)*w;a.lift+=.03*w;}
+  if(p.species===596){a.feet+=.24*Math.sin(t*Math.PI*16)*w;a.crouch+=.035*w;if(k==='web')a.reach=0;}
+  if(p.species===600){a.feet=0;a.arms=0;a.gears=Math.sin(t*Math.PI*10)*w;a.lean+=.025*Math.sin(t*Math.PI*4)*w;}
+  if(p.species===603||p.species===604){a.tail+=.36*Math.sin(t*Math.PI*6)*w;a.lift+=.03*w;if(p.species===603)a.feet=0;else a.arms+=.25*Math.sin(t*Math.PI*4)*w;}
+  if(p.species===605){a.arms+=.25*Math.sin(t*Math.PI*2)*w;a.glare=/psy|focus/.test(k)?w:a.glare;a.head+=.025*Math.sin(t*Math.PI*4)*w;}
+  if(p.species===607){a.tail+=.14*Math.sin(t*Math.PI*4)*w;a.feet=0;a.breath+=.035*Math.sin(t*Math.PI*4)*w;a.lean+=.025*Math.sin(t*Math.PI*3)*w;a.lift+=.02*w;}
+  if(p.species===610){a.head+=.1*Math.sin(t*Math.PI*2)*w;a.tail+=.25*Math.sin(t*Math.PI*4)*w;a.feet+=.1*beat*surge;}
+  if(p.species===613){a.arms+=.18*Math.sin(t*Math.PI*3)*w;a.head+=.035*w;a.feet+=.09*beat*surge;}
+  if(p.species===614){a.arms+=.36*Math.sin(t*Math.PI*2)*w;a.head-=.035*w;a.crouch+=.02*w;}
+  if(p.species===615){a.gears=.22*Math.sin(t*Math.PI*4)*w;a.feet=0;a.arms=0;a.lift+=.035*w;a.lean+=.045*Math.sin(t*Math.PI*4)*w;}
+  if(p.species===616){a.feet=0;a.arms=0;a.crouch+=.05*w;a.head*=.5;}
+  if(p.species===618){a.feet=0;a.lift=0;a.tail+=.25*Math.sin(t*Math.PI*4)*w;a.arms+=.2*Math.sin(t*Math.PI*6)*w;a.crouch*=.45;}
+  if(p.species===622){a.arms+=.24*Math.sin(t*Math.PI*2)*w;a.feet+=.06*beat*surge;a.head*=.3;}
   return a;
  };
  C.draw=function(c,W,H,x,f,layer){
@@ -197,6 +246,30 @@
  // Groups identified from the exported original front/back part sheets. Related
  // eye/mask/petal tiles rotate around a common joint, avoiding detached pieces.
  const partMaps={
+  497:{front:{head:[0,1,2,6],tail:[3,7,8]},back:{head:[0,1,2,6],tail:[3,4,8]}},
+  500:{front:{head:[0,2,3,12,13],left:[4,6],right:[5,7],feet:[9,10]},back:{head:[0,2,3,8,12],left:[5,7],right:[6,11],feet:[9,10]}},
+  503:{front:{head:[0,1,2,3,4,6,7,13,14,15,23,24,25],left:[16,17],right:[11,12],tail:[19,22]},back:{head:[0,1,2,4,13,14,18,19,20],left:[21,23],right:[16,17],tail:[10,11]}},
+  537:{front:{head:[0],left:[4,7],right:[6,8],feet:[2,3]},back:{head:[3,4,5,6,7],left:[8,9],right:[10],feet:[1,2]}},
+  560:{front:{head:[0],left:[1],right:[2],feet:[5,6],tail:[8]},back:{head:[0,6],left:[4],right:[5],feet:[2,3],tail:[1]}},
+  562:{front:{head:[0],left:[2],right:[1],tail:[4],shell:[3]},back:{head:[0],left:[2],right:[1],tail:[4],shell:[3]}},
+  569:{front:{left:[0,2,6],right:[1,3,7,8,9,10],feet:[11,12]},back:{left:[0,3,9],right:[1,2,4,5,6,7,11],feet:[13,14]}},
+  577:{front:{head:[0],tail:[3]},back:{head:[0],tail:[2]}},
+  578:{front:{head:[0]},back:{head:[0]}},
+  591:{front:{head:[1,2,3],left:[5,6],right:[4]},back:{head:[1],left:[4],right:[5]}},
+  594:{front:{left:[3],right:[2],tail:[1]},back:{left:[3],right:[2],tail:[1]}},
+  596:{front:{head:[0,5,8,10],feet:[2,3,4,6,7,9]},back:{head:[0,6,8],feet:[2,4,5,7,9]}},
+  600:{front:{gearBack:[0],gearL:[1,4,7],gearR:[2,3,5,6,8]},back:{gearBack:[0],gearL:[2,3],gearR:[1]}},
+  603:{front:{head:[0],left:[1],right:[2],tail:[3,4]},back:{head:[0],left:[1],right:[2],tail:[3,4]}},
+  604:{front:{head:[22],left:[25,20,27],right:[24,18,28],tail:[23,26]},back:{head:[22],left:[25,20,27],right:[24,18,28],tail:[26]}},
+  605:{front:{head:[0],left:[3],right:[2],feet:[1]},back:{head:[0],left:[2],right:[1]}},
+  607:{front:{shell:[0],tail:[4],left:[1],right:[2]},back:{shell:[0],tail:[3],left:[1],right:[2]}},
+  610:{front:{head:[0,1,4,8],left:[6],right:[3],feet:[5,7],tail:[9]},back:{head:[0,1],left:[4],right:[6],feet:[7,8],tail:[5,9]}},
+  613:{front:{head:[0,1,2,3,4],left:[6],right:[7],feet:[8,9,10]},back:{head:[0,1,2,3],left:[5],feet:[6,7]}},
+  614:{front:{head:[0,2,3],left:[6,7,8,9],right:[10,11,13],feet:[4,5,12,14]},back:{head:[0,10],left:[6,7,8],right:[9,13,14],feet:[2,4,11,12]}},
+  615:{front:{gearBack:[0,1,2,3,4,5,6,7,8,9,10,11,12,13]},back:{gearBack:[0,1,2,3,4,5,6]}},
+  616:{front:{shell:[2,4],head:[0,1]},back:{shell:[2,3],head:[0,1]}},
+  618:{front:{head:[0,2],left:[4],right:[3],tail:[5]},back:{head:[0],left:[2],right:[3],tail:[4]}},
+  622:{front:{head:[9],left:[14,16],right:[12,17],feet:[13,15]},back:{head:[8],left:[12],right:[14,15],feet:[11,13]}},
   508:{front:{head:[0,1,2,3,4,5,6,7],tail:[9,10],feet:[11,12,13]},back:{head:[0,1,2,3,4],tail:[6,7],feet:[8,9]}},
   521:{front:{head:[18,19,20,21,22,23,24,25],left:[29],tail:[30],feet:[31,32,33,34]},back:{head:[12,13,14,15],left:[18],tail:[19],feet:[20,21,22,23]}},
   529:{front:{head:[0,4],left:[5,6,7,8],right:[9,10,11,12],feet:[2,3]},back:{left:[5],right:[6],feet:[3,4]}},

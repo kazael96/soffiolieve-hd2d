@@ -1,7 +1,7 @@
 /* Native cycling billboards; continuous movement speed is adapted to HD-2D. */
 (()=>{
  let preparing=false;
- const allowed=()=>!!renderer.scene?.outdoor||renderer.scene===ROM_SCENE||renderer.scene===window.Journey?.outdoor;
+ const allowed=()=>!window.SurfField?.mounted()&&(!!renderer.scene?.outdoor||renderer.scene===ROM_SCENE||renderer.scene===window.Journey?.outdoor);
  const mounted=()=>!!Journey.state.original?.bicycle&&allowed();
  function dismount(){if(window.Journey?.state.original)Journey.state.original.bicycle=false;if(window.AudioEngine&&window.NativeStory)AudioEngine.setScene(NativeStory.music);}
  async function toggle(){

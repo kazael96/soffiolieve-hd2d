@@ -48,13 +48,15 @@
  function warp(zone,w){
   const key=[zone,w.x,w.y,w.z,w.width,w.height,w.a,w.b].join(':');if(warpPoints.has(key))return warpPoints.get(key);
   const front=w.y+(w.width-1)*.5,side=(w.z<<16>>16)+(w.height-1)*.5,center=position(zone,w.x,front,side),a=position(zone,w.x,front-.05,side),b=position(zone,w.x,front+.05,side),c=position(zone,w.x,front,side+.1),forward=norm([b.x-a.x,0,b.z-a.z]),lateral=norm([c.x-center.x,0,c.z-center.z]);
+  const tower=!!root.ICIRRUS_RAILS?.[zone];
   const primary=w.b===2?lateral:forward,secondary=w.b===2?mul(forward,-1):lateral,axis=w.a<=2?primary:secondary,out=mul(axis,[1,4].includes(w.a)?-1:1);
   // A rail's point order is not its screen compass: Castelia plaza lines run
   // in the opposite direction to the waterfront. Keep the native axis, then
   // orient the threshold towards the edge with a real walkable inward side.
   const inward=(dx,dz)=>[1,1.5,2,2.5,3].some(d=>locate(zone,center.x-16-dx*d,center.z-16-dz*d,{height:center.height,line:w.x}));
   if(!inward(out[0],out[2])&&inward(-out[0],-out[2])){out[0]*=-1;out[2]*=-1;}
-  const result={...center,line:w.x,front,side,out:{x:out[0],z:out[2]}};warpPoints.set(key,result);return result;
+  if(tower){const sign=front>=tables()[zone].lines[w.x].length/2?1:-1;out[0]=forward[0]*sign;out[2]=forward[2]*sign;}
+  const result={...center,...(tower?{span:w.height}:{}),line:w.x,front,side,out:{x:out[0],z:out[2]}};warpPoints.set(key,result);return result;
  }
  function actor(zone,n){const p=position(zone,n.x,n.z,n.y<<16>>16);return {...n,railOriginal:{...n},x:p.x-.5,z:p.z-.5,y:Math.round(p.height*65536)};}
  const landings=new Map();

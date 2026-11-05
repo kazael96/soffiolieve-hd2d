@@ -1,0 +1,22 @@
+/* Explicit water battle geography for every currently reachable native Surf table. */
+(()=>{
+ const plans={6:['Levantopoli','acc-map-11-ike01'],96:['Libecciopoli','mt-map-50-sea_mizu1'],113:['Mistralopoli','ic-map-64-mizu_sita2'],155:['Bosco Girandola','pw-map-287-ike01'],317:['Percorso 1','sea_mizu1'],321:['Percorso 3','acc-map-12-ike01'],324:['Grotta Minerale','acc-map-356-d0_miz'],326:['Percorso 4','nb-map-35-sea_mizu1'],331:['Percorso 6','mt-map-54-mizu_sita2']};
+ const contexts=Object.fromEntries(Object.entries(plans).map(([zone,[label,floor]])=>['surf'+zone,{zone:+zone,label,terrain:'water',floor,back:25,cutoff:-21,indoor:+zone===324,sky:+zone===324?['#27323b','#52616b']:['#80b4c6','#c3ddd4']}]));
+ function source(zone){if(zone===6)return ROUTE2_ASSETS.scenes[6];if(zone===321)return ROUTE3_ASSETS.scenes[321];if(zone===317){const d=NATIVE_SURFACE_DATA.scenes[317];return {...Journey.outdoor,permissionGrids:Journey.outdoor.permissionGrids.filter(g=>d.some(i=>i.x===g.x&&i.z===g.z))};}return OPENING_ASSETS.scenes['zone'+zone];}
+ function configure(id){const c=contexts[id];if(!c)return null;const scene=source(c.zone);if(!scene?.instances?.length)throw Error('Geografia acquatica incompleta: '+id);
+  if(!c.origin){const cells=[];for(const g of scene.permissionGrids)for(let z=0;z<32;z++)for(let x=0;x<32;x++){const at=8+(z*32+x)*8;if((g.bytes[at+2]&3)===2)cells.push([g.x+x-15.5,g.z+z-15.5]);}
+   if(!cells.length)throw Error('Superficie acquatica originale mancante: '+id);
+   const center=cells.reduce((v,p)=>[v[0]+p[0]/cells.length,v[1]+p[1]/cells.length],[0,0]);cells.sort((a,b)=>Math.hypot(a[0]-center[0],a[1]-center[1])-Math.hypot(b[0]-center[0],b[1]-center[1]));c.origin=cells[0];c.height=IcirrusChapter.surfaceAt(c.zone,...c.origin,0)?.height||0;
+  }return c;
+ }
+ function floor(id){const c=configure(id),texture=OPENING_ASSETS.textures[c.floor]||ROM_SCENE.textures[c.floor];if(!texture)throw Error('Texture acquatica originale mancante: '+id+'/'+c.floor);const key='icirrus-battle-'+id;
+  if(!OPENING_ASSETS.models[key]){const verts=[];for(const i of [0,1,2,2,1,3])verts.push(i%2?48:-48,0,i>=2?24:-64,i%2?1536:0,i>=2?1408:0,1,1,1,0,1,0);const groups=[{texture:c.floor,verts,repeatS:true,repeatT:true}];
+   if(c.zone===324){const nativeWall=OPENING_ASSETS.textures['acc-map-356-d0gake_001'];if(!nativeWall)throw Error('Parete originale della Grotta Minerale mancante');OPENING_ASSETS.textures['surf-cave-wall']={...nativeWall};const wall=[];for(const i of [0,1,2,2,1,3])wall.push(i%2?48:-48,i>=2?18:0,-38,i%2?1536:0,i>=2?0:384,.82,.85,.88,0,0,1);groups.push({texture:'surf-cave-wall',verts:wall,repeatS:true,repeatT:true,doubleSided:true});}
+   OPENING_ASSETS.models[key]={groups};}return key;
+ }
+ async function prepare(id){if(!contexts[id])return false;await SurfField.prepareAssets();const z=contexts[id].zone;if(z===326)await NimbasaChapter.ensure();else if([96,331].includes(z))await MistraltonChapter.ensure();else if(z===113)await IcirrusChapter.ensure();floor(id);return true;}
+ function instances(id){const c=configure(id);return [...source(c.zone).instances.filter(i=>i.actorUid===undefined&&Math.abs(i.x-c.origin[0])<64&&Math.abs(i.z-c.origin[1])<64).map(i=>({...i,x:i.x-c.origin[0],y:i.y-c.height,z:i.z-c.origin[1]-c.back})),{model:floor(id),x:0,y:0,z:0,rotation:0}];}
+ function ambient(id){const c=contexts[id];if(!c)return null;const slots=SURF_FIELD_ASSETS.encounters[c.zone]?.seasons[new Date().getMonth()%4].slots||[],rows=[...new Map(slots.map(s=>[s.name,s])).values()].slice(0,3);return rows.map((s,i)=>({species:s.name,id:s.id,x:-6+2.2*i,z:-19.5,height:.22}));}
+ const old=PinwheelBattles.instances,oldAmbient=PinwheelBattles.ambient;Object.assign(PinwheelBattles.contexts,contexts);PinwheelBattles.instances=id=>contexts[id]?instances(id):old(id);PinwheelBattles.ambient=id=>ambient(id)??oldAmbient(id);
+ window.SurfBattles={contexts,prepare,instances,ambient,has:id=>!!contexts[id],isGround:name=>/(?:mizu|_miz|ike01|sea_mizu1)/.test(name||''),capture:(state,n,position)=>{const c=contexts['surf'+n.zone];if(!c)throw Error('Lotta Surf senza geografia esplicita: '+n.zone);return Object.freeze({id:'surf'+n.zone,label:c.label,terrain:'water',zone:n.zone,scene:state.scene,x:position.x,y:position.y});}};
+})();

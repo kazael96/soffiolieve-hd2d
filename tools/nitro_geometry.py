@@ -54,6 +54,7 @@ def flatten_glb(file,key,assets,asset_url,units=16):
             packed=np.concatenate([p,uv,colors,norm],axis=1)
             idx=accessor(primitive['indices']).astype(int).flatten() if 'indices' in primitive else range(len(p))
             groups.append({'texture':texture,'w':width,'h':height,'alpha':factor[3],'doubleSided':mat.get('doubleSided',False),
+                'transparent':mat.get('alphaMode')=='BLEND' or factor[3]<1,
                 'repeatS':sampler.get('wrapS',10497)!=33071,'repeatT':sampler.get('wrapT',10497)!=33071,
                 'mirrorS':sampler.get('wrapS')==33648,'mirrorT':sampler.get('wrapT')==33648,
                 'verts':np.round(packed[idx].flatten(),5).tolist()})

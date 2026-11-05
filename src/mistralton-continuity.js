@@ -1,7 +1,7 @@
 /* Persistent physical itineraries across the chapter049 doors and joined fields. */
 (function(root){
  let options={};const entryTrips=new WeakMap(),version=2,pairs=[[96,191],[331,194]],point=(x,y)=>({x,y});
- const sameField=(a,b)=>a===b||pairs.some(p=>p.includes(a)&&p.includes(b));
+ const sameField=(a,b)=>a===b||!!root.IcirrusChapter?.sameField(a,b)||pairs.some(p=>p.includes(a)&&p.includes(b));
  const door=(zone,x,y,dx,dy,next=null,height=0)=>({zone,kind:'door',anchor:point(x,y),dx,dy,next,height});
  const edge=(zone,x,y,dx,dy,next=null)=>({zone,kind:'path',anchor:point(x,y),dx,dy,next,height:0});
  const arrival=(zone,x,y,destinationZone,targetUid,height=0)=>({zone,kind:'arrival',anchor:point(x,y),destinationZone,targetUid,height});
@@ -33,26 +33,27 @@
   'skyla-celestial-tower':{zone:342,uid:0,label:'Anemone alla Torre Cielo'},
   'cedric-next-research':{zone:113,uid:2,label:'Rutilo a Mistralopoli'}
  };
- function configure(config){options={...options,...config};return api;}
+ root.IcirrusContinuity?.extend({itineraries,nextEvents,door,edge,arrival});
+ function configure(config){options={...options,...config};root.IcirrusContinuity?.configure(options);return api;}
  const activeZone=()=>options.native?.zone??root.NativeStory?.state?.zone;
- function blockedFor(zone,fallback=()=>false){return (x,y)=>{const blocked=options.blockedAt||root.MistraltonChapter?.blockedAt;if(blocked)return blocked(zone,x,y);return fallback(x,y);};}
+ function blockedFor(zone,fallback=()=>false){return (x,y)=>{const custom=root.IcirrusContinuity?.blocked(zone,x,y);if(custom!==null&&custom!==undefined)return custom;const blocked=options.blockedAt||root.MistraltonChapter?.blockedAt;if(blocked)return blocked(zone,x,y);return fallback(x,y);};}
  function walk(from,to,zone,fallback){
-  const blocked=blockedFor(zone,fallback),lead={x:from.x,y:from.y},points=[];
+  const blocked=blockedFor(zone,fallback),custom=root.IcirrusContinuity?.path(from,to,zone,blocked);if(custom)return custom;const lead={x:from.x,y:from.y},points=[];
   // Keep a saved fractional step on its current axis before re-running A*.
   if(Math.abs(from.x-Math.round(from.x-.5)-.5)>1e-6){lead.x=(from.direction===2?Math.floor(from.x-.5):Math.ceil(from.x-.5))+.5;}
   else if(Math.abs(from.y-Math.round(from.y-.5)-.5)>1e-6){lead.y=(from.direction===0?Math.floor(from.y-.5):Math.ceil(from.y-.5))+.5;}
   if(Math.hypot(lead.x-from.x,lead.y-from.y)>1e-6&&!blocked(lead.x,lead.y))points.push(lead);else Object.assign(lead,{x:from.x,y:from.y});
-  return points.concat(root.FieldActorExits.route(lead,to,blocked));
+  const path=points.concat(root.FieldActorExits.route(lead,to,blocked)),last=path.at(-1)||lead;if(root.IcirrusChapter?.zones.includes(zone)&&Math.hypot(last.x-to.x,last.y-to.y)<.8&&!blocked(to.x,to.y))path.push({...to});return path;
  }
  function build(destination,leg,actor,fallback){const d=itineraries[destination]?.()[leg];if(!d)return null;
-  const goal=d.kind==='door'&&Math.hypot(actor.x-d.anchor.x,actor.y-d.anchor.y)>.01?point(d.anchor.x-d.dx,d.anchor.y-d.dy):d.anchor,points=walk(actor,goal,d.zone,fallback),last=points.at(-1)||actor;
+  const goal=d.stagePoint|| (d.kind==='door'&&Math.hypot(actor.x-d.anchor.x,actor.y-d.anchor.y)>.01?point(d.anchor.x-d.dx,d.anchor.y-d.dy):{...d.anchor,...(root.IcirrusChapter?.zones.includes(d.zone)?{height:d.height||0}:{})}),points=walk(actor,goal,d.zone,fallback),last=points.at(-1)||actor;
   // A partial route is a recoverable path error; never append a wall-crossing
   // final segment and pretend that the actor has reached a blocked doorway.
   if(Math.hypot(last.x-goal.x,last.y-goal.y)>.01)throw Error('Itinerario non percorribile: '+actor.name+' → '+destination+' ('+leg+')');
-  if(d.kind==='door')points.push({...d.anchor});if(d.kind!=='arrival')points.push(point(d.anchor.x+d.dx*2.8,d.anchor.y+d.dy*2.8));
-  return {kind:d.kind,points,anchor:{...d.anchor},clip:d.kind==='door'?[-d.dx,0,-d.dy,d.dx*d.anchor.x+d.dy*d.anchor.y+(d.dy<0?1.3:0)]:null,background:true,destination,itineraryVersion:version,chapter049:true,leg,...(d.kind==='arrival'?{destinationZone:d.destinationZone,targetUid:d.targetUid}:{})};
+  if(d.kind==='door')points.push({...d.anchor});if(['door','path'].includes(d.kind))points.push(point(d.anchor.x+d.dx*2.8,d.anchor.y+d.dy*2.8));
+  return {kind:d.kind,points,anchor:{...d.anchor},clip:d.kind==='door'?[-d.dx,0,-d.dy,d.dx*d.anchor.x+d.dy*d.anchor.y+(d.dy<0?1.3:0)]:null,background:true,destination,itineraryVersion:version,chapter049:true,leg,...(root.IcirrusChapter?.zones.includes(d.zone)?{nativeTravelVersion:1,startPose:{x:actor.x,y:actor.y,height:actor.height||0}}:{}),...(actor.incomingPortal?{entryCorridor:actor.incomingPortal}:{}),...(d.kind==='cannon'?{cannon:d.cannon,cannonDirection:d.cannonDirection}:{}),...(d.kind==='arrival'?{destinationZone:d.destinationZone,targetUid:d.targetUid}:{})};
  }
- function planExit(actor,zone,blocked){let destination;
+ function planExit(actor,zone,blocked){let destination=root.IcirrusContinuity?.destination(actor,zone);if(destination)return build(destination,0,actor,blocked);
   if(zone===96&&actor.name==='Komor')destination=[11].includes(actor.uid)?'komor-next-journey':'cold-storage-front';
   else if(zone===96&&actor.name==='Rafan')destination='driftveil-gym';
   else if(zone===96&&actor.name==='Belle')destination='belle-chargestone';
@@ -70,19 +71,21 @@
  }
  function known(record){return !!record?.plan?.chapter049&&record.plan.itineraryVersion===version&&Object.hasOwn(itineraries,record.plan.destination)&&Number.isInteger(record.plan.leg)&&record.plan.leg>=0&&record.plan.leg<itineraries[record.plan.destination]().length;}
  function shouldTick(record){return !known(record)||sameField(record.zone,activeZone());}
- function canRetire(record){return known(record)?record.stage==='hold'&&record.index>=record.plan.points.length:undefined;}
+ function canRetire(record){if(record.plan?.kind==='cannon')return false;return known(record)?record.stage==='hold'&&record.index>=record.plan.points.length:undefined;}
  function nextLeg(record){if(!known(record))return null;const destination=record.plan.destination,index=record.plan.leg,all=itineraries[destination](),old=all[index],next=all[index+1];
+  if(next&&root.IcirrusChapter?.zones.includes(next.zone)&&!root.IcirrusChapter.ready)return {deferred:true};
   if(!next){const event=nextEvents[destination];if(!event)return null;
    const actor={...record.actor,fieldZone:337,exitProbe:false,script:2000};delete actor.exitClip;
    return {actor,zone:337,plan:{...record.plan,kind:'resident',points:[],clip:null,nextChapter:true,nextEvent:event,transferAuthorized:true},stage:'resident',index:0,opened:false,zero:0,sampleSequence:-1,target:null};
   }
-  const start=old.kind==='path'?point(record.actor.x,record.actor.y):old.next;
+  const continuous=['path','cannon'].includes(old.kind),start=continuous?point(record.actor.x,record.actor.y):old.next;
   if([...options.departures?.records.values()||[]].some(r=>r!==record&&sameField(r.zone,next.zone)&&Math.hypot(r.actor.x-start.x,r.actor.y-start.y)<.7))return {deferred:true};
-  const actor={...record.actor,...start,fieldZone:next.zone,height:old.kind==='path'?record.actor.height:next.height||0,exitProbe:true,script:2000};delete actor.exitClip;delete actor.noShadow;
+  const actor={...record.actor,...start,fieldZone:next.zone,height:continuous?record.actor.height:(old.nextHeight??next.height??0),exitProbe:true,script:2000,...(old.nextEntry?{incomingPortal:old.nextEntry}:{})};delete actor.exitClip;delete actor.noShadow;if(!old.nextEntry)delete actor.incomingPortal;
   const plan=build(destination,index+1,actor);plan.transferAuthorized=true;
   return {actor,zone:next.zone,plan,index:0,stage:'walk',age:0,travel:0,opened:false,zero:0,sampleSequence:-1,target:null,unverified:0};
  }
  function restoreRecord(record,zone,progress={}){
+  const extra=root.IcirrusContinuity?.restoreRecord(record);if(extra!==undefined)return extra;
   if(record.actor.name==='Komor'&&record.plan.destination==='cold-storage-front'&&record.plan.itineraryVersion!==version){
    const phase=progress.vars?.[16527]??options.native?.vars?.[16527]??1,destination=phase<=1?'cold-storage-front':phase===2?'clay-gym-square-komor':'komor-next-journey',leg=phase===2?2:0;
    record={...record,zone:phase===2?191:96,plan:build(destination,leg,record.actor),stage:'walk',index:0,opened:false,travel:0};
@@ -102,7 +105,7 @@
    const end=point(leg.anchor.x+leg.dx*2.8,leg.anchor.y+leg.dy*2.8),done=Math.hypot(record.actor.x-end.x,record.actor.y-end.y)<.001;plan.points=resumeDoor&&!crossed?[{...leg.anchor},end]:[end];
    return {...record,plan,index:done?1:0,stage:done?'hold':'walk',opened:record.opened===true||plan.portalEntered,travel:0};
   }
-  const plan=build(record.plan.destination,record.plan.leg,record.actor);plan.transferAuthorized=record.plan.transferAuthorized===true;
+  const plan=build(record.plan.destination,record.plan.leg,{...record.actor,...(record.plan.entryCorridor&&blockedFor(record.zone)(record.actor.x,record.actor.y)?{incomingPortal:record.plan.entryCorridor}:{})});plan.transferAuthorized=record.plan.transferAuthorized===true;
   const arrived=plan.kind==='arrival'&&Math.hypot(record.actor.x-plan.anchor.x,record.actor.y-plan.anchor.y)<.001;
   return {...record,plan,index:0,stage:arrived?'resident':'walk',opened:false,travel:0};
  }
@@ -114,27 +117,27 @@
   if(record.plan.kind!=='door'||record.plan.portalEntered)return;const leg=itineraries[record.plan.destination]()[record.plan.leg];
   if((record.actor.x-leg.anchor.x)*leg.dx+(record.actor.y-leg.anchor.y)*leg.dy>=-.000001)record.plan.portalEntered=true;
  }
- function notifyArrival(record){if(record.stage==='resident'&&!record.arrivalNotified){record.arrivalNotified=true;options.recheck?.();}}
- function enterZone(zone=activeZone(),{covered=false}={}){const phase=options.native?.vars?.[16523]??0,source=zone===192&&phase===0?191:zone===193&&phase===2?192:null;if(source===null||!options.departures||!options.native)return false;
+ function notifyArrival(record){if(record.stage==='resident'){delete record.actor.incomingPortal;delete record.plan.entryCorridor;if(!record.arrivalNotified){record.arrivalNotified=true;root.IcirrusContinuity?.arrived(record);options.recheck?.();}}}
+ function enterZone(zone=activeZone(),{covered=false}={}){root.IcirrusContinuity?.enterZone(zone,{covered});const phase=options.native?.vars?.[16523]??0,source=zone===192&&phase===0?191:zone===193&&phase===2?192:null;if(source===null||!options.departures||!options.native)return false;
   const flag=zone===192?544:805;if(Array.isArray(options.native?.flags)&&!options.native.flags.includes(flag))return false;
   let started=entryTrips.get(options.native);if(!started){started=new Set();entryTrips.set(options.native,started);}const trip=zone+':'+phase;if(started.has(trip))return false;
   const current=options.departures.records.get('Komor');if(current&&!(current.stage==='resident'&&current.actor.fieldZone===source))return false;
   const uid=source===191?0:1,candidate=current?.actor||(options.native?.actors?.[source]||[]).find(n=>n.name==='Komor'&&n.uid===uid&&!n.hidden);if(!candidate)return false;
   const result=options.departures.depart({...candidate,fieldZone:source},source);if(result){started.add(trip);if(covered||options.isCovered?.()===true)options.departures.records.get('Komor').plan.transferAuthorized=true;}return result;
  }
- function tick(dt){dt=Math.min(.1,Math.max(0,dt));const controller=options.departures;if(!controller)return;enterZone();
+ function tick(dt){dt=Math.min(.1,Math.max(0,dt));const controller=options.departures;if(!controller)return;root.IcirrusContinuity?.tick(dt);enterZone();
   for(const r of controller.records.values()){
    if(!known(r))continue;r.actor.script=2000;if(r.stage==='resident'){notifyArrival(r);continue;}
    if(shouldTick(r)||!r.plan.transferAuthorized)continue;
    // The source field was explicitly covered, or this leg started after a real
    // occlusion proof. Advance a physical route off-map, never a fake GPU sample.
    if(r.stage==='walk'){const p=r.plan.points[r.index];if(p){const dx=p.x-r.actor.x,dy=p.y-r.actor.y,d=Math.hypot(dx,dy),step=Math.min(d,3.75*dt),next=point(r.actor.x+(d?dx/d*step:0),r.actor.y+(d?dy/d*step:0));if(d&&obstructed(r,next))continue;if(d){Object.assign(r.actor,next);r.actor.direction=Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0;r.travel+=step;}markPortalEntry(r);if(d<=step)r.index++;}else{r.stage=r.plan.kind==='arrival'?'resident':'hold';if(r.stage==='resident'){Object.assign(r.actor,{fieldZone:r.plan.destinationZone,uid:r.plan.targetUid,exitProbe:false,script:2000});notifyArrival(r);}}}
-   if(r.stage==='hold'){const next=nextLeg(r);if(next?.deferred)continue;if(next){controller.finishPortal(r);Object.assign(r,next);}else{controller.finishPortal(r);controller.records.delete(r.key);r.resolve?.();}}
+   if(r.stage==='hold'&&r.plan.kind!=='cannon'){const next=nextLeg(r);if(next?.deferred)continue;if(next){controller.finishPortal(r);Object.assign(r,next);}else{controller.finishPortal(r);controller.records.delete(r.key);r.resolve?.();}}
   }
  }
  function waitingFor(zone,names){return names.some(name=>{const r=options.departures?.records.get(name);return r&&(!sameField(r.plan.destinationZone??r.zone,zone)||r.stage!=='resident');});}
  function obstructed(record,p){if(!known(record))return false;return [...options.departures?.records.values()||[]].some(other=>other!==record&&sameField(other.zone,record.zone)&&Math.abs(other.actor.x-p.x)<.55&&Math.abs(other.actor.y-p.y)<.55);}
- function introduced(actor,actors){if(![96,191,192,193,194,195,107].includes(actor.fieldZone)||!['Komor','Rafan','Belle','Aralia','Anemone','Rutilo','N'].includes(actor.name))return actor;
+ function introduced(actor,actors){if(!(root.IcirrusChapter?.zones.includes(actor.fieldZone)||[96,191,192,193,194,195,107].includes(actor.fieldZone))||!['Komor','Rafan','Belle','Aralia','Anemone','Rutilo','N'].includes(actor.name))return actor;
   const record=options.departures?.records.get(actor.name);
   if(known(record)||!record&&actors.some(old=>old!==actor&&!old.hidden&&!old.continuityPending&&old.name===actor.name&&sameField(old.fieldZone,actor.fieldZone)))actor.continuityPending=true;
   return actor;
@@ -154,6 +157,7 @@
   return false;
  });}
  function prepareEvent(zone,scriptId,actors=[]){
+  if(root.IcirrusContinuity?.prepareEvent(zone,scriptId)===false)return false;
   // Script384 adds role1 before deleting role0, without moving role0 on DS.
   // Stage that walk before ActorPauseAll, so an early player retains control.
   if(zone===192&&scriptId===2&&(options.native?.vars?.[16523]??0)===1){const old=actors.find(n=>n.name==='Komor'&&n.uid===0&&n.fieldZone===192&&!n.hidden),r=options.departures?.records.get('Komor');
@@ -167,7 +171,7 @@
  }
  const logicalOnlyDelete=actor=>actor?.continuitySuperseded===true;
  const escortMotions=new Set([2484,2492,2500,2508,2520,2536,2572,2580,2592,2604,2616,2624,2632,2680,2704]);
- function startExitMotion(actor,zone,movementAddress){const replaces=zone===193&&escortMotions.has(movementAddress)||zone===195&&(actor.name==='Aralia'&&movementAddress===3148||actor.name==='Belle'&&movementAddress===3132||actor.name==='N'&&movementAddress===3172)||zone===107&&actor.name==='Anemone'&&movementAddress===3240;
+ function startExitMotion(actor,zone,movementAddress){const replaces=root.IcirrusContinuity?.replaceExitMotion(actor,zone,movementAddress)||zone===193&&escortMotions.has(movementAddress)||zone===195&&(actor.name==='Aralia'&&movementAddress===3148||actor.name==='Belle'&&movementAddress===3132||actor.name==='N'&&movementAddress===3172)||zone===107&&actor.name==='Anemone'&&movementAddress===3240;
   if(!replaces||actor.uid===255)return false;if(!actor.continuitySuperseded){if(!options.departures?.depart(actor,zone))return false;actor.continuitySuperseded=true;actor.hidden=true;}return true;
  }
  const occupies=record=>!known(record)||sameField(record.actor.fieldZone,activeZone());

@@ -101,6 +101,7 @@
   function partyActions(i){
     const t=MENU_ASSETS.texts['157'],entries=[[t[109],()=>summary(i)],[t[108],()=>{swapFrom=i;team();}],[t[110],()=>heldActions(i)]];
     if(root.MistraltonFly?.knows(Journey.state.party[i]))entries.push(['VOLO',()=>external(async()=>{if(!MistraltonFly.canUse(Journey.state,i))await NativeStory.showPage('Non è il momento di usarlo!');else await NativeStory.useFly(i);},()=>team({focus:i}))]);
+    if(root.SurfField?.knows(Journey.state.party[i]))entries.push(['SURF',()=>external(async()=>await NativeStory.useSurf(i,{prompt:false})?'close':false,()=>team({focus:i}))]);
     entries.push([t[115],()=>team({focus:i})]);partyPopup(i,entries,()=>team({focus:i}));
   }
   function heldActions(i){
@@ -203,6 +204,6 @@
   function saveMenu(){return NativeSave.open(screen,confirm,notice,main);}
   function options(draft={...NativeSettings.state},focus=0){return NativeOptions.open(screen,main,draft,focus);}
   function trainerCard(){return NativeTrainerCard.open(screen,main);}
-  root.NativeUI={Screen,nextButton,open,prepare,confirm,register,useRegistered,chooseParty:async()=>{if(!await usable())throw Error('Menu Squadra non disponibile');return new Promise(resolve=>{let settled=false;const finish=index=>{if(settled)return;settled=true;screen.close();resetInput();resolve(index);};team({select:finish,back:()=>finish(null)});});},team:async()=>{if(battling||root.NativeStory?.locked||!Journey.state.starter)return;if(!await usable())return false;team({back:()=>screen.close()});},main,bag,summary};
+  root.NativeUI={pc:async()=>{if(!await usable())return false;try{await NativeStorage.prepare();return await NativeStorage.open(screen,{assets,notice,confirm});}catch(error){return loadFailure(error);}},Screen,nextButton,open,prepare,confirm,register,useRegistered,chooseParty:async()=>{if(!await usable())throw Error('Menu Squadra non disponibile');return new Promise(resolve=>{let settled=false;const finish=index=>{if(settled)return;settled=true;screen.close();resetInput();resolve(index);};team({select:finish,back:()=>finish(null)});});},team:async()=>{if(battling||root.NativeStory?.locked||!Journey.state.starter)return;if(!await usable())return false;team({back:()=>screen.close()});},main,bag,summary};
   if(typeof module!=='undefined')module.exports={nextButton,wrapQuantity};
 })(typeof window!=='undefined'?window:globalThis);
