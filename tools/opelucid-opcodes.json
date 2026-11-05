@@ -1,0 +1,64 @@
+{
+  "545": {
+    "spec": {"name": "NativeOpcode545", "args": ["u16", "u16", "u16", "u16", "u16", "u16"]},
+    "handler": "0x0216bac4", "overlay": 10,
+    "source": "IRBI0216bac4..0216bb1c: six resolved halfword reads02159a10 before native field position/transition setup. Decoding only."
+  },
+  "547": {
+    "spec": {"name": "NativeOpcode547", "args": ["u16"]},
+    "handler": "0x0216bbd4", "overlay": 10,
+    "source": "IRBI0216bbd4..0216bc0a: one resolved halfword02159a10 then021f3a48 and wait callback. Decoding only."
+  },
+  "549": {
+    "spec": {"name": "NativeOpcode549", "args": ["u16", "u16", "u16"]},
+    "handler": "0x0216a690", "overlay": 10,
+    "source": "IRBI0216a690: three resolved halfwords02159a10 before allocation020122c0. Decoding only."
+  },
+  "548": {
+    "spec": {"name": "NativeOpcode548", "args": ["u16"]},
+    "handler": "0x0216bc0c", "overlay": 10,
+    "source": "IRBI0216bc0c..0216bc42: one resolved halfword02159a10 then field handler021f3a20 and wait callback. Decoding only."
+  },
+"378": {"spec":{"name":"NativeOpcode378","args":[]},"handler":"0x0215b308","overlay":10,"source":"IRBI 0215b308..0215b334 reads no script operands; installs a field task callback and02011290 wait. Decoding only."},
+"380": {"spec":{"name":"NativeOpcode380","args":["u16"]},"handler":"0x021b4fb4","overlay":21,"source":"IRBI 021b4fb4..021b4fda reads one output destination021599e8; save query0216eebc. Decoding only."},
+"546": {"spec":{"name":"NativeOpcode546","args":["u16","u16","u16","u16"]},"handler":"0x0216bb78","overlay":10,"source":"IRBI 0216bb78..0216bbd0 reads four resolved halfwords02159a10, field model ID plus native position passed to021f3980. Decoding only."},
+  "379": {
+    "spec": {"name": "NativeOpcode379", "args": ["u16"]},
+    "handler": "0x0215b338", "overlay": 10,
+    "source": "IRBI0215b338..0215b362: destination021599e8 once, save query0216ee98, Boolean resultSTRH. Decoding only."
+  },
+  "280": {
+    "spec": {"name": "NativeOpcode280", "args": ["u16", "u16", "u16"]},
+    "handler": "0x0215b918", "overlay": 10,
+    "source": "IRBI0215b918: resolved value02159a10 then two output destinations021599e8 before iterating the party. Decoding only."
+  },
+"150": {"spec":{"name":"NativeOpcode150","args":["u16"]},"handler":"0x0215b250","overlay":10,"source":"IRBI 0215b250..0215b274: one resolved halfword via02159a10, then0215a400. Decoding only; runtime semantics must be integrated separately."},
+"184": {"spec":{"name":"NativeOpcode184","args":["u16","u16","u16"]},"handler":"0x021af534","overlay":21,"source":"IRBI 021af534..021af580: two resolved halfwords02159a10 then destination021599e8. Decoding only; runtime semantics must be integrated separately."},
+"193": {"spec":{"name":"NativeOpcode193","args":["u16","u16","u16"]},"handler":"0x021afcac","overlay":21,"source":"IRBI 021afcac..021afd62: three raw halfwords02011330, movement target/position passed to02184d40. Decoding only; runtime semantics must be integrated separately."},
+"205": {"spec":{"name":"NativeOpcode205","args":["u16"]},"handler":"0x0215aa18","overlay":10,"source":"IRBI 0215aa18..0215aa3a: destination021599e8, value02168fa4 stored withSTRH. Decoding only; runtime semantics must be integrated separately."},
+"274": {"spec":{"name":"NativeOpcode274","args":["u16","u16"]},"handler":"0x0215b4bc","overlay":10,"source":"IRBI 0215b4bc..0215b560: destination021599e8 then resolved halfword02159a10; remaining code reads creature fields13..18, not script operands. Decoding only; runtime semantics must be integrated separately."},
+"376": {"spec":{"name":"NativeOpcode376","args":["u16","u16","u16"]},"handler":"0x021b4f20","overlay":21,"source":"IRBI 021b4f20..021b4f74: three resolved halfwords02159a10, then021a9fa0 and native wait callback. Decoding only; runtime semantics must be integrated separately."},
+"544": {"spec":{"name":"NativeOpcode544","args":["u16","u16","u16","u16"]},"handler":"0x0216bc44","overlay":10,"source":"IRBI 0216bc44..0216bd24: two resolved halfwords02159a10 then two destinations021599e8 before the switch. Decoding only; runtime semantics must be integrated separately."},
+"583": {"spec":{"name":"NativeOpcode583","args":["u16","u16","u16","u16"]},"handler":"0x021b219c","overlay":21,"source":"IRBI 021b219c onward: four resolved halfwords02159a10 before native field model lookup/placement. Decoding only; runtime semantics must be integrated separately."},
+  "19": {
+    "spec": {"name": "VarOr", "args": ["u16", "u16"]},
+    "handler": "0x02159774", "overlay": 10,
+    "source": "IRBI02159774..02159790: destination via021599e8, resolved value via02159a10, ORRS and STRH. Each helper reads one halfword02011330."
+  },
+  "403": {
+    "spec": {"name": "NativeOpcode403", "args": ["u16"]},
+    "handler": "0x021b25ac", "overlay": 21,
+    "source": "IRBI021b25ac..021b25e0: one halfword via02011330, then021f372c and wait callback0215887c. Decoding only."
+  },
+  "404": {
+    "spec": {"name": "NativeOpcode404", "args": ["u16"]},
+    "handler": "0x021b25e4", "overlay": 21,
+    "source": "IRBI021b25e4..021b2618: one halfword via02011330, then021f3768 and wait callback0215887c. Decoding only."
+  },
+  "405": {
+    "spec": {"name": "NativeOpcode405", "args": ["u16"]},
+    "handler": "0x021b261c",
+    "overlay": 21,
+    "source": "IRBI overlay21:021b261c..021b2638 calls the native halfword reader02011330 once, then021f37a4. Decoding only; puzzle semantics not yet implemented."
+  }
+}

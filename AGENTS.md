@@ -14,7 +14,13 @@ L'utente ha ribadito di completare il lavoro con cura, rispettando tutte le indi
 
 Dopo aver completato la storia principale, realizzare anche animazioni delle MN sul campo personalizzate per ciascun Pokémon compatibile, comprese Volo e Surf. Devono comprendere il Pokémon che compie l'azione nel mondo, con anatomia, contatti, movimento e transizioni coerenti; il solo cut-in iniziale o la coreografia in battaglia non soddisfa questa richiesta. Registrare la copertura per specie/forma–MN e verificare le azioni effettivamente utilizzabili. Questa estensione segue il finale e non lo sostituisce né autorizza a sbloccare automaticamente il postgame.
 
-## Capitolo corrente · 0.50 in lavorazione
+## Capitolo corrente · 0.51 in lavorazione
+
+La0.50 è pubblicata e verificata: revisione pubblica9f3eb3ed9c872f04, riferimento Windowsdcf2a6f89e5568c8, main09ac96fdc7e958085db64966304a7b4bfdff4223, PR43.660 Node/7 Python/40 fasi e storia con audio attivo nei tre formati PASS.261 file radice e2361 asset pubblici confrontati;048 eliminata,049/050 e tutti i rapporti esterni conservati. Dettagli e limiti in docs/QA-050.md.
+
+Proseguire con docs/ICIRRUS-OPELUCID-051.md: Silvestro e storia successiva fino alla prossima città. Verificare gli eventi e le risorse nella ROM prima di integrarli; non confondere estrazione privata e partita giocabile. Cap39 prima di Silvestro e43 dopo la settima medaglia, secondo i massimi nativi già verificati; conservare livelli e XP superiori. La destinazione complessiva resta il primo finale. Le MN personalizzate nel mondo seguono quel finale.
+
+## Capitolo precedente · 0.50
 
 La0.49 è pubblicata e verificata: revisione pubblica b22c8656e2bbe29f, riferimento Windows13ee30f6f8c7d45e, main9881d9f24d1fe29c3bf77b615fbb43d549246b88. PR41 contiene la tappa e PR42 corregge l’ordine della pipeline Pages;529 Node/7 Python/38 fasi superati,223 file radice e270 asset serviti confrontati. Build047 rimossa,048/049 conservate con tutti i rapporti esterni. Dettagli e limiti in docs/QA-049.md.
 

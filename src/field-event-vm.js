@@ -34,6 +34,7 @@
             case 'WorkSetConst':this.set(a[0],a[1]);break;
             case 'WorkAdd':this.set(a[0],v[0]+v[1]);break;
             case 'WorkSub':this.set(a[0],v[0]-v[1]);break;
+            case 'VarOr':this.set(a[0],(v[0]|v[1])&65535);break; // IRBI02159774: ORRS, STRH.
             case 'WorkCmpConst':this.comparison=[v[0],v[1]];break;
             case 'FlagSet':if(!this.state.flags.includes(v[0]))this.state.flags.push(v[0]);break;
             case 'FlagReset':this.state.flags=this.state.flags.filter(f=>f!==v[0]);break;

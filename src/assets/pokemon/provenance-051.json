@@ -1,0 +1,197 @@
+{
+  "source": "Original Nitro composite frame0, rasterized at native pixel size in a96×96portrait",
+  "records": [
+    {
+      "asset": "src/assets/pokemon/553-front.png",
+      "original": "assets/animated/553-front.json + png",
+      "frame": 0,
+      "sha256": "debfdd8a1c2db4edf3a14f9f018d25d0c1065a2b228d477d17604650c726ad94"
+    },
+    {
+      "asset": "src/assets/pokemon/553-back.png",
+      "original": "assets/animated/553-back.json + png",
+      "frame": 0,
+      "sha256": "2ffcfb57be5336ef38344c20eb2b6cdfd2b7de9149af21d8b0fa0e198b6f43b0"
+    },
+    {
+      "asset": "src/assets/pokemon/556-front.png",
+      "original": "assets/animated/556-front.json + png",
+      "frame": 0,
+      "sha256": "966e214c1ee9ff0ea06b0bdafbf6734b2f299b4ae5e36cf7185ff94b112a8494"
+    },
+    {
+      "asset": "src/assets/pokemon/556-back.png",
+      "original": "assets/animated/556-back.json + png",
+      "frame": 0,
+      "sha256": "f3bfb961bb349d27bfdfa415bea3200d47cc04d1e623cd3fd27d4aaf45018143"
+    },
+    {
+      "asset": "src/assets/pokemon/558-front.png",
+      "original": "assets/animated/558-front.json + png",
+      "frame": 0,
+      "sha256": "d102cb0f38caa7b3cdd749f4974cd5cd98bbd666ea36143a483cef7c036cc24f"
+    },
+    {
+      "asset": "src/assets/pokemon/558-back.png",
+      "original": "assets/animated/558-back.json + png",
+      "frame": 0,
+      "sha256": "e1bcef84270b5d8eee9309dad2c3cfef6792bd5f409679d96f13f2d29ea0e64d"
+    },
+    {
+      "asset": "src/assets/pokemon/563-front.png",
+      "original": "assets/animated/563-front.json + png",
+      "frame": 0,
+      "sha256": "f0b8acd217fe13dcf98062c3b24cdb007b59d9e1675d7943114ce93fec73ea68"
+    },
+    {
+      "asset": "src/assets/pokemon/563-back.png",
+      "original": "assets/animated/563-back.json + png",
+      "frame": 0,
+      "sha256": "e87d3e3b7e6810cc739d0dbc5552cebb374967899d65b6e09cd966ebce43bc4c"
+    },
+    {
+      "asset": "src/assets/pokemon/576-front.png",
+      "original": "assets/animated/576-front.json + png",
+      "frame": 0,
+      "sha256": "228f24876e5ee5c6e86ffb4049fd917cf050f9d502a41ba4bd7cc8ff70c5d796"
+    },
+    {
+      "asset": "src/assets/pokemon/576-back.png",
+      "original": "assets/animated/576-back.json + png",
+      "frame": 0,
+      "sha256": "a84c6e4e770e66ec3a837416745b5f97ef4ee1ed2354bf5c2483ecbd876416b3"
+    },
+    {
+      "asset": "src/assets/pokemon/593-front.png",
+      "original": "assets/animated/593-front.json + png",
+      "frame": 0,
+      "sha256": "f80f29c9b229f0d4354ed1f1b604521eca0b7050c09e422f207472a162f1fc63"
+    },
+    {
+      "asset": "src/assets/pokemon/593-back.png",
+      "original": "assets/animated/593-back.json + png",
+      "frame": 0,
+      "sha256": "191958d7e6b819e7b95096a817b30bcf33df194f1159b40afb50607cd72e42e9"
+    },
+    {
+      "asset": "src/assets/pokemon/598-front.png",
+      "original": "assets/animated/598-front.json + png",
+      "frame": 0,
+      "sha256": "eef68128fc397b309ebbfde8481aba4bb2a25630795d3c67d52fb1829e93e30c"
+    },
+    {
+      "asset": "src/assets/pokemon/598-back.png",
+      "original": "assets/animated/598-back.json + png",
+      "frame": 0,
+      "sha256": "7c59e663b451ddd3ae1d7e7d1cd26bf296a6be3ace85fff2f5eba2ca5607b0f5"
+    },
+    {
+      "asset": "src/assets/pokemon/606-front.png",
+      "original": "assets/animated/606-front.json + png",
+      "frame": 0,
+      "sha256": "24d07f3700bbdd238539f0b140b8c62f145dc454fbac89dbed61ca19042a1cb6"
+    },
+    {
+      "asset": "src/assets/pokemon/606-back.png",
+      "original": "assets/animated/606-back.json + png",
+      "frame": 0,
+      "sha256": "086616672f929caa7debdb4bec57c7c6dbb656b6d1447b66a2f18c80f8796c82"
+    },
+    {
+      "asset": "src/assets/pokemon/608-front.png",
+      "original": "assets/animated/608-front.json + png",
+      "frame": 0,
+      "sha256": "6372aa4f4398408f2f63d6da52f438da86752aca9d9df2b1ea2911301b81c604"
+    },
+    {
+      "asset": "src/assets/pokemon/608-back.png",
+      "original": "assets/animated/608-back.json + png",
+      "frame": 0,
+      "sha256": "83965e09791a1410158cadf86057d2226c32811a53cbe40d6493f0e99d3f4a04"
+    },
+    {
+      "asset": "src/assets/pokemon/611-front.png",
+      "original": "assets/animated/611-front.json + png",
+      "frame": 0,
+      "sha256": "23e713a66cc33e95bef8690b259ced30497fe579388913921ac9ce8353192457"
+    },
+    {
+      "asset": "src/assets/pokemon/611-back.png",
+      "original": "assets/animated/611-back.json + png",
+      "frame": 0,
+      "sha256": "863004eec0a4540daed19f0c6b52bfb0ac0f1d74008bb1a99377887b57184764"
+    },
+    {
+      "asset": "src/assets/pokemon/619-front.png",
+      "original": "assets/animated/619-front.json + png",
+      "frame": 0,
+      "sha256": "de3961f556e1d0d170b3bb853e06e2cf2538d1533a4a9763d316bde8c58aa0cc"
+    },
+    {
+      "asset": "src/assets/pokemon/619-back.png",
+      "original": "assets/animated/619-back.json + png",
+      "frame": 0,
+      "sha256": "02928391198dc6405c1fd7db4cc3dd97d4fd3a14e62f664726efa2ec11dfdba2"
+    },
+    {
+      "asset": "src/assets/pokemon/621-front.png",
+      "original": "assets/animated/621-front.json + png",
+      "frame": 0,
+      "sha256": "7d6d309f0542333307eb70dd6731214a9995b7190361fd5e64b53c38996bb16a"
+    },
+    {
+      "asset": "src/assets/pokemon/621-back.png",
+      "original": "assets/animated/621-back.json + png",
+      "frame": 0,
+      "sha256": "63a637724fc60e345270a0ec387f83002cf7dc6a15f7f2fceaba854efd09d276"
+    },
+    {
+      "asset": "src/assets/pokemon/623-front.png",
+      "original": "assets/animated/623-front.json + png",
+      "frame": 0,
+      "sha256": "c66f3cc9534d5f89990a2cb21b6c855a4ded8bbf77f3e49880d448ca6be22855"
+    },
+    {
+      "asset": "src/assets/pokemon/623-back.png",
+      "original": "assets/animated/623-back.json + png",
+      "frame": 0,
+      "sha256": "3cc431eeef38e40fbeb383d380b5fc190c296290e8839c4e632a8798690e94b3"
+    },
+    {
+      "asset": "src/assets/pokemon/624-front.png",
+      "original": "assets/animated/624-front.json + png",
+      "frame": 0,
+      "sha256": "3dd7fe0b5b184c40c5e7621942ed880511f91120e62274a9deb8795b85c2afe3"
+    },
+    {
+      "asset": "src/assets/pokemon/624-back.png",
+      "original": "assets/animated/624-back.json + png",
+      "frame": 0,
+      "sha256": "02b060ee3b1f54680f9f652e185dbcb4e7c75c9a10577c51b1cd06cc8def7056"
+    },
+    {
+      "asset": "src/assets/pokemon/626-front.png",
+      "original": "assets/animated/626-front.json + png",
+      "frame": 0,
+      "sha256": "729fe0381bd6be377871b980a9339f96fc906b37e1c7f145fa6e4a7ac5130126"
+    },
+    {
+      "asset": "src/assets/pokemon/626-back.png",
+      "original": "assets/animated/626-back.json + png",
+      "frame": 0,
+      "sha256": "90c4e98cf1aa30e3025b2a701c96fdcddbe03eefa81f8f27acf9defd86575ef6"
+    },
+    {
+      "asset": "src/assets/pokemon/593-female-front.png",
+      "original": "assets/animated/593-female-front.json + png",
+      "frame": 0,
+      "sha256": "7e3facd2ea4161b20387a93782a536a9426e4a982fc60e078800e9319de1ffa1"
+    },
+    {
+      "asset": "src/assets/pokemon/593-female-back.png",
+      "original": "assets/animated/593-female-back.json + png",
+      "frame": 0,
+      "sha256": "75f6c336da23f7d5c2a9693dd9641652da6054f7485a80d1a989e068e5ea7158"
+    }
+  ]
+}
