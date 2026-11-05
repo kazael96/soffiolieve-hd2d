@@ -46,7 +46,7 @@
   let tutorialWarm=null;
   function warmTutorial(){if(native.zone!==317||value(16508)>=1||tutorialWarm||!window.BattleEnvironment||!window.ROM_SPRITE_ANIM)return;tutorialWarm=Promise.all([window.BattleScreen?.prepare?.(),BattleEnvironment.prepare(Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass'})),ROM_SPRITE_ANIM.prepare([{id:572,back:true},{id:504,back:false}]),window.NativeCapture?.preload(),window.MoveFX?.preload(1),window.AudioEngine?.preloadMove(1,{p1:572,p2:504})]).catch(()=>{tutorialWarm=null;});}
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
-  let eventRunning=false,surfService=false,queued=null,reservedLiftArrival=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
+  let eventRunning=false,surfService=false,pcService=false,queued=null,reservedLiftArrival=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
@@ -201,7 +201,8 @@
     if(eventRunning||sceneChanging||journey.processing||failed)return;
     eventRunning=true;resetInput();
     try{
-      if(script===2100){await healAtCenter();if(native.zone===398&&value(16507)===2)await vm.run(796,6);}
+      if(script===10090){pcService=true;try{await window.NativeUI.pc();}finally{pcService=false;}}
+      else if(script===2100){await healAtCenter();if(native.zone===398&&value(16507)===2)await vm.run(796,6);}
       else if(script===2101){await message(346,13);await message(346,24);
       }else if(script===10100||script===10105){await showPage(ORIGINAL_EVENTS.texts[346][24]);}
       else if(script===10397){await showPage('Non ci sono Doni Segreti da ricevere.');}
@@ -211,7 +212,7 @@
     finally{eventRunning=false;journey.save(true);}
   }
   async function nickname(index=0){
-    const pokemon=state.party[index];if(!pokemon)throw Error('Pokémon da rinominare non disponibile');
+    const pokemon=typeof index==='object'?index:state.party[index];if(!pokemon)throw Error('Pokémon da rinominare non disponibile');
     if(window.NativeNaming){const result=await NativeNaming.open(pokemon);if(result===null)return 0;pokemon.nickname=result;journey.displayPartner();return 1;}
     const box=$('starterChoices'),input=document.createElement('input'),ok=document.createElement('button'),cancel=document.createElement('button'),d=$('dialogue');
     input.maxLength=10;input.value=pokemon.nickname||'';input.setAttribute('aria-label','Soprannome del Pokémon');ok.textContent='Conferma';cancel.textContent='Annulla';ok.type=cancel.type='button';
@@ -689,7 +690,7 @@
     // IRBI's counter tile is behaviour 0xD4. A wall or merely distant actor
     // does not permit talking through it. The nurse stands one tile beyond it.
     const wx=front.x+.5-origin()[0],wz=front.z+.5-origin()[1],g=renderer.scene.permissionGrids.find(g=>wx>=g.x-16&&wx<g.x+16&&wz>=g.z-16&&wz<g.z+16);
-    if(g){const i=8+((Math.floor(wz-g.z)+16)*32+Math.floor(wx-g.x)+16)*8;if(g.bytes[i]===0xd4){n=find({x:front.x+dx,z:front.z+dz},2.6);if(n)return {kind:'actor',n,script:n.script};}}
+    if(g){const i=8+((Math.floor(wz-g.z)+16)*32+Math.floor(wx-g.x)+16)*8;if(g.bytes[i]===0xd6&&frames.indexOf(facing)===0&&[398,8,20,41,65,99,109,115].includes(native.zone))return {kind:'pc',script:10090};if(g.bytes[i]===0xd4){n=find({x:front.x+dx,z:front.z+dz},2.6);if(n)return {kind:'actor',n,script:n.script};}}
     // Background records use grid X/Z followed by vertical height. Directions
     // 0..3 are N/E/W/S; 4 is any, 5 horizontal and 6 vertical.
     const dir=frames.indexOf(facing),allowed=[[0],[3],[2],[1],[0,1,2,3],[2,3],[0,1]];
@@ -749,7 +750,7 @@
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===115?changeZone(115,7,13):native.healZone===109?changeZone(109,7,13):native.healZone===99?changeZone(99,7,13):native.healZone===65?changeZone(65,7,13):native.healZone===41?changeZone(41,7,13):native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return window.SurfField?.music()||(window.Bicycle?.mounted()?1012:window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music);},get fieldCheckpointAllowed(){return (!!window.IcirrusGym?.busy||!!window.SurfField?.checkpointable)&&(!eventRunning||surfService)&&!sceneChanging&&!vm.running&&!failed&&!journey.processing;},get locked(){return !!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>native.healZone===115?changeZone(115,7,13):native.healZone===109?changeZone(109,7,13):native.healZone===99?changeZone(99,7,13):native.healZone===65?changeZone(65,7,13):native.healZone===41?changeZone(41,7,13):native.healZone===20?changeZone(20,7,13):native.healZone===8?changeZone(8,7,13):native.healZone===398?changeZone(398,7,13):changeZone(390,5,8),get music(){return window.SurfField?.music()||(window.Bicycle?.mounted()?1012:window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music);},get fieldCheckpointAllowed(){return (pcService||!!window.IcirrusGym?.busy||!!window.SurfField?.checkpointable)&&(!eventRunning||surfService||pcService)&&!sceneChanging&&!vm.running&&!failed&&!journey.processing;},get locked(){return !!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
   NativeStory.useEscapeRope=useEscapeRope;
   NativeStory.useFly=useFly;NativeStory.useSurf=useSurf;
   window.SurfField?.restore();window.IcirrusGym?.restore();window.MistraltonGym?.restore();window.MistraltonPuzzles?.restore();window.MistraltonContinuity?.enterZone(native.zone,{covered:fieldCovered});

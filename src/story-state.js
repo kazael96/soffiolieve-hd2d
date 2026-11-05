@@ -11,6 +11,7 @@
   Object.assign(objectives,{route4:'Attraversa il Percorso 4 e raggiungi Sciroccopoli.',nimbasa:'Esplora Sciroccopoli e aiuta il proprietario della Pensione Pokémon.'});
   Object.assign(objectives,{nimbasa:'Affronta N al luna park e la palestra di Camelia, poi raggiungi il Percorso 5.',driftveil:'Sei arrivato a Libecciopoli. Esplora la città e visita il Centro Pokémon.'});
   Object.assign(objectives,{driftveil:'Aiuta Komor al Deposito Frigo, poi affronta Rafan.',route6:'Attraversa il Percorso 6 e raggiungi la Cava Pietrelettrica.',chargestone:'Attraversa la Cava Pietrelettrica verso Ponentopoli.',mistralton:'Sei arrivato a Ponentopoli. Visita il Centro Pokémon.'});
+  Object.assign(objectives,{mistralton:'Incontra Anemone a Ponentopoli e raggiungila alla Torre Cielo.',route7:'Percorri il Percorso 7 verso la Torre Cielo.',celestial:'Sali sulla Torre Cielo e suona la campana.',skylaGym:'Raggiungi Anemone nella palestra di Ponentopoli.',twistMountain:'Attraversa Monte Vite verso Mistralopoli.',icirrus:'Sei arrivato a Mistralopoli. Esplora la città e il Centro Pokémon.'});
   function fresh(){return {version:2,playerName:'Alcide',phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],dex:{seen:[],caught:[]},pokeballs:0,potions:0,money:3000,routePotion:false};}
   function advance(s,expected){if(s.phase!==expected)return false;s.phase=phases[phases.indexOf(expected)+1]||expected;return true;}
   function choose(s,name){if(s.phase!=='gift'||!starters.includes(name))return false;s.starter=name;s.phase='belle';return true;}
@@ -26,6 +27,7 @@
     if(p.met&&Number.isFinite(Date.parse(p.met.date))&&Number.isInteger(p.met.zone)&&Number.isInteger(p.met.level))result.met={date:new Date(p.met.date).toISOString(),zone:p.met.zone,level:Math.max(1,Math.min(100,p.met.level))};
     return result;
   }
+  function cleanPokemon(p,names=speciesNames()){if(!p||!names.includes(p.name))return null;return {name:p.name,nickname:typeof p.nickname==='string'?p.nickname.slice(0,10):'',...([0,2,3,4,6,8,9,12,13,14,17,18,19,20,21,22,24,25,26,27,28,30,38,39,50,51,52,57,58,60,76,77,78,79,81,82,83,84,85,92,93,150,155,157,158,188,91,217,222,223,228,231,233,239,247,255,296,504,540,591,137,138,139,140,141,142,143,144,145].includes(p.heldItem)?{heldItem:p.heldItem}:{}),...traits(p),level:Math.max(2,Math.min(100,Math.floor(p.level)||5)),xp:Math.max(0,Math.floor(p.xp)||0),hp:Number.isInteger(p.hp)?Math.max(0,Math.min(999,p.hp)):null,status:['par','brn','psn','tox','slp','frz'].includes(p.status)?p.status:'',pp:Array.isArray(p.pp)?p.pp.filter(m=>Number.isInteger(m?.id)&&Number.isInteger(m?.left)).map(m=>({id:m.id,left:Math.max(0,Math.min(99,m.left))})).slice(0,4):[]};}
   function normalize(v){
     if(!v||v.version!==2||!phases.includes(v.phase)||!scenes.includes(v.scene))return null;
     if(v.phase!=='gift'&&!starters.includes(v.starter))return null;
@@ -33,9 +35,11 @@
     if(Number.isFinite(v.player?.x)&&Number.isFinite(v.player?.y))s.player={x:Math.max([329,96,191,331,194,107,337,198,113].includes(v.original?.zone)?-768:[326,62].includes(v.original?.zone)?-512:-240,Math.min(v.original?.zone===253?256:v.original?.zone===249?192:96,v.player.x)),y:Math.max([337,198,113].includes(v.original?.zone)?-768:[326,62,329,96,191,331,194,107].includes(v.original?.zone)?-512:-256,Math.min(v.original?.zone===249?336:96,v.player.y))};
     s.facing=[0,3,6,9].includes(v.facing)?v.facing:3;
     const names=speciesNames();
-    s.party=Array.isArray(v.party)?v.party.filter(p=>names.includes(p?.name)).slice(0,6).map(p=>({name:p.name,nickname:typeof p.nickname==='string'?p.nickname.slice(0,10):'',...([0,2,3,4,6,8,9,12,13,14,17,18,19,20,21,22,24,25,26,27,28,30,38,39,50,51,52,57,58,60,76,77,78,79,81,82,83,84,85,92,93,150,155,157,158,188,91,217,222,223,228,231,233,239,247,255,296,504,540,591,137,138,139,140,141,142,143,144,145].includes(p.heldItem)?{heldItem:p.heldItem}:{}),...traits(p),level:Math.max(2,Math.min(100,Math.floor(p.level)||5)),xp:Math.max(0,Math.floor(p.xp)||0),hp:Number.isInteger(p.hp)?Math.max(0,Math.min(999,p.hp)):null,status:['par','brn','psn','tox','slp','frz'].includes(p.status)?p.status:'',pp:Array.isArray(p.pp)?p.pp.filter(m=>Number.isInteger(m?.id)&&Number.isInteger(m?.left)).map(m=>({id:m.id,left:Math.max(0,Math.min(99,m.left))})).slice(0,4):[]})):[];
+    s.party=Array.isArray(v.party)?v.party.map(p=>cleanPokemon(p,names)).filter(Boolean).slice(0,6):[];
+    const store=root.PokemonStorage||(typeof require==='function'?require('./pokemon-storage.js'):null);if(v.storage&&store)s.storage=store.normalize(v.storage,p=>cleanPokemon(p,names));
+    if(v.starterReleased===true&&s.starter)s.starterReleased=true;
     const isStarter=name=>root.Training?root.Training.starterFamily(name,s.starter):name===s.starter;
-    if(s.phase!=='gift'&&(!s.party.length||!s.party.some(p=>isStarter(p.name))&&!(isStarter(v.original?.daycare?.pokemon?.name)&&Number.isInteger(v.original.daycare.pokemon.level)&&Array.isArray(v.original.daycare.pokemon.pp))))return null;
+    if(s.phase!=='gift'&&(!s.party.length||!s.starterReleased&&!s.party.some(p=>isStarter(p.name))&&!s.storage?.boxes.some(box=>box.some(p=>p&&isStarter(p.name)))&&!(isStarter(v.original?.daycare?.pokemon?.name)&&Number.isInteger(v.original.daycare.pokemon.level)&&Array.isArray(v.original.daycare.pokemon.pp))))return null;
     const valid=list=>Array.isArray(list)?[...new Set(list.filter(n=>[...names,'Purrloin'].includes(n)))]:[];
     s.dex={seen:Array.isArray(v.dex?.seen)?[...new Set(v.dex.seen.filter(n=>names.includes(n)||Object.hasOwn(root.TRAINING_DATA?.progression||{},n)))]:[],caught:valid(v.dex?.caught)};
     if(v.dex?.appearances&&typeof v.dex.appearances==='object'){s.dex.appearances={};for(const [name,a]of Object.entries(v.dex.appearances).slice(0,700))if(names.includes(name)&&a&&typeof a==='object')s.dex.appearances[name]={...(['M','F','N'].includes(a.gender)?{gender:a.gender}:{}),...(Number.isInteger(a.form)&&a.form>=0&&a.form<4?{form:a.form}:{})};}
@@ -70,5 +74,5 @@
   function read(storage){try{const raw=storage.getItem(KEY);if(!raw)return fresh();return normalize(JSON.parse(raw))||fresh();}catch{return fresh();}}
   function write(storage,state){try{const normalized=normalize(state);if(!normalized)return false;storage.setItem(KEY,JSON.stringify(normalized));return true;}catch{return false;}}
   function erase(storage){try{if(!storage)return false;storage.removeItem(KEY);return storage.getItem(KEY)==null;}catch{return false;}}
-  const api={erase,KEY,phases,starters,scenes,objectives,fresh,advance,choose,rivalStarter,register,normalize,read,write};root.StoryState=api;if(typeof module!=='undefined')module.exports=api;
+  const api={cleanPokemon,erase,KEY,phases,starters,scenes,objectives,fresh,advance,choose,rivalStarter,register,normalize,read,write};root.StoryState=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

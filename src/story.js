@@ -12,6 +12,22 @@
   function pack(m,xp=0){return {name:m.name,...(window.MistraltonMail?.sanitizeMail?.(m.mail,m.heldItem)?{mail:MistraltonMail.sanitizeMail(m.mail,m.heldItem)}:{}),...(Number.isInteger(m.form)?{form:m.form}:{}),...(m.met?{met:m.met}:{}),personality:m.personality??0,nickname:m.nickname||'',heldItem:m.heldItem||0,level:m.level,xp,hp:m.hp,status:m.status||'',ivs:m.ivs,evs:m.evs,nature:m.nature,gender:m.gender,abilityId:m.abilityId,happiness:m.happiness,pp:m.moves.map(m=>({id:m.id,left:m.left}))};}
   function record(m,xp=0){return {...pack(m,xp),met:{date:new Date().toISOString(),zone:state.original?.zone||391,level:m.level}};}
   function unpack(p){const m=makeMon(p.name,p.level,p);if(p.hp!==null)m.hp=Math.min(m.max,p.hp);m.status=p.status;for(const move of m.moves){const old=p.pp.find(x=>x.id===move.id);if(old)move.left=Math.min(move.pp,old.left);}return m;}
+  let storingCapture=false;
+  const pokemonStorage=PokemonStorage.create(state,{
+    allowed:()=>!battling&&(!processing||storingCapture),
+    isMail:id=>window.MistraltonMail?.isMail(id)===true,
+    isUsable:p=>!!p&&!p.egg&&unpack(p).hp>0,
+    toBox:p=>{const m=makeMon(p.name,p.level,p);return {...p,pp:p.pp.map(move=>({...move,left:m.moves.find(m=>m.id===move.id)?.pp??move.left}))};},
+    toParty:p=>({...p,hp:makeMon(p.name,p.level,p).max,status:''})
+  });
+  for(const action of ['move','release','capture']){
+    const perform=pokemonStorage[action];pokemonStorage[action]=(...args)=>{
+      const released=action==='release'?pokemonStorage.get(args[0]):null,result=perform(...args);
+      if(result.ok){if(released&&Training.starterFamily(released.name,state.starter))state.starterReleased=true;lead=Math.max(0,state.party.findIndex(p=>unpack(p).hp>0));}
+      return result;
+    };
+  }
+  const canCapture=()=>state.party.length<6||!!pokemonStorage.space();
   function displayPartner(){partner=state.party.length?unpack(state.party[lead]||state.party[0]):makeMon('Snivy',5);document.querySelector('.companion').hidden=!state.starter;refresh();}
   function update(){
     $('questSummary').textContent=$('storyObjective').textContent=StoryState.objectives[state.phase];
@@ -105,10 +121,14 @@
     for(const mon of s.battle.p1.pokemon)if(mon.storyId!==undefined&&mon.ateBerry&&!mon.item)state.party[mon.storyId].heldItem=0;
     if(s.double&&(captured||escaped))for(const foe of s.battle.p2.pokemon.filter(p=>p.hp===0))await gainXP(s,kind,foe);
     if(captured){
-      const first=StoryState.register(state,captured.name,true,captured),index=state.party.length;state.party.push(record(captured,OPENING_DATA[captured.name].growth[captured.level]));
+      const first=StoryState.register(state,captured.name,true,captured);let destination;
+      storingCapture=true;try{destination=pokemonStorage.capture(record(captured,OPENING_DATA[captured.name].growth[captured.level]));}finally{storingCapture=false;}
+      if(!destination.ok)throw Error('Nessun posto disponibile per il Pokémon catturato');
+      const pokemon=destination.party?state.party[destination.slot]:pokemonStorage.get(destination);
       if(first&&state.original?.pokedex){await progressText(15,66,[captured.name]);await Pokedex.entry(captured.name,{registration:true,pokemon:captured});}
       await NativeStory.showPage(messagePages(POKEDEX_ASSETS.labels.nickname,[captured.name]).join('\n'));
-      if(await NativeStory.choice(['SÌ','NO'])===0)await NativeStory.nickname(index);
+      if(await NativeStory.choice(['SÌ','NO'])===0)await NativeStory.nickname(pokemon);
+      if(!destination.party)await NativeStory.showPage((pokemon.nickname||pokemon.name)+' è stato trasferito al BOX '+(destination.box+1)+'.');
     }else if(!escaped&&s.battle.winner==='Alcide'){const defeated=[...s.battle.p2.pokemon,...(s.multi?s.battle.p4.pokemon:[])].filter(p=>p.hp===0);for(const foe of defeated.length?defeated:[s.active('p2')])await gainXP(s,kind,foe);}
     for(const id of leveled){const p=state.party[id];if(p?.hp>0)await evolve(p);}
     if(s.openingTrainer&&s.battle.winner==='Alcide'){
@@ -169,7 +189,7 @@
   function useRepel(id=79){if(battling||![76,77,79].includes(id)||!itemCount(id))return false;consumeItem(id);state.original.repelRemaining=({76:200,77:250,79:100})[id];save(true);return true;}
   async function teachMachine(id,index){const p=state.party[index],move=({...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,373:168,410:526,420:15})[id];if(battling||processing||!p||!move||!itemCount(id)||!((window.TRAINING_DATA?.compatibility[p.name]||window.ROUTE3_DATA?.compatibility[p.name]||STRIATON_DATA.compatibility[p.name])?.includes(id)))return false;processing=true;try{await learnMove(p,move);return p.pp.some(m=>m.id===move);}finally{processing=false;save(true);}}
   function daycareSteps(distance){const care=state.original?.daycare;if(!care||!Number.isFinite(distance)||distance<=0)return;care.distance=(care.distance||0)+distance;const steps=Math.floor(care.distance);if(!steps)return;care.distance-=steps;const p=care.pokemon,data=OPENING_DATA[p.name];if(!data)return;const cap=Training.cap(p),before=p.level;p.xp=Training.xp(p,steps,data.growth).total;while(p.level<cap&&p.xp>=data.growth[p.level+1]){p.level++;const species=GEN5.species.find(s=>s.en===p.name);for(const move of species.learnset.filter(m=>m.level===p.level)){if(p.pp.some(m=>m.id===move.id))continue;if(p.pp.length>=4)p.pp.shift();p.pp.push({id:move.id,left:GEN5.moves.find(m=>m.id===move.id).pp});}}if(p.level!==before){const m=makeMon(p.name,p.level,p);p.hp=m.max;}}
-  window.Journey={useZinc,useEvolutionStone,useEther,daycareSteps,useMoonStone,useMedicine,useRepel,teachMachine,restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
+  window.Journey={storage:pokemonStorage,canCapture,useZinc,useEvolutionStone,useEther,daycareSteps,useMoonStone,useMedicine,useRepel,teachMachine,restart,itemCount,addItem,consumeItem,useRareCandy,giveItem,takeItem,discardItem,moveParty,usePotion,get processing(){return processing;},state,outdoor,save,heal,openJournal,openTeam,talk,interact,hint,step,configs,attachBattle,recordParticipant,afterBattle,pack,record,unpack,setScene,update,displayPartner,encounter};
   potions=state.potions;renderer.scene=state.scene==='town'?outdoor:OPENING_ASSETS.scenes[state.scene==='bedroom'&&state.original?.roomMess?'bedroomMess':state.scene];player={...state.player};facing=state.facing;
   if(blocked(player.x-.18,player.y-.18)||blocked(player.x+.18,player.y+.18)){const p={zone17:[-7.5,10.5],zone18:[-7.5,13.5],zone19:[-11.5,2.5],zone155:[70.5,55.5],zone250:[-.5,12.5],zone251:[-13.5,-11.5],zone252:[-7.5,-6.5],zone249:[77,259.9],zone28:[55,16],zone41:[-8.5,-3.5],zone322:[-8.5,-3.5],zone323:[-8.5,-3.5],zone324:[13.5,-10.5],zone27:[-2.5,-11.5],zone20:[-8.5,-3.5],zone8:[-8.5,-3.5],zone398:[-8.5,2.5],zone399:[-9.5,-7.5],zone400:[-6.5,-12.5],zone401:[-9.5,-7.5],zone402:[-6.5,-12.5],zone403:[-9.5,-7.5],zone404:[-6.5,-12.5],zone405:[-10.5,-6.5],zone320:[-8.5,-11.5],biancaRoom:[-10.5,-9.5],komorHome:[-10.5,-6.5],komorRoom:[-10.5,-9.5],bedroom:[-10.5,-10.5],home:[-10.5,-6.5],bianca:[-10.5,-6.5],lab:[-12.5,-5.5],zone7:[-3.5,26.5],zone9:[-8.5,-6.5],zone10:[-5.5,-12.5],zone15:[-8.5,-1.5],zone152:[-6.5,10.5],town:[-2,0]}[state.scene];if(p)player={x:p[0],y:p[1]};}
   renderer.center=SceneCamera.anchor(state.scene,renderer.scene,state.original?.zone,player);displayPartner();actors();update();
