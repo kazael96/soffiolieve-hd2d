@@ -3,14 +3,14 @@
  let options={},kit=null;const tasks=new WeakMap(),directions=[[0,-1],[0,1],[-1,0],[1,0]],gymRoute=[[0,0],[1,2],[1,3],[2,2],[3,0],[4,3],[4,2],[5,1],[6,3],[7,0],[8,2]];
  const data=()=>root.ICIRRUS_EVENTS,zone=()=>options.native?.zone,records=()=>options.departures?.records;
  const global=z=>root.IcirrusChapter.globalZones.includes(z),origin=z=>global(z)?[784,752]:[16,16];
- function portal(z,index){const w=data().zones[z].warps[index],o=origin(z);if(w.rail){const p=root.NativeRails.warp(z,w);return {w,x:p.x-o[0],y:p.z-o[1],height:p.height,dx:p.out.x,dy:p.out.z};}const [dx,dy]=({1:[0,1],2:[0,-1],3:[1,0],4:[-1,0]})[w.a];return {w,x:w.x/16+(w.width-1)/2-o[0],y:w.z/16+(w.height-1)/2-o[1],height:w.y/16,dx,dy};}
+ function portal(z,index){const w=data().zones[z].warps[index],o=origin(z);if(w.rail){const p=root.NativeRails.warp(z,w);return {w,x:p.x-o[0],y:p.z-o[1],height:p.height,dx:p.out.x,dy:p.out.z};}const [dx,dy]=({1:[0,1],2:[0,-1],3:[1,0],4:[-1,0]})[w.a];return {w,x:w.x/16+(w.width-1)/2-o[0],y:w.z/16+(w.height-1)/2-o[1],height:(w.y<<16>>16)/16,dx,dy};}
  function door(z,index){const p=portal(z,index),next=portal(p.w.zone,p.w.warp);const sourceLanding=p.w.rail?root.NativeRails.landing(z,p.w):null,nextLanding=next.w.rail?root.NativeRails.landing(p.w.zone,next.w):null;return {...kit.door(z,p.x,p.y,p.dx,p.dy,{x:next.x+next.dx*.8,y:next.y+next.dy*.8},p.height),nativePortal:index,nextHeight:nextLanding?.rail.height??next.height,...(sourceLanding?{stagePoint:{x:sourceLanding.x,y:sourceLanding.z,height:sourceLanding.rail.height}}:{stagePoint:{x:p.x-p.dx,y:p.y-p.dy,height:p.height}}),nextEntry:nextLanding?{x:nextLanding.x,y:nextLanding.z}:{x:next.x-next.dx,y:next.y-next.dy}};}
  function tower(up){const rows=up?[[337,0],[338,1],[339,1],[340,1],[341,1]]:[[342,0],[341,0],[340,0],[339,0],[338,0]];return rows.map(([z,i])=>door(z,i));}
  function north(){const a=root.ICIRRUS_SCENES[337].permissionGrids,b=root.ICIRRUS_SCENES[198].permissionGrids,min=Math.min(...a.map(g=>g.z))-16;let best=null;
   for(let x=-710.5;x< -620;x++){const top={x,y:min+.5},bottom={x,y:min-.5};if(blocked(337,x,top.y)===false&&blocked(198,x,bottom.y)===false&&(!best||Math.abs(x+641.5)<Math.abs(best.x+641.5)))best=top;}
   if(!best)throw Error('Corridoio nativo Percorso7/Monte Vite non disponibile');return kit.edge(337,best.x,best.y,0,-1);
  }
- function mountain(){return [door(198,0),...[[200,1],[199,1],[200,4],[199,4],[200,6],[201,0],[199,6],[201,2],[199,8],[201,4],[202,1],[199,10]].map(([z,i])=>door(z,i))];}
+ function mountain(){const path=root.FieldSeason?.current()===3?[[200,1],[199,14],[201,7]]:[[200,1],[199,1],[200,4],[199,4],[200,6],[201,0],[199,6],[201,2],[199,8],[201,4],[202,1],[199,10]];return [door(198,0),...path.map(([z,i])=>door(z,i))];}
  function cannonLegs(){return gymRoute.map(([index,direction])=>{const a=root.ICIRRUS_GYM_DATA.anchors[index],[dx,dy]=directions[direction];return {zone:108,kind:'cannon',anchor:{x:a[0]-15.5-dx*2,y:a[2]-15.5-dy*2},cannon:index,cannonDirection:direction,height:a[1]};});}
  function extend(value){kit=value;const old={...kit.itineraries};
   kit.itineraries['skyla-celestial-tower']=()=>[...old['skyla-celestial-tower'](),...tower(true),kit.arrival(342,.5,-1.5,342,0,7)];

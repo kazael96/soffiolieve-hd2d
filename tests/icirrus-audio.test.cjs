@@ -15,10 +15,10 @@ test('all16 native music clips retain sample-exact durations, hashes and valid l
  for(const[id,record]of Object.entries(d.music))lossless(record,id);
  assert.equal(c.FIELD_AUDIO.prior.src,'keep.flac');
 });
-test('all21 scripted/cannon/bell effects have native provenance and bounded one-shot duration',()=>{
- assert.equal(Object.keys(d.sounds).length,21);
+test('all22 scripted/cannon/bell/jump effects have native provenance and bounded one-shot duration',()=>{
+ assert.equal(Object.keys(d.sounds).length,22);
  for(const[id,record]of Object.entries(d.sounds)){lossless(record,id);assert.ok(record.duration>0&&record.duration<=12);assert.equal(record.sustain,false);assert.ok(record.nativeHandlers.length);}
- for(const id of [1688,1689,1696,1686,1687,1697,1969])assert.ok(d.sounds[id]);
+ for(const id of [1374,1659,1688,1689,1696,1686,1687,1697,1969])assert.ok(d.sounds[id]);
 });
 test('all24 new cries contain actual mono PCM16 samples with native pitch/volume metadata',()=>{
  const proof=JSON.parse(fs.readFileSync(path.join(root,'assets/animated/provenance-050.json')));

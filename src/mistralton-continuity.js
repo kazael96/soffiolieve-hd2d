@@ -73,6 +73,7 @@
  function shouldTick(record){return !known(record)||sameField(record.zone,activeZone());}
  function canRetire(record){if(record.plan?.kind==='cannon')return false;return known(record)?record.stage==='hold'&&record.index>=record.plan.points.length:undefined;}
  function nextLeg(record){if(!known(record))return null;const destination=record.plan.destination,index=record.plan.leg,all=itineraries[destination](),old=all[index],next=all[index+1];
+  if(next&&root.IcirrusChapter?.zones.includes(next.zone)&&!root.IcirrusChapter.ready)return {deferred:true};
   if(!next){const event=nextEvents[destination];if(!event)return null;
    const actor={...record.actor,fieldZone:337,exitProbe:false,script:2000};delete actor.exitClip;
    return {actor,zone:337,plan:{...record.plan,kind:'resident',points:[],clip:null,nextChapter:true,nextEvent:event,transferAuthorized:true},stage:'resident',index:0,opened:false,zero:0,sampleSequence:-1,target:null};
@@ -116,7 +117,7 @@
   if(record.plan.kind!=='door'||record.plan.portalEntered)return;const leg=itineraries[record.plan.destination]()[record.plan.leg];
   if((record.actor.x-leg.anchor.x)*leg.dx+(record.actor.y-leg.anchor.y)*leg.dy>=-.000001)record.plan.portalEntered=true;
  }
- function notifyArrival(record){if(record.stage==='resident'&&!record.arrivalNotified){record.arrivalNotified=true;root.IcirrusContinuity?.arrived(record);options.recheck?.();}}
+ function notifyArrival(record){if(record.stage==='resident'){delete record.actor.incomingPortal;delete record.plan.entryCorridor;if(!record.arrivalNotified){record.arrivalNotified=true;root.IcirrusContinuity?.arrived(record);options.recheck?.();}}}
  function enterZone(zone=activeZone(),{covered=false}={}){root.IcirrusContinuity?.enterZone(zone,{covered});const phase=options.native?.vars?.[16523]??0,source=zone===192&&phase===0?191:zone===193&&phase===2?192:null;if(source===null||!options.departures||!options.native)return false;
   const flag=zone===192?544:805;if(Array.isArray(options.native?.flags)&&!options.native.flags.includes(flag))return false;
   let started=entryTrips.get(options.native);if(!started){started=new Set();entryTrips.set(options.native,started);}const trip=zone+':'+phase;if(started.has(trip))return false;

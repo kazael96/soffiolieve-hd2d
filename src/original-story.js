@@ -72,6 +72,7 @@
     if(native.zone===343&&record.model===162)record={...record,model:209};
     if(record.rail&&!record.railOriginal&&window.NativeRails?.has(native.zone))record=NativeRails.actor(native.zone,record);
     const n={...world(record.x,record.z),...(record.railOriginal?{railOriginal:record.railOriginal,railHeight:record.y/65536}:{}),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:(record.y||0)/65536};
+    if(native.zone===199&&record.model<162)n.height=window.IcirrusChapter?.surfaceAt(native.zone,n.x,n.y,n.height)?.height??n.height;
     n.wander=NpcWalk.create(record,{x:n.x,y:n.y});if(([185,8198,8199].includes(record.model)||native.zone===29&&record.model===0)){n.noShadow=true;n.gimmick=true;}pose(n,record.direction);npcs.push(n);window.MistraltonContinuity?.introduced(n,npcs);renderer.requireActors?.(fieldActors());return n;
   }
   function syncActors(){
@@ -92,6 +93,7 @@
     }
     const saved=native.actors?.[native.zone]||[];
     for(const n of npcs){const previous=saved.find(p=>p.uid===n.uid),record=data().actors.find(p=>p.id===n.uid);if(previous&&(!record.flag||!(native.actorFlags?.[native.zone]||[]).includes(record.flag)))Object.assign(n,structuredClone(previous));}
+    if(native.zone===199)for(const n of npcs)if(n.model<162)n.height=window.IcirrusChapter?.surfaceAt(native.zone,n.x,n.y,n.height)?.height??n.height;
 
     if(native.zone===389){
       if(value(16511)===1){const n=actor(3);if(n)Object.assign(n,world(781,751));}
@@ -270,7 +272,7 @@
       if(task.elapsed>=duration){n.jumpLift=0;if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
-  function fieldActors(){const actors=npcs.filter(n=>!n.hidden),visible=window.MistraltonContinuity?.visibleActors(actors)||actors;return departures.visible(visible,player).filter(n=>n.exitPlan?.chapter049||n.continuityPlan?.chapter049||window.MistraltonChapter?.zones.includes(n.fieldZone)||[337,198,342,113].includes(n.fieldZone)?(window.MistraltonContinuity?.sameField(n.fieldZone,native.zone)??n.fieldZone===native.zone):!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
+  function fieldActors(){const actors=npcs.filter(n=>!n.hidden),visible=window.MistraltonContinuity?.visibleActors(actors)||actors;return departures.visible(visible,player).filter(n=>n.exitPlan?.chapter049||n.continuityPlan?.chapter049||window.MistraltonChapter?.zones.includes(n.fieldZone)||window.IcirrusChapter?.zones.includes(n.fieldZone)?(window.MistraltonContinuity?.sameField(n.fieldZone,native.zone)??n.fieldZone===native.zone):!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
   function occupied(x,y){return fieldActors().some(n=>!n.gimmick&&((window.IcirrusGym?.sameLevel(n)??true)&&(window.MistraltonGym?.sameLevel(n)??true))&&((n.height||0)>=0||native.zone===97)&&(!window.NativeRails?.has(native.zone)||Math.abs((n.railHeight??0)-(native.railCurrent?.height??0))<1.8)&&NpcWalk.occupies(n,x,y));}
   function ambientMoving(){const bodies=fieldActors();return npcs.some(n=>bodies.includes(n)&&!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
@@ -362,7 +364,7 @@
       case 'NativeOpcode384':DriftveilGym.activate(v[0]);break;
       case 'NativeOpcode385':native.rollerTrainerClear=v[0];break;
       case 'NativeOpcode608':await DriftveilGym.prepare();break;
-      case 'NativeOpcode43':native.chapterSeason=v;break;
+      case 'NativeOpcode43':m.set(a[0],Math.imul(v[0],v[1])&0xffff);break;
       case 'NativeOpcode562':m.set(a[1],0);break;
       case 'NativeOpcode317':native.nimbasaScenePresentation=true;break;
       case 'NativeOpcode318':native.nimbasaScenePresentation=false;break;
@@ -375,7 +377,7 @@
       case 'NativeOpcode151':m.set(a[1],native.trainerWins?.includes(v[0])?1:0);break;
       case 'NativeOpcode207':m.set(a[0],new Date().getDay());break;
       case 'NativeOpcode208':m.set(a[0],new Date().getMonth()+1);m.set(a[1],new Date().getDate());break;
-      case 'NativeOpcode210':m.set(a[0],new Date().getMonth()%4);break;
+      case 'NativeOpcode210':m.set(a[0],window.FieldSeason?.current(native)??new Date().getMonth()%4);break;
       case 'NativeOpcode301':native.casteliaObjectStates??={};native.casteliaObjectStates[v.slice(0,3).join(':')]=v[3];break;
       case 'NativeOpcode308':native.casteliaPedestrians=true;break;
       case 'NativeOpcode64':native.moneyWindow=true;break;
@@ -550,8 +552,9 @@
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
     if(SceneCamera.tracks(OPENING_ASSETS.scenes[zoneScenes[zone]])){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
-    captureActors();native.zone=zone;if(window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.SurfField?.enter();syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
-    for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
+    captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:!!OPENING_ASSETS.scenes[zoneScenes[zone]].outdoor,fromOutdoor:!!renderer.scene.outdoor,busy:[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.SurfField?.enter();syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
+    const initFlags=native.flags.join(',');for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
+    if(window.IcirrusChapter?.zones.includes(zone)&&native.flags.join(',')!==initFlags)syncActors();
     if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;if(zone===107)native.mistralton=true;if(zone===113)native.icirrus=true;derivePhase();
     captureActors();await renderer.prepareScene?.();if(restoreField)await fade(0,8);
   }
@@ -570,7 +573,7 @@
         // IRBI pre-warp starts passage alongside opening; no additional door wait.
         move(255,[[8+warpDirections[w.a],1]]);await Promise.all(motions.filter(t=>t.id===255).map(t=>t.promise));
       }
-      await fade(1,8);const point=warpPoint(dw,w.zone);await changeZone(w.zone,Math.floor(point.x),Math.floor(point.z),dw.y/16);face(255,inward);
+      await fade(1,8);const point=warpPoint(dw,w.zone);await changeZone(w.zone,Math.floor(point.x),Math.floor(point.z),(dw.y<<16>>16)/16);face(255,inward);
       const [dx,dz]=origin(),doorX=dw.x/16-dx,doorZ=dw.z/16-dz;
       const door=fieldModels?.find(1,doorX,doorZ)?fieldModels.create(1,doorX,doorZ):null;
       if(door!==null){await fieldModels.play(door,0);await fieldModels.wait(door);}
@@ -591,7 +594,7 @@
       let p,out,landing;
       if(dw.rail){p=NativeRails.warp(w.zone,dw);out=p.out;landing=NativeRails.landing(w.zone,dw);native.railCurrent={zone:w.zone,line:p.line,height:p.height};}
       else{p=warpPoint(dw,w.zone);const [x,z]=directions[warpDirections[dw.a]];out={x,z};delete native.railCurrent;}
-      await changeZone(w.zone,p.x-.5,p.z-.5,dw.rail?p.height:dw.y/16);
+      await changeZone(w.zone,p.x-.5,p.z-.5,dw.rail?p.height:(dw.y<<16>>16)/16);
       if(landing){player.x=landing.x;player.y=landing.z;}else{player.x-=out.x;player.y-=out.z;}const dir=Math.abs(out.x)>Math.abs(out.z)?out.x>0?2:3:out.z>0?0:1;face(255,dir);
       if(dw.rail){const at=NativeRails.locate(w.zone,player.x,player.y,native.railCurrent);if(at)native.railCurrent={zone:w.zone,...at};}
       renderer.center=[player.x,player.y+1.5];renderer.elevation=renderer.scene.railZone?renderer.groundHeight(player.x,player.y):0;
@@ -646,6 +649,7 @@
     if(!window.PINWHEEL_ASSETS&&native.zone===16&&dir===2&&x< -175.5&&player.x>=-175.5){warpCooldown=.8;return chapterBoundary();}
     for(const w of warps()){
       if(w.rail)continue;
+      if(native.zone===199&&window.IcirrusSeasons?.portalOpen(w)===false)continue;
       if(native.zone===90&&w.zone===62&&value(16578)===0)continue;
       if(native.zone===18&&w.zone===19&&value(16522)!==7)continue;
       if(warpDirections[w.a]!==dir)continue;

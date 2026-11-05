@@ -8,6 +8,12 @@ Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPME
 
 L’utente ha confermato come destinazione il finale della storia principale, inclusi Lega, N e Ghecis; le attività dopo i titoli di coda restano escluse. Proseguire città per città nella storia, con una tappa implementata, collaudata e pubblicata prima della successiva. Per le prossime estensioni ricavare dalla ROM il livello del Pokémon più forte del prossimo Capopalestra e aumentare di conseguenza il limite; non scegliere arrotondamenti arbitrari. Livelli verificati nelle squadre IRBI (a/0/9/2–3): Rafan 31 (trainer24), Anemone 35 (25), Silvestro 39 (131), Aristide 43 (133). Conservare sempre livelli e XP superiori dei vecchi salvataggi. La 0.48 mantiene il limite 30 già autorizzato; il capitolo della palestra di Rafan passa a 31. Queste richieste si aggiungono agli standard A–H, senza ridurre controlli, continuità, sfondi, coreografie o pulizia delle build.
 
+## Conferma e seguito richiesti il 5 novembre 2026
+
+L'utente ha ribadito di completare il lavoro con cura, rispettando tutte le indicazioni e senza accelerare omettendo integrazioni o verifiche. La richiesta di avanzare nella trama non autorizza ad aggirare gli standard A–H. Distinguere sempre storia implementata, verificata e pubblicata: PC, manutenzione e preparazione di risorse non aumentano da soli la percentuale narrativa.
+
+Dopo aver completato la storia principale, realizzare anche animazioni delle MN sul campo personalizzate per ciascun Pokémon compatibile, comprese Volo e Surf. Devono comprendere il Pokémon che compie l'azione nel mondo, con anatomia, contatti, movimento e transizioni coerenti; il solo cut-in iniziale o la coreografia in battaglia non soddisfa questa richiesta. Registrare la copertura per specie/forma–MN e verificare le azioni effettivamente utilizzabili. Questa estensione segue il finale e non lo sostituisce né autorizza a sbloccare automaticamente il postgame.
+
 ## Capitolo corrente · 0.50 in lavorazione
 
 La0.49 è pubblicata e verificata: revisione pubblica b22c8656e2bbe29f, riferimento Windows13ee30f6f8c7d45e, main9881d9f24d1fe29c3bf77b615fbb43d549246b88. PR41 contiene la tappa e PR42 corregge l’ordine della pipeline Pages;529 Node/7 Python/38 fasi superati,223 file radice e270 asset serviti confrontati. Build047 rimossa,048/049 conservate con tutti i rapporti esterni. Dettagli e limiti in docs/QA-049.md.

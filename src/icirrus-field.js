@@ -5,7 +5,7 @@
   if(!names[zone])return null;const grass=['grass','darkGrass'].includes(tile),water=tile==='water';let id,terrain='interior';
   if(zone===337){id=water?'route7Water':tile==='darkGrass'?'route7Dark':grass?'route7Grass':'route7Path';terrain=water?'water':grass?'grass':'path';}
   else if(zone===198){id='twistApproach';terrain='path';}
-  else if(zone===199){id='twistYard';terrain='path';}
+  else if(zone===199){const season=window.FieldSeason?.current()??new Date().getMonth()%4;id='twistYard'+(season||'');terrain='path';}
   else if([200,201,202,203].includes(zone)){id='twist'+zone;terrain='cave';}
   else if([338,339,340,341,342].includes(zone))id='celestial'+zone;
   else if(zone===108)id='skylaGym';
@@ -13,9 +13,9 @@
   else if(zone===109)id='mistraltonCenter';
   else if(zone===113){id=water?'icirrusWater':grass?'icirrusMarsh':'icirrusTown';terrain=water?'water':grass?'grass':'town';}
   else id='icirrusRoom'+zone;
-  return {id,label:names[zone],terrain,season:((new Date().getMonth()%4)+4)%4};
+  return {id,label:names[zone],terrain,season:window.FieldSeason?.current()??((new Date().getMonth()%4)+4)%4};
  }
- function music(zone,month=new Date().getMonth()){
+ function music(zone,month=window.FieldSeason?.current()??new Date().getMonth()){
   if(zone===337||zone===198)return [1046,1047,1048,1049][((month%4)+4)%4];
   return ICIRRUS_EVENTS.zones[zone]?.music??null;
  }

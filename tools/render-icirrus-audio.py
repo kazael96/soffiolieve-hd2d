@@ -10,6 +10,7 @@ old_ids={r['id']for r in old['progression'].values()}
 cries=sorted({r['id']for r in current['progression'].values()}-old_ids)
 music={z['music']for z in events['zones'].values()}|{1013,1047,1048,1049}
 handlers={i:[f'overlay41:{pc}']for i,pc in [(1688,'021f3910'),(1689,'021f3a1a'),(1696,'021f3a54'),(1686,'021f3a9a'),(1687,'021f3d34'),(1697,'021f3d4a')]}
+handlers[1374]=['overlay10:021618a8/native field jump ascent (SEQ_SE_DANSA)']
 for bank,program in events['scripts'].items():
  for pc,command in program['code'].items():
   name=command['name'];args=command['args']

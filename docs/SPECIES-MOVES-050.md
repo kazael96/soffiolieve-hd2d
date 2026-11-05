@@ -2,11 +2,11 @@
 
 La matrice locale contiene2620 coppie su109 specie e forme entro39:860 coppie aggiunte alla base049 di1760. Comprende learnset IRBI, mosse conservate dalle preevoluzioni, macchine del catalogo del capitolo e Scontro. Cap operativo35 prima della sesta medaglia,39 dopo; livelli e XP legacy superiori conservati.
 
-Stato: implementato e verificato numericamente, con esecuzione di ogni fotogramma sui due lati, esito mancato, reazioni e recupero. Questo conteggio non certifica che ogni fonte sia gia raggiungibile: Surf sul campo, scambio, Ricordamosse e servizi facoltativi sono ancora in integrazione. Le fonti non abilitate non si considerano giocabili dalla sola presenza nel catalogo. Fenomeni e specie soltanto avversarie restano distinti.
+Stato: implementato e verificato numericamente, con esecuzione di ogni fotogramma sui due lati, esito mancato, reazioni e recupero. Surf sul campo è integrata; le fonti e i servizi facoltativi non abilitati non si considerano giocabili dalla sola presenza nel catalogo. Fenomeni e specie soltanto avversarie restano distinti.
 
 Sono stati aggiunti24 rig anatomici individuali con selezione delle parti native fronte/dorso: starter finali, Seismitoad, Scrafty, Yamask, Garbodor, Solosis/Duosion, Foongus, Alomomola, Galvantula, Klang, Eelektrik, Elgyem, Litwick, Axew, Cubchoo/Beartic, Cryogonal, Shelmet, Stunfisk e Golett. Le quattro tavole dei gesti sono state ispezionate; restano campioni, non2620 prove visive individuali. I gesti corporei sono adattamenti HD-2D; gli effetti nativi restano collegati al vero moveID.
 
-I profili conservano ali, code, arti, gusci/gel, ingranaggi e punti di emissione pertinenti. Miss e mosse rivolte a se stessi non provocano la reazione di un bersaglio non colpito. Forme stagionali e grafica femminile conservano le distinzioni del capitolo precedente. La verifica completa nel renderer di battaglia della candidata050 resta aperta.
+I profili conservano ali, code, arti, gusci/gel, ingranaggi e punti di emissione pertinenti. Miss e mosse rivolte a se stessi non provocano la reazione di un bersaglio non colpito. Forme stagionali e grafica femminile conservano le distinzioni del capitolo precedente. Nel renderer reale della candidata a1bba6cabc65fa7c passano tutte le860 coppie aggiunte in verticale390×844 (17200frame, due lati/esiti/recupero), con24 rig rappresentativi anche desktop e orizzontale. Prova esterna `browser-courtyard-cutaway/moves-full-390x844.json`; [QA-050.md](QA-050.md) distingue il riuso delle dipendenze immutate dai replay successivi e dal confronto con la cartuccia.
 
 | Specie/forma | Specie / graphic | ID mosse |
 | --- | --- | --- |

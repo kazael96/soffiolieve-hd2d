@@ -46,7 +46,7 @@
    await new Promise((resolve,reject)=>{let last,elapsed=0;const tick=now=>{try{last??=now;elapsed+=(now-last)*(window.GameSpeed?.rate||1);last=now;const progress=Math.min(1,elapsed/1000),pose=SpeciesMoves.sample(profile,progress*profile.frames,'p1');context.clearRect(0,0,768,384);ROM_SPRITE_ANIM.draw(context,graphic,false,128+512*progress,300,2.6,elapsed/1000,false,pose);if(progress===1)resolve();else request=requestAnimationFrame(tick);}catch(error){reject(error);}};request=requestAnimationFrame(tick);});
   }finally{if(request)cancelAnimationFrame(request);canvas.remove();release();}
  }
- function encounters(){return mounted()?(catalog?.encounters[native().zone]?.seasons[new Date().getMonth()%4]||{rate:0,slots:[]}):null;}
+ function encounters(){return mounted()?(catalog?.encounters[native().zone]?.seasons[window.FieldSeason?.current()??new Date().getMonth()%4]||{rate:0,slots:[]}):null;}
  function music(){return mounted()&&catalog?.musicFlags[native().zone]?1013:null;}
  window.SurfField={motion,play,prepareAssets,resources,actor,instances,apply,tick,blocked,restore,enter,music,encounters,mounted,knows:motion.known,canStart,start:(index)=>renderer.resourceGate?renderer.resourceGate('surf-entry',()=>motion.start(index)):motion.start(index),tryStep:motion.tryLanding,get busy(){return motion.busy;},get preparing(){return motion.preparing;},get checkpointable(){return !!native()?.surfMotion;}};
 })();

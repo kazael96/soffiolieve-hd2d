@@ -15,7 +15,7 @@ function newStoryMon(name,level,random=Math.random){
  const p=GEN5.species.find(s=>s.en===name)||GEN5.species.find(s=>s.id===window.PokemonVisuals?.speciesId({name})),natures=GEN5.dex.natures.all();
  const ivs=Object.fromEntries(['hp','atk','def','spe','spa','spd'].map(k=>[k,Math.floor(random()*32)]));
  const gender=p.genderRatio===255?'N':p.genderRatio===254?'F':p.genderRatio===0?'M':Math.floor(random()*256)<p.genderRatio?'F':'M';
- return makeMon(name,level,{...([585,586].includes(p.id)?{form:new Date().getMonth()%4}:{}),ivs,gender,personality:Math.floor(random()*0x100000000),nature:natures[Math.floor(random()*natures.length)].name,abilityId:p.abilities[Math.floor(random()*2)]});
+ return makeMon(name,level,{...([585,586].includes(p.id)?{form:window.FieldSeason?.current()??new Date().getMonth()%4}:{}),ivs,gender,personality:Math.floor(random()*0x100000000),nature:natures[Math.floor(random()*natures.length)].name,abilityId:p.abilities[Math.floor(random()*2)]});
 }
 // The initial rivals use only AI flag 4 (IRBI a/1/7/1, member 4).
 // Score each available move; break ties randomly, as in the original routine.
