@@ -20,6 +20,8 @@ La0.50 è pubblicata e verificata: revisione pubblica9f3eb3ed9c872f04, riferimen
 
 Proseguire con docs/ICIRRUS-OPELUCID-051.md: Silvestro e storia successiva fino alla prossima città. Verificare gli eventi e le risorse nella ROM prima di integrarli; non confondere estrazione privata e partita giocabile. Cap39 prima di Silvestro e43 dopo la settima medaglia, secondo i massimi nativi già verificati; conservare livelli e XP superiori. La destinazione complessiva resta il primo finale. Le MN personalizzate nel mondo seguono quel finale.
 
+Checkpoint locale051: geografia in10 famiglie, massimo3 residenti; cache dei supporti condivisa64; rilascio dei pacchetti grafici anche per caricamenti obsoleti/parziali. Il task/renderer di Silvestro e l'adattatore delle41 linee di ghiaccio sono testati isolatamente, compresi checkpoint e ×1/2/4. Il componente delle finestre conserva identità e proprietà delle scene. Questi componenti non sono ancora abilitati nell'index: prima di contare avanzamento narrativo servono integrazione degli hook, collisioni/trigger, stato persistente, continuità, copertura mosse/sfondi/audio e replay della partita. Le prove dei componenti e i limiti sono in docs/ICIRRUS-OPELUCID-051.md; non presentarli come nuovo capitolo pubblicato.
+
 ## Capitolo precedente · 0.50
 
 La0.49 è pubblicata e verificata: revisione pubblica b22c8656e2bbe29f, riferimento Windows13ee30f6f8c7d45e, main9881d9f24d1fe29c3bf77b615fbb43d549246b88. PR41 contiene la tappa e PR42 corregge l’ordine della pipeline Pages;529 Node/7 Python/38 fasi superati,223 file radice e270 asset serviti confrontati. Build047 rimossa,048/049 conservate con tutti i rapporti esterni. Dettagli e limiti in docs/QA-049.md.
