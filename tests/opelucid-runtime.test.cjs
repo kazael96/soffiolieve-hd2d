@@ -3,6 +3,16 @@ const test=require('node:test'),assert=require('node:assert/strict'),path=requir
 const old=process.argv[2];process.argv[2]=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site');const {environment,drain}=require('./check-story-runtime.cjs');process.argv[2]=old;
 async function setup(save){const c=environment({opelucid:true,sourceRoot:path.resolve(__dirname,'../src'),save});await c.OpelucidChapter.ensure();if(!save){const n=c.NativeStory.state,j=c.Journey;Object.assign(n,{intro:true,initialized:true,pokedex:true,badges:[0,1,2,3,4,5],healZone:115});j.state.starter='Snivy';j.state.phase='icirrus';j.state.party=['Serperior','Emboar','Samurott'].map(name=>j.pack(c.makeMon(name,39),c.OPENING_DATA[name].growth[39]));j.displayPartner();}return c;}
 
+test('Tower actors on another native height cannot be spoken to or block the current floor',async()=>{
+ const c=await setup(),n=c.NativeStory.state;await drain(c,c.NativeStory.changeZone(210,16,27));const trainer=c.npcs.find(a=>a.script===3303);Object.assign(c.player,{x:trainer.x,y:trainer.y+1});c.facing=0;n.fieldHeight=trainer.height-5;assert.equal(c.NativeStory.occupied(trainer.x,trainer.y),false);assert.equal(c.NativeStory.interact(),undefined);
+});
+
+test('new Tower trainers and floor items respond to A once and retain their result after saving',async()=>{
+ const c=await setup(),n=c.NativeStory.state;await drain(c,c.NativeStory.changeZone(210,16,27));const trainer=c.npcs.find(a=>a.script===3303);assert.ok(trainer);Object.assign(c.player,{x:trainer.x,y:trainer.y+1});n.fieldHeight=trainer.height;c.facing=0;const battles=[],start=c.startBattle;c.startBattle=(kind,config)=>{battles.push(config.trainerId);return start(kind,config);};
+ await drain(c,c.NativeStory.interact(),0,'p1');assert.deepEqual(battles,[303]);assert.ok(n.trainerWins.includes(303));await drain(c,c.NativeStory.interact(),0,'p1');assert.equal(battles.length,1);
+ await drain(c,c.NativeStory.changeZone(208,16,26));const item=c.npcs.find(a=>a.script===7012);assert.ok(item);Object.assign(c.player,{x:item.x,y:item.y+1});c.facing=0;const record=c.OPELUCID_DATA.items[item.script],before=c.Journey.itemCount(record.id);await drain(c,c.NativeStory.interact());assert.equal(c.Journey.itemCount(record.id),before+record.count);assert.ok(n.collectedItems[208].includes(item.uid));c.Journey.save(true);const saved=c.StoryState.read(c.localStorage);assert.ok(saved.original.trainerWins.includes(303));assert.ok(saved.original.collectedItems[208].includes(item.uid));
+});
+
 test('new chapter migration hides later native actors, and never reapplies after their event starts',async()=>{
  const c=await setup(),n=c.NativeStory.state;
  for(const flag of [577,578,587,588,589,603,604,605,606,607,613,659,688,838])assert.ok(n.flags.includes(flag),'native initial flag '+flag);
@@ -99,7 +109,7 @@ test('N continues the050 boundary checkpoint through every Tower floor only afte
  await drain(c,c.NativeStory.changeZone(114,17,14));await drain(c,c.NativeStory.run(0),0,'p1');
  const current=()=>c.NativeStory.departures.records.get('N');try{await drain(c,Promise.resolve(),0,'p1',()=>current()?.stage==='resident'&&current().actor.fieldZone===213);}catch(error){const r=current();throw Error(error.message+' '+JSON.stringify({stage:r?.stage,zone:r?.zone,actor:r?.actor,leg:r?.plan.leg,index:r?.index,length:r?.plan.points.length,target:r?.plan.points[r.index],authorized:r?.plan.transferAuthorized}));}
  const arrived=current();
- assert.equal(arrived.plan.destination,'n-dragonspiral-summit');assert.equal(arrived.actor.uid,2);assert.equal(arrived.actor.x,.5);assert.equal(arrived.actor.y,-3.5);assert.equal(c.OpelucidContinuity.prepareEvent(213,1),true);
+ assert.equal(arrived.plan.destination,'n-dragonspiral-summit');assert.equal(arrived.actor.uid,2);assert.equal(arrived.actor.x,.5);assert.equal(arrived.actor.y,-3.5);assert.equal(c.OpelucidContinuity.prepareEvent(213,1),false,'N alone cannot start the event before both friends arrive');
 });
 
 test('saving during an off-map native ledge jump preserves the airborne pose and completes the same journey',async()=>{
@@ -112,12 +122,19 @@ test('saving during an off-map native ledge jump preserves the airborne pose and
 });
 
 test('native Tower summit program reaches the reserved investigation without unlocking the postgame capture',async()=>{
- const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'213:0':'Komor','213:1':'Silvestro'};
  await drain(c,c.NativeStory.changeZone(113,172,170));const body={name:'N',model:103,uid:253,fieldZone:113,x:-604.5,y:-591.5,height:3,direction:0,frame:0};
  assert.ok(c.NativeStory.departures.depart(body,113));await drain(c,Promise.resolve(),0,'p1',()=>c.NativeStory.departures.records.get('N')?.actor.fieldZone===213&&c.NativeStory.departures.records.get('N')?.stage==='resident');
- await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.vars[16551]>=9&&!c.NativeStory.locked||!!c.elements.get('world')?.dataset.eventError);assert.equal(c.elements.get('world')?.dataset.eventError,undefined);
+ await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.vars[16541]===1&&!c.NativeStory.locked||!!c.elements.get('world')?.dataset.eventError);assert.equal(c.elements.get('world')?.dataset.eventError,undefined);
  assert.equal(n.vars[16551],9);assert.equal(n.zone,205);assert.equal(n.flags.includes(609),true);assert.equal(c.NativeStory.locked,false);
  assert.equal(c.Journey.state.party.some(p=>['Reshiram','Zekrom'].includes(p.name)),false);
+});
+
+test('presented summit boards N and retires both physical bodies without resident dragon copies',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'213:0':'Komor','213:1':'Silvestro'};c.renderer.hasPresentedActor=()=>true;
+ await drain(c,c.NativeStory.changeZone(113,172,170));const body={name:'N',model:103,uid:253,fieldZone:113,x:-604.5,y:-591.5,height:3,direction:0,frame:0};c.NativeStory.departures.depart(body,113);await drain(c,Promise.resolve(),0,'p1',()=>c.NativeStory.departures.records.get('N')?.actor.fieldZone===213&&c.NativeStory.departures.records.get('N')?.stage==='resident');
+ let mounted=0;const step=c.Journey.step;c.Journey.step=(...args)=>{step(...args);const actors=c.NativeStory.visualActors(),rider=actors.find(a=>a.name==='N'&&a.nativeDragonRider),dragon=actors.find(a=>[211,213].includes(a.model));if(rider&&dragon){mounted++;assert.equal(rider.x,dragon.x);assert.ok(Math.abs(rider.height-dragon.height-.9)<1e-7);}};
+ await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.vars[16541]===1&&!c.NativeStory.locked||!!c.elements.get('world')?.dataset.eventError);assert.equal(c.elements.get('world')?.dataset.eventError,undefined);assert.ok(mounted>5,'N never mounted the dragon');assert.equal(n.zone,205);assert.equal([...c.NativeStory.departures.records.values()].some(r=>[211,213].includes(r.actor.model)),false);assert.equal(c.NativeStory.departures.records.has('N'),false);
 });
 
 test('player collision on rail-only Tower floors uses the native ribbons and rejects their voids',async()=>{
@@ -149,4 +166,23 @@ test('native dragon cry text stays visible until the cry finishes, then the fift
  for(let i=0;i<500&&!heard.length;i++){await Promise.resolve();c.Journey.step(1/30,false);if(c.elements.get('dialogue')?.open)c.continue();}
  for(let i=0;i<12;i++)await Promise.resolve();assert.deepEqual(heard,[644]);assert.equal(c.elements.get('world')?.dataset.eventError,undefined);assert.equal(c.elements.get('dialogue').open,true);assert.ok(c.elements.get('dialogueText').textContent.length>0);
  c.continue();await Promise.resolve();assert.equal(n.vars[16551],6);assert.equal(c.elements.get('dialogue').open,true,'early A closed the roar text');finishCry();await drain(c,event,0,'p1');assert.equal(n.vars[16551],7);assert.equal(c.NativeStory.locked,false);assert.equal(heard.length,1);
+});
+
+test('Komor and Silvestro physically finish the Tower ascent and descend to their reserved roles before the investigation',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.vars[16551]=8;n.vars[16535]=5;n.vars[16437]=790;n.actors??={};n.actors[210]=[{name:'Komor',model:7,uid:0,fieldZone:210,x:3.5,y:.5,height:10,direction:2,frame:6,script:3},{name:'Silvestro',model:91,uid:1,fieldZone:210,x:3.5,y:-2.5,height:10,direction:0,frame:0,script:11}];
+ await drain(c,c.NativeStory.changeZone(212,16,22));c.Journey.step(1/30,false);const trip=name=>c.NativeStory.departures.records.get(name);assert.equal(trip('Komor')?.plan.destination,'komor-dragonspiral-top');assert.equal(trip('Silvestro')?.plan.destination,'brycen-dragonspiral-top');assert.equal(c.OpelucidContinuity.prepareEvent(213,1),false);assert.equal(c.NativeStory.locked,false);
+ await drain(c,Promise.resolve(),0,'p1',()=>['Komor','Silvestro'].every(name=>trip(name)?.stage==='resident'&&trip(name)?.actor.fieldZone===213));assert.equal(trip('Komor').actor.uid,0);assert.equal(trip('Silvestro').actor.uid,1);
+ await drain(c,c.NativeStory.changeZone(213,16,21));n.flags=n.flags.filter(f=>f!==613);for(const id of [0,1])await c.NativeStory.vm.host.command({name:'ActorAdd'},[id],[id],c.NativeStory.vm);c.NativeStory.visualActors();for(const [name,address]of [['Komor',1496],['Silvestro',1524]]){const body=c.npcs.find(a=>a.name===name);assert.ok(c.MistraltonContinuity.startExitMotion(body,213,address));assert.ok(trip(name).plan.destination.endsWith('dragonspiral-return'));}
+ n.vars[16551]=9;n.vars[16541]=1;await drain(c,c.NativeStory.changeZone(205,179,146));await drain(c,Promise.resolve(),0,'p1',()=>['Komor','Silvestro'].every(name=>trip(name)?.stage==='resident'&&trip(name)?.actor.fieldZone===205));assert.equal(trip('Komor').actor.uid,1);assert.equal(trip('Silvestro').actor.uid,4);assert.ok(Math.abs(trip('Silvestro').actor.height-3)<.01);assert.equal(c.NativeStory.visualActors().filter(a=>a.name==='Komor').length,1);
+});
+
+test('the reserved investigation leaves control while friends descend and survives a mid-descent save without repeating the awakening',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'213:0':'Komor','213:1':'Silvestro','213:2':'N'};
+ await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.zone===205&&!c.NativeStory.locked);assert.equal(n.vars[16541]||0,0);assert.equal(c.OpelucidContinuity.deferredEvent(205),4);assert.equal(c.OpelucidContinuity.prepareEvent(205,4),false);
+ await drain(c,Promise.resolve(),0,'p1',()=>[...c.NativeStory.departures.records.values()].some(r=>r.actor.fieldZone===211&&r.actor.jumpLift>.1));c.NativeStory.captureActors();assert.equal(c.Journey.save(true),true);const saved=c.StoryState.read(c.localStorage);assert.equal(saved.original.vars[16541]||0,0);assert.ok(saved.original.departures.some(r=>r.actor.fieldZone===211&&r.actor.jumpLift>.1));
+ const resumed=await setup(saved);await drain(resumed,Promise.resolve(),0,'p1',()=>resumed.NativeStory.state.vars[16541]===1&&!resumed.NativeStory.locked);assert.equal(resumed.NativeStory.state.zone,205);assert.equal(resumed.cinematics,undefined,'Reload repeated the awakening');assert.equal(resumed.OpelucidContinuity.deferredEvent(205),null);
+});
+
+test('new chapter events prepare the actual scene and arriving bodies before executing their native instructions',async()=>{
+ const c=await setup(),n=c.NativeStory.state;await drain(c,c.NativeStory.changeZone(212,16,22));n.vars[16551]=6;const heard=[];c.AudioEngine.cry=id=>{heard.push(id);return Promise.resolve();};let release,calls=0;const gate=new Promise(resolve=>release=resolve);c.renderer.prepareScene=()=>{calls++;return gate;};const before=c.NativeStory.vm.trace.length,event=c.NativeStory.run(7);for(let i=0;i<12;i++)await Promise.resolve();assert.equal(calls,1);assert.equal(c.NativeStory.vm.trace.length,before);assert.equal(c.NativeStory.locked,true);await c.NativeStory.run(7);assert.equal(c.NativeStory.vm.trace.length,before);assert.equal(calls,1);release();await drain(c,event,0,'p1');assert.equal(n.vars[16551],7);assert.deepEqual(heard,[644]);
 });
