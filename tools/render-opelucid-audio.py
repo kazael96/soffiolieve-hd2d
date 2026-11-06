@@ -14,6 +14,8 @@ source=source.replace('sustained=identifier in [1738,1741,1754]','sustained=iden
 scope={'__name__':'opelucid_audio_export','__file__':str(Path(__file__).with_name('render-mistralton-audio.py'))}
 exec(compile(source,scope['__file__'],'exec'),scope)
 handlers={1743:['IRBI program228 switch SEPlay'],1744:['overlay45:021f39aa/platform start'],1776:['overlay45:021f39da–021f39e2/platform stop/finish']}
+handlers[1665]=['IRBI583 independent actor fall: overlay21:021c7652']
+handlers[1650]=['IRBI417/effect17: overlay21:021da10c sound table, frame24']
 native_cries=set(namespace['cries'])
 for bank,program in namespace['events']['scripts'].items():
  for pc,command in program['code'].items():

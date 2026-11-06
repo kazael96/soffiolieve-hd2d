@@ -65,6 +65,7 @@
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   const fieldMotion=window.IcirrusFieldMotion?.create({state:()=>native,actor,sound:id=>AudioEngine.playSound(id)});
+  const fieldFall=window.OpelucidFieldFall?.create({state:()=>native,actor,ground:(x,y)=>renderer.groundHeight(x,y),sound:id=>AudioEngine.playSound(id)});
   function pose(n,dir,step=0){
     if(!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
     n.height=window.MistraltonGym?.actorHeight(n,n.height)??n.height;
@@ -278,7 +279,7 @@
       if(nativeVector){n.x=task.start.x+nativeVector[0]*f;n.y=task.start.y+nativeVector[2]*f;n.height=task.start.height+nativeVector[1]*f;}
       if(distance){const [dx,dy]=directions[dir];n.x=task.start.x+dx*f*distance;n.y=task.start.y+dy*f*distance;if(task.id===255)moving=true;else pose(n,dir,[1,0,2,0][Math.floor(task.elapsed*30/(duration*30/2))%4]);}
       if(code>=28&&code<=31&&task.id!==255)pose(n,dir,[1,0,2,0][Math.floor(f*4)%4]);if(code>=48&&code<=51)n.jumpLift=Math.sin(Math.PI*f)*.25;
-      if(task.elapsed>=duration){n.jumpLift=0;if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
+      if(task.elapsed>=duration){if(!fieldFall?.busy(task.id))n.jumpLift=0;if(task.id!==255){pose(n,n.direction);n.emote=null;}task.elapsed=0;task.start=null;if(++task.count>=Math.max(1,repeats)){task.index++;task.count=0;}}
     }
   }
   function fieldActors(){const actors=npcs.filter(n=>!n.hidden),visible=window.MistraltonContinuity?.visibleActors(actors)||actors;return departures.visible(visible,player).filter(n=>n.exitPlan?.chapter049||n.continuityPlan?.chapter049||window.MistraltonChapter?.zones.includes(n.fieldZone)||(window.IcirrusChapter?.zones.includes(n.fieldZone)||window.OpelucidChapter?.zones.includes(n.fieldZone))?(window.MistraltonContinuity?.sameField(n.fieldZone,native.zone)??n.fieldZone===native.zone):!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
@@ -361,6 +362,8 @@
       case 'NativeOpcode221':{const list=v[0]===1?state.dex.caught:state.dex.seen;m.set(a[1],new Set(list.map(name=>GEN5.dex.species.get(name).num)).size);break;}
       case 'NativeOpcode466':native.pokedexForms=true;break;
       case 'NativeOpcode123':{const p=world(v[1],v[3]);await fieldMotion.jump(v[0],[p.x,v[2]<<16>>16,p.y]);break;}
+      case 'NativeOpcode583':fieldFall.drop(v[0],world(v[1],v[2]),v[3]);break;
+      case 'NativeOpcode417':{const body=actor(v[0]);if(body?.name!=='Nardo')throw Error('Partenza originale non disponibile per questo personaggio');await OpelucidDeparture.play(()=>OpelucidContinuity.flyToNextEvent(body,native.zone));break;}
       case 'NativeOpcode252':{const p=state.party[v[1]];m.set(a[0],!p||p.egg?0:p.happiness??GEN5.dex.species.get(p.name).baseHappiness??70);break;}
       case 'NativeOpcode269':{if(![1,2].includes(v[1])){m.set(a[0],0);break;}const index=state.party.findIndex(p=>!p.egg&&(v[1]===1||p.hp>0));m.set(a[0],index<0?state.party.length:index);break;}
       case 'NativeOpcode254':m.set(a[0],state.party[v[1]]?GEN5.dex.species.get(state.party[v[1]].name).num:0);break;
@@ -540,10 +543,10 @@
     return true;
   }
   async function phoneCall(id,m){
-    if(![1,2,3,4,6].includes(id))throw Error('Call outside opening '+id);
-    const call=id===6?window.ICIRRUS_PHONE:id===4?NIMBASA_PHONE:id===3?CASTELIA_PHONE:id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
+    if(![1,2,3,4,5,6].includes(id))throw Error('Call outside opening '+id);
+    const call=id===5?window.OPELUCID_PHONE:id===6?window.ICIRRUS_PHONE:id===4?NIMBASA_PHONE:id===3?CASTELIA_PHONE:id===2?ROUTE2_PHONE:PHONE_ASSETS,portraits={...PHONE_ASSETS.portraits,...(window.ROUTE2_PHONE?.portraits||{})};
     if(!call)throw Error('Dati Interpoké non disponibili: '+id);
-    const texts=id===6?call.text:id===4?NIMBASA_PHONE.text:id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts;
+    const texts=[5,6].includes(id)?call.text:id===4?NIMBASA_PHONE.text:id===3?CASTELIA_PHONE.text:id===2?ROUTE2_DATA.phoneText:ORIGINAL_EVENTS.phoneTexts;
     const names=['Alcide','Komor','Belle','Aralia','Mamma'],panel=document.createElement('section');panel.id='phoneScene';panel.setAttribute('aria-label','Interpoké');
     const pictures=call.participants.filter(person=>person<5).map(person=>{
       const name=names[person],tile=document.createElement('figure'),image=document.createElement('img'),label=document.createElement('figcaption');
@@ -567,6 +570,7 @@
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function changeZone(zone,x,z,entryHeight){
+    fieldFall?.reset();
     dragonFlight?.reset();
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
@@ -745,7 +749,7 @@
     if(renderer.scene.chapter051&&!window.OpelucidGym?.busy){const at=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(at)native.fieldHeight=at.height;}
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
     try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);fieldMotion?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
+    window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);fieldMotion?.tick(dt);fieldFall?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
     const held=!!window.DragonspiralJump?.busy||!!window.OpelucidGym?.busy||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     const deferred=window.OpelucidContinuity?.deferredEvent(native.zone);if(deferred&&window.OpelucidContinuity.prepareEvent(native.zone,deferred)){run(deferred-1);return;}
