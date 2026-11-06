@@ -32,6 +32,8 @@ descriptors, manifest = {}, {'source': 'IRBI; geographic split of the reviewed n
 for family, zones in families.items():
     scene_rows = {str(zone): assets['scenes'][str(zone)] for zone in zones}
     model_ids = {instance['model'] for scene in scene_rows.values() for instance in scene['instances']}
+    variants = {str(zone): assets.get('variantScenes', {}).get(str(zone), {}) for zone in zones if assets.get('variantScenes', {}).get(str(zone))}
+    model_ids |= {instance['model'] for group in variants.values() for scene in group.values() for instance in scene['instances']}
     models = {key: assets['models'][key] for key in sorted(model_ids)}
     texture_ids = {group['texture'] for model in models.values() for group in model['groups'] if group.get('texture')}
     textures = {key: assets['textures'][key] for key in sorted(texture_ids)}
@@ -45,7 +47,7 @@ for family, zones in families.items():
         textures.update(gym['textures'])
         extra_images = [path.relative_to(args.output).as_posix() for path in sorted((args.output / 'assets/opelucid/gym').rglob('*.png'))]
     filename = 'opelucid-' + family + '-assets.js'
-    write(filename, 'OPELUCID_PART_ASSETS', {'source': 'IRBI', 'family': family, 'models': models, 'textures': textures, 'scenes': scene_rows, 'sprites': sprites, 'extraImages': extra_images})
+    write(filename, 'OPELUCID_PART_ASSETS', {'source': 'IRBI', 'family': family, 'models': models, 'textures': textures, 'scenes': scene_rows, **({'variantScenes': variants} if variants else {}), 'sprites': sprites, 'extraImages': extra_images})
     manifest['families'][family] = {'src': filename, 'pack': 'assets/opelucid-' + family + '-pack.bin', 'zones': zones,
                                     'models': len(models), 'textures': len(textures), 'catalogBytes': (args.output / filename).stat().st_size}
     for zone in zones:

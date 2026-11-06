@@ -24,3 +24,7 @@ test('invalid checkpoint data is rejected rather than silently clearing the puzz
 test('other regions do not create a gym record or activate its ramp gates',()=>{
  const f=setup({zone:389});f.task.tick(.5);assert.equal(f.native.brycenPuzzle,undefined);assert.equal(f.task.gate(0,2),false);assert.equal(f.task.busy,false);assert.equal(f.task.visual(0),null);
 });
+
+test('native completion stops the sustained rotation motor before playing the finish effect',async()=>{
+ const f=setup(),p=f.task.begin('platform',0);f.task.tick(2);await p;assert.deepEqual(f.stops,[1744]);assert.deepEqual(f.sounds,[1744,1776]);
+});

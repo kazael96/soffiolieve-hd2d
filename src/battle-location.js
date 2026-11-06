@@ -4,6 +4,7 @@
  function capture(state,native,position,terrain='path'){
   if(!state||!position||!Number.isFinite(position.x)||!Number.isFinite(position.y))throw Error('Posizione del combattimento non disponibile');
   if(root.SurfField?.mounted())return root.SurfBattles.capture(state,native,position);
+  if(root.OPELUCID_FIELD){const place=root.OPELUCID_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.ICIRRUS_FIELD){const place=root.ICIRRUS_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.MISTRALTON_FIELD){const place=root.MISTRALTON_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.DRIFTVEIL_FIELD){const place=root.DRIFTVEIL_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}

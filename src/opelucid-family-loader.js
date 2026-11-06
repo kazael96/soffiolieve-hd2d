@@ -7,7 +7,12 @@
   if(data.family!==name||!data.models||!data.textures||!data.scenes||!data.sprites||!Array.isArray(part.zones))throw Error('Catalogo geografico incompleto: '+name);
   const actual=Object.keys(data.scenes).map(Number).sort((a,b)=>a-b),expected=[...part.zones].sort((a,b)=>a-b);
   if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error('Mappe geografiche incomplete: '+name);
-  for(const scene of Object.values(data.scenes)){
+  const sceneRows=Object.values(data.scenes);
+  for(const [zone,variants]of Object.entries(data.variantScenes||{})){
+   if(!expected.includes(+zone)||!variants||typeof variants!=='object')throw Error('Variante geografica non valida: '+name);
+   sceneRows.push(...Object.values(variants));
+  }
+  for(const scene of sceneRows){
    if(!Array.isArray(scene.instances))throw Error('Geometria geografica incompleta: '+name);
    for(const instance of scene.instances)if(!data.models[instance.model])throw Error('Modello geografico mancante: '+name);
   }

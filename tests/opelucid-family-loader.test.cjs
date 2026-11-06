@@ -9,6 +9,12 @@ test('all ten actual catalogs parse as data with their exact scene and geometry 
  assert.throws(()=>parse(read(part.src),'brycen',{...part,zones:[114,115]}),/Mappe geografiche/);
 });
 
+test('a corrupt alternate bridge model is rejected before installing the family',()=>{
+ const part=parts.families.dragonspiral,data=JSON.parse(read(part.src).toString().split('=').slice(1).join('=').trim().replace(/;$/,''));
+ data.variantScenes[206].bridge.instances[0].model='missing-bridge';
+ assert.throws(()=>parse(Buffer.from('window.OPELUCID_PART_ASSETS='+JSON.stringify(data)+';'),'dragonspiral',part),/Modello geografico mancante/);
+});
+
 test('real family geometry remains absent until its image pack succeeds; failure is retryable',async()=>{
  const assets={models:{},textures:{}},released=[];let release,fail=true;
  const resources={bytes:async file=>read(file),releaseImages:file=>released.push(file),preloadImages:()=>new Promise(done=>release=()=>done(!fail))};

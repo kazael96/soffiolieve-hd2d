@@ -106,6 +106,7 @@
  Object.assign(recipes,{13:'airCut',26:'jumpKick',31:'headRam',42:'needle',54:'shellGuard',58:'psybeam',92:'poisonTrap',136:'jumpKick',169:'web',499:'smoke',505:'healingWave',11:'gearGrip'});
  Object.assign(recipes,{258:'hailCall',241:'sunCall',240:'rainCall',201:'sandCall',216:'bodyRam',218:'bodyRam',219:'shellGuard'});
  Object.assign(recipes,{378:'squeeze',164:'shellGuard',457:'headRam',261:'spiritWind',57:'waterPulse',59:'iceWind',87:'electricWave',387:'bodyRam',400:'furySlash',289:'thief',421:'furySlash',94:'psybeam',528:'flameRush',444:'rockVolley',509:'throw',538:'shellGuard',492:'ambush',14:'swordDance',51:'sludgeJet',38:'bodyRam',276:'counterPalm',504:'shellGuard',356:'groundStamp',50:'seal',114:'smoke',506:'spiritWind',471:'psywave',470:'psywave',247:'psywave',283:'flail',237:'energyBall',220:'healingWave',532:'headRam',273:'restore',120:'fireRing',306:'furySlash',493:'psybeam',107:'curl',83:'fireRing',262:'focus',517:'fireRing',82:'flameJet',530:'doubleKick',337:'furySlash',349:'dance',181:'iceWind',556:'iceShard',420:'iceShard',159:'harden',62:'psybeam',426:'mud',340:'flyDive',325:'counterPalm',5:'counterPalm',222:'groundStamp'});
+ Object.assign(recipes,window.OpelucidMotion?.recipes);
  const pairs={};
  for(const [name,row]of Object.entries(TRAINING_DATA.progression)){
   pairs[name]=Training.moves(name);
@@ -129,7 +130,7 @@
  const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
  C.sample=function(p,f,side='p1',miss=false){
   if(!p.training)return previousSample(p,f,side,miss);
-  const a=DemoMoves.sample(p,f,side,miss),r=C.rigs[p.species]||DemoMoves.rigs[p.species],t=a.t,w=a.wind,beat=Math.sin(t*Math.PI*r.step),surge=ease((t-.2)/.25)*(1-ease((t-.57)/.35)),k=p.kind;a.graphic=p.graphic||p.species;
+  const a=DemoMoves.sample(p,f,side,miss),r=C.rigs[p.graphic]||C.rigs[p.species]||DemoMoves.rigs[p.species],t=a.t,w=a.wind,beat=Math.sin(t*Math.PI*r.step),surge=ease((t-.2)/.25)*(1-ease((t-.57)/.35)),k=p.kind;a.graphic=p.graphic||p.species;
   if(p.id===503){a.head-=r.head*.35*surge;a.lean-=r.lean*.25*surge;a.breath+=.025*Math.sin(t*Math.PI*3)*w;a.arms+=r.arms*.12*Math.sin(t*Math.PI*4)*w;}
   if(['burrow','sludgeJet','poisonTrap','flameBite','waterRush','grow','firePalm'].includes(k)){a.head=r.head*w;a.tail=r.tail*Math.sin(t*Math.PI*5)*w;a.arms=r.arms*Math.sin(t*Math.PI*2)*w;a.crouch=r.crouch*w;a.lean=r.lean*w;a.reach=r.reach*surge;a.breath=(k==='grow'?.09:.035)*Math.sin(Math.PI*t)*w;if(k==='burrow'){a.head=-r.head*w;a.crouch*=1.7;a.feet=r.feet*Math.sin(t*Math.PI*12)*w;}if(k==='waterRush')a.lift=.06*w;}
   if(['gust','airCut','roost'].includes(k)){a.arms=r.arms*Math.sin(t*Math.PI*8)*w;a.lift=k==='roost'?0:.1*w;a.head=-r.head*w;a.crouch=k==='roost'?r.crouch*w:0;}
@@ -301,4 +302,5 @@
   return {rotation,pivotX,pivotY};
  };
  window.TrainingMoves={pairs,fitted,recipes,partMaps};
+ window.OpelucidMotion?.install();
 })();

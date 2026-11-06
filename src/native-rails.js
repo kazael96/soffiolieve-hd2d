@@ -56,6 +56,18 @@
   const inward=(dx,dz)=>[1,1.5,2,2.5,3].some(d=>locate(zone,center.x-16-dx*d,center.z-16-dz*d,{height:center.height,line:w.x}));
   if(!inward(out[0],out[2])&&inward(-out[0],-out[2])){out[0]*=-1;out[2]*=-1;}
   if(tower){const sign=front>=tables()[zone].lines[w.x].length/2?1:-1;out[0]=forward[0]*sign;out[2]=forward[2]*sign;}
+  if(w.b===3){
+   // Curved connectors can put the portal inside a blocked rail segment.
+   // Resolve the inward corridor on its native endpoint graph, rather than
+   // accepting a nearby but disconnected ring or rounding through a wall.
+   const data=tables()[zone],line=data.lines[w.x],connected=new Set([w.x,...data.points[line.a].lines,...data.points[line.b].lines]);let resolved=null;
+   for(const axis of [out,forward,mul(forward,-1),lateral,mul(lateral,-1)]){
+    for(let distance=1;distance<=3;distance+=.25){const x=center.x-16-axis[0]*distance,z=center.z-16-axis[2]*distance,hint={height:center.height,line:w.x},rail=locate(zone,x,z,hint);
+     if(rail&&connected.has(rail.line)&&[[-.2,-.2],[.2,.2],[-.2,.2],[.2,-.2]].every(([dx,dz])=>locate(zone,x+dx,z+dz,hint))){resolved=axis;break;}
+    }if(resolved)break;
+   }
+   if(resolved){out[0]=resolved[0];out[2]=resolved[2];}
+  }
   const result={...center,...(tower?{span:w.height}:{}),line:w.x,front,side,out:{x:out[0],z:out[2]}};warpPoints.set(key,result);return result;
  }
  function actor(zone,n){const p=position(zone,n.x,n.z,n.y<<16>>16);return {...n,railOriginal:{...n},x:p.x-.5,z:p.z-.5,y:Math.round(p.height*65536)};}

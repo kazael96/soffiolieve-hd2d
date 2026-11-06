@@ -1,9 +1,9 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../src'),read=name=>{const raw=fs.readFileSync(path.join(root,name+'.js'),'utf8');return JSON.parse(raw.slice(raw.indexOf('=')+1).trim().replace(/;$/,''));},metadata=read('opelucid-scenes'),parts=read('opelucid-parts'),canonical=read('opelucid-assets');
 const makeWindow=require('../src/opelucid-scene-window.js').create,makeCache=require('../src/opelucid-resource-cache.js').create;
-function setup({loadFamily=async name=>read('opelucid-'+name+'-assets'),afterPrepare=async()=>{},legacyEnsure=async()=>{}}={}){
+function setup({loadFamily=async name=>read('opelucid-'+name+'-assets'),afterPrepare=async()=>{},legacyEnsure=async()=>{},variant=()=>null}={}){
  const assets={models:{},textures:{},scenes:{}},legacy={instances:[{model:'legacy198'}]};let sceneWindow;const loader=makeCache({assets,manifest:parts.families,limit:3,loadFamily,onEvict:name=>sceneWindow.evict(name),onDiscard:name=>sceneWindow.evict(name)});
- sceneWindow=makeWindow({metadata,parts,assets,loader,legacyDescriptor:()=>null,legacyScene:()=>legacy,legacyEnsure,afterPrepare}).register();return {assets,loader,sceneWindow,legacy};
+ sceneWindow=makeWindow({metadata,parts,assets,loader,legacyDescriptor:()=>null,legacyScene:()=>legacy,legacyEnsure,afterPrepare,variant}).register();return {assets,loader,sceneWindow,legacy};
 }
 
 test('all scene descriptors remain usable before geometry; current and neighbors install as one bounded window',async()=>{
@@ -20,4 +20,11 @@ test('late legacy dependency cannot supersede the newer destination or reclaim a
 
 test('failed actor preparation remains covered and retry does not require rebuilding metadata or resources',async()=>{
  let fail=true,calls=0;const f=setup({afterPrepare:async()=>{calls++;if(fail)throw Error('missing actor');}}),scene=f.sceneWindow.scene(114);await assert.rejects(f.sceneWindow.prepare(114),/missing actor/);assert.equal(scene.assetsPending,true);assert.deepEqual(f.loader.stats().resident,['brycen']);fail=false;assert.equal(await f.sceneWindow.prepare(114),true);assert.equal(f.sceneWindow.scene(114),scene);assert.equal(scene.assetsPending,false);assert.equal(calls,2);
+});
+
+test('native bridge event switches geometry and permissions together without replacing its scene handle',async()=>{
+ const v=read('opelucid-map-variants');let active=false;const f=setup({variant:z=>z===206&&active?{key:v.variant,descriptor:{...metadata[206],...v.scene}}:null}),scene=f.sceneWindow.scene(206);
+ await f.sceneWindow.prepare(206);assert.ok(scene.instances.some(i=>i.model==='op-map-414'));
+ active=true;await f.sceneWindow.prepare(206);assert.equal(f.sceneWindow.scene(206),scene);assert.ok(scene.instances.some(i=>i.model==='op-bridge-map-418'));assert.equal(scene.instances.some(i=>i.model==='op-map-414'),false);assert.deepEqual(scene.permissionGrids,v.scene.permissionGrids);
+ active=false;await f.sceneWindow.prepare(206);assert.equal(f.sceneWindow.scene(206),scene);assert.ok(scene.instances.some(i=>i.model==='op-map-414'));assert.equal(f.loader.stats().resident.length,1);
 });

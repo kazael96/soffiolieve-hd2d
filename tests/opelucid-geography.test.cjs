@@ -12,7 +12,8 @@ test('every native scene is assigned to one geographic family with intact models
  assert.equal(new Set(assigned).size,48);assert.equal(assigned.length,48);
 });
 test('new native grids retain old overlapping data and NG maps explicitly require rails',()=>{
- assert.equal(Object.keys(surface.grids).length,63);assert.equal(Object.values(surface.grids).reduce((sum,v)=>sum+v.length,0),66);
+ assert.equal(Object.keys(surface.grids).length,67);assert.equal(Object.values(surface.grids).reduce((sum,v)=>sum+v.length,0),70);
+ assert.deepEqual(surface.scenes[2061].map(row=>row.member),[417,419,418,420]);
  for(const [id,layers]of Object.entries(surface.grids))if(prior.grids[id])assert.deepEqual(layers,prior.grids[id],id);
  assert.deepEqual([...new Set(surface.railMaps.map(r=>r.zone))],[209,211]);for(const r of surface.railMaps)assert.ok(rails[r.zone]);
  for(const z of [114,209,211])assert.equal(scenes[z].railZone,z);

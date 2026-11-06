@@ -4,6 +4,7 @@
  const uploads=new WeakMap(),native=()=>window.NativeStory?.state||window.Journey?.state.original;
  const mounted=()=>native()?.surf===true;
  function surface(zone,x,z,height=0){
+  const chapter051=window.OpelucidChapter?.surfaceAt(zone,x,z,height);if(chapter051)return chapter051;
   const original=window.IcirrusChapter?.surfaceAt(zone,x,z,height);if(original)return original;
   const scene=window.OPENING_ASSETS?.scenes['zone'+zone]||renderer.scene;
   const grid=scene?.permissionGrids?.find(g=>x>=g.x-16&&x<g.x+16&&z>=g.z-16&&z<g.z+16);if(!grid)return null;

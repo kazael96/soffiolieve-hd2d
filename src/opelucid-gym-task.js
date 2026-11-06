@@ -26,7 +26,7 @@
    t.fraction+=dt*data.tickRate;const steps=Math.floor(t.fraction+1e-8);t.fraction=Math.max(0,t.fraction-steps);
    t.frame+=steps;if(t.frame<duration(t))return;
    if(t.kind==='switch')r.switches[t.index]=1-t.start;
-   else {r.states[t.index]=1-t.start;sound(data.sounds.finish);}
+   else {r.states[t.index]=1-t.start;stopSound(data.sounds.start);sound(data.sounds.finish);}
    delete r.task;settle(true);save();
   }
   function visual(instance){

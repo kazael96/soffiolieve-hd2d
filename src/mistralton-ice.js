@@ -4,26 +4,27 @@
 (function(root){
  const directions=[[0,-1],[0,1],[-1,0],[1,0]],point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<4096&&Math.abs(p.y)<4096,integer=(v,min,max)=>Number.isInteger(v)&&v>=min&&v<=max;
  function createController(options={}){
+  const iceZone=options.iceZone??192,slideKey=options.slideKey??"mistraltonIceSlide";
   const state=options.state||(()=>root.NativeStory?.state),hero=options.player||(()=>typeof player!=='undefined'?player:null),direction=options.direction||(()=>typeof facing==='number'?facing/3:0),resetInput=options.resetInput||(()=>root.resetInput?.()),save=options.save||(()=>root.Journey?.save(true)),canStart=options.canStart||(()=>!root.NativeStory?.locked),speed=options.speed??3.75;
   if(!Number.isFinite(speed)||speed<=0||speed>32)throw Error('Velocità di scivolamento non valida');
-  const grids=()=>typeof options.grids==='function'?options.grids(192):options.grids||root.MistraltonChapter?.grids(192)||root.MISTRALTON_SCENES?.[192]?.permissionGrids;
+  const grids=()=>typeof options.grids==='function'?options.grids(iceZone):options.grids||root.MistraltonChapter?.grids(iceZone)||root.MISTRALTON_SCENES?.[iceZone]?.permissionGrids;
   const events=()=>typeof options.events==='function'?options.events():options.events||root.MISTRALTON_EVENTS;
   let slide=null,shake=null,releaseRequired=false,lastDirection=null;
   function tile(x,y){const all=grids();if(!Array.isArray(all)||!all.length)return null;const grid=all.find(g=>x>=g.x-16&&x<g.x+16&&y>=g.z-16&&y<g.z+16);if(!grid)return {type:-1,blocked:true};if(!grid.bytes||grid.bytes.length<8196)return null;const at=8+((Math.floor(y-grid.z)+16)*32+Math.floor(x-grid.x)+16)*8;return {type:grid.bytes[at],blocked:!!(grid.bytes[at+2]&1)};}
   function blockedAt(x,y){const check=options.blocked||options.baseBlocked,actorBlocked=options.actors?.().some(n=>!n.hidden&&!n.gimmick&&(n.fieldZone===undefined||n.fieldZone===state()?.zone)&&Math.abs(n.x-x)<.55&&Math.abs(n.y-y)<.55);if(check)return !!check(x,y)||!!actorBlocked;return (typeof root.blocked==='function'?!!root.blocked(x,y):tile(x,y)?.blocked!==false)||!!root.NativeStory?.occupied?.(x,y)||!!actorBlocked;}
   function collision(x,y){return [[-.18,-.18],[-.18,.18],[.18,-.18],[.18,.18]].some(([dx,dy])=>blockedAt(x+dx,y+dy));}
-  function persistSlide(){const n=state(),p=hero();if(slide&&n&&point(p)){const {dir,phase,target,stopAfter}=slide;n.mistraltonIceSlide={version:1,zone:192,dir,phase,target:{...target},stopAfter:!!stopAfter,x:p.x,y:p.y};}}
-  function finishSlide(persist=true){const n=state();if(slide){releaseRequired=true;lastDirection=slide.dir;}slide=null;if(n)delete n.mistraltonIceSlide;resetInput();if(persist)save();}
+  function persistSlide(){const n=state(),p=hero();if(slide&&n&&point(p)){const {dir,phase,target,stopAfter}=slide;n[slideKey]={version:1,zone:iceZone,dir,phase,target:{...target},stopAfter:!!stopAfter,x:p.x,y:p.y};}}
+  function finishSlide(persist=true){const n=state();if(slide){releaseRequired=true;lastDirection=slide.dir;}slide=null;if(n)delete n[slideKey];resetInput();if(persist)save();}
   function forwardTarget(){const p=hero(),[dx,dy]=directions[slide.dir],horizontal=!!dx;let along=Math.floor((horizontal?p.x:p.y))+.5;const value=horizontal?p.x:p.y,sign=horizontal?dx:dy;if((along-value)*sign< -1e-7)along+=sign;
    slide.phase='travel';slide.target=horizontal?{x:along,y:p.y}:{x:p.x,y:along};const next=tile(slide.target.x,slide.target.y);slide.stopAfter=next?.type!==24;
   }
-  function startSlide(){const n=state(),p=hero(),dir=direction();if(!n||n.zone!==192||!point(p)||!integer(dir,0,3)||slide||!canStart())return false;const current=tile(p.x,p.y);if(!current||current.type!==24||current.blocked||releaseRequired&&lastDirection===dir)return false;
+  function startSlide(){const n=state(),p=hero(),dir=direction();if(!n||n.zone!==iceZone||!point(p)||!integer(dir,0,3)||slide||!canStart())return false;const current=tile(p.x,p.y);if(!current||current.type!==24||current.blocked||releaseRequired&&lastDirection===dir)return false;
    const horizontal=dir>=2;slide={dir,phase:'align',target:horizontal?{x:p.x,y:Math.floor(p.y)+.5}:{x:Math.floor(p.x)+.5,y:p.y},stopAfter:false};releaseRequired=true;lastDirection=dir;persistSlide();resetInput();save();return true;
   }
-  function restoreSlide(){const n=state(),p=hero(),r=n?.mistraltonIceSlide;if(!r)return false;if(n.zone!==192){delete n.mistraltonIceSlide;return false;}if(!tile(p?.x,p?.y))return false;
-   const horizontal=r.dir>=2,valid=r.version===1&&r.zone===192&&integer(r.dir,0,3)&&['align','travel'].includes(r.phase)&&point(r.target)&&point(p)&&Number.isFinite(r.x)&&Number.isFinite(r.y)&&Math.hypot(r.x-p.x,r.y-p.y)<.001&&Math.hypot(r.target.x-p.x,r.target.y-p.y)<=1.01&&
+  function restoreSlide(){const n=state(),p=hero(),r=n?.[slideKey];if(!r)return false;if(n.zone!==iceZone){delete n[slideKey];return false;}if(!tile(p?.x,p?.y))return false;
+   const horizontal=r.dir>=2,valid=r.version===1&&r.zone===iceZone&&integer(r.dir,0,3)&&['align','travel'].includes(r.phase)&&point(r.target)&&point(p)&&Number.isFinite(r.x)&&Number.isFinite(r.y)&&Math.hypot(r.x-p.x,r.y-p.y)<.001&&Math.hypot(r.target.x-p.x,r.target.y-p.y)<=1.01&&
     (r.phase==='align'?(horizontal?Math.abs(r.target.x-p.x)<1e-6&&Math.abs(r.target.y-(Math.floor(p.y)+.5))<1e-6:Math.abs(r.target.y-p.y)<1e-6&&Math.abs(r.target.x-(Math.floor(p.x)+.5))<1e-6):(horizontal?Math.abs(r.target.y-p.y)<1e-6&&Math.abs(r.target.x-(Math.floor(r.target.x)+.5))<1e-6:Math.abs(r.target.x-p.x)<1e-6&&Math.abs(r.target.y-(Math.floor(r.target.y)+.5))<1e-6));
-   if(!valid||r.phase==='align'&&tile(p.x,p.y).type!==24){delete n.mistraltonIceSlide;return false;}const [dx,dy]=directions[r.dir];if(r.phase==='travel'&&((r.target.x-p.x)*dx+(r.target.y-p.y)*dy<-.001)){delete n.mistraltonIceSlide;return false;}
+   if(!valid||r.phase==='align'&&tile(p.x,p.y).type!==24){delete n[slideKey];return false;}const [dx,dy]=directions[r.dir];if(r.phase==='travel'&&((r.target.x-p.x)*dx+(r.target.y-p.y)*dy<-.001)){delete n[slideKey];return false;}
    slide={dir:r.dir,phase:r.phase,target:{...r.target},stopAfter:r.phase==='travel'&&tile(r.target.x,r.target.y)?.type!==24};releaseRequired=true;lastDirection=r.dir;resetInput();return true;
   }
   function advanceSlide(dt){if(!slide)return false;const p=hero();if(!point(p)){finishSlide();return false;}if(!tile(p.x,p.y)||!tile(slide.target.x,slide.target.y))return false;let budget=dt*speed,moved=false,guard=0;
@@ -51,14 +52,14 @@
   }
   function warps(zone,list=events()?.zones?.[zone]?.warps||[]){const n=state(),patches=n?.mistraltonWarpPatches;if(!Array.isArray(list))throw Error('Tabella dei varchi non valida');if(!patches||typeof patches!=='object'||Array.isArray(patches))return list.map(w=>({...w}));return list.map((w,index)=>{const key=zone+':'+index,r=Object.hasOwn(patches,key)?patches[key]:null;if(!r)return {...w};const valid=r.version===1&&r.zone===zone&&r.index===index&&['x','y','z'].every(k=>integer(r[k],0,65535))&&r.x%16===8&&r.z%16===8&&r.y%16===0&&!w.rail;if(!valid){delete patches[key];return {...w};}return {...w,x:r.x,y:r.y,z:r.z};});}
   function restore(){const a=slide?true:restoreSlide(),b=shake?true:restoreShake();return a||b;}
-  function enter(zone){if(slide&&zone!==192)finishSlide();if(shake&&zone!==shake.zone)finishShake(false);if(zone===state()?.zone)restore();}
-  function reset(){if(slide||state()?.mistraltonIceSlide)finishSlide(false);if(shake||state()?.mistraltonCameraShake)finishShake(false,false);releaseRequired=false;lastDirection=null;resetInput();save();}
-  function tick(dt,moved=false){if(!Number.isFinite(dt)||dt<0||dt>60)return false;const n=state();if(!n)return false;if(slide&&n.zone!==192)finishSlide();if(shake&&n.zone!==shake.zone)finishShake(false);if(!slide&&n.mistraltonIceSlide)restoreSlide();if(!shake&&n.mistraltonCameraShake)restoreShake();
+  function enter(zone){if(slide&&zone!==iceZone)finishSlide();if(shake&&zone!==shake.zone)finishShake(false);if(zone===state()?.zone)restore();}
+  function reset(){if(slide||state()?.[slideKey])finishSlide(false);if(shake||state()?.mistraltonCameraShake)finishShake(false,false);releaseRequired=false;lastDirection=null;resetInput();save();}
+  function tick(dt,moved=false){if(!Number.isFinite(dt)||dt<0||dt>60)return false;const n=state();if(!n)return false;if(slide&&n.zone!==iceZone)finishSlide();if(shake&&n.zone!==shake.zone)finishShake(false);if(!slide&&n[slideKey])restoreSlide();if(!shake&&n.mistraltonCameraShake)restoreShake();
    if(shake){shake.elapsed=Math.min(shake.args[2]*shake.args[3]/30,shake.elapsed+dt);if(shake.elapsed+1e-9>=shake.args[2]*shake.args[3]/30)finishShake(true);else persistShake();}
-   if(!slide&&!moved)releaseRequired=false;if(!slide&&moved&&n.zone===192)startSlide();return advanceSlide(dt);
+   if(!slide&&!moved)releaseRequired=false;if(!slide&&moved&&n.zone===iceZone)startSlide();return advanceSlide(dt);
   }
   function command(name,args=[],values=args){if(name==='NativeOpcode328')return playShake(values);if(name==='NativeOpcode491'){patchWarp(values);return true;}return false;}
-  const busy=()=>{const n=state();return !!slide||!!shake||!!n?.mistraltonIceSlide&&n.mistraltonIceSlide.zone===n.zone||!!n?.mistraltonCameraShake&&n.mistraltonCameraShake.zone===n.zone;};
+  const busy=()=>{const n=state();return !!slide||!!shake||!!n?.[slideKey]&&n[slideKey].zone===n.zone||!!n?.mistraltonCameraShake&&n.mistraltonCameraShake.zone===n.zone;};
   return {prepare:()=>Promise.resolve(true),tick,enter,restore,reset,command,playShake,patchWarp,warps,cameraOffset,applyCamera,tile,blocked:()=>null,canMove:()=>!busy(),get busy(){return busy();},get sliding(){return !!slide;},get slide(){return slide;}};
  }
  const api={createController};Object.defineProperties(api,Object.getOwnPropertyDescriptors(createController()));root.MistraltonIce=api;if(typeof module!=='undefined')module.exports=api;

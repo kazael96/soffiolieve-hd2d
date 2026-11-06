@@ -28,10 +28,13 @@ assert prior['normals'] == [list(row) for row in struct.iter_unpack('<3h', norma
 assert prior['offsets'] == list(struct.unpack('<1314i', offset_bytes))
 lands = NARC(rom.getFileByName('a/0/0/8')).files
 scenes, grids, rail_maps, hashes = {}, {}, [], {}
-for zone, scene in assets['scenes'].items():
+all_scenes = dict(assets['scenes'])
+if assets.get('variantScenes', {}).get('206', {}).get('bridge'):
+    all_scenes['2061'] = assets['variantScenes']['206']['bridge']
+for zone, scene in all_scenes.items():
     scenes[zone] = []
     for instance in scene['instances']:
-        match = re.fullmatch(r'op-map-(\d+)', instance['model'])
+        match = re.fullmatch(r'op-(?:bridge-)?map-(\d+)', instance['model'])
         if not match:
             continue
         member = int(match[1])

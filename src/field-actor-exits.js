@@ -1,9 +1,9 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Rutilo']);
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Rutilo','Silvestro']);
  const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
- const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
+ const copy=n=>({...Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]])),...(Number.isFinite(n.jumpLift)&&n.jumpLift>=0&&n.jumpLift<=2?{jumpLift:n.jumpLift}:{})});
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
   const less=(a,b)=>a.f<b.f||a.f===b.f&&a.h<b.h;
@@ -112,7 +112,7 @@
   // The documented old Aralia routes are rebuilt from her valid saved pose;
   // their obsolete path/index must not prevent that compatibility migration.
   if(r.zone===317&&a.name==='Aralia'&&p&&!p.itineraryVersion&&(['path','resident'].includes(p.kind)||p.destination==='lab')){p={kind:'path',points:[],clip:null,...(p.destination==='lab'?{destination:'lab'}:{})};index=0;stage='walk';}
-  if(!p||!['path','door','stairs','resident','arrival','cannon'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(point))return null;
+  if(!p||!['path','door','stairs','resident','arrival','cannon'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(v=>point(v)&&(v.jumpLift===undefined||Number.isFinite(v.jumpLift)&&v.jumpLift>=0&&v.jumpLift<=2)))return null;
   if(['door','stairs','arrival','cannon'].includes(p.kind)&&!point(p.anchor))return null;
   if(p.clip!=null&&(!Array.isArray(p.clip)||p.clip.length!==4||!p.clip.every(Number.isFinite)))return null;
   if(p.kind==='arrival'&&(!Number.isInteger(p.destinationZone)||!Number.isInteger(p.targetUid)))return null;
