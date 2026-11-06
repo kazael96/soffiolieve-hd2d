@@ -437,6 +437,14 @@
       case 'NativeOpcode490':native.libraryPatches??={};native.libraryPatches[v[1]+':'+v[3]]={kind:v[0],height:v[2]};break;
       case 'NativeOpcode182':m.set(a[2],journey.consumeItem(v[0],v[1])?1:0);break;
       case 'NativeOpcode258':m.set(a[0],0);break; // Egg predicate; the demo has no eggs or breeding service.
+      case 'NativeOpcode544':{
+        // IRBI0216bc44/0216bd10: unsupported species leave the slot alone;
+        // supported event searches initialize it to0 and return0 if absent.
+        // Event-origin metadata and these optional encounters are outside the
+        // current main-story roster. Do not manufacture a positive result.
+        if([243,244,245,251,492,647,648,649].includes(v[0])){m.set(a[2],0);const name=GEN5.species.find(s=>s.id===v[0])?.en;if(name&&state.party.some(p=>p.name===name))throw Error('Dati di origine del Pokémon evento non disponibili per questa sequenza opzionale');}
+        m.set(a[3],0);break;
+      }
       case 'NativeOpcode283':{const p=GEN5.species.find(p=>p.en===state.party[v[2]]?.name);m.set(a[0],p?.types[0]??0);m.set(a[1],p?.types[1]??p?.types[0]??0);break;}
       case 'CGearScene':native.cgear=true;break;
       case 'CGearNotice':await showPage('Il C-Gear è stato attivato. Le funzioni wireless non sono disponibili nella demo.');break;
@@ -602,7 +610,7 @@
     if(SceneCamera.tracks(OPENING_ASSETS.scenes[zoneScenes[zone]])){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
     captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:!!OPENING_ASSETS.scenes[zoneScenes[zone]].outdoor,fromOutdoor:!!renderer.scene.outdoor,busy:[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.OpelucidChapter?.zones.includes(zone))await OpelucidChapter.ensure(zone);else if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.OpelucidGym?.enter(zone);window.DragonspiralJump?.enter();window.SurfField?.enter();syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
     const initFlags=native.flags.join(',');for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
-    if(window.IcirrusChapter?.zones.includes(zone)&&native.flags.join(',')!==initFlags)syncActors();
+    if((window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))&&native.flags.join(',')!==initFlags)syncActors();
     if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;if(zone===107)native.mistralton=true;if(zone===113)native.icirrus=true;derivePhase();
     captureActors();await renderer.prepareScene?.();if(restoreField)await fade(0,8);
   }

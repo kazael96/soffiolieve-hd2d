@@ -22,7 +22,7 @@
   ['route9Grass',348,[-419.5,-569.5],'op-map-71-grass01ax','normal'],
   ['route9Dark',348,[-433.5,-566.5],'op-map-70-grass01ax','dark',-65551/65536]
  ])contexts[id]={zone,origin,height,back:25,cutoff:-21,floor,kind};
- contexts.tubeline={zone:254,origin:[-.5,79.5],height:0,back:25,cutoff:-21,floor:'op-map-184-h03_05',sky:['#7e9aa4','#c6d6d6']};
+ contexts.tubeline={zone:254,origin:[-.5,79.5],height:0,back:25,cutoff:-21,floor:'op-map-184-h03_02',floorHalfWidth:9,uvScale:4,underlay:'op-map-184-kawa_soko',underlayHeight:-9.5,sky:['#7e9aa4','#c6d6d6']};
  contexts.opelucidTrainerHouse={zone:125,origin:[-6.5,-6.5],height:0,back:25,cutoff:-21,floor:'op-map-531-in33yuka',wall:'op-map-531-in33kabe01',wallPattern:'in33kabe',indoor:true,sky:['#313942','#71828a']};
  function clipFar(verts,cutoff){
   const result=[];for(let at=0;at<verts.length;at+=33){const polygon=[verts.slice(at,at+11),verts.slice(at+11,at+22),verts.slice(at+22,at+33)],kept=[];
@@ -37,8 +37,12 @@
   const walls=[];for(const {a,b,count}of edges.values()){if(count!==1)continue;const length=Math.hypot(b[0]-a[0],b[2]-a[2]);if(length<.0001)continue;for(const i of [0,1,2,2,1,3]){const p=i%2?b:a;walls.push(p[0],i>=2?p[1]:0,p[2],i%2?length*4:0,i>=2?0:64,1,1,1,0,0,1);}}return walls;
  }
  const context=id=>window.OpelucidSeasons?.battle(contexts[id])||contexts[id];
+ function plane(c,height=0){const verts=[],half=c.floorHalfWidth??48,quad=[0,1,2,2,1,3];
+  if(c.floorUV){const [u0,v0,u1,v1]=c.floorUV;let row=0;for(let z=-64;z<24;z+=4,row++){let column=0;for(let x=-half;x<half;x+=4,column++)for(const i of quad){const right=i%2,bottom=i>=2,uvx=column%2?1-right:right,uvz=row%2?1-Number(bottom):Number(bottom);verts.push(right?Math.min(x+4,half):x,height,bottom?Math.min(z+4,24):z,uvx?u1:u0,uvz?v1:v0,1,1,1,0,1,0);}}}
+  else for(const i of quad)verts.push(i%2?half:-half,height,i>=2?24:-64,i%2?half*2*(c.uvScale??16):0,i>=2?88*(c.uvScale??16):0,1,1,1,0,1,0);return verts;
+ }
  function floor(id){const c=context(id),key='opelucid-battle-'+id+'-season'+(c.season??'base');if(!OPENING_ASSETS.textures[c.floor])throw Error('Pavimento nativo non disponibile: '+id);
-  if(!OPENING_ASSETS.models[key]){const verts=[];for(const i of [0,1,2,2,1,3])verts.push(i%2?48:-48,0,i>=2?24:-64,i%2?1536:0,i>=2?1408:0,1,1,1,0,1,0);const groups=[{texture:c.floor,verts,repeatS:true,repeatT:true}];
+  if(!OPENING_ASSETS.models[key]){const groups=[{texture:c.floor,verts:plane(c),repeatS:!c.floorUV,repeatT:!c.floorUV}];if(c.underlay){if(!OPENING_ASSETS.textures[c.underlay])throw Error('Materiale sotto il ponte non disponibile');groups.push({texture:c.underlay,verts:plane({floorHalfWidth:48},c.underlayHeight),repeatS:true,repeatT:true});}
    if(c.wall){const texture=OPENING_ASSETS.textures[c.wall];if(!texture)throw Error('Parete nativa non disponibile: '+id);const arc=[[-48,-29],[-32,-40],[-16,-46],[0,-48],[16,-46],[32,-40],[48,-29]];for(let s=0;s+1<arc.length;s++){const [ax,az]=arc[s],[bx,bz]=arc[s+1],wall=[],length=Math.hypot(bx-ax,bz-az);for(const i of [0,1,2,2,1,3])wall.push(i%2?bx:ax,i>=2?24:0,i%2?bz:az,i%2?length*4:0,i>=2?0:texture.h*3,.76,.81,.82,0,0,1);groups.push({texture:c.wall,verts:wall,repeatS:true,repeatT:true,doubleSided:true});}}
    OPENING_ASSETS.models[key]={groups};}return key;
  }
@@ -50,5 +54,5 @@
   }),{model:floor(id),x:0,y:0,z:0,rotation:0}];}
  function ambient(id){const c=contexts[id];if(!c)return null;if(!c.kind)return [];const season=OPELUCID_DATA.encounters[c.zone]?.seasons[window.FieldSeason?.current()??new Date().getMonth()%4],slots=season?.[c.kind]?.slots||[];return [...new Map(slots.map(s=>[s.name,s])).values()].slice(0,3).map((s,i)=>({species:s.name,id:s.id,x:-6+i*2.2,z:-19.5,height:.38}));}
  const previous=PinwheelBattles.instances,previousAmbient=PinwheelBattles.ambient;Object.assign(PinwheelBattles.contexts,contexts);PinwheelBattles.instances=id=>contexts[id]?instances(id):previous(id);PinwheelBattles.ambient=id=>ambient(id)??previousAmbient(id);
- window.OpelucidBattles={has:id=>!!contexts[id],revision:id=>[113,205,345,346].includes(contexts[id]?.zone)?window.FieldSeason?.current()??0:null,prepare,instances,ambient,contexts,clipFar,supportEdges,isGround:name=>/^op-/.test(name||'')&&/(?:yuka|suna|sabaku|sand_base|ice_s|grass|michi|mizu|water|(?:sp|w)_marsh|(?:sp|w)_o11m|w_out11_yuka|h03_05)/.test(name)};
+ window.OpelucidBattles={has:id=>!!contexts[id],revision:id=>[113,205,345,346].includes(contexts[id]?.zone)?window.FieldSeason?.current()??0:null,prepare,instances,ambient,contexts,clipFar,supportEdges,isGround:name=>/^op-/.test(name||'')&&/(?:yuka|suna|sabaku|sand_base|ice_s|grass|michi|mizu|water|(?:sp|w)_marsh|(?:sp|w)_o11m|w_out11_yuka|h03_(?:02|04|05)|kawa_soko)/.test(name)};
 })();

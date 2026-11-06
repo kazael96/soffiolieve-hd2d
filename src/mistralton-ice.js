@@ -4,10 +4,11 @@
 (function(root){
  const directions=[[0,-1],[0,1],[-1,0],[1,0]],point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<4096&&Math.abs(p.y)<4096,integer=(v,min,max)=>Number.isInteger(v)&&v>=min&&v<=max;
  function createController(options={}){
-  const iceZone=options.iceZone??192,slideKey=options.slideKey??"mistraltonIceSlide";
+  let iceZone=options.iceZone??192;const iceZones=options.iceZones??[iceZone,...(root.OpelucidChapter?[113,345,346]:[])],slideKey=options.slideKey??"mistraltonIceSlide";
   const state=options.state||(()=>root.NativeStory?.state),hero=options.player||(()=>typeof player!=='undefined'?player:null),direction=options.direction||(()=>typeof facing==='number'?facing/3:0),resetInput=options.resetInput||(()=>root.resetInput?.()),save=options.save||(()=>root.Journey?.save(true)),canStart=options.canStart||(()=>!root.NativeStory?.locked),speed=options.speed??3.75;
   if(!Number.isFinite(speed)||speed<=0||speed>32)throw Error('Velocità di scivolamento non valida');
-  const grids=()=>typeof options.grids==='function'?options.grids(iceZone):options.grids||root.MistraltonChapter?.grids(iceZone)||root.MISTRALTON_SCENES?.[iceZone]?.permissionGrids;
+  const defaultGrids=()=>{if([113,345,346].includes(iceZone)&&root.OpelucidSeasons&&!root.OpelucidSeasons.scene(iceZone))return null;return root.OpelucidChapter?.zones.includes(iceZone)?root.OpelucidChapter.grids(iceZone):root.MistraltonChapter?.grids(iceZone)||root.MISTRALTON_SCENES?.[iceZone]?.permissionGrids;};
+  const grids=()=>typeof options.grids==='function'?options.grids(iceZone):options.grids||defaultGrids();
   const events=()=>typeof options.events==='function'?options.events():options.events||root.MISTRALTON_EVENTS;
   let slide=null,shake=null,releaseRequired=false,lastDirection=null;
   function tile(x,y){const all=grids();if(!Array.isArray(all)||!all.length)return null;const grid=all.find(g=>x>=g.x-16&&x<g.x+16&&y>=g.z-16&&y<g.z+16);if(!grid)return {type:-1,blocked:true};if(!grid.bytes||grid.bytes.length<8196)return null;const at=8+((Math.floor(y-grid.z)+16)*32+Math.floor(x-grid.x)+16)*8;return {type:grid.bytes[at],blocked:!!(grid.bytes[at+2]&1)};}
@@ -21,7 +22,7 @@
   function startSlide(){const n=state(),p=hero(),dir=direction();if(!n||n.zone!==iceZone||!point(p)||!integer(dir,0,3)||slide||!canStart())return false;const current=tile(p.x,p.y);if(!current||current.type!==24||current.blocked||releaseRequired&&lastDirection===dir)return false;
    const horizontal=dir>=2;slide={dir,phase:'align',target:horizontal?{x:p.x,y:Math.floor(p.y)+.5}:{x:Math.floor(p.x)+.5,y:p.y},stopAfter:false};releaseRequired=true;lastDirection=dir;persistSlide();resetInput();save();return true;
   }
-  function restoreSlide(){const n=state(),p=hero(),r=n?.[slideKey];if(!r)return false;if(n.zone!==iceZone){delete n[slideKey];return false;}if(!tile(p?.x,p?.y))return false;
+  function restoreSlide(){const n=state(),p=hero(),r=n?.[slideKey];if(!r)return false;if(!iceZones.includes(n.zone)||r.zone!==n.zone){delete n[slideKey];return false;}iceZone=n.zone;if(!tile(p?.x,p?.y))return false;
    const horizontal=r.dir>=2,valid=r.version===1&&r.zone===iceZone&&integer(r.dir,0,3)&&['align','travel'].includes(r.phase)&&point(r.target)&&point(p)&&Number.isFinite(r.x)&&Number.isFinite(r.y)&&Math.hypot(r.x-p.x,r.y-p.y)<.001&&Math.hypot(r.target.x-p.x,r.target.y-p.y)<=1.01&&
     (r.phase==='align'?(horizontal?Math.abs(r.target.x-p.x)<1e-6&&Math.abs(r.target.y-(Math.floor(p.y)+.5))<1e-6:Math.abs(r.target.y-p.y)<1e-6&&Math.abs(r.target.x-(Math.floor(p.x)+.5))<1e-6):(horizontal?Math.abs(r.target.y-p.y)<1e-6&&Math.abs(r.target.x-(Math.floor(r.target.x)+.5))<1e-6:Math.abs(r.target.x-p.x)<1e-6&&Math.abs(r.target.y-(Math.floor(r.target.y)+.5))<1e-6));
    if(!valid||r.phase==='align'&&tile(p.x,p.y).type!==24){delete n[slideKey];return false;}const [dx,dy]=directions[r.dir];if(r.phase==='travel'&&((r.target.x-p.x)*dx+(r.target.y-p.y)*dy<-.001)){delete n[slideKey];return false;}
@@ -52,9 +53,9 @@
   }
   function warps(zone,list=events()?.zones?.[zone]?.warps||[]){const n=state(),patches=n?.mistraltonWarpPatches;if(!Array.isArray(list))throw Error('Tabella dei varchi non valida');if(!patches||typeof patches!=='object'||Array.isArray(patches))return list.map(w=>({...w}));return list.map((w,index)=>{const key=zone+':'+index,r=Object.hasOwn(patches,key)?patches[key]:null;if(!r)return {...w};const valid=r.version===1&&r.zone===zone&&r.index===index&&['x','y','z'].every(k=>integer(r[k],0,65535))&&r.x%16===8&&r.z%16===8&&r.y%16===0&&!w.rail;if(!valid){delete patches[key];return {...w};}return {...w,x:r.x,y:r.y,z:r.z};});}
   function restore(){const a=slide?true:restoreSlide(),b=shake?true:restoreShake();return a||b;}
-  function enter(zone){if(slide&&zone!==iceZone)finishSlide();if(shake&&zone!==shake.zone)finishShake(false);if(zone===state()?.zone)restore();}
+  function enter(zone){if(slide&&zone!==iceZone)finishSlide();if(iceZones.includes(zone))iceZone=zone;if(shake&&zone!==shake.zone)finishShake(false);if(zone===state()?.zone)restore();}
   function reset(){if(slide||state()?.[slideKey])finishSlide(false);if(shake||state()?.mistraltonCameraShake)finishShake(false,false);releaseRequired=false;lastDirection=null;resetInput();save();}
-  function tick(dt,moved=false){if(!Number.isFinite(dt)||dt<0||dt>60)return false;const n=state();if(!n)return false;if(slide&&n.zone!==iceZone)finishSlide();if(shake&&n.zone!==shake.zone)finishShake(false);if(!slide&&n[slideKey])restoreSlide();if(!shake&&n.mistraltonCameraShake)restoreShake();
+  function tick(dt,moved=false){if(!Number.isFinite(dt)||dt<0||dt>60)return false;const n=state();if(!n)return false;if(slide&&n.zone!==iceZone)finishSlide();if(iceZones.includes(n.zone))iceZone=n.zone;if(shake&&n.zone!==shake.zone)finishShake(false);if(!slide&&n[slideKey])restoreSlide();if(!shake&&n.mistraltonCameraShake)restoreShake();
    if(shake){shake.elapsed=Math.min(shake.args[2]*shake.args[3]/30,shake.elapsed+dt);if(shake.elapsed+1e-9>=shake.args[2]*shake.args[3]/30)finishShake(true);else persistShake();}
    if(!slide&&!moved)releaseRequired=false;if(!slide&&moved&&n.zone===iceZone)startSlide();return advanceSlide(dt);
   }
