@@ -9,5 +9,14 @@
   if(!covered||!outdoor||fromOutdoor||busy)return {changed:false,deferred:true,season:previous};
   state.fieldSeason=next;return {changed:true,previous,season:next};
  }
- const api={valid,calendar,current,transition};root.FieldSeason=api;if(typeof module!=='undefined')module.exports=api;
+ // IRBI ARM9 020113f0 indexes 0209dea4 by effective season*24 + hour.
+ // These are five native phases; early night4 is distinct from evening2/night3.
+ const hours=[
+  [4,4,4,4,4,0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,3,3,3,3],
+  [4,4,4,4,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,3,3,3],
+  [4,4,4,4,4,4,0,0,0,0,1,1,1,1,1,1,1,2,2,2,3,3,3,3],
+  [4,4,4,4,4,4,4,0,0,0,0,1,1,1,1,1,1,2,2,3,3,3,3,3]
+ ];
+ function phase(state,date=new Date()){const hour=date.getHours();if(!Number.isInteger(hour)||hour<0||hour>23)throw Error('Ora del campo non valida');return hours[current(state)][hour];}
+ const api={valid,calendar,current,transition,phase};root.FieldSeason=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);

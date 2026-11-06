@@ -1,4 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),C=require('../src/scene-camera.js');
+test('Castle cutaway targets native wall faces and black roof caps without cutting stairs, actors or battle scenery',()=>{for(const zone of [160,161,162,163,164,165]){const scene={zone,chapter051:true};assert.equal(C.cutawayKind(scene,'op-map-312-in10_kabe05'),1);assert.equal(C.cutawayKind(scene,'op-map-312-in10_suna01'),2);for(const texture of ['op-map-312-in10_satir01','op-prop-False-9-41-d4satir_u','actor-180-0','op-map-312-in10_suna03'])assert.equal(C.cutawayKind(scene,texture),0);}for(const scene of [{zone:165},{zone:114,chapter051:true},{zone:207,chapter051:true},{zone:158,chapter051:true},{chapter051:true},{zone:NaN,chapter051:true},{}])assert.equal(C.cutawayKind(scene,'op-map-312-in10_kabe05'),0);});
 
 test('Dragonspiral entrance clears a five-tile canopy six tiles in front and restores the previous view',()=>{
  const renderer={scene:{zone:206}},restore=C.applyFieldView(renderer,{z:34.5});

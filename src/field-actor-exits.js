@@ -1,8 +1,8 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Gasparago','Silvestro']);
- const canonicalName=n=>n.model===104&&n.name==='Rutilo'?'Gasparago':n.name;
- const identity=n=>canonicalName(n)!==n.name?'Gasparago':!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Gasparago','Silvestro','Aristide']);
+ const canonicalName=n=>n.model===104&&n.name==='Rutilo'?'Gasparago':n.model===180&&n.name==='Original180'?'Aristide':n.name;
+ const identity=n=>canonicalName(n)!==n.name?canonicalName(n):!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
  const copy=n=>({...Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]])),name:canonicalName(n),...(Number.isFinite(n.jumpLift)&&n.jumpLift>=0&&n.jumpLift<=2?{jumpLift:n.jumpLift}:{})});
  function route(from,to,blocked){

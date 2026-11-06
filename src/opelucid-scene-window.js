@@ -4,16 +4,16 @@
  function create({metadata,parts,assets,loader,legacyDescriptor=()=>null,legacyScene=()=>null,legacyEnsure=async()=>{},neighbors=defaultNeighbors,surfaces=null,afterPrepare=async()=>{},variant=()=>null}){
   const owned=new Map(),zones=Object.keys(metadata).map(Number),globalZones=zones.filter(z=>metadata[z].sourceMatrix===0);let generation=0,loading=null;
   const descriptor=z=>variant(z)?.descriptor||metadata[z]||legacyDescriptor(z),members=z=>[z,...(neighbors[z]||[])],grids=z=>members(z).flatMap(id=>descriptor(id)?.permissionGrids||[]);
-  const geometry=(data,z)=>data?.variantScenes?.[z]?.[variant(z)?.key]||data?.scenes[z];
+  const geometry=(data,z)=>variant(z)?.scene||data?.variantScenes?.[z]?.[variant(z)?.key]||data?.scenes[z];
   const crosses=(a,b)=>a===b||(neighbors[a]||[]).includes(b)||(neighbors[b]||[]).includes(a);
   function evict(name){for(const [zone,scene]of owned)if(parts.zoneFamily[zone]===name&&assets.scenes['zone'+zone]===scene){scene.instances=[];scene.assetsPending=true;}}
   async function prepare(zone){
    if(!owned.has(zone))throw Error('Mappa del capitolo non disponibile: '+zone);
    if(loading?.zone===zone)return loading.promise;
-   const token=++generation,ids=members(zone),families=[...new Set(ids.map(id=>parts.zoneFamily[id]).filter(Boolean))];
+   const token=++generation,ids=members(zone),families=[...new Set(ids.filter(id=>!variant(id)?.scene).map(id=>parts.zoneFamily[id]).filter(Boolean))];if(!families.length)loader.cancel();
    const promise=Promise.resolve().then(async()=>{
     await Promise.all(ids.filter(id=>!parts.zoneFamily[id]).map(legacyEnsure));if(token!==generation)return false;
-    if(!await loader.ensure(families)||token!==generation)return false;
+    if(families.length&&!await loader.ensure(families)||token!==generation)return false;
     const scene=owned.get(zone);if(assets.scenes['zone'+zone]!==scene)return false;
     const current=geometry(loader.get(parts.zoneFamily[zone]),zone);if(!current)throw Error('Geometria della mappa incompleta: '+zone);
     const instances=ids.flatMap(id=>{

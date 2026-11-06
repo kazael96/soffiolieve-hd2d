@@ -17,6 +17,9 @@ handlers={1743:['IRBI program228 switch SEPlay'],1744:['overlay45:021f39aa/platf
 handlers[1665]=['IRBI583 independent actor fall: overlay21:021c7652']
 handlers[1650]=['IRBI417/effect17: overlay21:021da10c sound table, frame24']
 handlers[1952]=['IRBI193 sand sink: overlay21:021bfee6..021bfeea']
+handlers[1914]=['IRBI field building kind14 open: overlay21 sound table021d3c70']
+handlers[1915]=['IRBI field building kind14 close: overlay21 sound table021d3c70']
+handlers[1975]=['IRBI native movements184/185: dispatch021d5e40, handlers02198d98/02198db0, literals02198dac/02198dc4']
 native_cries=set(namespace['cries'])
 for bank,program in namespace['events']['scripts'].items():
  for pc,command in program['code'].items():

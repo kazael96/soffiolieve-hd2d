@@ -2,10 +2,10 @@
 (function(root){
   const KEY='soffiolieve-black-opening-v2';
   function migrateNpcNames(native){
-    const rename=actor=>{if(actor?.model===104&&actor.name==='Rutilo'){actor.name='Gasparago';return true;}return false;};
+    const rename=actor=>{const next=actor?.model===104&&actor.name==='Rutilo'?'Gasparago':actor?.model===180&&actor.name==='Original180'?'Aristide':null;if(next)actor.name=next;return next;};
     for(const actors of Object.values(native.actors||{}))if(Array.isArray(actors))for(const actor of actors)rename(actor);
-    if(Array.isArray(native.departures))for(const record of native.departures)if(rename(record?.actor)&&record.key==='Rutilo')record.key='Gasparago';
-    if(native.opelucidArrivals&&typeof native.opelucidArrivals==='object')for(const key of Object.keys(native.opelucidArrivals))if(native.opelucidArrivals[key]==='Rutilo')native.opelucidArrivals[key]='Gasparago';
+    if(Array.isArray(native.departures))for(const record of native.departures){const before=record?.actor?.name,next=rename(record?.actor);if(next&&(record.key===before||record.key===record.actor.fieldZone+':'+record.actor.uid+':'+before))record.key=next;}
+    if(native.opelucidArrivals&&typeof native.opelucidArrivals==='object')for(const key of Object.keys(native.opelucidArrivals)){if(native.opelucidArrivals[key]==='Rutilo')native.opelucidArrivals[key]='Gasparago';else if(['120:6','123:0'].includes(key)&&native.opelucidArrivals[key]==='Original180')native.opelucidArrivals[key]='Aristide';}
   }
   const phases=['gift','belle','komor','mother','biancaHouse','lab','map','routeStart','tutorial','route','arrival','centerHeal','centerTour','plasma','nextRoute','route2','striaton','dreamyard','dreamyardDone','route3','wellspring','nacrene','nacreneGym','pinwheel','skyarrow','castelia','route4','nimbasa','driftveil','route6','chargestone','mistralton','route7','celestial','skylaGym','twistMountain','icirrus','brycenGym','dragonspiral','relicCastle','route8','tubeline','route9','opelucid'];
   const starters=['Snivy','Tepig','Oshawott'];

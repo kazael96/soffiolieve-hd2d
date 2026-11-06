@@ -4,6 +4,9 @@
  function tracks(scene){return !!scene&&(scene.followPlayer===true||Object.entries(scene).some(([key,value])=>value===true&&/^chapter\d+$/.test(key)&&Number(key.slice(7))>=42));}
  function anchor(name,scene,zone,position){if(root.SurfField?.mounted())return [position.x,position.y+1.5];if(name==='town')return [[321,16,154].includes(zone)?position.x:position.x*.7,position.y+1.5];return tracks(scene)?[position.x,position.y+1.5]:[-10,-10];}
  function followFactor(seconds){const dt=Number.isFinite(seconds)?Math.max(0,Math.min(1,seconds)):0;return 1-Math.exp(-2.1*dt);}
+ // Only the Castle's native shell uses a foreground cutaway. The black cap
+ // shares its sand material with the floor, so the shader also tests colour.
+ function cutawayKind(scene,texture=''){if(!scene?.chapter051||![160,161,162,163,164,165].includes(scene.zone)||!/^op-map-/.test(texture))return 0;if(/in10_kabe/.test(texture))return 1;return /in10_suna01$/.test(texture)?2:0;}
  function applyFieldView(renderer,hero){
   let current=fieldViews.get(renderer);
   const restore=()=>{if(current){renderer.cameraPitch=current.base;fieldViews.delete(renderer);current=null;}};
@@ -15,5 +18,5 @@
   // smoothly to the ordinary low camera before the open bridge.
   renderer.cameraPitch=[Math.sin(angle),Math.cos(angle)];return restore;
  }
- const api={tracks,anchor,followFactor,applyFieldView};root.SceneCamera=api;if(typeof module!=='undefined')module.exports=api;
+ const api={tracks,anchor,followFactor,applyFieldView,cutawayKind};root.SceneCamera=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

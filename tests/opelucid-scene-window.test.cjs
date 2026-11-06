@@ -6,6 +6,8 @@ function setup({loadFamily=async name=>read('opelucid-'+name+'-assets'),afterPre
  sceneWindow=makeWindow({metadata,parts,assets,loader,legacyDescriptor:()=>null,legacyScene:()=>legacy,legacyEnsure,afterPrepare,variant}).register();return {assets,loader,sceneWindow,legacy};
 }
 
+test('a fully supplied native seasonal scene does not fetch its duplicate base geography',async()=>{const calls=[],seasonal={instances:[{model:'winter-native-map'}]},f=setup({loadFamily:async name=>{calls.push(name);return read('opelucid-'+name+'-assets');},variant:z=>[113,205,345].includes(z)?{key:'winter',descriptor:metadata[z],scene:seasonal}:null});await f.sceneWindow.prepare(345);assert.deepEqual(calls,[]);assert.equal(f.sceneWindow.scene(345).instances.length,2);assert.ok(f.sceneWindow.scene(345).instances.every(i=>i.model==='winter-native-map'));assert.equal(f.sceneWindow.scene(345).assetsPending,false);});
+
 test('all scene descriptors remain usable before geometry; current and neighbors install as one bounded window',async()=>{
  const f=setup(),scene=f.sceneWindow.scene(113),grids=scene.permissionGrids;assert.equal(Object.keys(f.assets.scenes).length,48);assert.equal(Object.keys(f.assets.models).length,0);assert.equal(scene.assetsPending,true);assert.ok(grids.length>metadata[113].permissionGrids.length);f.sceneWindow.register();assert.equal(f.sceneWindow.scene(113),scene);
  assert.equal(await f.sceneWindow.prepare(113),true);assert.equal(f.assets.scenes.zone113,scene);assert.equal(scene.assetsPending,false);assert.deepEqual(f.loader.stats().resident,['icirrus','dragonspiral','route8']);

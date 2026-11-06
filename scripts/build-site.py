@@ -131,8 +131,9 @@ def build(archive, target):
         icirrus_pack = startup_pack(site,['icirrus-assets.js'],'assets/icirrus-pack.bin')
         opelucid_packs = geographic_packs(site)
         for season in range(4):
-            if (site / f'field-season-{season}-assets.js').exists():
-                startup_pack(site,[f'field-season-{season}-assets.js'],f'assets/field-season-{season}-pack.bin')
+            for prefix in ['field','opelucid']:
+                if (site / f'{prefix}-season-{season}-assets.js').exists():
+                    startup_pack(site,[f'{prefix}-season-{season}-assets.js'],f'assets/{prefix}-season-{season}-pack.bin')
         entrypoints = bundle_entries(site)
         # A content hash changes script/CSS URLs on every source update.
         hashes = {p.relative_to(site).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -140,9 +141,10 @@ def build(archive, target):
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
         for season in range(4):
-            pack = site / f'assets/field-season-{season}-pack.bin'
-            if pack.exists():
-                asset_hashes[pack.relative_to(site).as_posix()] = hashlib.sha256(pack.read_bytes()).hexdigest()
+            for prefix in ['field','opelucid']:
+                pack = site / f'assets/{prefix}-season-{season}-pack.bin'
+                if pack.exists():
+                    asset_hashes[pack.relative_to(site).as_posix()] = hashlib.sha256(pack.read_bytes()).hexdigest()
         asset_hashes['assets/icirrus-pack.bin'] = hashlib.sha256((site/'assets/icirrus-pack.bin').read_bytes()).hexdigest()
         for part in opelucid_packs.values():
             asset_hashes[part['pack']] = hashlib.sha256((site/part['pack']).read_bytes()).hexdigest()

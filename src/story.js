@@ -152,7 +152,7 @@
     const g=onRoute?(dream||next?renderer.scene:outdoor).permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
     const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
     const dark=next?.dark&&g?.bytes[tile]===6,table=dark?next.dark.slots:enc?enc.slots:OPENING_ENCOUNTERS;if(dark)encounterState.rate=next.dark.rate;
-    if(encounterState.advance(distance,!!g&& (surfing?enc.rate>0&&(g.bytes[tile+2]&3)===2:[324,195,196,197,200,201,202,203,338,339,340,341].includes(window.NativeStory?.state.zone)?g.bytes[tile]===10:(window.NativeStory?.state.zone===326?NIMBASA_FIELD.sandTiles.includes(g.bytes[tile]):[4,6].includes(g.bytes[tile]))),n=>Math.floor(Math.random()*n))){
+    if(encounterState.advance(distance,!!g&&RouteEncounter.terrain(g.bytes[tile]|g.bytes[tile+1]<<8,g.bytes[tile+2]|g.bytes[tile+3]<<8,surfing),n=>Math.floor(Math.random()*n))){
       const pick=()=>{let roll=Math.random()*100;const e=table.find(slot=>(roll-=slot.weight)<0)||table.at(-1);return monConfig(newStoryMon(e.name,e.level??e.min+Math.floor(Math.random()*(e.max-e.min+1))));};
       // IRBI overlay21 021a935e..021a937a: two healthy party members;
       // GFL_RandomLC(65535)/656 < 40 enables the second dark-grass slot.
