@@ -8,7 +8,7 @@
  Object.assign(OPENING_DATA,ICIRRUS_DATA.pokemonData);
  for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])Object.assign(TRAINING_DATA[key],ICIRRUS_DATA[key]);
  TRAINING_DATA.levelCap=ICIRRUS_DATA.levelCap;TRAINING_DATA.capSteps=ICIRRUS_DATA.capSteps;
- const names={7:'Komor',90:'Anemone',97:'Nardo',103:'N',104:'Rutilo',105:'Aralia',134:'Belle'};
+ const names={7:'Komor',90:'Anemone',97:'Nardo',103:'N',104:'Gasparago',105:'Aralia',134:'Belle'};
  async function script(file,globalName){if(window[globalName])return;const url=NativeTextLayout.resource(file),bytes=await RuntimeAssets.bytes(url),tag=document.createElement('script');tag.textContent=new TextDecoder().decode(bytes)+'\n//# sourceURL='+new URL(url,location.href).href;document.body.append(tag);tag.remove();if(!window[globalName])throw Error('Risorsa del capitolo incompleta: '+file);}
  function ensure(){if(task)return task;task=Promise.resolve().then(async()=>{
   await Promise.all([script('icirrus-assets.js','ICIRRUS_ASSETS'),script('native-surface-data.js','NATIVE_SURFACE_DATA'),window.MistraltonChapter?.ensure()]);

@@ -23,7 +23,7 @@
   kit.itineraries['nardo-after-surf']=()=>[door(198,0)];
   kit.itineraries['n-dragonspiral-approach']=()=>[kit.edge(107,-665.5,-463.5,0,-1),north(),...mountain(),door(202,3),kit.arrival(113,-604.5,-591.5,113,253)];
   kit.itineraries['cedric-dragonspiral-approach']=()=>[kit.arrival(113,-603.5,-591.5,113,252)];
-  root.OpelucidContinuity?.extend(kit);
+  root.OpelucidContinuity?.extend({...kit,mountain,icirrusDoor:door});
  }
  function blocked(z,x,y){const extra=root.OpelucidContinuity?.blocked(z,x,y);if(extra!==null&&extra!==undefined)return extra;if(!root.IcirrusChapter?.zones.includes(z))return null;
   if(root.NativeRails?.has(z)&&root.NativeRails.locate(z,x,y))return false;
@@ -39,9 +39,9 @@
   for(const goal of candidates){const route=root.FieldActorExits.route(start,goal,blocked),last=route.at(-1)||start;if(Math.hypot(last.x-goal.x,last.y-goal.y)<.01)return [...prefix,...route,{...to}];}
   return [...prefix,...root.FieldActorExits.route(start,to,blocked)];
  }
- function destination(actor,z){const extra=root.OpelucidContinuity?.destination(actor,z);if(extra)return extra;if(z===107&&actor.name==='N')return 'n-dragonspiral-approach';if(z===113&&actor.name==='Rutilo')return 'cedric-dragonspiral-approach';if(z===342&&actor.name==='Anemone')return 'skyla-gym-return';if(z===198&&actor.name==='Komor')return 'komor-twist-exit';if(z===198&&actor.name==='Nardo')return 'nardo-after-surf';if(z===202&&actor.name==='Komor')return 'komor-icirrus-wait';return null;}
+ function destination(actor,z){const extra=root.OpelucidContinuity?.destination(actor,z);if(extra)return extra;if(z===107&&actor.name==='N')return 'n-dragonspiral-approach';if(z===113&&actor.name==='Gasparago')return 'cedric-dragonspiral-approach';if(z===342&&actor.name==='Anemone')return 'skyla-gym-return';if(z===198&&actor.name==='Komor')return 'komor-twist-exit';if(z===198&&actor.name==='Nardo')return 'nardo-after-surf';if(z===202&&actor.name==='Komor')return 'komor-icirrus-wait';return null;}
  function arrived(r){root.OpelucidContinuity?.arrived(r);const name=r.plan.destination;if(!['skyla-celestial-tower','skyla-gym-return','cedric-next-research','komor-next-journey','komor-twist-exit','komor-icirrus-wait'].includes(name))return;const flag=name==='skyla-celestial-tower'?676:name==='cedric-next-research'?579:name==='komor-twist-exit'?678:null;if(flag!==null&&options.native.flags.includes(flag))options.native.flags=options.native.flags.filter(f=>f!==flag);Promise.resolve().then(()=>root.NativeStory?.syncActors());}
- function prepareEvent(z,script){if(root.OpelucidContinuity?.prepareEvent(z,script)===false)return false;if(z===113&&script===1)return !options.native.flags.includes(579)&&!root.MistraltonContinuity.waitingFor(z,['Rutilo']);if(z===198&&script===2)return !root.MistraltonContinuity.waitingFor(z,['Komor']);if(z===202&&script===1)return !root.MistraltonContinuity.waitingFor(z,['Komor']);return true;}
+ function prepareEvent(z,script){if(root.OpelucidContinuity?.prepareEvent(z,script)===false)return false;if(z===113&&script===1)return !options.native.flags.includes(579)&&!root.MistraltonContinuity.waitingFor(z,['Gasparago']);if(z===198&&script===2)return !root.MistraltonContinuity.waitingFor(z,['Komor']);if(z===202&&script===1)return !root.MistraltonContinuity.waitingFor(z,['Komor']);return true;}
  function cannon(r){const previous=tasks.get(r);if(previous?.plan===r.plan)return previous.task;let task;const state=new Proxy({zone:108},{get:(target,key)=>key==='cannonRide'?r.plan.cannonRide:key==='cannonHeight'?r.actor.height:target[key],set:(target,key,value)=>{if(key==='cannonRide')r.plan.cannonRide=value;else if(key==='cannonHeight')r.actor.height=value;else target[key]=value;return true;},deleteProperty:(target,key)=>{if(key==='cannonRide')delete r.plan.cannonRide;else delete target[key];return true;}});
   task=root.IcirrusCannonTask.create({readState:()=>state,hero:()=>r.actor,sound:id=>{if(zone()===108)root.AudioEngine?.playSound(id);},save:()=>{},camera:()=>{}});tasks.set(r,{plan:r.plan,task});if(r.plan.cannonRide)task.resume();else task.start(r.plan.cannonDirection);return task;
  }

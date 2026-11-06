@@ -17,6 +17,6 @@ const path=require('node:path'),assert=require('node:assert/strict'),{environmen
  const handoff=JSON.parse(JSON.stringify(legacy.NativeStory.departures.save()));assert.equal(handoff[0].plan.nextChapter,true);c.NativeStory.departures.restore(handoff,n.zone,n);await travel('Komor');
  assert.equal(c.NativeStory.departures.records.get('Komor').zone,198);await event('Komor battle, Nardo jump and native Surf gift',198,144,208,1);assert.equal(j.itemCount(422),1);
  await travel('Komor');await event('Komor and Plasma in the final Mountain gallery',202,52,14,0);assert.equal(n.vars[16571],1);assert.equal(n.vars[16535],1);
- await travel('Rutilo');await event('Rutilo arrival at Icirrus',113,176,209,0);assert.equal(n.vars[16535],2);assert.equal(j.state.phase,'icirrus');
+ await travel('Gasparago');await event('Gasparago arrival at Icirrus',113,176,209,0);assert.equal(n.vars[16535],2);assert.equal(j.state.phase,'icirrus');
  console.log('PASS native main narrative through Icirrus, with legacy Komor transfer');
 })().catch(error=>{console.error(error);process.exitCode=1;});

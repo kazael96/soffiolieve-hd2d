@@ -69,7 +69,7 @@ test('post-gym native cutscene reaches the Dragonspiral investigation without le
 test('early tower arrival has no future collision and the event waits for physical roles',async()=>{
  const c=await setup(),n=c.NativeStory.state;n.vars[16551]=1;
  await drain(c,c.NativeStory.changeZone(205,176,148));
- assert.equal(c.NativeStory.visualActors().some(a=>['Rutilo','Komor','Silvestro'].includes(a.name)),false);
+ assert.equal(c.NativeStory.visualActors().some(a=>['Gasparago','Komor','Silvestro'].includes(a.name)),false);
  assert.equal(c.NativeStory.occupied(-602.5,-607.5),false);
  assert.equal(c.OpelucidContinuity.prepareEvent(205,1),false);assert.equal(c.NativeStory.locked,false);
 });
@@ -77,8 +77,8 @@ test('early tower arrival has no future collision and the event waits for physic
 test('legacy050 Cedric boundary checkpoint walks onward from its saved body',async()=>{
  const c=await setup(),n=c.NativeStory.state;n.vars[16535]=2;
  await drain(c,c.NativeStory.changeZone(113,172,170));
- const body={name:'Rutilo',model:104,uid:252,fieldZone:113,x:-603.5,y:-591.5,height:3,direction:0,frame:0};
- assert.ok(c.NativeStory.departures.depart(body,113));const r=c.NativeStory.departures.records.get('Rutilo');
+ const body={name:'Gasparago',model:104,uid:252,fieldZone:113,x:-603.5,y:-591.5,height:3,direction:0,frame:0};
+ assert.ok(c.NativeStory.departures.depart(body,113));const r=c.NativeStory.departures.records.get('Gasparago');
  Object.assign(r,{stage:'resident',index:0,plan:{...r.plan,points:[],kind:'arrival',destinationZone:113,targetUid:252}});
  const before={x:r.actor.x,y:r.actor.y};c.Journey.step(1/30,false);
  assert.equal(r.stage,'walk');assert.equal(r.plan.destinationZone,205);assert.equal(r.actor.x,before.x);assert.equal(r.actor.y,before.y);
@@ -122,7 +122,7 @@ test('saving during an off-map native ledge jump preserves the airborne pose and
 });
 
 test('native Tower summit program reaches the reserved investigation without unlocking the postgame capture',async()=>{
- const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'213:0':'Komor','213:1':'Silvestro'};
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'205:3':'Nardo','213:0':'Komor','213:1':'Silvestro'};
  await drain(c,c.NativeStory.changeZone(113,172,170));const body={name:'N',model:103,uid:253,fieldZone:113,x:-604.5,y:-591.5,height:3,direction:0,frame:0};
  assert.ok(c.NativeStory.departures.depart(body,113));await drain(c,Promise.resolve(),0,'p1',()=>c.NativeStory.departures.records.get('N')?.actor.fieldZone===213&&c.NativeStory.departures.records.get('N')?.stage==='resident');
  await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.vars[16541]===1&&!c.NativeStory.locked||!!c.elements.get('world')?.dataset.eventError);assert.equal(c.elements.get('world')?.dataset.eventError,undefined);
@@ -131,7 +131,7 @@ test('native Tower summit program reaches the reserved investigation without unl
 });
 
 test('presented summit boards N and retires both physical bodies without resident dragon copies',async()=>{
- const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'213:0':'Komor','213:1':'Silvestro'};c.renderer.hasPresentedActor=()=>true;
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'205:3':'Nardo','213:0':'Komor','213:1':'Silvestro'};c.renderer.hasPresentedActor=()=>true;
  await drain(c,c.NativeStory.changeZone(113,172,170));const body={name:'N',model:103,uid:253,fieldZone:113,x:-604.5,y:-591.5,height:3,direction:0,frame:0};c.NativeStory.departures.depart(body,113);await drain(c,Promise.resolve(),0,'p1',()=>c.NativeStory.departures.records.get('N')?.actor.fieldZone===213&&c.NativeStory.departures.records.get('N')?.stage==='resident');
  let mounted=0;const step=c.Journey.step;c.Journey.step=(...args)=>{step(...args);const actors=c.NativeStory.visualActors(),rider=actors.find(a=>a.name==='N'&&a.nativeDragonRider),dragon=actors.find(a=>[211,213].includes(a.model));if(rider&&dragon){mounted++;assert.equal(rider.x,dragon.x);assert.ok(Math.abs(rider.height-dragon.height-.9)<1e-7);}};
  await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.vars[16541]===1&&!c.NativeStory.locked||!!c.elements.get('world')?.dataset.eventError);assert.equal(c.elements.get('world')?.dataset.eventError,undefined);assert.ok(mounted>5,'N never mounted the dragon');assert.equal(n.zone,205);assert.equal([...c.NativeStory.departures.records.values()].some(r=>[211,213].includes(r.actor.model)),false);assert.equal(c.NativeStory.departures.records.has('N'),false);
@@ -177,7 +177,7 @@ test('Komor and Silvestro physically finish the Tower ascent and descend to thei
 });
 
 test('the reserved investigation leaves control while friends descend and survives a mid-descent save without repeating the awakening',async()=>{
- const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'213:0':'Komor','213:1':'Silvestro','213:2':'N'};
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=8;n.opelucidArrivals={'205:3':'Nardo','213:0':'Komor','213:1':'Silvestro','213:2':'N'};
  await drain(c,c.NativeStory.changeZone(213,16,21));await drain(c,c.NativeStory.run(0),0,'p1');await drain(c,Promise.resolve(),0,'p1',()=>n.zone===205&&!c.NativeStory.locked);assert.equal(n.vars[16541]||0,0);assert.equal(c.OpelucidContinuity.deferredEvent(205),4);assert.equal(c.OpelucidContinuity.prepareEvent(205,4),false);
  await drain(c,Promise.resolve(),0,'p1',()=>[...c.NativeStory.departures.records.values()].some(r=>r.actor.fieldZone===211&&r.actor.jumpLift>.1));c.NativeStory.captureActors();assert.equal(c.Journey.save(true),true);const saved=c.StoryState.read(c.localStorage);assert.equal(saved.original.vars[16541]||0,0);assert.ok(saved.original.departures.some(r=>r.actor.fieldZone===211&&r.actor.jumpLift>.1));
  const resumed=await setup(saved);await drain(resumed,Promise.resolve(),0,'p1',()=>resumed.NativeStory.state.vars[16541]===1&&!resumed.NativeStory.locked);assert.equal(resumed.NativeStory.state.zone,205);assert.equal(resumed.cinematics,undefined,'Reload repeated the awakening');assert.equal(resumed.OpelucidContinuity.deferredEvent(205),null);
@@ -185,4 +185,16 @@ test('the reserved investigation leaves control while friends descend and surviv
 
 test('new chapter events prepare the actual scene and arriving bodies before executing their native instructions',async()=>{
  const c=await setup(),n=c.NativeStory.state;await drain(c,c.NativeStory.changeZone(212,16,22));n.vars[16551]=6;const heard=[];c.AudioEngine.cry=id=>{heard.push(id);return Promise.resolve();};let release,calls=0;const gate=new Promise(resolve=>release=resolve);c.renderer.prepareScene=()=>{calls++;return gate;};const before=c.NativeStory.vm.trace.length,event=c.NativeStory.run(7);for(let i=0;i<12;i++)await Promise.resolve();assert.equal(calls,1);assert.equal(c.NativeStory.vm.trace.length,before);assert.equal(c.NativeStory.locked,true);await c.NativeStory.run(7);assert.equal(c.NativeStory.vm.trace.length,before);assert.equal(calls,1);release();await drain(c,event,0,'p1');assert.equal(n.vars[16551],7);assert.deepEqual(heard,[644]);
+});
+
+test('Gasparago and Silvestro re-enter the Tower and adopt their actual first-floor research roles',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.vars[16437]=790;n.vars[16551]=9;n.vars[16541]=1;n.flags=n.flags.filter(f=>![602,606,607].includes(f));await drain(c,c.NativeStory.changeZone(205,179,146));
+ for(const [name,address]of [['Gasparago',800],['Silvestro',816]]){const body=c.npcs.find(a=>a.name===name&&a.fieldZone===205);assert.ok(body);assert.equal(c.MistraltonContinuity.startExitMotion(body,205,address),true);assert.equal(c.OpelucidContinuity.allowActor({name,fieldZone:207,uid:name==='Gasparago'?1:0}),false);}
+ const trip=name=>c.NativeStory.departures.records.get(name);await drain(c,Promise.resolve(),0,'p1',()=>['Gasparago','Silvestro'].every(name=>trip(name)?.stage==='resident'&&trip(name)?.actor.fieldZone===207));
+ assert.equal(trip('Gasparago').actor.uid,1);assert.equal(trip('Gasparago').actor.x,6.5);assert.equal(trip('Gasparago').actor.y,-3.5);assert.equal(trip('Silvestro').actor.uid,0);assert.equal(trip('Silvestro').actor.x,8.5);assert.equal(trip('Silvestro').actor.y,-5.5);await drain(c,c.NativeStory.changeZone(207,14,26));const actors=c.NativeStory.visualActors();for(const name of ['Gasparago','Silvestro'])assert.equal(actors.filter(a=>a.name===name).length,1);assert.equal(c.NativeStory.departures.records.has('Gasparago'),false);const pages=await drain(c,c.NativeStory.run(1),0,'p1');assert.ok(pages.some(p=>p.includes('Gasparago')),'Native research dialogue unavailable');
+});
+
+test('a visible follower crosses the shared Icirrus/Dragonspiral boundary without waiting to disappear',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.vars[16535]=5;n.vars[16551]=2;n.vars[16437]=790;await drain(c,c.NativeStory.changeZone(113,172,170));let sequence=0;c.renderer.actorVisibility=()=>({visible:true,sequence:++sequence});const start={name:'Komor',model:7,uid:0,fieldZone:113,x:-605.5,y:-591.5,height:3,direction:0,frame:0};assert.ok(c.NativeStory.departures.depart(start,113));const trip=c.NativeStory.departures.records.get('Komor'),body=trip.actor;let before={...body};for(let i=0;i<250&&trip.zone===113;i++){before={...trip.actor};c.Journey.step(1/30,false);await Promise.resolve();}
+ assert.equal(trip.zone,205);assert.equal(trip.actor,body,'Shared-field crossing replaced the physical actor');assert.ok(Math.hypot(body.x-before.x,body.y-before.y)<=.126);assert.equal(c.NativeStory.departures.retired.some(a=>a.name==='Komor'),false);assert.equal(c.NativeStory.visualActors().filter(a=>a.name==='Komor').length,1);
 });

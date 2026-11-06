@@ -15,7 +15,7 @@
   legacyEnsure:async z=>{if(window.IcirrusChapter?.zones.includes(z))await IcirrusChapter.ensure();else await window.NimbasaChapter?.ensure();},
   variant,surfaces:{at:(z,...args)=>surfaces?.at(variant(z)?.surfaceZone??z,...args)},afterPrepare:async z=>{if(z===114)await window.OpelucidGym?.prepare();}
  }).register();
- const names={7:'Komor',91:'Silvestro',92:'Iris',97:'Nardo',100:'Ghecis',103:'N',104:'Rutilo',105:'Aralia',134:'Belle'};
+ const names={7:'Komor',91:'Silvestro',92:'Iris',97:'Nardo',100:'Ghecis',103:'N',104:'Gasparago',105:'Aralia',134:'Belle'};
  for(const [id,paths]of Object.entries(OPELUCID_SPRITES))OPENING_SPRITES[names[id]||'Original'+id]??=paths;
  Object.assign(OPENING_DATA,OPELUCID_DATA.pokemonData);for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])Object.assign(TRAINING_DATA[key],OPELUCID_DATA[key]);TRAINING_DATA.levelCap=OPELUCID_DATA.levelCap;TRAINING_DATA.capSteps=OPELUCID_DATA.capSteps;
  const prepare=sceneWindow.prepare;sceneWindow.prepare=async zone=>{await metadata();return prepare(zone);};

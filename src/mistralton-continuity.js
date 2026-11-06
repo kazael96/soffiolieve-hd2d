@@ -32,7 +32,7 @@
  const nextEvents={
   'komor-next-journey':{zone:198,uid:2,label:'Komor prima del Monte Vite'},
   'skyla-celestial-tower':{zone:342,uid:0,label:'Anemone alla Torre Cielo'},
-  'cedric-next-research':{zone:113,uid:2,label:'Rutilo a Mistralopoli'}
+  'cedric-next-research':{zone:113,uid:2,label:'Gasparago a Mistralopoli'}
  };
  root.IcirrusContinuity?.extend({itineraries,nextEvents,door,edge,arrival});
  function configure(config){options={...options,...config};root.IcirrusContinuity?.configure(options);return api;}
@@ -67,7 +67,7 @@
   else if(zone===195&&actor.name==='Aralia')destination='aralia-research-handoff';
   else if(zone===195&&actor.name==='N')destination='n-mistralton-airport';
   else if(zone===107&&actor.name==='Anemone')destination='skyla-celestial-tower';
-  else if(zone===107&&actor.name==='Rutilo')destination='cedric-next-research';
+  else if(zone===107&&actor.name==='Gasparago')destination='cedric-next-research';
   return destination?build(destination,0,actor,blocked):null;
  }
  function known(record){return !!record?.plan?.chapter049&&record.plan.itineraryVersion===version&&Object.hasOwn(itineraries,record.plan.destination)&&Number.isInteger(record.plan.leg)&&record.plan.leg>=0&&record.plan.leg<itineraries[record.plan.destination]().length;}
@@ -75,6 +75,7 @@
  function canRetire(record){if(record.plan?.kind==='cannon')return false;return known(record)?record.stage==='hold'&&record.index>=record.plan.points.length:undefined;}
  function nextLeg(record){if(!known(record))return null;const destination=record.plan.destination,index=record.plan.leg,all=itineraries[destination](),old=all[index],next=all[index+1];
   if(next&&root.IcirrusChapter?.zones.includes(next.zone)&&!root.IcirrusChapter.ready)return {deferred:true};
+  if(next&&root.OpelucidChapter?.zones.includes(next.zone)&&!root.OpelucidChapter.ready)return {deferred:true};
   if(!next){const event=nextEvents[destination];if(!event)return null;
    const actor={...record.actor,fieldZone:337,exitProbe:false,script:2000};delete actor.exitClip;
    return {actor,zone:337,plan:{...record.plan,kind:'resident',points:[],clip:null,nextChapter:true,nextEvent:event,transferAuthorized:true},stage:'resident',index:0,opened:false,zero:0,sampleSequence:-1,target:null};
@@ -110,6 +111,17 @@
   const arrived=plan.kind==='arrival'&&Math.hypot(record.actor.x-plan.anchor.x,record.actor.y-plan.anchor.y)<.001;
   return {...record,plan,index:0,stage:arrived?'resident':'walk',opened:false,travel:0};
  }
+ function resumeNardoAfterSurf(){
+  const native=options.native,controller=options.departures;
+  // IRBI396:798/806/810 deleted Nardo, set flag658 and work16564=2.
+  // The050 route ended after its proved cave exit; continue at the other
+  // side of that same portal, never replay a disappearance or fake a probe.
+  if(!root.OpelucidChapter?.ready||!controller||controller.records.has('Nardo')||native?.vars[16564]!==2||!native.flags.includes(658)||native.vars[16541]||native.opelucidArrivals?.['205:3']==='Nardo')return false;
+  const destination='nardo-after-surf',all=itineraries[destination]?.(),old=all?.[0];if(!old||all.length<2||old.zone!==198||old.kind!=='door'||old.nativePortal!==0)return false;
+  const actor={name:'Nardo',model:97,uid:1,fieldZone:198,x:old.anchor.x+old.dx*2.8,y:old.anchor.y+old.dy*2.8,height:old.height,frame:0,direction:0};
+  const record={key:'Nardo',actor,zone:198,plan:{kind:'door',destination,leg:0,chapter049:true,itineraryVersion:version},stage:'hold',index:0,age:0,travel:0,zero:0,sampleSequence:-1},next=nextLeg(record);
+  if(!next||next.deferred)return false;controller.records.set('Nardo',{...record,...next});return true;
+ }
  function migrate(){const controller=options.departures;if(!controller)return false;for(const [key,r]of controller.records){if(r.plan.chapter049)continue;const restored=restoreRecord(r,activeZone(),options.native);if(restored===null){controller.records.delete(key);continue;}if(restored){Object.assign(r,restored,{zero:0,sampleSequence:-1});r.actor.exitProbe=r.stage!=='resident';delete r.actor.exitClip;}}return true;}
  function carry(record){return known(record)||record?.actor?.name==='Komor'&&record?.plan?.destination==='cold-storage-front';}
  function canRestore(record){return known(record);}
@@ -129,6 +141,16 @@
  function tick(dt){dt=Math.min(.1,Math.max(0,dt));const controller=options.departures;if(!controller)return;root.IcirrusContinuity?.tick(dt);enterZone();
   for(const r of controller.records.values()){
    if(!known(r))continue;r.actor.script=2000;if(r.stage==='resident'){notifyArrival(r);continue;}
+   if(r.stage==='hold'&&r.plan.kind==='path'){
+    const legs=itineraries[r.plan.destination](),source=legs[r.plan.leg],destination=legs[r.plan.leg+1];
+    if(source.kind==='path'&&destination&&sameField(source.zone,destination.zone)){
+     const next=nextLeg(r);if(next&&!next.deferred){
+      // A continuous field boundary needs no disappearance. Retain the same
+      // rendered body and pose while assigning its next physical path.
+      const body=r.actor;for(const key of Object.keys(body))if(!Object.hasOwn(next.actor,key))delete body[key];Object.assign(body,next.actor);next.actor=body;controller.finishPortal(r);Object.assign(r,next);
+     }
+    }
+   }
    if(shouldTick(r)||!r.plan.transferAuthorized)continue;
    // The source field was explicitly covered, or this leg started after a real
    // occlusion proof. Advance a physical route off-map, never a fake GPU sample.
@@ -138,7 +160,7 @@
  }
  function waitingFor(zone,names){return names.some(name=>{const r=options.departures?.records.get(name);return r&&(!sameField(r.plan.destinationZone??r.zone,zone)||r.stage!=='resident');});}
  function obstructed(record,p){if(!known(record))return false;return [...options.departures?.records.values()||[]].some(other=>other!==record&&sameField(other.zone,record.zone)&&Math.abs(other.actor.x-p.x)<.55&&Math.abs(other.actor.y-p.y)<.55);}
- function introduced(actor,actors){if(!(travelZone(actor.fieldZone)||[96,191,192,193,194,195,107].includes(actor.fieldZone))||!['Komor','Rafan','Belle','Aralia','Anemone','Rutilo','Silvestro','N'].includes(actor.name))return actor;
+ function introduced(actor,actors){if(!(travelZone(actor.fieldZone)||[96,191,192,193,194,195,107].includes(actor.fieldZone))||!['Komor','Rafan','Belle','Aralia','Anemone','Gasparago','Silvestro','N'].includes(actor.name))return actor;
   const record=options.departures?.records.get(actor.name);
   if(known(record)||!record&&actors.some(old=>old!==actor&&!old.hidden&&!old.continuityPending&&old.name===actor.name&&sameField(old.fieldZone,actor.fieldZone)))actor.continuityPending=true;
   return actor;
@@ -176,6 +198,6 @@
   if(!replaces||actor.uid===255)return false;if(!actor.continuitySuperseded){if(!options.departures?.depart(actor,zone))return false;actor.continuitySuperseded=true;actor.hidden=true;}return true;
  }
  const occupies=record=>!known(record)||sameField(record.actor.fieldZone,activeZone());
- const api={configure,planExit,migrate,tick,enterZone,carry,canRestore,restoreRecord,coveredTransition,nextLeg,shouldTick,canRetire,waitingFor,obstructed,introduced,visibleActors,prepareEvent,startExitMotion,logicalOnlyDelete,occupies,sameField,nextEvents};root.MistraltonContinuity=api;
+ const api={configure,planExit,migrate,tick,enterZone,carry,canRestore,restoreRecord,coveredTransition,nextLeg,shouldTick,canRetire,waitingFor,obstructed,introduced,visibleActors,prepareEvent,startExitMotion,logicalOnlyDelete,occupies,sameField,nextEvents,resumeNardoAfterSurf};root.MistraltonContinuity=api;
  if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

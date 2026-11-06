@@ -1,9 +1,10 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Rutilo','Silvestro']);
- const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Gasparago','Silvestro']);
+ const canonicalName=n=>n.model===104&&n.name==='Rutilo'?'Gasparago':n.name;
+ const identity=n=>canonicalName(n)!==n.name?'Gasparago':!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
- const copy=n=>({...Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]])),...(Number.isFinite(n.jumpLift)&&n.jumpLift>=0&&n.jumpLift<=2?{jumpLift:n.jumpLift}:{})});
+ const copy=n=>({...Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]])),name:canonicalName(n),...(Number.isFinite(n.jumpLift)&&n.jumpLift>=0&&n.jumpLift<=2?{jumpLift:n.jumpLift}:{})});
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
   const less=(a,b)=>a.f<b.f||a.f===b.f&&a.h<b.h;
@@ -123,6 +124,7 @@
  class Controller{
   constructor({blocked=()=>false,obstructed=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,obstructed,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
   depart(n,zone,{covered=false,resident=false}={}){
+   if(canonicalName(n)!==n.name)n={...n,name:canonicalName(n)};
    if(root.MistraltonContinuity?.logicalOnlyDelete(n))return false;
    if([110,208].includes(n.model)||n.fieldObject||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
    const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
