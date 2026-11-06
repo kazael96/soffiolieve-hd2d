@@ -16,6 +16,7 @@ exec(compile(source,scope['__file__'],'exec'),scope)
 handlers={1743:['IRBI program228 switch SEPlay'],1744:['overlay45:021f39aa/platform start'],1776:['overlay45:021f39da–021f39e2/platform stop/finish']}
 handlers[1665]=['IRBI583 independent actor fall: overlay21:021c7652']
 handlers[1650]=['IRBI417/effect17: overlay21:021da10c sound table, frame24']
+handlers[1952]=['IRBI193 sand sink: overlay21:021bfee6..021bfeea']
 native_cries=set(namespace['cries'])
 for bank,program in namespace['events']['scripts'].items():
  for pc,command in program['code'].items():

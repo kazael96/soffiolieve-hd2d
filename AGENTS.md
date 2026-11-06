@@ -16,6 +16,8 @@ Dopo aver completato la storia principale, realizzare anche animazioni delle MN 
 
 ## Capitolo corrente · 0.51 in lavorazione
 
+Checkpoint più recente: candidata13 privata00464172971cdb93. Leggere l'ultima sezione di docs/ICIRRUS-OPELUCID-051.md, che supera i limiti storici elencati sotto.193/sabbie mobili, attesa fisica dell'atterraggio, risorse583, cancelli di Nardo al Museo e Chiarolite collegati. Discesa completa con input e filmato417/audio verificati nei tre viewport; allenatori preparati nella fixture, quindi lotte del Castello non certificate. Fondali20 complessivi, nuovi8 con controlli renderer PASS ma revisione grafica ancora aperta.820 Node e41 fasi CLI PASS (deep-thirteenth/report.json). Nessuna051 pubblicata. Restano continuità degli altri protagonisti, palestra/Torre con lotte, seguito fino a Boreduopoli e poi finale; non arrestare l'obiettivo a questo checkpoint.
+
 La0.50 è pubblicata e verificata: revisione pubblica9f3eb3ed9c872f04, riferimento Windowsdcf2a6f89e5568c8, main09ac96fdc7e958085db64966304a7b4bfdff4223, PR43.660 Node/7 Python/40 fasi e storia con audio attivo nei tre formati PASS.261 file radice e2361 asset pubblici confrontati;048 eliminata,049/050 e tutti i rapporti esterni conservati. Dettagli e limiti in docs/QA-050.md.
 
 Proseguire con docs/ICIRRUS-OPELUCID-051.md: Silvestro e storia successiva fino alla prossima città. Verificare gli eventi e le risorse nella ROM prima di integrarli; non confondere estrazione privata e partita giocabile. Cap39 prima di Silvestro e43 dopo la settima medaglia, secondo i massimi nativi già verificati; conservare livelli e XP superiori. La destinazione complessiva resta il primo finale. Le MN personalizzate nel mondo seguono quel finale.

@@ -66,6 +66,8 @@
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   const fieldMotion=window.IcirrusFieldMotion?.create({state:()=>native,actor,sound:id=>AudioEngine.playSound(id)});
   const fieldFall=window.OpelucidFieldFall?.create({state:()=>native,actor,ground:(x,y)=>renderer.groundHeight(x,y),sound:id=>AudioEngine.playSound(id)});
+  const quicksand=window.OpelucidQuicksand?.create({state:()=>native,hero:()=>player,ground:(x,y)=>renderer.groundHeight(x,y)});
+  async function warmFieldSounds(ids){if(!AudioEngine.enabled)return;const tracks=[];try{const load=async()=>{for(const track of tracks)track.stop();tracks.length=0;for(const id of ids){const record=window.FIELD_AUDIO?.[id];if(!record)throw Error('Suono originale di campo mancante: '+id);const track=AudioEngine.createCinematic(record.src);tracks.push(track);await track.prepare();}};if(renderer.resourceGate)await renderer.resourceGate('native-field-sounds-'+ids.join('-'),load);else await load();}finally{for(const track of tracks)track.stop();}}
   function pose(n,dir,step=0){
     if(!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
     n.height=window.MistraltonGym?.actorHeight(n,n.height)??n.height;
@@ -362,7 +364,20 @@
       case 'NativeOpcode221':{const list=v[0]===1?state.dex.caught:state.dex.seen;m.set(a[1],new Set(list.map(name=>GEN5.dex.species.get(name).num)).size);break;}
       case 'NativeOpcode466':native.pokedexForms=true;break;
       case 'NativeOpcode123':{const p=world(v[1],v[3]);await fieldMotion.jump(v[0],[p.x,v[2]<<16>>16,p.y]);break;}
-      case 'NativeOpcode583':fieldFall.drop(v[0],world(v[1],v[2]),v[3]);break;
+      case 'NativeOpcode583':{
+        await warmFieldSounds([1665,1666]);const body=actor(v[0]);if(!body)throw Error('Personaggio della caduta non disponibile');
+        const prepare=async()=>{const required=[...fieldActors(),body];await renderer.requireActors?.(required);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(required)))throw renderer.loadingError||Error('Grafica del personaggio in arrivo non pronta');};
+        if(renderer.resourceGate)await renderer.resourceGate('native-falling-actor-'+v[0],prepare);else await prepare();fieldFall.drop(v[0],world(v[1],v[2]),v[3]);body.nativeSandArrival=true;break;
+      }
+      case 'NativeOpcode193':{
+        const p=grid(),pit=data().triggers.find(record=>record.type===0&&record.var===16384&&record.value===0&&p.x>=record.x&&p.x<record.x+record.width&&p.z>=record.z&&p.z<record.z+record.height);
+        if(!quicksand||!pit||!OpelucidQuicksand.zones.includes(native.zone)||!zoneScenes[v[0]])throw Error('Caduta nelle sabbie mobili non disponibile');
+        await warmFieldSounds([1952,1665,1666]);
+        if(!await quicksand.pull(world(pit.x+Math.floor(pit.width/2),pit.z+Math.floor(pit.height/2))))throw Error('Risucchio nelle sabbie mobili interrotto');
+        void AudioEngine.playSound(1952);await Promise.all([quicksand.sink(),fade(1,30)]);
+        await changeZone(v[0],v[1],v[2]);fieldFall.drop(255,{x:player.x,y:player.y},Math.round(facing/3));const landing=fieldFall.wait(255);await fade(0,8);
+        if(!await landing)throw Error('Atterraggio nelle sabbie mobili interrotto');break;
+      }
       case 'NativeOpcode417':{const body=actor(v[0]);if(body?.name!=='Nardo')throw Error('Partenza originale non disponibile per questo personaggio');await OpelucidDeparture.play(()=>OpelucidContinuity.flyToNextEvent(body,native.zone));break;}
       case 'NativeOpcode252':{const p=state.party[v[1]];m.set(a[0],!p||p.egg?0:p.happiness??GEN5.dex.species.get(p.name).baseHappiness??70);break;}
       case 'NativeOpcode269':{if(![1,2].includes(v[1])){m.set(a[0],0);break;}const index=state.party.findIndex(p=>!p.egg&&(v[1]===1||p.hp>0));m.set(a[0],index<0?state.party.length:index);break;}
@@ -570,6 +585,7 @@
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function changeZone(zone,x,z,entryHeight){
+    quicksand?.reset();
     fieldFall?.reset();
     dragonFlight?.reset();
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
@@ -749,7 +765,7 @@
     if(renderer.scene.chapter051&&!window.OpelucidGym?.busy){const at=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(at)native.fieldHeight=at.height;}
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
     try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);fieldMotion?.tick(dt);fieldFall?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
+    window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);fieldMotion?.tick(dt);fieldFall?.tick(dt);quicksand?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
     const held=!!window.DragonspiralJump?.busy||!!window.OpelucidGym?.busy||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     const deferred=window.OpelucidContinuity?.deferredEvent(native.zone);if(deferred&&window.OpelucidContinuity.prepareEvent(native.zone,deferred)){run(deferred-1);return;}
@@ -768,6 +784,7 @@
     // Native type6 uses the separate header-gated query2162780/2162830.
     // It is not an unconditional footstep script (Cold Storage contains2000).
     for(const trigger of data().triggers)if(trigger.type!==6&&!(native.zone===114&&Math.abs((native.fieldHeight??0)-trigger.y/16)>.25)&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
+      const surface=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(window.OpelucidQuicksand?.trigger(native.zone,trigger,player,{behavior:surface?.behavior,running:!!keys.Shift,mounted:window.Bicycle?.mounted()})===false)continue;
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
       // Recheck a stationary player without locking input while they arrive.
