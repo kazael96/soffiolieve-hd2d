@@ -1,4 +1,4 @@
-/* Native, height-aware footpaths for the four chapter051 return journeys.
+/* Native, height-aware footpaths for the chapter051 return journeys.
  * This exports metadata only. It never changes story flags or supplies an
  * occlusion proof; the ordinary field controller must perform every handoff.
  */
@@ -25,7 +25,9 @@ const recipes=season=>{
   {key:'aralia-museum',name:'Aralia',start:{zone:107,x:-683.5,y:-441.5,height:0},route:museum,target:[16,9]},
   {key:'cedric-museum',name:'Gasparago',start:{zone:207,x:6.5,y:-3.5,height:0},route:[[207,0],[206,0],...tower,...museum],target:[16,10]},
   {key:'belle-museum',name:'Belle',start:{zone:205,x:-602.5,y:-596.5,height:3},route:[...tower,...museum],target:[16,12]},
-  {key:'komor-castle-entrance',name:'Komor',start:{zone:205,x:-605.5,y:-596.5,height:3},route:[...tower,...castle],target:[158,2]},
+  // Native316:306 places Komor at61,0,38 before his approach. The static
+  // role61,32 is not the beginning of this encounter.
+  {key:'komor-castle-entrance',name:'Komor',start:{zone:205,x:-605.5,y:-596.5,height:3},route:[...tower,...castle],target:[158,2],goal:{x:45.5,y:22.5,height:0}},
  ];
 };
 const paths={},seasons={},proof=[];
@@ -48,7 +50,7 @@ for(const season of [0,1,2,3]){
    else {const p=portal(z,index),q=portal(p.w.zone,p.w.warp);leg={zone:z,kind:'door',anchor:{x:p.x,y:p.y},dx:p.dx,dy:p.dy,height:p.height,nativePortal:index,stagePoint:p.stage,next:{x:q.x+q.dx*.8,y:q.y+q.dy*.8},nextEntry:{x:q.stage.x,y:q.stage.y},nextHeight:q.stage.height};next={...q.stage};}
    leg.start={x:pose.x,y:pose.y,height:pose.height};try{leg.path=footpath(z,pose,leg.stagePoint);}catch(error){error.message+=' season'+season+' '+activeKey;throw error;}legs.push(leg);pose=next;
   }
-  const [zone,uid]=recipe.target,a=events[zone].actors.find(a=>a.id===uid),o=origin(zone),goal={x:a.x+.5-o[0],y:a.z+.5-o[1],height:a.y/65536};legs.push({zone,kind:'arrival',anchor:{x:goal.x,y:goal.y},height:goal.height,destinationZone:zone,targetUid:uid,start:pose,path:footpath(zone,pose,goal)});
+  const [zone,uid]=recipe.target,a=events[zone].actors.find(a=>a.id===uid),o=origin(zone),goal=recipe.goal||{x:a.x+.5-o[0],y:a.z+.5-o[1],height:a.y/65536};legs.push({zone,kind:'arrival',anchor:{x:goal.x,y:goal.y},height:goal.height,destinationZone:zone,targetUid:uid,start:pose,path:footpath(zone,pose,goal)});
   trips[recipe.key]={name:recipe.name,source:recipe.start,target:recipe.target,legs};proof.push({season,key:recipe.key,legs:legs.length,points:legs.reduce((sum,l)=>sum+paths[l.path].length,0)});
  }
  seasons[season]=trips;

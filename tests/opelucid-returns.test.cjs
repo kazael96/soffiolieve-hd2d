@@ -42,6 +42,10 @@ test('a stationary player on the Museum trigger starts the native event after al
  try{await drain(c,Promise.resolve(),0,'p1',()=>c.Journey.itemCount(616)===1&&!c.NativeStory.locked);}catch(error){throw Error(error.message+' '+JSON.stringify({player:c.player,zone:n.zone,work:n.vars[16530],arrivals:n.opelucidArrivals,gate:c.OpelucidContinuity.prepareEvent(16,12),pending:n.pendingZoneEntry,records:[...c.NativeStory.departures.records.values()].map(r=>({name:r.actor.name,zone:r.zone,stage:r.stage,uid:r.actor.uid,destination:r.plan.destination})),trace:c.NativeStory.vm.trace.slice(-8)}));}
  assert.equal(c.Journey.itemCount(617),0);
 });
+
+test('Komor reaches the scripted Castle greeting start before ActorSetGPos can relocate him',async()=>{
+ const c=await setup(),record=start(c,'komor-castle-entrance');c.testSpeed=4;await drain(c,Promise.resolve(),0,'p1',()=>record()?.stage==='resident');const a=record().actor,cmd=c.OPELUCID_EVENTS.scripts[316].code[306];assert.equal(cmd.name,'ActorSetGPos');const [uid,x,layer,z]=cmd.args;assert.equal(a.uid,uid);assert.ok(Math.hypot(a.x-(x-15.5),a.y-(z-15.5))<.001,'Return must reach the scripted greeting start, not the static actor role');const support=c.OpelucidChapter.surfaceAt(158,a.x,a.y,layer);assert.ok(support,'Missing native greeting ground');assert.ok(Math.abs(a.height-support.height)<.001,'Greeting must start on its native ground plane '+JSON.stringify({height:a.height,support:support.height,anchor:record().plan.anchor,points:record().plan.points.slice(-3)}));
+});
 test('native outdoor seams are continuous fields, without joining unrelated distant regions',async()=>{
  const c=await setup();for(const t of Object.values(c.OPELUCID_RETURN_DATA.seasons[0]))for(let i=0;i<t.legs.length-1;i++)if(t.legs[i].kind==='path'){const a=t.legs[i].zone,b=t.legs[i+1].zone;assert.equal(c.MistraltonContinuity.sameField(a,b),true,'Missing continuous border '+a+'/'+b);assert.equal(c.MistraltonContinuity.sameField(b,a),true);}assert.equal(c.MistraltonContinuity.sameField(107,16),false);
 });
