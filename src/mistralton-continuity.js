@@ -35,7 +35,7 @@
   'cedric-next-research':{zone:113,uid:2,label:'Gasparago a Mistralopoli'}
  };
  root.IcirrusContinuity?.extend({itineraries,nextEvents,door,edge,arrival});
- function configure(config){options={...options,...config};root.IcirrusContinuity?.configure(options);return api;}
+ function configure(config){options={...options,...config};root.IcirrusContinuity?.configure(options);root.OpelucidNpcFalls?.configure({activeZone:()=>options.native?.zone,prepare:options.prepareNpcFall,sound:options.npcFallSound,generation:options.resourceGeneration});return api;}
  const activeZone=()=>options.native?.zone??root.NativeStory?.state?.zone;
  function blockedFor(zone,fallback=()=>false){return (x,y)=>{const custom=root.IcirrusContinuity?.blocked(zone,x,y);if(custom!==null&&custom!==undefined)return custom;const blocked=options.blockedAt||root.MistraltonChapter?.blockedAt;if(blocked)return blocked(zone,x,y);return fallback(x,y);};}
  function walk(from,to,zone,fallback){
@@ -52,7 +52,7 @@
   // final segment and pretend that the actor has reached a blocked doorway.
   if(Math.hypot(last.x-goal.x,last.y-goal.y)>.01)throw Error('Itinerario non percorribile: '+actor.name+' → '+destination+' ('+leg+')');
   if(d.kind==='door')points.push({...d.anchor,...(d.worldReturn?{height:d.height}: {})});if(['door','path'].includes(d.kind))points.push({...point(d.anchor.x+d.dx*2.8,d.anchor.y+d.dy*2.8),...(d.worldReturn?{height:d.height}:{})});
-  return {kind:d.kind,points,anchor:{...d.anchor},clip:d.kind==='door'?[-d.dx,0,-d.dy,d.dx*d.anchor.x+d.dy*d.anchor.y+(d.dy<0?1.3:0)]:null,background:true,destination,itineraryVersion:version,chapter049:true,leg,...(nativeTravel?{nativeTravelVersion:1,startPose:{x:actor.x,y:actor.y,height:actor.height||0}}:{}),...(d.worldReturn?{worldReturn:true}:{}),...(actor.incomingPortal?{entryCorridor:actor.incomingPortal}:{}),...(d.kind==='cannon'?{cannon:d.cannon,cannonDirection:d.cannonDirection}:{}),...(d.kind==='arrival'?{destinationZone:d.destinationZone,targetUid:d.targetUid}:{})};
+  return {kind:d.kind,points,anchor:{...d.anchor},clip:d.kind==='door'?[-d.dx,0,-d.dy,d.dx*d.anchor.x+d.dy*d.anchor.y+(d.dy<0?1.3:0)]:null,background:true,destination,itineraryVersion:version,chapter049:true,leg,...(nativeTravel?{nativeTravelVersion:1,startPose:{x:actor.x,y:actor.y,height:actor.height||0}}:{}),...(d.worldReturn?{worldReturn:true}:{}),...(d.fallEntry?{fallEntry:true}:{}),...(actor.incomingPortal?{entryCorridor:actor.incomingPortal}:{}),...(d.kind==='cannon'?{cannon:d.cannon,cannonDirection:d.cannonDirection}:{}),...(d.kind==='arrival'?{destinationZone:d.destinationZone,targetUid:d.targetUid}:{})};
  }
  function planExit(actor,zone,blocked){let destination=root.OpelucidReturns?.destination(actor,zone,options.native)||root.IcirrusContinuity?.destination(actor,zone);if(destination)return build(destination,0,actor,blocked);
   if(zone===96&&actor.name==='Komor')destination=[11].includes(actor.uid)?'komor-next-journey':'cold-storage-front';
@@ -72,21 +72,22 @@
  }
  function known(record){return !!record?.plan?.chapter049&&record.plan.itineraryVersion===version&&Object.hasOwn(itineraries,record.plan.destination)&&Number.isInteger(record.plan.leg)&&record.plan.leg>=0&&record.plan.leg<itineraries[record.plan.destination]().length;}
  function shouldTick(record){return !known(record)||sameField(record.zone,activeZone());}
- function canRetire(record){if(record.plan?.kind==='cannon')return false;return known(record)?record.stage==='hold'&&record.index>=record.plan.points.length:undefined;}
+ function canRetire(record){if(record.plan?.kind==='cannon'||root.OpelucidNpcFalls?.canExit(record)===false)return false;return known(record)?record.stage==='hold'&&record.index>=record.plan.points.length:undefined;}
  function nextLeg(record){if(!known(record))return null;const destination=record.plan.destination,index=record.plan.leg,all=itineraries[destination](),old=all[index],next=all[index+1];
   if(next&&root.IcirrusChapter?.zones.includes(next.zone)&&!root.IcirrusChapter.ready)return {deferred:true};
   if(next&&root.OpelucidChapter?.zones.includes(next.zone)&&!root.OpelucidChapter.ready)return {deferred:true};
-  if(!next){const event=nextEvents[destination];if(!event)return null;
+  if(!next){if(old.awaitNativeDrop)return {deferred:true};const event=nextEvents[destination];if(!event)return null;
    const actor={...record.actor,fieldZone:337,exitProbe:false,script:2000};delete actor.exitClip;
    return {actor,zone:337,plan:{...record.plan,kind:'resident',points:[],clip:null,nextChapter:true,nextEvent:event,transferAuthorized:true},stage:'resident',index:0,opened:false,zero:0,sampleSequence:-1,target:null};
   }
   const continuous=['path','cannon'].includes(old.kind),start=continuous?point(record.actor.x,record.actor.y):old.next;
-  if([...options.departures?.records.values()||[]].some(r=>r!==record&&sameField(r.zone,next.zone)&&Math.hypot(r.actor.x-start.x,r.actor.y-start.y)<.7))return {deferred:true};
+  if([...options.departures?.records.values()||[]].some(r=>r!==record&&root.OpelucidNpcFalls?.blocks(r)!==false&&sameField(r.zone,next.zone)&&Math.hypot(r.actor.x-start.x,r.actor.y-start.y)<.7))return {deferred:true};
   const actor={...record.actor,...start,fieldZone:next.zone,height:continuous?record.actor.height:(old.nextHeight??next.height??0),exitProbe:true,script:2000,...(old.nextEntry?{incomingPortal:old.nextEntry}:{})};delete actor.exitClip;delete actor.noShadow;if(!old.nextEntry)delete actor.incomingPortal;
-  const plan=build(destination,index+1,actor);plan.transferAuthorized=true;
-  return {actor,zone:next.zone,plan,index:0,stage:'walk',age:0,travel:0,opened:false,zero:0,sampleSequence:-1,target:null,unverified:0};
+  const plan=build(destination,index+1,actor);plan.transferAuthorized=true;delete actor.jumpLift;delete actor.npcFallPending;
+  const result={actor,zone:next.zone,plan,index:0,stage:'walk',age:0,travel:0,opened:false,zero:0,sampleSequence:-1,target:null,unverified:0};root.OpelucidNpcFalls?.enter(result);return result;
  }
  function restoreRecord(record,zone,progress={}){
+  const fall=root.OpelucidNpcFalls?.restore(record,itineraries[record.plan.destination]?.()[record.plan.leg]);if(fall!==undefined)return fall;
   const extra=root.IcirrusContinuity?.restoreRecord(record);if(extra!==undefined)return extra;
   if(record.actor.name==='Komor'&&record.plan.destination==='cold-storage-front'&&record.plan.itineraryVersion!==version){
    const phase=progress.vars?.[16527]??options.native?.vars?.[16527]??1,destination=phase<=1?'cold-storage-front':phase===2?'clay-gym-square-komor':'komor-next-journey',leg=phase===2?2:0;
@@ -152,6 +153,7 @@
     }
    }
    if(shouldTick(r)||!r.plan.transferAuthorized)continue;
+   if(root.OpelucidNpcFalls?.tick(r,dt))continue;
    // The source field was explicitly covered, or this leg started after a real
    // occlusion proof. Advance a physical route off-map, never a fake GPU sample.
    if(r.stage==='walk'){const p=r.plan.points[r.index];if(p){const dx=p.x-r.actor.x,dy=p.y-r.actor.y,d=Math.hypot(dx,dy),step=Math.min(d,3.75*dt),next=point(r.actor.x+(d?dx/d*step:0),r.actor.y+(d?dy/d*step:0));if(d&&obstructed(r,next))continue;if(d){Object.assign(r.actor,next);r.actor.direction=Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0;r.travel+=step;}markPortalEntry(r);if(d<=step)r.index++;}else{r.stage=r.plan.kind==='arrival'?'resident':'hold';if(r.stage==='resident'){Object.assign(r.actor,{fieldZone:r.plan.destinationZone,uid:r.plan.targetUid,exitProbe:false,script:2000});notifyArrival(r);}}}
@@ -159,13 +161,13 @@
   }
  }
  function waitingFor(zone,names){return names.some(name=>{const r=options.departures?.records.get(name);return r&&(!sameField(r.plan.destinationZone??r.zone,zone)||r.stage!=='resident');});}
- function obstructed(record,p){if(!known(record))return false;return [...options.departures?.records.values()||[]].some(other=>other!==record&&sameField(other.zone,record.zone)&&Math.abs(other.actor.x-p.x)<.55&&Math.abs(other.actor.y-p.y)<.55);}
+ function obstructed(record,p){if(!known(record))return false;return [...options.departures?.records.values()||[]].some(other=>other!==record&&root.OpelucidNpcFalls?.blocks(other)!==false&&sameField(other.zone,record.zone)&&Math.abs(other.actor.x-p.x)<.55&&Math.abs(other.actor.y-p.y)<.55);}
  function introduced(actor,actors){if(!(travelZone(actor.fieldZone)||[96,191,192,193,194,195,107].includes(actor.fieldZone))||!['Komor','Rafan','Belle','Aralia','Anemone','Gasparago','Silvestro','N'].includes(actor.name))return actor;
   const record=options.departures?.records.get(actor.name);
   if(known(record)||!record&&actors.some(old=>old!==actor&&!old.hidden&&!old.continuityPending&&old.name===actor.name&&sameField(old.fieldZone,actor.fieldZone)))actor.continuityPending=true;
   return actor;
  }
- function visibleActors(actors){return actors.filter(actor=>{if(root.OpelucidContinuity?.allowActor(actor)===false||actor.continuitySuperseded)return false;const record=options.departures?.records.get(actor.name);
+ function visibleActors(actors){return actors.filter(actor=>{if(actor.npcFallPending||root.OpelucidContinuity?.allowActor(actor)===false||actor.continuitySuperseded)return false;const record=options.departures?.records.get(actor.name);
   // A future logical role can be populated by changeZone without ActorAdd.
   // Keep it out of Controller.visible until the physical itinerary arrives:
   // that controller's ordinary rejoin policy would otherwise abandon the
@@ -197,7 +199,7 @@
  function startExitMotion(actor,zone,movementAddress){const replaces=root.IcirrusContinuity?.replaceExitMotion(actor,zone,movementAddress)||zone===193&&escortMotions.has(movementAddress)||zone===195&&(actor.name==='Aralia'&&movementAddress===3148||actor.name==='Belle'&&movementAddress===3132||actor.name==='N'&&movementAddress===3172)||zone===107&&actor.name==='Anemone'&&movementAddress===3240;
   if(!replaces||actor.uid===255)return false;if(!actor.continuitySuperseded){if(!options.departures?.depart(actor,zone))return false;actor.continuitySuperseded=true;actor.hidden=true;}return true;
  }
- const occupies=record=>!known(record)||sameField(record.actor.fieldZone,activeZone());
+ const occupies=record=>root.OpelucidNpcFalls?.blocks(record)!==false&&(!known(record)||sameField(record.actor.fieldZone,activeZone()));
  const api={configure,planExit,migrate,tick,enterZone,carry,canRestore,restoreRecord,coveredTransition,nextLeg,shouldTick,canRetire,waitingFor,obstructed,introduced,visibleActors,prepareEvent,startExitMotion,logicalOnlyDelete,occupies,sameField,nextEvents,resumeNardoAfterSurf};root.MistraltonContinuity=api;
  if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

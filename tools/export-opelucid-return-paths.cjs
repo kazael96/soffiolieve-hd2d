@@ -15,6 +15,9 @@ const globals=new Set([16,154,157,326,62,329,96,191,331,194,107,337,198,113,205,
 const south=[[107,5],[195,0],[194,331,[-681.5,-400.5],[0,1]],[331,96,[-623.5,-348.5],[1,0]],[96,0],[253,1],[329,0],[91,0],[62,0],[90,1]];
 const museum=[...south,[326,1],[51,0],[32,4],[30,1],[31,1],[28,9],[252,0],[249,0],[251,0],[250,0],[155,0],[154,16,[-175.5,-165.5],[1,0]]];
 const castle=[...south,[326,157,[-384.5,-240.5],[0,-1]],[157,0],[159,1]];
+// Native193 landing arguments:322:16,324:28,326:52,328:56/70.
+// The upper floor partitions prevent an all-stair shortcut.
+const sandDescent=[[158,1],[160,0],[161,{pit:0,to:[162,22,17]}],[162,{pit:1,to:[163,21,19]}],[163,{pit:0,to:[164,15,21]}]];
 const descending=season=>{
  const climb=[[198,0],...(season===3?[[200,1],[199,14],[201,7]]:[[200,1],[199,1],[200,4],[199,4],[200,6],[201,0],[199,6],[201,2],[199,8],[201,4],[202,1],[199,10]]),[202,3]];
  return climb.map(([z,i])=>{const w=events[z].warps[i];return [w.zone,w.warp];}).reverse();
@@ -28,6 +31,8 @@ const recipes=season=>{
   // Native316:306 places Komor at61,0,38 before his approach. The static
   // role61,32 is not the beginning of this encounter.
   {key:'komor-castle-entrance',name:'Komor',start:{zone:205,x:-605.5,y:-596.5,height:3},route:[...tower,...castle],target:[158,2],goal:{x:45.5,y:22.5,height:0}},
+  {key:'nardo-castle-bottom',name:'Nardo',start:{zone:205,x:-602.5,y:-597.5,height:3},route:[...tower,...castle,...sandDescent,[164,{pit:0,to:[165,14,26]}]],target:[165,1]},
+  {key:'komor-castle-drop',name:'Komor',start:{zone:158,x:45.5,y:16.5,height:1.5},route:[...sandDescent,[164,{pit:0,to:[165,14,24],awaitNativeDrop:true}]],target:[165,2],awaitNativeDrop:true},
  ];
 };
 const paths={},seasons={},proof=[];
@@ -41,16 +46,17 @@ for(const season of [0,1,2,3]){
  function surface(z,x,y,h){let row=canonical.at(z,x,y,h)||fallback.at(z,x,y,h);if(!row&&globals.has(z)){const entries=worldIndex.get(Math.floor((x+16)/32)*32+':'+Math.floor((y+16)/32)*32);if(entries)row=fallback.at(z,x,y,h,entries);}return row?{...row,flags:row.flags|((row.flags&2)?1:0)}:null;}
  const chapter={ready:true,surfaceAt:surface};
  function portal(z,index){const w=events[z].warps[index],o=origin(z);if(w.rail){const p=c.NativeRails.warp(z,w),q=c.NativeRails.landing(z,w);return {w,x:p.x-o[0],y:p.z-o[1],height:p.height,dx:p.out.x,dy:p.out.z,stage:{x:q.x,y:q.z,height:q.rail.height}};}const [dx,dy]=({1:[0,1],2:[0,-1],3:[1,0],4:[-1,0]})[w.a],x=w.x/16+(w.width-1)/2-o[0],y=w.z/16+(w.height-1)/2-o[1],height=(w.y<<16>>16)/16;return {w,x,y,height,dx,dy,stage:{x:x-dx,y:y-dy,height}};}
- function footpath(z,from,to){const points=c.NativeRails.has(z)&&!scenes[z].permissionGrids.length?c.NativeRailPaths.route(z,from,to):c.IcirrusPaths.route(z,from,to,{chapter,zones:[z],unbounded:true});if(!points||!points.length||Math.hypot(points.at(-1).x-to.x,points.at(-1).y-to.y)>.00001)throw Error('Incomplete footpath '+z);const tuples=points.map(p=>[p.x,p.y,p.height??0,...(p.jumpLift===undefined?[]:[p.jumpLift])]),id=crypto.createHash('sha256').update(JSON.stringify(tuples)).digest('hex').slice(0,20);paths[id]=tuples;return id;}
+ function footpath(z,from,to){const guarded={ready:true,surfaceAt:(zone,x,y,h)=>{const s=surface(zone,x,y,h);if(!s||s.behavior!==124||![160,161,162,163,164].includes(zone))return s;const centre=events[zone].triggers.some(t=>t.type===0&&t.var===16384&&Math.floor(x+16)===t.x+Math.floor(t.width/2)&&Math.floor(y+16)===t.z+Math.floor(t.height/2));return centre&&Math.hypot(x-to.x,y-to.y)>.01?{...s,flags:s.flags|1}:s;}};const points=c.NativeRails.has(z)&&!scenes[z].permissionGrids.length?c.NativeRailPaths.route(z,from,to):c.IcirrusPaths.route(z,from,to,{chapter:guarded,zones:[z],unbounded:true});if(!points||!points.length||Math.hypot(points.at(-1).x-to.x,points.at(-1).y-to.y)>.00001)throw Error('Incomplete footpath '+z);const tuples=points.map(p=>[p.x,p.y,p.height??0,...(p.jumpLift===undefined?[]:[p.jumpLift])]),id=crypto.createHash('sha256').update(JSON.stringify(tuples)).digest('hex').slice(0,20);paths[id]=tuples;return id;}
  const trips={};let activeKey;
  for(const recipe of recipes(season)){
-  activeKey=recipe.key;let pose={...recipe.start};const legs=[];
+  activeKey=recipe.key;let pose={...recipe.start},fallEntry=false;const legs=[];
   for(const [z,index,point,dir]of recipe.route){let leg,next;
-   if(point){const row=surface(z,point[0],point[1],pose.height);if(!row||row.flags&3)throw Error('Blocked native border '+z);leg={zone:z,kind:'path',anchor:{x:point[0],y:point[1]},dx:dir[0],dy:dir[1],height:row.height,stagePoint:{x:point[0],y:point[1],height:row.height}};next={x:point[0]+dir[0]*2.8,y:point[1]+dir[1]*2.8,height:row.height};}
+   if(typeof index==='object'){const pit=events[z].triggers[index.pit],x=pit.x+Math.floor(pit.width/2)-15.5,y=pit.z+Math.floor(pit.height/2)-15.5,s=surface(z,x,y,pose.height),[nz,nx,ny]=index.to,ground=surface(nz,nx-15.5,ny-15.5,0);if(s?.behavior!==124||!ground)throw Error('Invalid native sand handoff '+z);next={x:nx-15.5,y:ny-15.5,height:ground.height};leg={zone:z,kind:'fall',anchor:{x,y},height:s.height,stagePoint:{x,y,height:s.height},next:{x:next.x,y:next.y},nextHeight:next.height,...(index.awaitNativeDrop?{awaitNativeDrop:true}:{})};}
+   else if(point){const row=surface(z,point[0],point[1],pose.height);if(!row||row.flags&3)throw Error('Blocked native border '+z);leg={zone:z,kind:'path',anchor:{x:point[0],y:point[1]},dx:dir[0],dy:dir[1],height:row.height,stagePoint:{x:point[0],y:point[1],height:row.height}};next={x:point[0]+dir[0]*2.8,y:point[1]+dir[1]*2.8,height:row.height};}
    else {const p=portal(z,index),q=portal(p.w.zone,p.w.warp);leg={zone:z,kind:'door',anchor:{x:p.x,y:p.y},dx:p.dx,dy:p.dy,height:p.height,nativePortal:index,stagePoint:p.stage,next:{x:q.x+q.dx*.8,y:q.y+q.dy*.8},nextEntry:{x:q.stage.x,y:q.stage.y},nextHeight:q.stage.height};next={...q.stage};}
-   leg.start={x:pose.x,y:pose.y,height:pose.height};try{leg.path=footpath(z,pose,leg.stagePoint);}catch(error){error.message+=' season'+season+' '+activeKey;throw error;}legs.push(leg);pose=next;
+   if(fallEntry)leg.fallEntry=true;leg.start={x:pose.x,y:pose.y,height:pose.height};try{leg.path=footpath(z,pose,leg.stagePoint);}catch(error){error.message+=' season'+season+' '+activeKey;throw error;}legs.push(leg);pose=next;fallEntry=leg.kind==='fall';
   }
-  const [zone,uid]=recipe.target,a=events[zone].actors.find(a=>a.id===uid),o=origin(zone),goal=recipe.goal||{x:a.x+.5-o[0],y:a.z+.5-o[1],height:a.y/65536};legs.push({zone,kind:'arrival',anchor:{x:goal.x,y:goal.y},height:goal.height,destinationZone:zone,targetUid:uid,start:pose,path:footpath(zone,pose,goal)});
+  const [zone,uid]=recipe.target,a=events[zone].actors.find(a=>a.id===uid),o=origin(zone),goal=recipe.goal||{x:a.x+.5-o[0],y:a.z+.5-o[1],height:a.y/65536};if(!recipe.awaitNativeDrop)legs.push({zone,kind:'arrival',anchor:{x:goal.x,y:goal.y},height:goal.height,destinationZone:zone,targetUid:uid,start:pose,path:footpath(zone,pose,goal),...(fallEntry?{fallEntry:true}:{})});
   trips[recipe.key]={name:recipe.name,source:recipe.start,target:recipe.target,legs};proof.push({season,key:recipe.key,legs:legs.length,points:legs.reduce((sum,l)=>sum+paths[l.path].length,0)});
  }
  seasons[season]=trips;

@@ -47,7 +47,7 @@
   const dragonFlight=window.OpelucidDragonFlight?.create({zone:()=>native.zone,presented:n=>renderer.hasPresentedActor?.(n)===true,time:()=>typeof t==='number'?t:0,pose,path:(from,to)=>window.OpelucidContinuity.path(from,to,native.zone),sample:n=>renderer.actorVisibility?.(n),moving:n=>motions.some(task=>actor(task.id)===n)});
   let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false,triadCoverMode=null;
   const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&fieldActors().some(n=>{return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
-  window.MistraltonContinuity?.configure({native,departures,actors:()=>npcs,blockedAt:window.MistraltonChapter?.blockedAt,isCovered:()=>fieldCovered,recheck:()=>{lastTile='';}});
+  window.MistraltonContinuity?.configure({native,departures,actors:()=>npcs,blockedAt:window.MistraltonChapter?.blockedAt,isCovered:()=>fieldCovered,recheck:()=>{lastTile='';},resourceGeneration:()=>renderer.resourceEpoch,prepareNpcFall,npcFallSound:id=>AudioEngine.playSound(id)});
   departures.restore(native.departures,native.zone,native);
   const warmedBanks=new Set();
   let tutorialWarm=null;
@@ -68,6 +68,7 @@
   const fieldMotion=window.IcirrusFieldMotion?.create({state:()=>native,actor,sound:id=>AudioEngine.playSound(id)});
   const fieldFall=window.OpelucidFieldFall?.create({state:()=>native,actor,ground:(x,y)=>renderer.groundHeight(x,y),sound:id=>AudioEngine.playSound(id)});
   const quicksand=window.OpelucidQuicksand?.create({state:()=>native,hero:()=>player,ground:(x,y)=>renderer.groundHeight(x,y)});
+  async function prepareNpcFall(body,ids){await warmFieldSounds(ids);if(native.zone!==body.fieldZone)return;const prepare=async()=>{const required=[...fieldActors(),body];await renderer.requireActors?.(required);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(required)))throw renderer.loadingError||Error('Grafica della discesa non pronta');};if(renderer.resourceGate)await renderer.resourceGate('npc-sand-'+body.name,prepare);else await prepare();}
   async function warmFieldSounds(ids){if(!AudioEngine.enabled)return;const tracks=[];try{const load=async()=>{for(const track of tracks)track.stop();tracks.length=0;for(const id of ids){const record=window.FIELD_AUDIO?.[id];if(!record)throw Error('Suono originale di campo mancante: '+id);const track=AudioEngine.createCinematic(record.src);tracks.push(track);await track.prepare();}};if(renderer.resourceGate)await renderer.resourceGate('native-field-sounds-'+ids.join('-'),load);else await load();}finally{for(const track of tracks)track.stop();}}
   function pose(n,dir,step=0){
     if(!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
@@ -300,7 +301,7 @@
   }
   async function run(entry,bank=data().script){
     if(eventRunning||failed)return;
-    const narrative=bank===data().script&&(data().onEnter?.some(e=>e.entry===entry&&value(e.var)===e.value)||data().triggers?.some(e=>e.script===entry+1&&value(e.var)===e.value));
+    const narrative=bank===data().script&&(window.OpelucidContinuity?.arrivalEvent(native.zone,entry+1)||data().onEnter?.some(e=>e.entry===entry&&value(e.var)===e.value)||data().triggers?.some(e=>e.script===entry+1&&value(e.var)===e.value));
     if(narrative&&(window.MistraltonContinuity?.prepareEvent(native.zone,entry+1,npcs)===false||[192,193].includes(native.zone)&&window.MistraltonContinuity?.waitingFor(native.zone,['Komor']))){native.pendingZoneEntry={zone:native.zone,bank,entry};lastTile='';journey.save(true);return;}
     delete native.pendingZoneEntry;window.Bicycle?.dismount();eventRunning=true;resetInput();const before=structuredClone(state);
     try{warmBank(bank);await settleAmbient();if(window.OpelucidChapter?.zones.includes(native.zone))await renderer.prepareScene?.();captureActors();journey.save(true);
@@ -315,7 +316,7 @@
         if(chain>=5)throw Error('Original reserved-script chain exceeded its limit');
         const next=queued;queued=null;if(!Number.isInteger(next)||next<1)throw Error('Invalid original reserved script '+next);
         if(native.zone===205&&next===4&&window.OpelucidContinuity?.prepareEvent(205,4)===false){await fade(0,8);break;}
-        await vm.run(data().script,next-1);
+        if(window.OpelucidContinuity?.arrivalEvent(native.zone,next)&&window.OpelucidContinuity.prepareEvent(native.zone,next)===false){native.pendingZoneEntry={zone:native.zone,bank:data().script,entry:next-1};lastTile='';await fade(0,8);break;}await vm.run(data().script,next-1);
       }
       if(bank===778&&native.zone===396&&value(16505)===0)await vm.run(792,0);
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
@@ -372,7 +373,7 @@
       case 'NativeOpcode583':{
         await warmFieldSounds([1665,1666]);const body=actor(v[0]);if(!body)throw Error('Personaggio della caduta non disponibile');
         const prepare=async()=>{const required=[...fieldActors(),body];await renderer.requireActors?.(required);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(required)))throw renderer.loadingError||Error('Grafica del personaggio in arrivo non pronta');};
-        if(renderer.resourceGate)await renderer.resourceGate('native-falling-actor-'+v[0],prepare);else await prepare();fieldFall.drop(v[0],world(v[1],v[2]),v[3]);body.nativeSandArrival=true;break;
+        if(renderer.resourceGate)await renderer.resourceGate('native-falling-actor-'+v[0],prepare);else await prepare();if(body.name==='Komor'&&native.zone===165)window.OpelucidReturns?.claimDrop({native,departures});fieldFall.drop(v[0],world(v[1],v[2]),v[3]);body.nativeSandArrival=true;break;
       }
       case 'NativeOpcode193':{
         const p=grid(),pit=data().triggers.find(record=>record.type===0&&record.var===16384&&record.value===0&&p.x>=record.x&&p.x<record.x+record.width&&p.z>=record.z&&p.z<record.z+record.height);
@@ -787,7 +788,7 @@
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     const deferred=window.OpelucidContinuity?.deferredEvent(native.zone);if(deferred&&window.OpelucidContinuity.prepareEvent(native.zone,deferred)){run(deferred-1);return;}
     if(!native.intro&&renderer.ready){run(4,782);return;}
-    const pending=native.pendingZoneEntry;if(pending){const valid=pending.zone===native.zone&&pending.bank===data().script&&Number.isInteger(pending.entry)&&ORIGINAL_EVENTS.scripts[pending.bank]?.supportedEntries.includes(pending.entry)&&(data().onEnter?.some(e=>e.entry===pending.entry&&value(e.var)===e.value)||data().triggers?.some(e=>e.script===pending.entry+1&&value(e.var)===e.value));if(!valid)delete native.pendingZoneEntry;else if(!window.MistraltonContinuity?.waitingFor(native.zone,['Komor'])&&window.MistraltonContinuity?.prepareEvent(native.zone,pending.entry+1,npcs)!==false){run(pending.entry,pending.bank);return;}}
+    const pending=native.pendingZoneEntry;if(pending){const valid=pending.zone===native.zone&&pending.bank===data().script&&Number.isInteger(pending.entry)&&ORIGINAL_EVENTS.scripts[pending.bank]?.supportedEntries.includes(pending.entry)&&(window.OpelucidContinuity?.arrivalEvent(native.zone,pending.entry+1)||data().onEnter?.some(e=>e.entry===pending.entry&&value(e.var)===e.value)||data().triggers?.some(e=>e.script===pending.entry+1&&value(e.var)===e.value));if(!valid)delete native.pendingZoneEntry;else if((![192,193].includes(native.zone)||!window.MistraltonContinuity?.waitingFor(native.zone,['Komor']))&&window.MistraltonContinuity?.prepareEvent(native.zone,pending.entry+1,npcs)!==false){run(pending.entry,pending.bank);return;}}
 
     if(window.MistraltonChapter){const next=MistraltonChapter.zoneAt(native.zone,player);if(next!==native.zone){native.zone=next;native.music=MISTRALTON_FIELD.music(next)||data().music;AudioEngine.setScene(native.music);syncActors();derivePhase();lastTile='';journey.save(true);return;}}
     const p=grid(),key=native.zone+':'+p.x+':'+p.z;
