@@ -16,3 +16,19 @@ test('visible lower-camera head keeps submerging; no adapter claims a GPU result
 test('damaged or unrelated saved fall phases are rejected',()=>{
  falls.configure({activeZone:()=>122});const r=record('fall');falls.tick(r,1/30);for(const frame of [-1,50,NaN]){const copy=structuredClone(r);copy.plan.fallExit.frame=frame;assert.equal(falls.restore(copy,{kind:'fall',anchor:r.plan.anchor}),null);}assert.equal(falls.restore(r,{kind:'door'}),null);
 });
+
+test('a submerged body is progressively clipped at its own floor and cannot reappear below a cutaway room',()=>{
+ falls.configure({activeZone:()=>122});const r=record('fall');r.actor.height=4;
+ for(let frame=1;frame<=49;frame++){
+  falls.tick(r,1/30);assert.deepEqual(r.actor.exitClip,[0,1,0,-4]);
+  const bottom=r.actor.height+r.actor.jumpLift,head=bottom+2*.906,plane=r.actor.exitClip;
+  assert.equal(plane[1]*bottom+plane[3]>=0,false);
+  if(frame>=34)assert.ok(plane[1]*head+plane[3]<0,'No head pixels may remain below the floor');
+ }
+ const saved=structuredClone(r);delete saved.actor.exitClip;assert.ok(falls.restore(saved,{kind:'fall',anchor:r.plan.anchor}));assert.deepEqual(saved.actor.exitClip,[0,1,0,-4]);
+});
+
+test('a saved submerged hold is clipped even while its visible-field resources are still pending',()=>{
+ falls.configure({activeZone:()=>161,prepare:()=>new Promise(()=>{})});const r=record('fall');r.stage='hold';r.plan.fallExit={frame:49,fraction:0};r.actor.jumpLift=-4;
+ assert.equal(falls.tick(r,0),true);assert.deepEqual(r.actor.exitClip,[0,1,0,-0]);assert.equal(r.actor.jumpLift,-4);assert.equal(r.plan.fallExit.frame,49);
+});
