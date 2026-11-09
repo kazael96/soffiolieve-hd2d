@@ -1,0 +1,11 @@
+/* Highlight each native composite track in place for anatomical review. */
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{createCanvas,loadImage}=require(process.argv[2]),out=path.resolve(process.argv[3]),root=path.resolve(__dirname,'../src');
+const c={document:{createElement:()=>createCanvas(1,1)}};c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(root,'pokemon-anim.js'),'utf8'),c);c.RuntimeAssets={json:async p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8')),image:async p=>loadImage(path.join(root,p))};
+(async()=>{fs.mkdirSync(out,{recursive:true});const ids=[553,556,558,563,576,593,598,606,608,611,619,621,623,624,626,'593-female'],inventory=[];
+ for(let group=0;group<4;group++){
+  const sheets=[];let width=0;for(const id of ids.slice(group*4,group*4+4))for(const back of [false,true]){const state=c.ROM_SPRITE_ANIM.load(id+'-'+(back?'back':'front'));await state.promise;if(!state.ready)throw Error(state.error);const tracks=[...new Set(state.data.maps.flatMap(map=>map.map(r=>r[0])))].sort((a,b)=>a-b);sheets.push({id,back,state,tracks});width=Math.max(width,(tracks.length+1)*80);inventory.push({id,back,tracks});}
+  const canvas=createCanvas(width,sheets.length*100),ctx=canvas.getContext('2d');ctx.fillStyle='#e5e7de';ctx.fillRect(0,0,width,canvas.height);ctx.imageSmoothingEnabled=false;
+  for(let row=0;row<sheets.length;row++){const {id,back,state,tracks}=sheets[row],original=state.data;for(let column=0;column<=tracks.length;column++){const x=column*80,y=row*100;ctx.fillStyle='#21393c';ctx.font='11px sans-serif';ctx.fillText(column?String(tracks[column-1]):id+(back?' B':' F'),x+3,y+12);state.data=original;ctx.globalAlpha=column?.15:1;c.ROM_SPRITE_ANIM.draw(ctx,id,back,x+40,y+95,.8,0,true);ctx.globalAlpha=1;if(column){state.data={...original,maps:original.maps.map(map=>map.filter(r=>r[0]===tracks[column-1]))};c.ROM_SPRITE_ANIM.draw(ctx,id,back,x+40,y+95,.8,0,true);}}state.data=original;}
+  fs.writeFileSync(path.join(out,'parts-'+group+'.png'),canvas.toBuffer('image/png'));
+ }fs.writeFileSync(path.join(out,'native-tracks.json'),JSON.stringify(inventory,null,2));console.log('Highlighted native tracks for',inventory.length,'front/back composites');
+})().catch(e=>{console.error(e);process.exitCode=1;});

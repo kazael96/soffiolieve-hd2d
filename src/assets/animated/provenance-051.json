@@ -1,0 +1,602 @@
+{
+  "source": "IRBI a/0/0/4 NCGR/NCER/NANR/NMCR/NMAR; reviewed Nitro decoder",
+  "decoderSHA256": "fec8142f05e50ae5702aec63b6c264e319778a86f0687ea05e768e313ec38fa0",
+  "femaleVariants": [
+    593
+  ],
+  "species": [
+    553,
+    556,
+    558,
+    563,
+    576,
+    593,
+    598,
+    606,
+    608,
+    611,
+    619,
+    621,
+    623,
+    624,
+    626
+  ],
+  "records": [
+    {
+      "asset": "src/assets/animated/553-front.json",
+      "species": 553,
+      "graphic": 553,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "e57667490fda165e53aa5dff91bf5d411508ce75ccd57533ea7efe3a1fb3ea87"
+    },
+    {
+      "asset": "src/assets/animated/553-front.png",
+      "species": 553,
+      "graphic": 553,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "91696c69a8a730364836399659250978920d4c20c14b037b92375509758b2646"
+    },
+    {
+      "asset": "src/assets/animated/553-back.json",
+      "species": 553,
+      "graphic": 553,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "ea42d4ea2dcd1b2bac10e2e2f5722b0c618ba4d378649d7b184f522673339cc0"
+    },
+    {
+      "asset": "src/assets/animated/553-back.png",
+      "species": 553,
+      "graphic": 553,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "2f4cd7164c1fff1c1d4d0f0c8bda2ecfde3fb6c15ee9b28c2f27d04e84bc025b"
+    },
+    {
+      "asset": "src/assets/animated/556-front.json",
+      "species": 556,
+      "graphic": 556,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "239522e12dd86aa3a6c9b2b6044711e8d0408f584096c504ecc8753231c59c23"
+    },
+    {
+      "asset": "src/assets/animated/556-front.png",
+      "species": 556,
+      "graphic": 556,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "6756b3b6960dca5c75d6048d264755f0f548239465169b0b4745105a60573138"
+    },
+    {
+      "asset": "src/assets/animated/556-back.json",
+      "species": 556,
+      "graphic": 556,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "e2bfab21575dc40e5ab45287178b2b63d8b1c5c38b73e4745b9c590ca9f5af8a"
+    },
+    {
+      "asset": "src/assets/animated/556-back.png",
+      "species": 556,
+      "graphic": 556,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "fea112c8cb8a1fbbdf487cbd5740abce572d2e0d16ac89dad2dca2eca97ad2ee"
+    },
+    {
+      "asset": "src/assets/animated/558-front.json",
+      "species": 558,
+      "graphic": 558,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "88c257b9988011f1d08aafacc20c8d20afe5bc9eccf518f098083854ab3c5388"
+    },
+    {
+      "asset": "src/assets/animated/558-front.png",
+      "species": 558,
+      "graphic": 558,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "79f9f1fcc5ea39ef379027ecb6065702b82501bfefcd424eff5a70738ff563b5"
+    },
+    {
+      "asset": "src/assets/animated/558-back.json",
+      "species": 558,
+      "graphic": 558,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "b29b68d7d68d844c567ff756d8523ec5f07eba6177b00fb7a5552afaf33da375"
+    },
+    {
+      "asset": "src/assets/animated/558-back.png",
+      "species": 558,
+      "graphic": 558,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "b4f9ea176ead8a22efa0a5da272de538aa2b50613d50c1500480b7943e85b265"
+    },
+    {
+      "asset": "src/assets/animated/563-front.json",
+      "species": 563,
+      "graphic": 563,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "598973fb5f06642c035176c30b174d4d0e1834dddb426dc39aa03739a4180a21"
+    },
+    {
+      "asset": "src/assets/animated/563-front.png",
+      "species": 563,
+      "graphic": 563,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "0044d98707ca642bb2e461a3caa006fe5c273adc7673d0dfcd6dd5e6303f3070"
+    },
+    {
+      "asset": "src/assets/animated/563-back.json",
+      "species": 563,
+      "graphic": 563,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "19f8b2f64c24f211f294c508a151ff3aaa156925601774454f1cfc5e010b418d"
+    },
+    {
+      "asset": "src/assets/animated/563-back.png",
+      "species": 563,
+      "graphic": 563,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "13db667ba786acedd8446da44b1bed3c60428fdacb9ca9398c203b554612aa6e"
+    },
+    {
+      "asset": "src/assets/animated/576-front.json",
+      "species": 576,
+      "graphic": 576,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "e807eb7870e9b0fad85e014aa0b7826f375ec34fcda7b313eb05f3964c97f898"
+    },
+    {
+      "asset": "src/assets/animated/576-front.png",
+      "species": 576,
+      "graphic": 576,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "08524073d32116a5f2207fc14d83b75865df73cd40e1a5bfddf9dda7b616c2f4"
+    },
+    {
+      "asset": "src/assets/animated/576-back.json",
+      "species": 576,
+      "graphic": 576,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "14bc08126bd4b912e6fb679641be19ceb1671af2712c1c8e7fce2dd390d7b02a"
+    },
+    {
+      "asset": "src/assets/animated/576-back.png",
+      "species": 576,
+      "graphic": 576,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "b933d78918a2f6ab8c2189301727e305f80053abde8ddbdd09ad6dcbd27d7dc1"
+    },
+    {
+      "asset": "src/assets/animated/593-front.json",
+      "species": 593,
+      "graphic": 593,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "cdc8ae646d96aecad2ac410c1e77dad9337cdf13ffd7cc5628cf1666890591bb"
+    },
+    {
+      "asset": "src/assets/animated/593-front.png",
+      "species": 593,
+      "graphic": 593,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "c61de129981d9d2e494958188eca509ecb2fbe3e82bf433f8b0a7e8ea4373513"
+    },
+    {
+      "asset": "src/assets/animated/593-back.json",
+      "species": 593,
+      "graphic": 593,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "ceea528b730c00843aec475690e3798a35d27b6db1f30eb283954a99686d11db"
+    },
+    {
+      "asset": "src/assets/animated/593-back.png",
+      "species": 593,
+      "graphic": 593,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "26b81cedd105c8895fee936777ae8e0c9724780d3b7d73ee07014a753145a758"
+    },
+    {
+      "asset": "src/assets/animated/598-front.json",
+      "species": 598,
+      "graphic": 598,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "52c0a64d29333d39531e25213a5887a99e933e20a0790ce6133fcdf0b7edae21"
+    },
+    {
+      "asset": "src/assets/animated/598-front.png",
+      "species": 598,
+      "graphic": 598,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "5a5e6f1be810c0e094ffe1180075a124dff21c54a4571aa838b6da5679f3466d"
+    },
+    {
+      "asset": "src/assets/animated/598-back.json",
+      "species": 598,
+      "graphic": 598,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "46ff0f977d8752b0d96105dc673a3ffc25ed079740b2870aaf9bcb2dcc3f8548"
+    },
+    {
+      "asset": "src/assets/animated/598-back.png",
+      "species": 598,
+      "graphic": 598,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "54584835c5746c0066ba31f4f809436f5f2c43604bc581e3bd7c7d5520f5aad2"
+    },
+    {
+      "asset": "src/assets/animated/606-front.json",
+      "species": 606,
+      "graphic": 606,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "18209d9a4f7a0cb409a1cc6e0815ef691b13b4801ded1357dc27f7694cf4c5f4"
+    },
+    {
+      "asset": "src/assets/animated/606-front.png",
+      "species": 606,
+      "graphic": 606,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "abfc1251266fafe9ccc3a88b533114a0f70c7c18137f8033295a1f64ef09f6fd"
+    },
+    {
+      "asset": "src/assets/animated/606-back.json",
+      "species": 606,
+      "graphic": 606,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "4315483e95d99b92720e3df8a610a5c6e494e6bc3a0aa6cb2b5debbbcdc03253"
+    },
+    {
+      "asset": "src/assets/animated/606-back.png",
+      "species": 606,
+      "graphic": 606,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "4bc23c267c224572984ace759522be0e27a07f0c9f78eaec0262e990d288d15f"
+    },
+    {
+      "asset": "src/assets/animated/608-front.json",
+      "species": 608,
+      "graphic": 608,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "c5a6df93ea384cdc9479fd4db07fe4f08aceb6c843459fea77126ea1e3db27aa"
+    },
+    {
+      "asset": "src/assets/animated/608-front.png",
+      "species": 608,
+      "graphic": 608,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "b943803ef51f79645ef4ae8a538ab6f460bb2a09c67f7a05f66821e03aeac728"
+    },
+    {
+      "asset": "src/assets/animated/608-back.json",
+      "species": 608,
+      "graphic": 608,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "5d1c52a535640c71419c6390dd339e81438b14bf873be4f561d98a1f0132341a"
+    },
+    {
+      "asset": "src/assets/animated/608-back.png",
+      "species": 608,
+      "graphic": 608,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "23a19be9ca9cd4e16e21e6e8340e3a81a29ecd131f853bc99e14ef12c481e00a"
+    },
+    {
+      "asset": "src/assets/animated/611-front.json",
+      "species": 611,
+      "graphic": 611,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "ae4b54a2197ff9337cee457760e57e28b3423bd5b3f17978a0b32c19fb1780da"
+    },
+    {
+      "asset": "src/assets/animated/611-front.png",
+      "species": 611,
+      "graphic": 611,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "b4587878256f39f174e033383e3f57867d69851a3542a0f61497f5b44578908f"
+    },
+    {
+      "asset": "src/assets/animated/611-back.json",
+      "species": 611,
+      "graphic": 611,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "7d72f6710434f24f5d553eb71ad57c22c384a0ea9a1dedca80068ac7317ef18b"
+    },
+    {
+      "asset": "src/assets/animated/611-back.png",
+      "species": 611,
+      "graphic": 611,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "5d21126ffe97360b9b3b0d335e9ffffcde7d1bba129722612e48aab0039bfc82"
+    },
+    {
+      "asset": "src/assets/animated/619-front.json",
+      "species": 619,
+      "graphic": 619,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "85cb494e5ceb86bcde850c8b7131bb1f30f2852e9866cef7bd16bfdd0a0803f0"
+    },
+    {
+      "asset": "src/assets/animated/619-front.png",
+      "species": 619,
+      "graphic": 619,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "709b462fe86cef7946c96a83aacdaa7388a86e553fdf16301b959a3d7c61c3c6"
+    },
+    {
+      "asset": "src/assets/animated/619-back.json",
+      "species": 619,
+      "graphic": 619,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "1b29a2895fd97cb7c65a0728cef0fb4b75993e0f26259bfa87a0ec6b72e1cedd"
+    },
+    {
+      "asset": "src/assets/animated/619-back.png",
+      "species": 619,
+      "graphic": 619,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "8f4f0cae198077cafe06fd8caf46bbfc1c78f36dbbe7b8ddcfa8abb8c919859f"
+    },
+    {
+      "asset": "src/assets/animated/621-front.json",
+      "species": 621,
+      "graphic": 621,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "ce072528420cad9da757dc9560095d1e02746537e535dac9227b166ef5881549"
+    },
+    {
+      "asset": "src/assets/animated/621-front.png",
+      "species": 621,
+      "graphic": 621,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "6c73161cb09207ba5e83e57c9217f6ae60c5b883d48664a6219acb8e52e8e6ca"
+    },
+    {
+      "asset": "src/assets/animated/621-back.json",
+      "species": 621,
+      "graphic": 621,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "c712cc1649b5c5f930176d3c0654c316d2f2fbaed61760e1458307bddf0ced3b"
+    },
+    {
+      "asset": "src/assets/animated/621-back.png",
+      "species": 621,
+      "graphic": 621,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "6c49cd5e1bc43422a542b51a93e76d5462e1e302e367ba4e412d05e314ad6336"
+    },
+    {
+      "asset": "src/assets/animated/623-front.json",
+      "species": 623,
+      "graphic": 623,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "5ac7da9b5a69928f7fd888e8eb5729c9f9fe63e5bb0e17ffd448105db7592796"
+    },
+    {
+      "asset": "src/assets/animated/623-front.png",
+      "species": 623,
+      "graphic": 623,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "6fd94bf03a20a8ea31d61517d81688929d1229b6062b7972842246730a59f41d"
+    },
+    {
+      "asset": "src/assets/animated/623-back.json",
+      "species": 623,
+      "graphic": 623,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "8622c6dd1e1bae65b13c23975ae1ea9b7955328c2a170a7842674b3d43078d8e"
+    },
+    {
+      "asset": "src/assets/animated/623-back.png",
+      "species": 623,
+      "graphic": 623,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "39d6c5c2fe60e2f5ba3edec10bd15505009051365a1d56f539de8fc746546b35"
+    },
+    {
+      "asset": "src/assets/animated/624-front.json",
+      "species": 624,
+      "graphic": 624,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "219b250f5519bc9c804ff88bc40259f70e81b524f525560d1e77846cb54eb8f9"
+    },
+    {
+      "asset": "src/assets/animated/624-front.png",
+      "species": 624,
+      "graphic": 624,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "0aeed60d9320afed780052ea9e4102969285d1fcb70bc0f4d45af2e0b7e14ddc"
+    },
+    {
+      "asset": "src/assets/animated/624-back.json",
+      "species": 624,
+      "graphic": 624,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "cee247415ecabb948bf6478ff5d02d97f7a2832e3e97c3a7cfd63855e2d42ff9"
+    },
+    {
+      "asset": "src/assets/animated/624-back.png",
+      "species": 624,
+      "graphic": 624,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "46fb656d81dff95b655bacb8d1674e0a4738d4b5358474f28c69858487d93de0"
+    },
+    {
+      "asset": "src/assets/animated/626-front.json",
+      "species": 626,
+      "graphic": 626,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "dd01e68bd087672450657b4df32b04a2a14a59a6eb81345a3b6b93328a05ff68"
+    },
+    {
+      "asset": "src/assets/animated/626-front.png",
+      "species": 626,
+      "graphic": 626,
+      "back": false,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "c689cc71885769001e143b9ea78b9867700a216c79b20da26f15bc00842cbe1c"
+    },
+    {
+      "asset": "src/assets/animated/626-back.json",
+      "species": 626,
+      "graphic": 626,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "aa840c6bfb1f13516ad38dea3815648d6b761f8fc6217a55adc209330e68e246"
+    },
+    {
+      "asset": "src/assets/animated/626-back.png",
+      "species": 626,
+      "graphic": 626,
+      "back": true,
+      "female": false,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "70abd20346b1772f25d7ac37715d6d55cef83c8d52d4ad28d5a3a9501866e1c5"
+    },
+    {
+      "asset": "src/assets/animated/593-female-front.json",
+      "species": 593,
+      "graphic": "593-female",
+      "back": false,
+      "female": true,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "cdc8ae646d96aecad2ac410c1e77dad9337cdf13ffd7cc5628cf1666890591bb"
+    },
+    {
+      "asset": "src/assets/animated/593-female-front.png",
+      "species": 593,
+      "graphic": "593-female",
+      "back": false,
+      "female": true,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "cd30227fa8535ae1ad953b682a43408d262c4d23b49a16346ac6ec4f491e50f9"
+    },
+    {
+      "asset": "src/assets/animated/593-female-back.json",
+      "species": 593,
+      "graphic": "593-female",
+      "back": true,
+      "female": true,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "ceea528b730c00843aec475690e3798a35d27b6db1f30eb283954a99686d11db"
+    },
+    {
+      "asset": "src/assets/animated/593-female-back.png",
+      "species": 593,
+      "graphic": "593-female",
+      "back": true,
+      "female": true,
+      "source": "IRBI a/0/0/4 original Nitro composite",
+      "sha256": "4dde07e93d9aaa357c283091d79dbe7a92e7aa512ecf561c866e2dc30651cefe"
+    }
+  ]
+}

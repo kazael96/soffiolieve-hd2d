@@ -41,12 +41,12 @@ function moveVisualContext(e,move,following,charge){let actor=visualBattleContex
 function syncVisualVolatiles(){for(let side of ['p1','p2']){let p=session.active(side),v=p.volatiles,state=visualState[side];state.hidden=!!(v.fly||v.dig||v.dive||v.shadowforce||v.skydrop);state.substitute=!!v.substitute;state.minimized=!!v.minimize}}
 
 async function throwStoryBall(ballId=4){
- if(![2,3,4,6,8,9,12,13,14].includes(ballId))ballId=4;
+ if(![2,3,4,6,8,9,10,12,13,14,15].includes(ballId))ballId=4;
  if(!session||busy||finished||storyBattle!=='wild'||!Journey.itemCount(ballId)||!Journey.canCapture())return;
  if(window.DoubleBattles&&!DoubleBattles.captureTarget()){log('Non puoi lanciare una Ball finché ci sono due Pokémon avversari!');return;}
  busy=true;Journey.consumeItem(ballId);updateBattle();const start=session.battle.log.length;captureVisualContext();
  try{
-  const target=session.active('p2'),result=CaptureRules.roll(target,OPENING_DATA[target.species.name].catchRate,n=>session.battle.random(n),Journey.state.dex.caught.length,CaptureRules.ballBonus(ballId,target,{caught:Journey.state.dex.caught.includes(TRAINING_DATA.progression[target.species.name]?.dexName||target.species.name),terrain:battleLocation?.terrain}),{darkGrass:['route3Dark','route5Dark'].includes(battleLocation?.id)}),caught=result.caught;
+  const target=session.active('p2'),result=CaptureRules.roll(target,OPENING_DATA[target.species.name].catchRate,n=>session.battle.random(n),Journey.state.dex.caught.length,CaptureRules.ballBonus(ballId,target,{caught:Journey.state.dex.caught.includes(TRAINING_DATA.progression[target.species.name]?.dexName||target.species.name),terrain:battleLocation?.terrain,elapsedTurns:Math.max(0,session.battle.turn-1)}),{darkGrass:['route3Dark','route5Dark'].includes(battleLocation?.id)}),caught=result.caught;
   log('Alcide usa '+ORIGINAL_EVENTS.itemNames[ballId]+'!');await MoveFX.capture({...result,ball:ballId,cryIds:{p1:partner.spriteId,p2:enemy.spriteId}});
   if(caught){capturedMon={...session.snapshot('p2'),ivs:{...target.set.ivs},evs:{...target.set.evs},nature:target.set.nature,gender:target.gender,form:target.nativeForm??target.set?.form??enemy.form,happiness:target.happiness};if(ballId===14){capturedMon.hp=capturedMon.max;capturedMon.status='';for(const m of capturedMon.moves)m.left=m.pp};session.battle.win('p1');visualState.p2.hidden=true;log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][65],[target.species.name]).join('\n'));}
   else{

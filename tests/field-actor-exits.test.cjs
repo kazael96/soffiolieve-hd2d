@@ -1,6 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {Controller,route,plan}=require('../src/field-actor-exits.js');
 const actor=(name='Belle')=>({name,uid:3,model:134,fieldZone:389,x:-2.5,y:5.5,height:0,frame:0,direction:0,flip:false});
+
+test('airborne departures retain lift while malformed jump paths are isolated from valid people',()=>{
+ const first=new Controller();first.depart({...actor('N'),jumpLift:.4},317,{resident:true});first.depart(actor('Belle'),317,{resident:true});
+ const saved=JSON.parse(JSON.stringify(first.save())),restored=new Controller();restored.restore(saved,317);assert.equal(restored.records.get('N').actor.jumpLift,.4);
+ saved.find(r=>r.actor.name==='N').plan.points=[{x:0,y:0,jumpLift:1000}];const clean=new Controller();clean.restore(saved,317);assert.equal(clean.records.has('N'),false);assert.equal(clean.records.has('Belle'),true);
+});
 test('a removed native mechanism or skull never becomes a walking billboard departure',()=>{const c=new Controller();assert.equal(c.depart({...actor('Original8198'),model:8198,gimmick:true},17),false);assert.equal(c.records.size,0);});
 
 test('a consumed item ball is removed as an object and never walks away like an NPC',()=>{const c=new Controller();assert.equal(c.depart({...actor('Original110'),model:110,fieldZone:56},56),false);assert.equal(c.records.size,0);});

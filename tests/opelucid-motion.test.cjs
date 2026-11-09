@@ -1,0 +1,15 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+function setup(){const root=path.resolve(__dirname,'../src'),site=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site'),c={};c.window=c;vm.createContext(c);const read=file=>fs.readFileSync(fs.existsSync(path.join(root,file))?path.join(root,file):path.join(site,file),'utf8');
+ for(const file of ['assets/battle-data.js','battle-sim.js','training-data.js','opelucid-data.js','pokemon-visuals.js','training.js'])vm.runInContext(read(file),c);
+ for(const key of ['evolutions','progression','compatibility','machines','pokemonData'])Object.assign(c.TRAINING_DATA[key],c.OPELUCID_DATA[key]);c.TRAINING_DATA.levelCap=43;
+ for(const name of ['purrloin-moves','demo-moves','chapter-moves','route3-moves','species-moves','tepig-moves','oshawott-moves','patrat-moves','lillipup-moves','opelucid-moves','training-moves','battle-reactions'])vm.runInContext(read(name+'.js'),c);return c;}
+test('051 coverage registers all3414 legal pairs on124 records and keeps earlier sources',()=>{
+ const c=setup();assert.equal(Object.keys(c.TrainingMoves.pairs).length,124);assert.equal(Object.values(c.TrainingMoves.pairs).reduce((sum,ids)=>sum+ids.length,0),3414);for(const [name,ids]of Object.entries(c.TrainingMoves.pairs))for(const id of ids)assert.ok(c.SpeciesMoves.select(c.TRAINING_DATA.progression[name].id,id),name+'/'+id);assert.equal(c.TRAINING_DATA.machines[328],undefined);assert.equal(Object.keys(c.OpelucidMotion.rows).length,15);
+});
+test('new authored limb maps reference only real, non-overlapping original composite tracks',()=>{
+ const c=setup();for(const [graphic,sides]of Object.entries(c.OpelucidMotion.parts))for(const [side,map]of Object.entries(sides)){const data=JSON.parse(fs.readFileSync(path.join(__dirname,'../src/assets/animated',graphic+'-'+side+'.json'),'utf8')),native=new Set(data.maps.flatMap(rows=>rows.map(row=>row[0]))),ids=Object.values(map).flat();assert.equal(ids.length,new Set(ids).size,graphic+'/'+side+' duplicate role');for(const id of ids)assert.ok(native.has(id),graphic+'/'+side+' nonexistent '+id);}
+});
+test('female Jellicent emission, Golurk rocket stance and Fraxure tusks use their own anatomy',()=>{
+ const c=setup(),male=c.SpeciesMoves.select(593,57),female=c.SpeciesMoves.select('593-female',57);assert.equal(female.graphic,'593-female');const layout={x:250,y:520,height:180,w:1000,h:650},body={x:0,y:0,scale:1,scaleX:1,scaleY:1,rotation:0},a=c.SpeciesMoves.sample(male,male.impact,'p1'),b=c.SpeciesMoves.sample(female,female.impact,'p1'),ma=c.DemoMoves.attachment(male,a,layout,body,'p1'),fe=c.DemoMoves.attachment(female,b,layout,body,'p1');assert.notEqual(ma.y,fe.y);assert.notEqual(ma.x,fe.x);
+ const fly=c.SpeciesMoves.select(623,19),rocket=c.SpeciesMoves.sample(fly,fly.impact,'p1');assert.ok(rocket.arms<0,'Golurk braces instead of flapping');const chop=c.SpeciesMoves.select(611,530),tusks=c.SpeciesMoves.sample(chop,chop.impact,'p2');assert.equal(tusks.feet,0);assert.ok(Math.abs(tusks.head)>0);
+});

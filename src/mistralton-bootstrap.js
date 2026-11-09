@@ -6,7 +6,7 @@
  Object.assign(OPENING_DATA,MISTRALTON_DATA.pokemonData);
  for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])Object.assign(TRAINING_DATA[key],MISTRALTON_DATA[key]);
  TRAINING_DATA.levelCap=MISTRALTON_DATA.levelCap;TRAINING_DATA.capSteps=MISTRALTON_DATA.capSteps;
- const names={7:'Komor',134:'Belle',105:'Aralia',103:'N',192:'Violante',89:'Rafan',90:'Anemone',104:'Rutilo',182:'Triade'};
+ const names={7:'Komor',134:'Belle',105:'Aralia',103:'N',192:'Violante',89:'Rafan',90:'Anemone',104:'Gasparago',182:'Triade'};
  async function ensure(){if(task)return task;task=Promise.resolve().then(async()=>{
   if(!window.MISTRALTON_ASSETS){const url=NativeTextLayout.resource('mistralton-assets.js'),raw=await RuntimeAssets.bytes(url),tag=document.createElement('script');tag.textContent=new TextDecoder().decode(raw)+'\n//# sourceURL='+new URL(url,location.href).href;document.body.append(tag);tag.remove();if(!window.MISTRALTON_ASSETS)throw Error('Risorse della Cava e di Ponentopoli incomplete');}
   const d=MISTRALTON_ASSETS;Object.assign(OPENING_ASSETS.models,d.models);Object.assign(OPENING_ASSETS.textures,d.textures);

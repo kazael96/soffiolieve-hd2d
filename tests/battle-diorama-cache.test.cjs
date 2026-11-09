@@ -2,6 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const source=fs.readFileSync(require.resolve('../src/battle-diorama.js'),'utf8');
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};};
 const turn=()=>new Promise(resolve=>setImmediate(resolve));
+test('a native season change rebuilds the same battle context and releases its old GPU materials',async()=>{const f=environment({count:1});let season=0;f.c.OpelucidBattles={revision:()=>season,has:()=>false,isGround:()=>false};await f.prepare(0);const buffers=[...f.liveBuffers];assert.equal(f.uploads,1);await f.prepare(0);assert.equal(f.uploads,1);season=3;f.c.OPENING_ASSETS.textures.material0={src:'winter-material'};await f.prepare(0);assert.equal(f.uploads,2);assert.ok(buffers.every(b=>!f.liveBuffers.has(b)));assert.deepEqual(f.requests,['material0','winter-material']);assert.equal(f.D.cacheStats().entries,1);});
 function environment({count=40,size=16,shared=false,ambient=false,image,failUpload=0,failShader=0,failLink=false,failProgram=false}={}){
  let sequence=0,lost=false,uploads=0,closes=0,releases=0,pins=0,shaderCount=0,linkCount=0,programCount=0;
  const liveBuffers=new Set(),liveTextures=new Set(),liveShaders=new Set(),livePrograms=new Set(),removedBuffers=[],removedTextures=[],drawn=[],requests=[],canvases=[];

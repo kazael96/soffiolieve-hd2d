@@ -1,9 +1,10 @@
 /* HD-2D departures: logical deletion never directly removes a visible person. */
 (function(root){
- const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Rutilo']);
- const identity=n=>!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
+ const people=new Set(['Komor','Belle','Aralia','Mamma','Padre','N','Ghecis','Zania','Spighetto','Chicco','Maisello','Aloé','Artemisio','Iris','Camelia','Nardo','Rafan','Anemone','Gasparago','Silvestro','Aristide']);
+ const canonicalName=n=>n.model===104&&n.name==='Rutilo'?'Gasparago':n.model===180&&n.name==='Original180'?'Aristide':n.name;
+ const identity=n=>canonicalName(n)!==n.name?canonicalName(n):!(n.name==='Ghecis'&&n.fieldZone===152)&&people.has(n.name)&&!(n.name==='Padre'&&n.fieldZone!==392)?n.name:(n.fieldZone||0)+':'+n.uid+':'+n.name;
  const outdoor=z=>[389,317,397,319,6,321,16,154].includes(z);
- const copy=n=>Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]]));
+ const copy=n=>({...Object.fromEntries(['name','uid','model','fieldZone','x','y','height','frame','direction','flip'].map(k=>[k,n[k]])),name:canonicalName(n),...(Number.isFinite(n.jumpLift)&&n.jumpLift>=0&&n.jumpLift<=2?{jumpLift:n.jumpLift}:{})});
  function route(from,to,blocked){
   const start=[Math.round(from.x-.5),Math.round(from.y-.5)],end=[Math.round(to.x-.5),Math.round(to.y-.5)],key=p=>p.join(','),distance=p=>Math.abs(p[0]-end[0])+Math.abs(p[1]-end[1]),previous=new Map([[key(start),null]]),cost=new Map([[key(start),0]]),heap=[];
   const less=(a,b)=>a.f<b.f||a.f===b.f&&a.h<b.h;
@@ -112,8 +113,8 @@
   // The documented old Aralia routes are rebuilt from her valid saved pose;
   // their obsolete path/index must not prevent that compatibility migration.
   if(r.zone===317&&a.name==='Aralia'&&p&&!p.itineraryVersion&&(['path','resident'].includes(p.kind)||p.destination==='lab')){p={kind:'path',points:[],clip:null,...(p.destination==='lab'?{destination:'lab'}:{})};index=0;stage='walk';}
-  if(!p||!['path','door','stairs','resident','arrival','cannon'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(point))return null;
-  if(['door','stairs','arrival','cannon'].includes(p.kind)&&!point(p.anchor))return null;
+  if(!p||!['path','door','stairs','resident','arrival','cannon','fall'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(v=>point(v)&&(v.jumpLift===undefined||Number.isFinite(v.jumpLift)&&v.jumpLift>=0&&v.jumpLift<=2)))return null;
+  if(['door','stairs','arrival','cannon','fall'].includes(p.kind)&&!point(p.anchor))return null;
   if(p.clip!=null&&(!Array.isArray(p.clip)||p.clip.length!==4||!p.clip.every(Number.isFinite)))return null;
   if(p.kind==='arrival'&&(!Number.isInteger(p.destinationZone)||!Number.isInteger(p.targetUid)))return null;
   if(!['walk','resident','rejoin','hold','descend','opening'].includes(stage)||!Number.isInteger(index)||index<0||index>p.points.length)return null;
@@ -123,8 +124,9 @@
  class Controller{
   constructor({blocked=()=>false,obstructed=()=>false,pose=()=>{},portal=async()=>null,finishPortal=()=>{},sample=()=>null}={}){Object.assign(this,{blocked,obstructed,pose,portal,finishPortal,sample});this.records=new Map();this.retired=[];}
   depart(n,zone,{covered=false,resident=false}={}){
+   if(canonicalName(n)!==n.name)n={...n,name:canonicalName(n)};
    if(root.MistraltonContinuity?.logicalOnlyDelete(n))return false;
-   if([110,208].includes(n.model)||n.fieldObject||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
+   if([110,208].includes(n.model)||n.fieldObject||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false,arrivalNotified:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
    const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
    this.records.set(key,{key,actor,zone,plan:p,index:0,age:0,travel:0,zero:0,stage:resident?'resident':'walk',sampleSequence:-1});return true;
   }
@@ -144,6 +146,7 @@
    dt=Math.min(.1,Math.max(0,dt));for(const [key,r]of this.records){const a=r.actor;r.age+=dt;
     if(root.MistraltonContinuity?.shouldTick(r)===false)continue;
     if(r.stage==='resident')continue;
+    if(root.OpelucidNpcFalls?.tick(r,dt))continue;
     if(r.stage==='rejoin'){
      const b=r.target;if(!b){r.stage='walk';continue;}const d=Math.hypot(b.x-a.x,b.y-a.y),step=3.75*dt;
      if(d<.001){this.records.delete(key);r.resolve?.();continue;}

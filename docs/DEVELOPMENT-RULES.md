@@ -81,6 +81,16 @@ Richiesta successiva del5 novembre2026: dopo il completamento della storia princ
 
 Un controllo fallito va corretto o segnalato con causa e limite concreto; non rimuoverlo per ottenere un rapporto verde. Le prove su viewport telefono non certificano ogni GPU Android fisica e nessuna suite dimostra assenza assoluta di bug.
 
+### Efficienza del ciclo di sviluppo e dei rilasci
+
+Dal9 novembre2026 l'utente richiede lavoro senza controllo del PC. Le verifiche grafiche vengono eseguite in un browser headless separato e con profilo temporaneo; evitare interazioni con mouse/tastiera, cambio del focus o browser personali. `scripts/test-browser-headless.cjs` avvia e arresta il proprio server locale, esegue le fixture isolate nei tre formati e conserva rapporti e PNG. La modalità è sempre invisibile e non accetta un'opzione headed. Distinguere il rendering software ANGLE SwiftShader da una GPU Android fisica: l'audio interno può essere attivo mentre l'uscita del processo di test rimane muta. Conservare il controllo manuale delle immagini esportate; non richiedere che l'utente mantenga una finestra in primo piano.
+
+Richiesta del9 novembre2026: velocizzare i rilasci conservando la qualità. Durante lo sviluppo usare prima regressioni mirate al componente e prove brevi per localizzare i difetti; raggruppare correzioni coerenti prima di ricostruire una candidata. La candidata destinata alla pubblicazione deve comunque superare l'intera suite e i replay richiesti nei tre formati. Non trasformare un FAIL in PASS aumentando soltanto il timeout o eliminando l'asserzione.
+
+Riutilizzare un rapporto soltanto per gli stessi sorgenti/asset e lo stesso comportamento verificato, con revisione e perimetro espliciti. Una modifica del controllore condiviso richiede le regressioni dei capitoli che lo usano; la cache non sostituisce la verifica del risultato. Conservare separatamente build, fixture e rapporti per poter ricondurre ogni esito alla candidata esatta.
+
+Ottimizzare il generatore evitando copie integrali superflue: la build completamente preparata può essere spostata dalla cartella temporanea alla destinazione sullo stesso volume. Deve restare indipendente da sorgenti e build precedenti; vietati collegamenti mutabili condivisi. Su volumi diversi usare la copia, rifiutare destinazioni già esistenti e conservare tutti i controlli SHA-256 e dei percorsi. Misurare i miglioramenti; non promettere percentuali di accelerazione prima dei confronti. Le cache incrementali degli asset restano un'estensione da implementare e collaudare, non una capacità già presente.
+
 ## 1. Uscite e sparizioni dei personaggi
 
 Un personaggio non deve sparire in un punto che il giocatore può vedere. Prima della rimozione deve raggiungere un'uscita coerente, attraversare una porta, uscire dall'inquadratura o passare dietro un elemento che lo nasconda realmente. Deve restare non visibile anche durante la rimozione, tenendo conto dei movimenti della camera e dello zoom.
@@ -180,3 +190,8 @@ Applicare [ROUTE3-NACRENE-042.md](ROUTE3-NACRENE-042.md) e [SPECIES-MOVES-042.md
 ## Estensione Zefiropoli–Austropoli e limite 25 · 0.43
 
 Applicare [NACRENE-CASTELIA-043.md](NACRENE-CASTELIA-043.md), [SPECIES-MOVES-043.md](SPECIES-MOVES-043.md) e [QA-043.md](QA-043.md). Conservare quote e linee del ponte nei salvataggi, ingressi percorribili anche agli angoli del corpo, comandi relativi alla camera e prove di visibilità invalidate quando cambiano orientamento o altezza. Conservare evoluzioni, slot abilità, PS/PP e livelli/XP legacy senza abbassarli; il limite corrente della demo è 25. La suite comprende training-runtime e pinwheel-runtime. Roster predisposto, specie ottenibili, prove numeriche, rendering e confronto visivo restano distinti; i limiti aperti non diventano funzionalità complete per il solo aggiornamento degli inventari.
+
+
+### Esecuzione della suite estesa · 9 novembre 2026
+
+La crescita dei replay host051 ha superato il budget del vecchio singolo processo unitario300s. Conservare quel FAIL come baseline e non alzare soltanto il timeout. `scripts/unit-test-groups.cjs` distribuisce in modo deterministico tutti i file `.test.cjs` in quattro gruppi sequenziali, senza duplicati né omissioni; ogni processo termina e rilascia VM/asset prima del successivo. Windows conserva `--test-isolation=none`, Linux `--test-concurrency=2`. Ogni fase ha budget180s; nessun gruppo vuoto o test saltato. Il rapporto completo registra separatamente tutti i gruppi e rimane FAIL se uno fallisce. I test verificano l’inventario reale e i confini del raggruppamento. Non attribuire un miglioramento di tempo totale prima della misura; lo scopo immediato è mantenere budget e memoria per processo senza ridurre la copertura.

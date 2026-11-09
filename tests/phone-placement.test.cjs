@@ -26,3 +26,9 @@ test('Route7 call6 uses the native mother portrait, bank197 text and clean modal
  assert.ok(messages.some(text=>text.includes('Percorso 7')),'The second call text cannot replace the Route7 conversation');
  assert.equal(removed,true);assert.equal(c.$('world').dataset.phone,undefined);assert.equal(c.$('dialogue').open,false);
 });
+
+test('Castle call5 keeps Aralia and the player in two tiles and uses the original Museum invitation',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),root=path.resolve(__dirname,'../src'),c=environment({sourceRoot:root});vm.runInContext(fs.readFileSync(path.join(root,'opelucid-phone.js'),'utf8'),c);
+ let panel,removed=false;c.document.body.append=node=>{if(node.id==='phoneScene'){panel=node;node.remove=()=>removed=true;}};
+ const pages=await drain(c,c.NativeStory.vm.host.command({name:'CallXTransceiver'},[5],[5],{words:{0:'Alcide'}}));assert.equal(c.OPELUCID_PHONE.textBank,196);assert.equal(panel.children.length,2);assert.equal(panel.children[0].children[0].alt,'Aralia');assert.equal(panel.children[1].children[0].alt,'Alcide');assert.ok(pages.some(t=>t.includes('Museo')&&t.includes('Zefiropoli')));assert.equal(removed,true);assert.equal(c.$('world').dataset.phone,undefined);
+});

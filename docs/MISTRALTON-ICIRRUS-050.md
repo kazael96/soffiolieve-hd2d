@@ -1,4 +1,6 @@
-# Ponentopoli–Mistralopoli · 0.50 in lavorazione
+# Ponentopoli–Mistralopoli · 0.50 pubblicata
+
+Consegna verificata il5 novembre: revisione pubblica9f3eb3ed9c872f04, PR43, main09ac96fdc7e958085db64966304a7b4bfdff4223. Prove effettive e limiti in [QA-050.md](QA-050.md). Le sezioni seguenti conservano il percorso di integrazione storico; la prossima tappa è [ICIRRUS-OPELUCID-051.md](ICIRRUS-OPELUCID-051.md).
 
 Base verificata:0.49 pubblica b22c8656e2bbe29f, main9881d9f24d1fe29c3bf77b615fbb43d549246b88. La richiesta complessiva prosegue fino al primo finale con Lega, N e Ghecis, senza postgame. Questa tappa va implementata, collaudata e pubblicata prima della successiva; la ricerca privata non costituisce integrazione.
 

@@ -4,7 +4,7 @@
  const supported=new Set([46,47,48,49,50,69]);
  const compare=(x,op,y)=>[x===y,x!==y,x<y,x>y,x<=y,x>=y][op];
  function compile(data,spas,{shakes=3,caught=true,critical=false,side='p1',ball=4}={}){
-  ballItem=[2,3,4,6,8,9,12,13,14].includes(ball)?ball:4;
+  ballItem=[2,3,4,6,8,9,10,12,13,14,15].includes(ball)?ball:4;
   const variables={12:shakes,13:Number(caught),14:Number(critical),15:ballItem,19:side==='p2'?1:0,39:0};
   const byOffset=new Map(data.commands.map((c,i)=>[c.at,i])),commands=[];let yieldAfterCommand=true;
   const finishCommand=()=>{if(yieldAfterCommand)commands.push([57,[1]])};

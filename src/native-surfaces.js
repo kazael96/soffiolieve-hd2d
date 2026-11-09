@@ -3,13 +3,18 @@
  const signed=n=>Number(BigInt.asIntN(32,n)),raw=n=>Math.round(n*65536);
  const mul=(a,b)=>signed((BigInt(a)*BigInt(b)+2048n)>>12n);
  const div=(a,b)=>signed(((BigInt(a)<<32n)/BigInt(b)+524288n)>>20n);
+ const decoded=new Map();let ownerSerial=0;
+ function retain(token,cache,key,grid){
+  decoded.delete(token);decoded.set(token,{cache,key,grid});
+  while(decoded.size>64){const [old,row]=decoded.entries().next().value;decoded.delete(old);if(row.cache.get(row.key)===row.grid)row.cache.delete(row.key);}
+ }
  function create(data){
-  const cache=new Map();
+  const cache=new Map(),owner=++ownerSerial;
   function grid(member,layer){
-   const key=member+':'+layer;if(cache.has(key)){const v=cache.get(key);cache.delete(key);cache.set(key,v);return v;}
+   const key=member+':'+layer,token=owner+':'+key;if(cache.has(key)){const v=cache.get(key);retain(token,cache,key,v);return v;}
    const encoded=data.grids[member]?.[layer];if(!encoded)return null;
    const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0)),view=new DataView(bytes.buffer),g={view,width:view.getUint16(0,true),depth:view.getUint16(2,true)};
-   cache.set(key,g);while(cache.size>64)cache.delete(cache.keys().next().value);return g;
+   cache.set(key,g);retain(token,cache,key,g);return g;
   }
   function sample(member,x,z,layer=0,originY=0){
    if(![x,z,originY].every(Number.isFinite))return null;const g=grid(member,layer);if(!g||x<0||z<0||x>=g.width||z>=g.depth)return null;

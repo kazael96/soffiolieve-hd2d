@@ -6,6 +6,8 @@ import struct
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
+import errno
 import zipfile
 
 spec = importlib.util.spec_from_file_location('build_site', Path(__file__).resolve().parents[1] / 'scripts/build-site.py')
@@ -14,6 +16,40 @@ spec.loader.exec_module(builder)
 
 
 class BuildTests(unittest.TestCase):
+    def test_publish_renames_complete_tree_without_copying(self):
+        with builder.build_staging() as folder:
+            folder=Path(folder);site=folder/'staged';site.mkdir()
+            (site/'asset.bin').write_bytes(b'original');target=folder/'published'
+            with mock.patch.object(builder.shutil,'copytree',side_effect=AssertionError('Unnecessary full-tree copy')):
+                self.assertEqual(builder.publish_staging(site,target),'rename')
+            self.assertFalse(site.exists())
+            self.assertEqual((target/'asset.bin').read_bytes(),b'original')
+
+    def test_publish_rejects_existing_output_and_preserves_both_trees(self):
+        with builder.build_staging() as folder:
+            folder=Path(folder);site=folder/'staged';site.mkdir();target=folder/'verified';target.mkdir()
+            (site/'asset.bin').write_bytes(b'candidate');(target/'asset.bin').write_bytes(b'verified')
+            with self.assertRaisesRegex(ValueError,'already exists'):
+                builder.publish_staging(site,target)
+            self.assertEqual((target/'asset.bin').read_bytes(),b'verified')
+            self.assertEqual((site/'asset.bin').read_bytes(),b'candidate')
+
+    def test_publish_copies_only_across_volumes_without_sharing_mutable_files(self):
+        with builder.build_staging() as folder:
+            folder=Path(folder);site=folder/'staged';site.mkdir();(site/'asset.bin').write_bytes(b'payload');target=folder/'published'
+            with mock.patch.object(Path,'rename',side_effect=OSError(errno.EXDEV,'Different volume')):
+                self.assertEqual(builder.publish_staging(site,target),'copy')
+            self.assertEqual((target/'asset.bin').read_bytes(),b'payload')
+            (target/'asset.bin').write_bytes(b'edited')
+            self.assertEqual((site/'asset.bin').read_bytes(),b'payload')
+
+    def test_publish_does_not_mask_permission_failures_with_a_copy(self):
+        with builder.build_staging() as folder:
+            folder=Path(folder);site=folder/'staged';site.mkdir();target=folder/'published'
+            with mock.patch.object(Path,'rename',side_effect=PermissionError(errno.EACCES,'Denied')),mock.patch.object(builder.shutil,'copytree',side_effect=AssertionError('Unexpected fallback')):
+                with self.assertRaises(PermissionError):builder.publish_staging(site,target)
+            self.assertTrue(site.is_dir());self.assertFalse(target.exists())
+
     def test_checksum_guard(self):
         with builder.build_staging() as folder:
             archive = Path(folder)/'bad.zip'

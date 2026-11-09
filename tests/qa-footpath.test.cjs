@@ -1,0 +1,7 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+test('the real QA footpath releases its key before asynchronous completion can advance another frame',async()=>{
+ const source=fs.readFileSync('tests/browser-qa.js','utf8'),start=source.indexOf(' async function walk049('),end=source.indexOf(' async function hold049(',start);assert.ok(start>=0&&end>start);
+ const dataset={},player={x:1.36,y:.5},health=require('./qa-input-health.js');let queued,key=null,releases=0;
+ const c={window:{},NativeStory:{state:{zone:99},locked:false,occupied:()=>false},player,renderer:{ready:true},performance:{now:()=>0},document:{getElementById:()=>({dataset}),body:{dispatchEvent(e){key=e.type==='keydown'?e.key:null;}}},KeyboardEvent:class{constructor(type,options){this.type=type;Object.assign(this,options);}},menuOpen:()=>false,battling:false,blocked:()=>false,QAInputHealth:health,FieldActorExits:{route:()=>[{x:1.5,y:.5}]},requestAnimationFrame:fn=>{queued=fn;return 1;},cancelAnimationFrame(){},check:(ok,text)=>{if(!ok)throw Error(text);},down049:k=>{key=k;},release049:()=>{key=null;releases++;},until:async predicate=>{queued();assert.equal(predicate(),true);},auto049:async task=>{await task;queued();if(key==='ArrowRight')player.x+=.467;}};
+ vm.createContext(c);vm.runInContext(source.slice(start,end)+';this.walk=walk049;',c);const position=await c.walk(17,16);assert.equal(position.x,1.36);assert.equal(key,null);assert.ok(releases>=1);
+});

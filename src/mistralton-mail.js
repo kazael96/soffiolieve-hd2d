@@ -1,8 +1,8 @@
-/* Offline held Mail137..145. Original IRBI words/labels; the compact composer
+/* Offline held Mail137..146. Original IRBI words/labels; the compact composer
  * uses the native menu compositor with A/B/touch. No network delivery exists.
  */
 (function(root){
- const isMail=id=>Number.isInteger(id)&&id>=137&&id<=145;
+ const isMail=id=>Number.isInteger(id)&&id>=137&&id<=146;
  function createService(options={}){
   const D=options.data||root.MISTRALTON_MAIL_DATA,getJourney=()=>typeof options.journey==='function'?options.journey():options.journey||root.Journey,state=options.state||(()=>getJourney()?.state),save=options.save||(()=>getJourney()?.save(true)),battleActive=options.battling||(()=>typeof root.battling==='boolean'?root.battling:typeof window!=='undefined'&&typeof battling!=='undefined'?battling:false);
   let screen=null,active=null;const papers=new Map();

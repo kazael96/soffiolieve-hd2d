@@ -4,6 +4,7 @@
  function capture(state,native,position,terrain='path'){
   if(!state||!position||!Number.isFinite(position.x)||!Number.isFinite(position.y))throw Error('Posizione del combattimento non disponibile');
   if(root.SurfField?.mounted())return root.SurfBattles.capture(state,native,position);
+  if(root.OPELUCID_FIELD){const place=root.OPELUCID_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.ICIRRUS_FIELD){const place=root.ICIRRUS_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.MISTRALTON_FIELD){const place=root.MISTRALTON_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
   if(root.DRIFTVEIL_FIELD){const place=root.DRIFTVEIL_FIELD.context(native?.zone,position,terrain);if(place)return Object.freeze({...place,zone:native.zone,scene:state.scene,x:position.x,y:position.y});}
@@ -23,6 +24,6 @@
   }else throw Error('Ambiente di lotta non definito: '+state.scene);
   return Object.freeze({id,label,zone,scene:state.scene,x:position.x,y:position.y,terrain:variant});
  }
- function tile(grids,position){const g=grids?.find(g=>position.x>=g.x-16&&position.x<g.x+16&&position.y>=g.z-16&&position.y<g.z+16);if(!g)return 'path';const at=8+(Math.floor(position.y-g.z)+16)*256+(Math.floor(position.x-g.x)+16)*8;return g.bytes[at]===24?'ice':root.NIMBASA_FIELD?.sandTiles.includes(g.bytes[at])?'sand':g.bytes[at]===4?'grass':g.bytes[at]===6?'darkGrass':g.bytes[at]===10?'cave':'path';}
+ function tile(grids,position){const g=grids?.find(g=>position.x>=g.x-16&&position.x<g.x+16&&position.y>=g.z-16&&position.y<g.z+16);if(!g)return 'path';const at=8+(Math.floor(position.y-g.z)+16)*256+(Math.floor(position.x-g.x)+16)*8;return g.bytes[at]===28?'marsh':g.bytes[at]===24?'ice':root.NIMBASA_FIELD?.sandTiles.includes(g.bytes[at])?'sand':[4,5].includes(g.bytes[at])?'grass':[6,7,9,34].includes(g.bytes[at])?'darkGrass':[10,22].includes(g.bytes[at])?'cave':'path';}
  const api={capture,tile,rooms};root.BattleLocation=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
