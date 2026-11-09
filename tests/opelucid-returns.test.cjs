@@ -26,9 +26,21 @@ test('Museum roles and the Castle greeting stay unavailable before their physica
  for(const [name,zone,uid]of [['Aralia',16,9],['Gasparago',16,10],['Belle',16,12],['Komor',158,2]])assert.equal(c.OpelucidContinuity.allowActor({name,fieldZone:zone,uid}),false,name+' appeared at the next event before travelling');
  assert.equal(c.OpelucidContinuity.prepareEvent(16,12),false);assert.equal(c.OpelucidContinuity.prepareEvent(158,3),false);await drain(c,c.NativeStory.changeZone(16,644,587));await c.NativeStory.run(11);assert.equal(c.NativeStory.locked,false);assert.equal(n.pendingZoneEntry?.entry,11);assert.equal(c.Journey.itemCount(616),0);assert.equal(c.NativeStory.visualActors().some(a=>c.OpelucidReturns.isTarget(a)),false);for(const uid of [9,10,12]){const a=c.OPELUCID_EVENTS.zones[16].actors.find(a=>a.id===uid);assert.equal(c.NativeStory.occupied(a.x-783.5,a.z-751.5),false,'Future role collision '+uid);}
 });
+
+test('a reused resident body notifies its new Museum arrival after the earlier journey was already acknowledged',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.vars[16551]=8;const t=c.OpelucidReturns.trip('aralia-museum'),a={name:'Aralia',model:105,uid:250,fieldZone:107,x:t.source.x,y:t.source.y,height:0,direction:1,frame:3};assert.ok(c.NativeStory.departures.depart(a,107,{resident:true}));const r=c.NativeStory.departures.records.get('Aralia');Object.assign(r.plan,{kind:'arrival',chapter049:true,itineraryVersion:2,nativeTravelVersion:1,destination:'aralia-research-handoff',leg:1,destinationZone:107,targetUid:250,anchor:{x:a.x,y:a.y},transferAuthorized:true});
+ c.Journey.step(1/30,false);assert.equal(r.arrivalNotified,true,'Prior arrival was not acknowledged');n.vars[16551]=9;c.testSpeed=4;await drain(c,Promise.resolve(),0,'p1',()=>r.stage==='resident'&&r.actor.fieldZone===16);assert.equal(n.opelucidArrivals?.['16:9'],'Aralia','New arrival reused the acknowledgment of the previous journey');
+});
 test('three simultaneous Museum returns finish as distinct native roles and release the existing event gate',async()=>{
  const c=await setup(),n=c.NativeStory.state;c.testSpeed=4;n.opelucidArrivals={'16:11':'Nardo'};const records=['aralia-museum','cedric-museum','belle-museum'].map(key=>start(c,key));await drain(c,Promise.resolve(),0,'p1',()=>records.every(record=>record().stage==='resident'));
  assert.equal(c.OpelucidContinuity.prepareEvent(16,12),true);assert.equal(records.map(r=>r().actor.uid).join(','),'9,10,12');assert.equal(new Set(records.map(r=>r().actor.name)).size,3);assert.equal(c.NativeStory.departures.records.size,3);
+});
+
+test('a stationary player on the Museum trigger starts the native event after all three physical returns',async()=>{
+ const c=await setup(),n=c.NativeStory.state;c.testSpeed=4;n.vars[16530]=6;n.flags=n.flags.filter(f=>![614,751].includes(f));n.opelucidArrivals={'16:11':'Nardo'};c.OpelucidDeparture={play:async covered=>covered()};await drain(c,c.NativeStory.changeZone(16,644,586));
+ assert.equal(c.Journey.itemCount(616),0);assert.equal(c.NativeStory.locked,false);for(const key of ['aralia-museum','cedric-museum','belle-museum'])start(c,key);
+ try{await drain(c,Promise.resolve(),0,'p1',()=>c.Journey.itemCount(616)===1&&!c.NativeStory.locked);}catch(error){throw Error(error.message+' '+JSON.stringify({player:c.player,zone:n.zone,work:n.vars[16530],arrivals:n.opelucidArrivals,gate:c.OpelucidContinuity.prepareEvent(16,12),pending:n.pendingZoneEntry,records:[...c.NativeStory.departures.records.values()].map(r=>({name:r.actor.name,zone:r.zone,stage:r.stage,uid:r.actor.uid,destination:r.plan.destination})),trace:c.NativeStory.vm.trace.slice(-8)}));}
+ assert.equal(c.Journey.itemCount(617),0);
 });
 test('native outdoor seams are continuous fields, without joining unrelated distant regions',async()=>{
  const c=await setup();for(const t of Object.values(c.OPELUCID_RETURN_DATA.seasons[0]))for(let i=0;i<t.legs.length-1;i++)if(t.legs[i].kind==='path'){const a=t.legs[i].zone,b=t.legs[i+1].zone;assert.equal(c.MistraltonContinuity.sameField(a,b),true,'Missing continuous border '+a+'/'+b);assert.equal(c.MistraltonContinuity.sameField(b,a),true);}assert.equal(c.MistraltonContinuity.sameField(107,16),false);

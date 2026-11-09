@@ -126,7 +126,7 @@
   depart(n,zone,{covered=false,resident=false}={}){
    if(canonicalName(n)!==n.name)n={...n,name:canonicalName(n)};
    if(root.MistraltonContinuity?.logicalOnlyDelete(n))return false;
-   if([110,208].includes(n.model)||n.fieldObject||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
+   if([110,208].includes(n.model)||n.fieldObject||n.gimmick||n.hidden||covered)return false;const key=identity(n),existing=this.records.get(key);if(existing){if(!resident&&['resident','rejoin'].includes(existing.stage)){Object.assign(existing,{zone,plan:plan(existing.actor,zone,this.blocked),index:0,age:0,travel:0,zero:0,stage:'walk',target:null,opened:false,arrivalNotified:false});existing.actor.exitProbe=true;delete existing.actor.exitClip;}return true;}
    const actor=copy(n),p=resident?{kind:'resident',points:[],clip:null}:plan(n,zone,this.blocked);actor.exitProbe=!resident;
    this.records.set(key,{key,actor,zone,plan:p,index:0,age:0,travel:0,zero:0,stage:resident?'resident':'walk',sampleSequence:-1});return true;
   }
