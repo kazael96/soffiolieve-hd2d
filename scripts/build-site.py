@@ -69,18 +69,20 @@ def startup_pack(site, sources=None, filename='assets/field-pack.bin', strict=Fa
     return {'images':len(index),'bytes':dest.stat().st_size}
 
 
-def geographic_packs(site):
-    """Keep chapter051 transport separated by area, including dynamic gym images."""
-    file=site/'opelucid-parts.js'
+def geographic_packs(site, prefix='opelucid'):
+    """Keep native geographic transport separated by area, including dynamic images."""
+    if prefix not in ['opelucid', 'league']:raise ValueError('Invalid geographic pack prefix')
+    file=site/(prefix+'-parts.js')
     if not file.exists():return {}
     text=file.read_text(encoding='utf8')
-    match=re.match(r'\s*window\.OPELUCID_PARTS\s*=\s*',text)
+    match=re.match(r'\s*window\.'+prefix.upper()+r'_PARTS\s*=\s*',text)
     if not match:raise ValueError('Invalid geographic pack manifest')
     data=json.JSONDecoder().raw_decode(text[match.end():])[0]
     result={}
     for name,part in data['families'].items():
         # These are source-controlled paths, nevertheless reject escapes before writing.
-        if not re.fullmatch(r'[a-z0-9]+',name) or part['src']!=f'opelucid-{name}-assets.js' or part['pack']!=f'assets/opelucid-{name}-pack.bin':
+        pattern=r'[a-z0-9]+' if prefix=='opelucid' else r'[a-z][a-zA-Z0-9]*'
+        if not re.fullmatch(pattern,name) or part['src']!=f'{prefix}-{name}-assets.js' or part['pack']!=f'assets/{prefix}-{name}-pack.bin':
             raise ValueError('Invalid geographic pack path')
         result[name]={'pack':part['pack'],**startup_pack(site,[part['src']],part['pack'],strict=True)}
     return result
@@ -146,8 +148,9 @@ def build(archive, target):
         mistralton_pack = startup_pack(site,['mistralton-assets.js'],'assets/mistralton-pack.bin')
         icirrus_pack = startup_pack(site,['icirrus-assets.js'],'assets/icirrus-pack.bin')
         opelucid_packs = geographic_packs(site)
+        league_packs = geographic_packs(site, 'league')
         for season in range(4):
-            for prefix in ['field','opelucid']:
+            for prefix in ['field','opelucid','league']:
                 if (site / f'{prefix}-season-{season}-assets.js').exists():
                     startup_pack(site,[f'{prefix}-season-{season}-assets.js'],f'assets/{prefix}-season-{season}-pack.bin')
         entrypoints = bundle_entries(site)
@@ -157,12 +160,12 @@ def build(archive, target):
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
         for season in range(4):
-            for prefix in ['field','opelucid']:
+            for prefix in ['field','opelucid','league']:
                 pack = site / f'assets/{prefix}-season-{season}-pack.bin'
                 if pack.exists():
                     asset_hashes[pack.relative_to(site).as_posix()] = hashlib.sha256(pack.read_bytes()).hexdigest()
         asset_hashes['assets/icirrus-pack.bin'] = hashlib.sha256((site/'assets/icirrus-pack.bin').read_bytes()).hexdigest()
-        for part in opelucid_packs.values():
+        for part in [*opelucid_packs.values(), *league_packs.values()]:
             asset_hashes[part['pack']] = hashlib.sha256((site/part['pack']).read_bytes()).hexdigest()
         asset_hashes['assets/mistralton-pack.bin'] = hashlib.sha256((site/'assets/mistralton-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/driftveil-pack.bin'] = hashlib.sha256((site/'assets/driftveil-pack.bin').read_bytes()).hexdigest()
@@ -179,7 +182,7 @@ def build(archive, target):
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
             'version': '0.51', 'revision': revision,
-            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs},
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         publish_staging(site, target)
     print(f"Built Soffiolieve 0.51 ({revision}) in {target}")

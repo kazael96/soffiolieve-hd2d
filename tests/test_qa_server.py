@@ -16,6 +16,32 @@ builder_spec.loader.exec_module(builder)
 
 
 class QAServerTests(unittest.TestCase):
+    def test_rejected_origins_receive_complete_403_without_reset_or_artifact_writes(self):
+        with builder.build_staging() as folder:
+            site, overlay = Path(folder) / 'site', Path(folder) / 'qa'
+            site.mkdir()
+            overlay.mkdir()
+            qa_server.args = types.SimpleNamespace(qa=overlay, site=site, port=0)
+            server = qa_server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
+            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker.start()
+            payload = b'x' * 65536
+            try:
+                for _ in range(20):
+                    connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=10)
+                    try:
+                        connection.request('POST', '/__qa/report', body=payload, headers={'Origin': 'http://127.0.0.1:1'})
+                        response = connection.getresponse()
+                        self.assertEqual(response.status, 403)
+                        self.assertIn(b'403', response.read())
+                    finally:
+                        connection.close()
+                self.assertEqual(list(overlay.iterdir()), [])
+            finally:
+                server.shutdown()
+                server.server_close()
+                worker.join(timeout=5)
+
     def test_full_large_response_and_overlay_share_a_persistent_connection(self):
         with builder.build_staging() as folder:
             site = Path(folder) / 'site'

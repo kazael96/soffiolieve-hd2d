@@ -10,9 +10,55 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('league_export', ROOT / 'tools/extract-league.py')
 exporter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(exporter)
+field_spec = importlib.util.spec_from_file_location('league_field_export', ROOT / 'tools/extract-league-field-models.py')
+field_exporter = importlib.util.module_from_spec(field_spec)
+field_spec.loader.exec_module(field_exporter)
+data_spec = importlib.util.spec_from_file_location('league_data_export', ROOT / 'tools/extract-league-data.py')
+data_exporter = importlib.util.module_from_spec(data_spec)
+data_spec.loader.exec_module(data_exporter)
 
 
 class LeagueExportTests(unittest.TestCase):
+    def test_progression_preserves_prior_roster_and_raises_cap_only_after_eighth_badge(self):
+        source = data_exporter.build_source()
+        ast.parse(source)
+        self.assertIn("{'badge':7,'level':43},{'badge':8,'level':50}", source)
+        self.assertIn("'levelCap':50", source)
+        self.assertIn("'firstLeagueTrainers':[228,229,230,231]", source)
+        self.assertIn("'icirrus-data.js','opelucid-data.js']", source)
+        self.assertIn("_prior_text('opelucid-data.js')", source)
+        self.assertIn("a.output/'league-data.js'", source)
+        self.assertIn('separate_postgame(data)', source)
+        self.assertNotIn('<=67', source)
+
+    def test_postgame_rematch_rows_remain_reference_only_and_unknown_native_levels_fail(self):
+        rows = {i: {'party': [{'level': 67}]} for i in [591, 592, 593]}
+        rows[133] = {'party': [{'level': 43}]}
+        data = {'trainers': rows}
+        data_exporter.separate_postgame(data)
+        self.assertEqual(set(data['trainers']), {133})
+        self.assertEqual(set(data['referenceOnlyTrainers']), {591, 592, 593})
+        with self.assertRaisesRegex(ValueError, 'Unreviewed'):
+            data_exporter.separate_postgame({'trainers': {591: {'party': [{'level': 45}]}}})
+        partial = {'trainers': {591: {'party': [{'level': 67}]}, 592: {'party': [{'level': 45}]}}}
+        before = json.dumps(partial, sort_keys=True)
+        with self.assertRaisesRegex(ValueError, 'Unreviewed'):
+            data_exporter.separate_postgame(partial)
+        self.assertEqual(json.dumps(partial, sort_keys=True), before)
+
+    def test_animated_child_export_is_valid_scoped_and_uses_hidden_converter_and_local_scratch(self):
+        source = field_exporter.build_source()
+        ast.parse(source)
+        self.assertIn("glob('league-*-assets.js')", source)
+        self.assertIn('lg-prop-', source)
+        self.assertIn('scopes.lg=LEAGUE_FIELD_MODELS', source)
+        self.assertNotIn('scopes.op=', source)
+        self.assertIn("source.replace('subprocess.run(', '_quiet_run(')", source)
+        self.assertIn("replace('tempfile.TemporaryDirectory()', '_build_staging()')", source)
+        self.assertIn("scope['_build_staging'] = build_staging", source)
+        self.assertNotIn("assert combined['models'] and combined['children']", source)
+        self.assertIn("record['modelKey'] in combined['models']", source)
+
     def test_scope_preserves_reviewed_commands_and_refuses_partial_programs(self):
         source = exporter.build_source()
         tree = ast.parse(source)

@@ -26,6 +26,16 @@ class Handler(SimpleHTTPRequestHandler):
         origin = self.headers.get('Origin', '')
         port = self.server.server_port
         if origin not in (f'http://127.0.0.1:{port}', f'http://localhost:{port}'):
+            # Closing a Windows socket with an unread POST body can reset the
+            # connection before its 403 reaches the client. Drain only a bounded
+            # body, without parsing/writing it, and never wait indefinitely.
+            try:
+                rejected_size = int(self.headers.get('Content-Length', '0'))
+                if 0 < rejected_size <= 4_000_000:
+                    self.connection.settimeout(1)
+                    self.rfile.read(rejected_size)
+            except (ValueError, OSError):
+                pass
             self.send_error(403)
             return
         try:
