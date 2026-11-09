@@ -1,0 +1,282 @@
+{
+  "source": "IRBI Gym114 permission grids, native rail163 boundaries and program228 switches; expected inputs only",
+  "initial": [
+    17,
+    62
+  ],
+  "scope": "Trainer victories prepared to isolate continuous traversal; no graphics or battle claim",
+  "steps": [
+    {
+      "key": "ArrowUp",
+      "x": 11,
+      "z": 58,
+      "height": 0,
+      "state": 0,
+      "event": "gate0"
+    },
+    {
+      "key": "ArrowRight",
+      "x": 24,
+      "z": 58,
+      "height": 0,
+      "state": 0
+    },
+    {
+      "key": "ArrowUp",
+      "x": 24,
+      "z": 53,
+      "height": 0,
+      "state": 0
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 23,
+      "z": 53,
+      "height": 0,
+      "state": 1,
+      "event": "switch0"
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 22,
+      "z": 47,
+      "height": 0,
+      "state": 1,
+      "event": "gate1"
+    },
+    {
+      "key": "ArrowDown",
+      "x": 22,
+      "z": 48,
+      "height": 0,
+      "state": 1
+    },
+    {
+      "key": "ArrowRight",
+      "x": 45,
+      "z": 48,
+      "height": 3,
+      "state": 1,
+      "event": "auto6"
+    },
+    {
+      "key": "ArrowRight",
+      "x": 52,
+      "z": 48,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowUp",
+      "x": 52,
+      "z": 43,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowRight",
+      "x": 54,
+      "z": 43,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowUp",
+      "x": 54,
+      "z": 39,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowRight",
+      "x": 55,
+      "z": 39,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowDown",
+      "x": 55,
+      "z": 42,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowRight",
+      "x": 61,
+      "z": 42,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowDown",
+      "x": 61,
+      "z": 44,
+      "height": 3.0007171630859375,
+      "state": 1
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 59,
+      "z": 49,
+      "height": 3,
+      "state": 1,
+      "event": "gate2"
+    },
+    {
+      "key": "ArrowUp",
+      "x": 59,
+      "z": 41,
+      "height": 3.0007171630859375,
+      "state": 3,
+      "event": "switch1"
+    },
+    {
+      "key": "ArrowUp",
+      "x": 59,
+      "z": 39,
+      "height": 3.0007171630859375,
+      "state": 3
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 48,
+      "z": 39,
+      "height": 3,
+      "state": 3,
+      "event": "gate3"
+    },
+    {
+      "key": "ArrowUp",
+      "x": 48,
+      "z": 38,
+      "height": 3.0007171630859375,
+      "state": 3
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 25,
+      "z": 38,
+      "height": 6,
+      "state": 3,
+      "event": "auto17"
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 10,
+      "z": 37,
+      "height": 6,
+      "state": 3,
+      "event": "gate5"
+    },
+    {
+      "key": "ArrowRight",
+      "x": 12,
+      "z": 37,
+      "height": 6.0014495849609375,
+      "state": 3
+    },
+    {
+      "key": "ArrowUp",
+      "x": 13,
+      "z": 40,
+      "height": 6,
+      "state": 3,
+      "event": "gate4"
+    },
+    {
+      "key": "ArrowUp",
+      "x": 13,
+      "z": 38,
+      "height": 6.0014495849609375,
+      "state": 3
+    },
+    {
+      "key": "ArrowRight",
+      "x": 14,
+      "z": 38,
+      "height": 6.0014495849609375,
+      "state": 3
+    },
+    {
+      "key": "ArrowUp",
+      "x": 14,
+      "z": 37,
+      "height": 6.0014495849609375,
+      "state": 3
+    },
+    {
+      "key": "ArrowRight",
+      "x": 18,
+      "z": 37,
+      "height": 6.0014495849609375,
+      "state": 3
+    },
+    {
+      "key": "ArrowUp",
+      "x": 18,
+      "z": 29,
+      "height": 6.0014495849609375,
+      "state": 3
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 15,
+      "z": 29,
+      "height": 6.0014495849609375,
+      "state": 7,
+      "event": "switch2"
+    },
+    {
+      "key": "ArrowRight",
+      "x": 24,
+      "z": 29,
+      "height": 6,
+      "state": 7,
+      "event": "gate6"
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 22,
+      "z": 29,
+      "height": 6.0014495849609375,
+      "state": 7
+    },
+    {
+      "key": "ArrowDown",
+      "x": 21,
+      "z": 26,
+      "height": 6,
+      "state": 7,
+      "event": "gate7"
+    },
+    {
+      "key": "ArrowUp",
+      "x": 21,
+      "z": 21,
+      "height": 6.0014495849609375,
+      "state": 7
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 18,
+      "z": 21,
+      "height": 6.0014495849609375,
+      "state": 7
+    },
+    {
+      "key": "ArrowUp",
+      "x": 18,
+      "z": 15,
+      "height": 7.0016937255859375,
+      "state": 7
+    },
+    {
+      "key": "ArrowLeft",
+      "x": 17,
+      "z": 15,
+      "height": 7.0016937255859375,
+      "state": 7
+    }
+  ]
+}

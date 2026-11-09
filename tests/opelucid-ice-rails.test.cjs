@@ -9,7 +9,7 @@ function setup(route=routes.entries[0],checkpoint){
 for(const speed of [1,2,4])test('all eight directional gates follow connected native curves at ×'+speed+' without leaving their physical heights',async()=>{
  for(const route of routes.entries){const f=setup(route),p=f.ice.startGate(route.gate,2,route.direction);assert.ok(p);let frames=0;
   while(f.ice.busy&&frames++<3000){f.ice.tick(speed/60);const r=f.ice.snapshot;if(r){const expected=rails.position(114,r.line,r.front);assert.ok(Math.hypot(f.hero.x+16-expected.x,f.hero.y+16-expected.z)<1e-6);assert.ok(Math.abs(f.native.fieldHeight-expected.height)<1e-6);}}
-  assert.ok(frames<3000);assert.equal(await p,true);const last=route.lines.at(-1),end=rails.position(114,last,table.lines[last].length);assert.ok(Math.hypot(f.hero.x+16-end.x,f.hero.y+16-end.z)<1e-6);assert.equal(f.native.brycenIceRide,undefined);
+  assert.ok(frames<3000);assert.equal(await p,true);const end=rails.position(114,route.exit.line,route.exit.front);assert.ok(Math.hypot(f.hero.x+16-end.x,f.hero.y+16-end.z)<1e-6);assert.equal(f.native.brycenIceRide,undefined);
  }
 });
 test('opposite platform state, wrong direction and another floor cannot activate a ramp',()=>{

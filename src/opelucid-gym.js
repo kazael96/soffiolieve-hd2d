@@ -16,9 +16,17 @@
    if(name==='NativeOpcode405'){const ride=rails.startGate(values[0],2,direction());if(ride)ice.reset();return true;} // Native405 rebinds movement and returns; the field task continues independently.
    return false;
   }
+  function tryAutomatic(moved){
+   if(!moved)return false;for(const route of root.OPELUCID_GYM_ROUTES.automatic){if(rails.startAutomatic(route.line,direction())){ice.reset();return true;}}return false;
+  }
   function tick(dt,moved=false){task.tick(dt);if(!active()){if(rails.busy)rails.cancel();ice.enter(state()?.zone);return;}if(rails.busy){const p=hero(),x=p.x,z=p.y;rails.tick(dt);const dx=p.x-x,dz=p.y-z;if(Math.hypot(dx,dz)>1e-7)face(Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0);return;}
-   const p=hero();for(const route of root.OPELUCID_GYM_ROUTES.automatic){const a=root.NativeRails.position(114,route.line,0);if(Math.hypot(p.x+16-a.x,p.y+16-a.z)<.5&&Math.abs((state().fieldHeight??0)-a.height)<.25&&moved){const started=rails.startAutomatic(route.line,direction());if(started){ice.reset();rails.tick(dt);return;}}}
-   if(!task.busy)ice.tick(dt,moved);
+   if(tryAutomatic(moved)){rails.tick(dt);return;}
+   if(!task.busy&&ice.tick(dt,moved)){
+    // Sliding owns movement while input is locked. Track its sloping support
+    // and test bridge entries after that movement, without spending dt twice.
+    const p=hero(),row=surface(p.x,p.y);if(row&&!(row.flags&1))state().fieldHeight=row.height;
+    tryAutomatic(true);
+   }
   }
   function enter(zone){if(zone!==114){if(task.busy)task.cancel();if(rails.busy)rails.cancel();ice.enter(zone);return;}task.snapshot;rails.restore();ice.enter(zone);}
   return {prepare:()=>visual.prepare(),release:()=>visual.release(),apply:r=>visual.apply(r),command,tick,enter,restore:()=>{if(active()){rails.restore();ice.restore();}},blocked,task,rails,ice,heightAt:(x,z)=>active()&&rails.busy&&Math.hypot(x-hero().x,z-hero().y)<.001?state().fieldHeight:null,sameLevel:n=>!active()||Math.abs((n.height??0)-(state()?.fieldHeight??0))<1.25,get busy(){return active()&&(task.busy||rails.busy||ice.busy);},get checkpointable(){return active()&&(rails.busy||ice.busy);}};

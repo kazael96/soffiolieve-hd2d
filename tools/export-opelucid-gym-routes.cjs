@@ -18,6 +18,16 @@ for(const trigger of zone.triggers){
 }
 entries.sort((a,b)=>a.gate-b.gate);if(entries.length!==8||entries.some((entry,index)=>entry.gate!==index))throw Error('Incomplete native ramp gate set');
 const roots=table.lines.map((line,i)=>({line,i})).filter(row=>!table.lines.some(other=>other.b===row.line.a)),automatic=roots.filter(row=>!entries.some(entry=>entry.line===row.i)).map(row=>({line:row.i,lines:chain(row.i)}));
+// Each component contains paired native163 mode-boundary cells. The line
+// endpoints include blocked padding and are not the playable landing points.
+for(const route of [...entries,...automatic]){
+ const boundaries=route.lines.flatMap(id=>{const line=table.lines[id],tiles=line.tiles;return Array.from({length:tiles.length},(_,front)=>({line:id,front,value:tiles.values[front*tiles.width+Math.floor(tiles.width/2)]})).filter(p=>(p.value&65535)===163);});
+ if(boundaries.length!==2||boundaries.some(p=>p.value&0x10000))throw Error('Invalid native ice boundaries');
+ const [entry,exit]=boundaries,last=table.lines[exit.line];
+ if(entry.line!==route.line||exit.line!==route.lines.at(-1)||!(last.tiles.values[(exit.front+1)*last.tiles.width+Math.floor(last.tiles.width/2)]&0x10000))throw Error('Native ice boundary/padding mismatch');
+ if(route.front!==undefined&&route.front!==entry.front)throw Error('Directional trigger differs from native entry boundary');
+ route.entry={line:entry.line,front:entry.front,behavior:163};route.exit={line:exit.line,front:exit.front,behavior:163};
+}
 const data={source:'IRBI event228 directional triggers/opcode405 + native Gym114 rail point connectivity',zone:114,entries,automatic,timing:'HD-2D movement adapter; native curves and line parameterization, no DS frame timing claim'};
 fs.writeFileSync(path.join(root,'opelucid-gym-routes.js'),'window.OPELUCID_GYM_ROUTES='+JSON.stringify(data)+';\n');
 process.stdout.write(JSON.stringify(data,null,2)+'\n');
