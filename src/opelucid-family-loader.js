@@ -1,7 +1,9 @@
 /* Chapter051 transport: data-only catalogs, bounded ownership and complete image packs. */
 (function(root){
  function parse(raw,name,part){
-  const text=new TextDecoder().decode(raw),match=/^\s*window\.OPELUCID_PART_ASSETS\s*=\s*([\s\S]*?)\s*;?\s*$/.exec(text);
+  const variable=part.variable??'OPELUCID_PART_ASSETS';
+  if(typeof variable!=='string'||! /^[A-Z][A-Z0-9_]*$/.test(variable))throw Error('Catalogo geografico non valido: '+name);
+  const text=new TextDecoder().decode(raw),match=new RegExp('^\\s*window\\.'+variable+'\\s*=\\s*([\\s\\S]*?)\\s*;?\\s*$').exec(text);
   if(!match)throw Error('Catalogo geografico non valido: '+name);
   let data;try{data=JSON.parse(match[1]);}catch{throw Error('Catalogo geografico non valido: '+name);}
   if(data.family!==name||!data.models||!data.textures||!data.scenes||!data.sprites||!Array.isArray(part.zones))throw Error('Catalogo geografico incompleto: '+name);

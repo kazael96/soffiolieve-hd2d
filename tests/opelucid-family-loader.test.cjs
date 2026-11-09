@@ -2,6 +2,17 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {create,parse}=require('../src/opelucid-family-loader.js'),cacheFactory=require('../src/opelucid-resource-cache.js').create;
 const root=path.resolve(__dirname,'../src'),read=name=>fs.readFileSync(path.join(root,name)),parts=JSON.parse(read('opelucid-parts.js').toString().split('=').slice(1).join('=').trim().replace(/;$/,''));
 
+test('explicit data carriers can share the bounded loader without executing code or accepting another chapter',()=>{
+ const data={family:'drayden',models:{dragon:{groups:[{texture:'skin'}]}},textures:{skin:{}},scenes:{121:{instances:[{model:'dragon'}]}},sprites:{}},part={zones:[121],variable:'LEAGUE_PART_ASSETS'},raw=Buffer.from('window.LEAGUE_PART_ASSETS='+JSON.stringify(data)+';');
+ assert.deepEqual(parse(raw,'drayden',part),data);
+ assert.throws(()=>parse(raw,'drayden',{zones:[121]}),/non valido/);
+ assert.throws(()=>parse(raw,'drayden',{...part,variable:'OTHER_PART_ASSETS'}),/non valido/);
+ assert.throws(()=>parse(raw,'drayden',{...part,variable:'LEAGUE_PART_ASSETS|.*'}),/non valido/);
+ assert.throws(()=>parse(Buffer.from(raw+';globalThis.executed=true;'),'drayden',part),/non valido/);
+ data.models.dragon.groups[0].texture='missing';
+ assert.throws(()=>parse(Buffer.from('window.LEAGUE_PART_ASSETS='+JSON.stringify(data)+';'),'drayden',part),/Texture geografica mancante/);
+});
+
 test('all ten actual catalogs parse as data with their exact scene and geometry dependencies',()=>{
  for(const [name,part]of Object.entries(parts.families)){const data=parse(read(part.src),name,part);assert.equal(data.family,name);assert.equal(Object.keys(data.scenes).length,part.zones.length);}
  const part=parts.families.brycen,raw=read(part.src).toString();
