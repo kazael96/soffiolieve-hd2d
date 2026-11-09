@@ -3,3 +3,12 @@ function fixture(t){const parent=path.resolve(os.tmpdir()),dir=fs.mkdtempSync(pa
 test('browser QA detaches save storage before app initialization and preserves the published index',t=>{const f=fixture(t),out=path.join(f.dir,'qa');build(f.site,out);const html=fs.readFileSync(path.join(out,'index.html'),'utf8');assert.ok(html.includes('window.SpeciesStudioMode=true;'));assert.ok(html.indexOf('DeepQAEarlyErrors')<html.indexOf('window.SpeciesStudioMode'));assert.ok(html.includes('/__qa/browser-qa.js'));assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),f.html);assert.ok(fs.existsSync(path.join(out,'browser-qa.js')));});
 test('browser QA refuses to write test controls into the published site',t=>{const f=fixture(t);assert.throws(()=>build(f.site,path.join(f.site,'qa')),/outside/);assert.equal(fs.readdirSync(f.site).length,1);});
 test('an unrecognized startup format fails instead of running tests against real player storage',t=>{const f=fixture(t);fs.writeFileSync(path.join(f.site,'index.html'),'<html><head></head><body></body></html>');const out=path.join(f.dir,'qa');assert.throws(()=>build(f.site,out),/isolation/);assert.equal(fs.existsSync(out),false);});
+
+test('the input health monitor is delivered before the QA driver and never inserted into the release',t=>{
+ const f=fixture(t),out=path.join(f.dir,'qa');build(f.site,out);
+ const html=fs.readFileSync(path.join(out,'index.html'),'utf8');
+ assert.ok(html.indexOf('/__qa/qa-input-health.js')<html.indexOf('/__qa/browser-qa.js'));
+ assert.equal(fs.readFileSync(path.join(out,'qa-input-health.js'),'utf8'),fs.readFileSync(path.join(__dirname,'qa-input-health.js'),'utf8'));
+ assert.equal(fs.existsSync(path.join(f.site,'qa-input-health.js')),false);
+ assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),f.html);
+});
