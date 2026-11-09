@@ -45,6 +45,12 @@
   }
   return best;
  }
+ function surfaceAt(zone,x,z,hint={}){
+  const at=locate(zone,x,z,hint);if(!at)return null;
+  const tile=tables()[zone].lines[at.line].tiles,index=at.front*tile.width+at.side+Math.floor(tile.width/2),attributes=tile.values[index];
+  if(!Number.isInteger(attributes))throw Error('Attributi del binario non disponibili: '+zone+'/'+at.line);
+  return {...at,attributes,behavior:attributes&255,flags:(attributes>>>16)&255};
+ }
  const warpPoints=new Map();
  function warp(zone,w){
   const key=[zone,w.x,w.y,w.z,w.width,w.height,w.a,w.b].join(':');if(warpPoints.has(key))return warpPoints.get(key);
@@ -92,5 +98,5 @@
  }
  function screenDirection(direction,yaw){const [x,z]=[[0,-1],[0,1],[-1,0],[1,0]][direction],c=Math.cos(yaw),s=Math.sin(yaw),dx=x*c-z*s,dz=x*s+z*c;return Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0;}
  function trigger(zone,t,x,z,hint){const p=locate(zone,x,z,hint),side=t.width<<16>>16;return !!p&&p.line===t.x&&p.front>=t.z&&p.front<t.z+t.height&&p.side>=side&&p.side<side+t.y;}
- const api={trigger,landing,cameraYaw,screenDirection,position,halfWidth,mesh,locate,warp,actor,has:zone=>!!tables()[zone]};root.NativeRails=api;if(typeof module!=='undefined')module.exports=api;
+ const api={trigger,landing,cameraYaw,screenDirection,position,halfWidth,mesh,locate,surfaceAt,warp,actor,has:zone=>!!tables()[zone]};root.NativeRails=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

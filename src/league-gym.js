@@ -28,7 +28,7 @@
   function enter(zone){if(zone===121){task.snapshot;jump.restore();return;}task.cancel();jump.cancel();}
   function tick(dt){if(!active())return;if(jump.busy)jump.tick(dt);else task.tick(dt);}
   function heightAt(x,z){const p=hero();return active()&&jump.busy&&Math.hypot(x-p.x,z-p.y)<.001?state().fieldHeight:null;}
-  function blocked(x,z){if(!active())return null;if(task.busy||jump.busy)return true;return !root.NativeRails?.locate(121,x,z,{height:state()?.fieldHeight??0});}
+  function blocked(x,z){if(!active())return null;if(task.busy||jump.busy)return true;const row=root.OpelucidChapter?.surfaceAt(121,x,z,state()?.fieldHeight??0);return !row||!!(row.flags&1);}
   function dispose(){task.cancel();jump.cancel();visual.release();if(installed&&root.NativeRailGates?.[121]===railGate)delete root.NativeRailGates[121];installed=false;}
   return {install,dispose,command,enter,tick,heightAt,blocked,task,jump,prepare:()=>visual.prepare(),release:()=>visual.release(),apply:renderer=>visual.apply(renderer),
    restore:()=>{if(active()){task.snapshot;jump.restore();}},sameLevel:n=>!active()||Math.abs((n.height??0)-(state()?.fieldHeight??0))<1.25,

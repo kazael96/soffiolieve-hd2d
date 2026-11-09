@@ -14,7 +14,7 @@ function setup(){
   const pair=[...Object.entries(c.OPELUCID_PARTS.families),...Object.entries(c.LEAGUE_PARTS.families)].flatMap(([name,part])=>[[name,part],...Object.values(part.seasons||{}).map(row=>[name,row])]).find(([name,part])=>part.src===file);if(!pair)throw Error('Unexpected catalog '+file);
   const [name,part]=pair;return Buffer.from('window.'+(part.variable||'OPELUCID_PART_ASSETS')+'='+JSON.stringify({family:name,...(part.season!==undefined?{season:part.season}:{}),models:{[name]:{groups:[],season:part.season??0}},textures:{},scenes:Object.fromEntries(part.zones.map(z=>[z,{instances:[{model:name}]}])),sprites:{}})+';');
  }};
- vm.createContext(c);for(const file of ['league-geography','opelucid-resource-cache','opelucid-family-loader','opelucid-scene-window','opelucid-bootstrap'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
+ vm.createContext(c);for(const file of ['league-geography','league-surfaces','opelucid-resource-cache','opelucid-family-loader','opelucid-scene-window','opelucid-bootstrap'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
  return {c,reads,released,prepared};
 }
 test('one registered chapter owns old and new scene handles with a shared three-family cache',async()=>{
@@ -25,6 +25,9 @@ test('one registered chapter owns old and new scene handles with a shared three-
 });
 test('new native rail floors cannot silently fall back to a WB plane when the rail is blocked',async()=>{
  const {c}=setup();await c.OpelucidChapter.ensure(121);assert.equal(c.OpelucidChapter.surfaceAt(121,0,0,9).height,9);assert.equal(c.OpelucidChapter.surfaceAt(121,999,0,9),null);assert.equal(c.OpelucidChapter.blockedAt(121,999,0),true);assert.equal(c.OpelucidChapter.blockedAt(121,0,0),false);
+});
+test('Gym WB floors work without ribbons while the NG Victory exterior never borrows a WB floor',async()=>{
+ const {c}=setup();await c.OpelucidChapter.ensure(121);c.NativeStory.state.fieldHeight=2;assert.equal(c.OpelucidChapter.blockedAt(121,999,0),false);assert.equal(c.OpelucidChapter.surfaceAt(121,999,0,2).height,2);assert.equal(c.OpelucidChapter.surfaceAt(214,999,0,2),null);assert.equal(c.OpelucidChapter.blockedAt(214,999,0),true);
 });
 test('an unavailable Gym controller leaves the descriptor pending and can recover on a later preparation',async()=>{
  const {c}=setup(),gym=c.LeagueGym;delete c.LeagueGym;await assert.rejects(c.OpelucidChapter.ensure(121),/Meccanismi/);assert.equal(c.OpelucidChapter.scene(121).assetsPending,true);c.LeagueGym=gym;assert.equal(await c.OpelucidChapter.ensure(121),true);assert.equal(c.OpelucidChapter.scene(121).assetsPending,false);
