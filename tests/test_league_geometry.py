@@ -1,5 +1,7 @@
 import copy
 import importlib.util
+import hashlib
+import json
 from pathlib import Path
 import struct
 import sys
@@ -23,6 +25,23 @@ geo = load('league_geography', 'export-league-scenes.py')
 
 
 class LeagueGeometryTests(unittest.TestCase):
+    def test_native_button_pattern_uses_both_texture_palette_pairs_and_returns_to_rest(self):
+        fixture = json.loads((ROOT / 'tests/fixtures/drayden-button-pattern.json').read_text(encoding='utf-8'))
+        raw = bytes.fromhex(fixture['hex'])
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), fixture['sha256'])
+        self.assertEqual(gym.native_track(raw)['nativeFrames'], 27)
+        self.assertEqual(gym.pattern_tracks(raw), {'gym08_b_1': [
+            {'frame': 0, 'texture': 'gym08_b.1', 'palette': 'gym08_b.1_pl'},
+            {'frame': 13, 'texture': 'gym08_b.2', 'palette': 'gym08_b.2_pl'},
+            {'frame': 26, 'texture': 'gym08_b.1', 'palette': 'gym08_b.1_pl'}]})
+        damaged = bytearray(raw)
+        # Third key points outside the two native palettes.
+        damaged[68 + 56 + 2 * 4 + 3] = 2
+        with self.assertRaisesRegex(ValueError, 'Invalid native pattern keyframe'):
+            gym.pattern_tracks(damaged)
+        with self.assertRaisesRegex(ValueError, 'Expected native texture-pattern'):
+            gym.pattern_tracks(b'BCA0' + raw[4:])
+
     def test_original_animation_header_keeps_native_duration_separate_from_converter(self):
         # Captured IRBI a/1/6/2:4 header through duration (not a complete animation).
         raw = bytes.fromhex('42 43 41 30 ff fe 01 00 c4 05 00 00 10 00 01 00 14 00 00 00 4a 4e 54 30 b0 05 00 00 00 01 28 00 08 00 10 00 7f 01 00 00 66 00 01 00 04 00 08 00 30 00 00 00 69 6e 33 31 5f 75 65 5f 72 6e 65 63 6b 00 00 00 4a 00 41 43 51 00 04 00')

@@ -1,5 +1,13 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function context(){const c={};c.window=c;vm.createContext(c);for(const f of ['pinwheel-rails','native-rails','pinwheel-events'])vm.runInContext(fs.readFileSync('src/'+f+'.js','utf8'),c);return c;}
+
+test('dynamic native line gates reject a disabled ribbon before selecting height, without stale mesh permissions',()=>{
+ const c=context(),r=c.NativeRails,line=c.PINWHEEL_RAILS[249].lines[13],p=r.position(249,13,line.length/2),x=p.x-16,z=p.z-16;
+ const before=r.locate(249,x,z,{line:13,height:p.height});assert.equal(before.line,13);const mesh=r.mesh(249);
+ c.NativeRailGates={249:()=>false};assert.equal(r.locate(249,x,z,{line:13,height:p.height}),null,'A warm mesh must not keep a disabled passage walkable');
+ c.NativeRailGates[249]=id=>id===13;assert.equal(r.locate(249,x,z,{line:13,height:p.height}).line,13);assert.equal(r.mesh(249),mesh);
+ delete c.NativeRailGates[249];assert.equal(r.locate(249,x,z,{line:13,height:p.height}).line,13);
+});
 test('IRBI rail assignments and bridge endpoint positions retain native coordinates',()=>{
  const c=context(),r=c.NativeRails;assert.equal(c.PINWHEEL_RAILS[28].file,5);assert.equal(c.PINWHEEL_RAILS[249].file,11);assert.equal(c.PINWHEEL_RAILS[249].chunkSpan,128);
  assert.deepEqual(JSON.parse(JSON.stringify(r.position(249,13,0))),{x:89.3125,height:2,z:275.9375});

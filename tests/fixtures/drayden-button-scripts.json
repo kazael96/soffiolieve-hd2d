@@ -1,0 +1,1165 @@
+{
+  "source": "IRBI242 entries2..7, operands and offsets unchanged; camera and jump408 are isolated in host test",
+  "scripts": {
+    "242": {
+      "entries": [
+        113,
+        68,
+        1544,
+        1586,
+        1628,
+        1670,
+        1712,
+        1754,
+        1194,
+        1354,
+        925,
+        1044
+      ],
+      "sourceSha256": "ec94585af523854c50b9455818bb04aa2424d553e57d14c17648e0f68725c896",
+      "supportedEntries": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "code": {
+        "1754": {
+          "op": 46,
+          "name": "ActorPauseAll",
+          "args": [],
+          "end": 1756
+        },
+        "1756": {
+          "op": 408,
+          "name": "NativeOpcode408",
+          "args": [
+            2
+          ],
+          "end": 1760
+        },
+        "1760": {
+          "op": 407,
+          "name": "NativeOpcode407",
+          "args": [
+            2,
+            1
+          ],
+          "end": 1766
+        },
+        "1766": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32801,
+            5
+          ],
+          "end": 1772
+        },
+        "1772": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32800,
+            2
+          ],
+          "end": 1778
+        },
+        "1778": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32802,
+            1
+          ],
+          "end": 1784
+        },
+        "1784": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1796
+          ],
+          "end": 1790
+        },
+        "1790": {
+          "op": 48,
+          "name": "RTFinishSubEvents",
+          "args": [],
+          "end": 1792
+        },
+        "1792": {
+          "op": 47,
+          "name": "ActorUnlockAll",
+          "args": [],
+          "end": 1794
+        },
+        "1794": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 1796
+        },
+        "1796": {
+          "op": 319,
+          "name": "EVCameraInit",
+          "args": [],
+          "end": 1798
+        },
+        "1798": {
+          "op": 321,
+          "name": "EVCameraUnbind",
+          "args": [],
+          "end": 1800
+        },
+        "1800": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1824
+          ],
+          "end": 1806
+        },
+        "1806": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            2128
+          ],
+          "end": 1812
+        },
+        "1812": {
+          "op": 327,
+          "name": "EVCameraMoveToDefault",
+          "args": [
+            30
+          ],
+          "end": 1816
+        },
+        "1816": {
+          "op": 325,
+          "name": "EVCameraWait",
+          "args": [],
+          "end": 1818
+        },
+        "1818": {
+          "op": 322,
+          "name": "EVCameraRebind",
+          "args": [],
+          "end": 1820
+        },
+        "1820": {
+          "op": 320,
+          "name": "EVCameraEnd",
+          "args": [],
+          "end": 1822
+        },
+        "1822": {
+          "op": 5,
+          "name": "VMReturn",
+          "args": [],
+          "end": 1824
+        },
+        "2128": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            0
+          ],
+          "end": 2134
+        },
+        "2134": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2147
+          ],
+          "end": 2141
+        },
+        "2141": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2177
+          ],
+          "end": 2147
+        },
+        "2177": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            1
+          ],
+          "end": 2183
+        },
+        "2183": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2196
+          ],
+          "end": 2190
+        },
+        "2190": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2226
+          ],
+          "end": 2196
+        },
+        "2226": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            2
+          ],
+          "end": 2232
+        },
+        "2232": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2245
+          ],
+          "end": 2239
+        },
+        "2239": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2275
+          ],
+          "end": 2245
+        },
+        "2275": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            3
+          ],
+          "end": 2281
+        },
+        "2281": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2294
+          ],
+          "end": 2288
+        },
+        "2288": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2324
+          ],
+          "end": 2294
+        },
+        "2324": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            4
+          ],
+          "end": 2330
+        },
+        "2330": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2343
+          ],
+          "end": 2337
+        },
+        "2337": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2373
+          ],
+          "end": 2343
+        },
+        "2373": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            5
+          ],
+          "end": 2379
+        },
+        "2379": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2392
+          ],
+          "end": 2386
+        },
+        "2386": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2392
+        },
+        "2422": {
+          "op": 325,
+          "name": "EVCameraWait",
+          "args": [],
+          "end": 2424
+        },
+        "2424": {
+          "op": 409,
+          "name": "NativeOpcode409",
+          "args": [
+            32800
+          ],
+          "end": 2428
+        },
+        "2428": {
+          "op": 5,
+          "name": "VMReturn",
+          "args": [],
+          "end": 2430
+        },
+        "2392": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            5464,
+            6528,
+            970752,
+            2289664,
+            827471,
+            1425408,
+            30
+          ],
+          "end": 2416
+        },
+        "2416": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2422
+        },
+        "2343": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            4952,
+            56576,
+            970752,
+            1245184,
+            827471,
+            1581056,
+            30
+          ],
+          "end": 2367
+        },
+        "2367": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2373
+        },
+        "2294": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            2776,
+            8576,
+            970752,
+            3022848,
+            425999,
+            765952,
+            30
+          ],
+          "end": 2318
+        },
+        "2318": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2324
+        },
+        "2245": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            6488,
+            57984,
+            970752,
+            2396160,
+            536561,
+            1245184,
+            30
+          ],
+          "end": 2269
+        },
+        "2269": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2275
+        },
+        "2196": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            9176,
+            61056,
+            970752,
+            557056,
+            380913,
+            3014656,
+            30
+          ],
+          "end": 2220
+        },
+        "2220": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2226
+        },
+        "2147": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            7256,
+            7040,
+            970752,
+            950272,
+            307185,
+            2965504,
+            30
+          ],
+          "end": 2171
+        },
+        "2171": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2422
+          ],
+          "end": 2177
+        },
+        "1824": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            0
+          ],
+          "end": 1830
+        },
+        "1830": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            1843
+          ],
+          "end": 1837
+        },
+        "1837": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            1873
+          ],
+          "end": 1843
+        },
+        "1873": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            1
+          ],
+          "end": 1879
+        },
+        "1879": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            1892
+          ],
+          "end": 1886
+        },
+        "1886": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            1922
+          ],
+          "end": 1892
+        },
+        "1922": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            2
+          ],
+          "end": 1928
+        },
+        "1928": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            1941
+          ],
+          "end": 1935
+        },
+        "1935": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            1971
+          ],
+          "end": 1941
+        },
+        "1971": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            3
+          ],
+          "end": 1977
+        },
+        "1977": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            1990
+          ],
+          "end": 1984
+        },
+        "1984": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2020
+          ],
+          "end": 1990
+        },
+        "2020": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            4
+          ],
+          "end": 2026
+        },
+        "2026": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2039
+          ],
+          "end": 2033
+        },
+        "2033": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2069
+          ],
+          "end": 2039
+        },
+        "2069": {
+          "op": 25,
+          "name": "WorkCmpConst",
+          "args": [
+            32801,
+            5
+          ],
+          "end": 2075
+        },
+        "2075": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            1,
+            2088
+          ],
+          "end": 2082
+        },
+        "2082": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 2088
+        },
+        "2118": {
+          "op": 325,
+          "name": "EVCameraWait",
+          "args": [],
+          "end": 2120
+        },
+        "2120": {
+          "op": 410,
+          "name": "NativeOpcode410",
+          "args": [
+            32800,
+            32802
+          ],
+          "end": 2126
+        },
+        "2126": {
+          "op": 5,
+          "name": "VMReturn",
+          "args": [],
+          "end": 2128
+        },
+        "2088": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            9688,
+            0,
+            970752,
+            1843200,
+            430159,
+            1695744,
+            30
+          ],
+          "end": 2112
+        },
+        "2112": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 2118
+        },
+        "2039": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            9688,
+            0,
+            970752,
+            1843200,
+            430159,
+            1695744,
+            30
+          ],
+          "end": 2063
+        },
+        "2063": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 2069
+        },
+        "1990": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            4696,
+            65408,
+            970752,
+            2797568,
+            15,
+            1290240,
+            30
+          ],
+          "end": 2014
+        },
+        "2014": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 2020
+        },
+        "1941": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            4696,
+            65408,
+            970752,
+            2797568,
+            15,
+            1290240,
+            30
+          ],
+          "end": 1965
+        },
+        "1965": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 1971
+        },
+        "1892": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            8664,
+            0,
+            970752,
+            839680,
+            36879,
+            2117632,
+            30
+          ],
+          "end": 1916
+        },
+        "1916": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 1922
+        },
+        "1843": {
+          "op": 323,
+          "name": "EVCameraMoveTo",
+          "args": [
+            8664,
+            0,
+            970752,
+            839680,
+            36879,
+            2117632,
+            30
+          ],
+          "end": 1867
+        },
+        "1867": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            2118
+          ],
+          "end": 1873
+        },
+        "1712": {
+          "op": 46,
+          "name": "ActorPauseAll",
+          "args": [],
+          "end": 1714
+        },
+        "1714": {
+          "op": 408,
+          "name": "NativeOpcode408",
+          "args": [
+            3
+          ],
+          "end": 1718
+        },
+        "1718": {
+          "op": 407,
+          "name": "NativeOpcode407",
+          "args": [
+            2,
+            0
+          ],
+          "end": 1724
+        },
+        "1724": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32801,
+            4
+          ],
+          "end": 1730
+        },
+        "1730": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32800,
+            2
+          ],
+          "end": 1736
+        },
+        "1736": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32802,
+            0
+          ],
+          "end": 1742
+        },
+        "1742": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1796
+          ],
+          "end": 1748
+        },
+        "1748": {
+          "op": 48,
+          "name": "RTFinishSubEvents",
+          "args": [],
+          "end": 1750
+        },
+        "1750": {
+          "op": 47,
+          "name": "ActorUnlockAll",
+          "args": [],
+          "end": 1752
+        },
+        "1752": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 1754
+        },
+        "1670": {
+          "op": 46,
+          "name": "ActorPauseAll",
+          "args": [],
+          "end": 1672
+        },
+        "1672": {
+          "op": 408,
+          "name": "NativeOpcode408",
+          "args": [
+            2
+          ],
+          "end": 1676
+        },
+        "1676": {
+          "op": 407,
+          "name": "NativeOpcode407",
+          "args": [
+            1,
+            1
+          ],
+          "end": 1682
+        },
+        "1682": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32801,
+            3
+          ],
+          "end": 1688
+        },
+        "1688": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32800,
+            1
+          ],
+          "end": 1694
+        },
+        "1694": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32802,
+            1
+          ],
+          "end": 1700
+        },
+        "1700": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1796
+          ],
+          "end": 1706
+        },
+        "1706": {
+          "op": 48,
+          "name": "RTFinishSubEvents",
+          "args": [],
+          "end": 1708
+        },
+        "1708": {
+          "op": 47,
+          "name": "ActorUnlockAll",
+          "args": [],
+          "end": 1710
+        },
+        "1710": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 1712
+        },
+        "1628": {
+          "op": 46,
+          "name": "ActorPauseAll",
+          "args": [],
+          "end": 1630
+        },
+        "1630": {
+          "op": 408,
+          "name": "NativeOpcode408",
+          "args": [
+            3
+          ],
+          "end": 1634
+        },
+        "1634": {
+          "op": 407,
+          "name": "NativeOpcode407",
+          "args": [
+            1,
+            0
+          ],
+          "end": 1640
+        },
+        "1640": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32801,
+            2
+          ],
+          "end": 1646
+        },
+        "1646": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32800,
+            1
+          ],
+          "end": 1652
+        },
+        "1652": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32802,
+            0
+          ],
+          "end": 1658
+        },
+        "1658": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1796
+          ],
+          "end": 1664
+        },
+        "1664": {
+          "op": 48,
+          "name": "RTFinishSubEvents",
+          "args": [],
+          "end": 1666
+        },
+        "1666": {
+          "op": 47,
+          "name": "ActorUnlockAll",
+          "args": [],
+          "end": 1668
+        },
+        "1668": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 1670
+        },
+        "1586": {
+          "op": 46,
+          "name": "ActorPauseAll",
+          "args": [],
+          "end": 1588
+        },
+        "1588": {
+          "op": 408,
+          "name": "NativeOpcode408",
+          "args": [
+            2
+          ],
+          "end": 1592
+        },
+        "1592": {
+          "op": 407,
+          "name": "NativeOpcode407",
+          "args": [
+            0,
+            0
+          ],
+          "end": 1598
+        },
+        "1598": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32801,
+            1
+          ],
+          "end": 1604
+        },
+        "1604": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32800,
+            0
+          ],
+          "end": 1610
+        },
+        "1610": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32802,
+            0
+          ],
+          "end": 1616
+        },
+        "1616": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1796
+          ],
+          "end": 1622
+        },
+        "1622": {
+          "op": 48,
+          "name": "RTFinishSubEvents",
+          "args": [],
+          "end": 1624
+        },
+        "1624": {
+          "op": 47,
+          "name": "ActorUnlockAll",
+          "args": [],
+          "end": 1626
+        },
+        "1626": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 1628
+        },
+        "1544": {
+          "op": 46,
+          "name": "ActorPauseAll",
+          "args": [],
+          "end": 1546
+        },
+        "1546": {
+          "op": 408,
+          "name": "NativeOpcode408",
+          "args": [
+            3
+          ],
+          "end": 1550
+        },
+        "1550": {
+          "op": 407,
+          "name": "NativeOpcode407",
+          "args": [
+            0,
+            1
+          ],
+          "end": 1556
+        },
+        "1556": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32801,
+            0
+          ],
+          "end": 1562
+        },
+        "1562": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32800,
+            0
+          ],
+          "end": 1568
+        },
+        "1568": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            32802,
+            1
+          ],
+          "end": 1574
+        },
+        "1574": {
+          "op": 4,
+          "name": "VMCall",
+          "args": [
+            1796
+          ],
+          "end": 1580
+        },
+        "1580": {
+          "op": 48,
+          "name": "RTFinishSubEvents",
+          "args": [],
+          "end": 1582
+        },
+        "1582": {
+          "op": 47,
+          "name": "ActorUnlockAll",
+          "args": [],
+          "end": 1584
+        },
+        "1584": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 1586
+        }
+      }
+    }
+  }
+}

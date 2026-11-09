@@ -37,8 +37,9 @@
  }
  function triangle(x,z,a,b,c){const d=(b.z-c.z)*(a.x-c.x)+(c.x-b.x)*(a.z-c.z);if(Math.abs(d)<1e-8)return null;const u=((b.z-c.z)*(x-c.x)+(c.x-b.x)*(z-c.z))/d,v=((c.z-a.z)*(x-c.x)+(a.x-c.x)*(z-c.z))/d;if(u<-.00001||v<-.00001||u+v>1.00001)return null;return a.height*u+b.height*v+c.height*(1-u-v);}
  function locate(zone,x,z,{height,line}={}){
-  const list=mesh(zone)?.bins.get(Math.floor(x)+':'+Math.floor(z))||[];let best=null,score=Infinity;
-  for(const cell of list){const q=cell.corners,h=triangle(x,z,q[0],q[1],q[2])??triangle(x,z,q[0],q[2],q[3]);if(h===null)continue;
+  const list=mesh(zone)?.bins.get(Math.floor(x)+':'+Math.floor(z))||[],enabled=root.NativeRailGates?.[zone];let best=null,score=Infinity;
+  if(enabled!==undefined&&typeof enabled!=='function')throw Error('Permessi dinamici dei binari non validi: '+zone);
+  for(const cell of list){if(enabled&&!enabled(cell.line))continue;const q=cell.corners,h=triangle(x,z,q[0],q[1],q[2])??triangle(x,z,q[0],q[2],q[3]);if(h===null)continue;
    const delta=height===undefined?0:Math.abs(h-height);if(delta>1.8)continue;const distance=delta+(line===undefined||cell.line===line?0:.001);
    if(distance<score){score=distance;best={height:h,line:cell.line,front:cell.front,side:cell.side};}
   }
