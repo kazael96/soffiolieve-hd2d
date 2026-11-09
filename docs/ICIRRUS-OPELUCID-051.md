@@ -4,7 +4,7 @@ Base pubblica verificata0.50, revisione9f3eb3ed9c872f04, main09ac96fdc7e958085db
 
 Questa tappa parte da Silvestro e segue gli eventi nativi fino alla prossima città. Cap39 prima della settima medaglia,43 dopo, sulla base dei massimi delle squadre131/133 già verificati nella ROM. Conservare livelli e XP legacy superiori. Inventariare zone, script, incontri, servizi, sfondi, coppie specie–mossa e itinerari prima dell'integrazione; l'estrazione privata non costituisce contenuto giocabile.
 
-La0.51 è integrata solo in parte nei sorgenti e non è collaudata come tappa completa. La0.50 resta il riferimento pubblicato. Nuove varianti stagionali, ghiaccio, puzzle, animazioni, Interpoké, audio e salvataggi richiedono prove specifiche; non riusare genericamente i PASS della0.50 per certificarli.
+La0.51 è integrata nei sorgenti: PR44 integrata,24 casi headless/tre formati e CI929Node/14Python/44fasi PASS. La pubblicazione Pages non è ancora verificata; la0.50 resta il riferimento pubblico. I checkpoint seguenti conservano la cronologia, compresi i difetti poi corretti; leggere anche docs/QA-051.md. Nuove varianti stagionali, ghiaccio, puzzle, animazioni, Interpoké, audio e salvataggi richiedono prove specifiche; non riusare genericamente i PASS della0.50 per certificarli.
 
 ## Preparazione verificata dei riferimenti
 
