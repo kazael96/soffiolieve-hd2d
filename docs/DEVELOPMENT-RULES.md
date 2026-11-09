@@ -188,3 +188,8 @@ Applicare [ROUTE3-NACRENE-042.md](ROUTE3-NACRENE-042.md) e [SPECIES-MOVES-042.md
 ## Estensione Zefiropoli–Austropoli e limite 25 · 0.43
 
 Applicare [NACRENE-CASTELIA-043.md](NACRENE-CASTELIA-043.md), [SPECIES-MOVES-043.md](SPECIES-MOVES-043.md) e [QA-043.md](QA-043.md). Conservare quote e linee del ponte nei salvataggi, ingressi percorribili anche agli angoli del corpo, comandi relativi alla camera e prove di visibilità invalidate quando cambiano orientamento o altezza. Conservare evoluzioni, slot abilità, PS/PP e livelli/XP legacy senza abbassarli; il limite corrente della demo è 25. La suite comprende training-runtime e pinwheel-runtime. Roster predisposto, specie ottenibili, prove numeriche, rendering e confronto visivo restano distinti; i limiti aperti non diventano funzionalità complete per il solo aggiornamento degli inventari.
+
+
+### Esecuzione della suite estesa · 9 novembre 2026
+
+La crescita dei replay host051 ha superato il budget del vecchio singolo processo unitario300s. Conservare quel FAIL come baseline e non alzare soltanto il timeout. `scripts/unit-test-groups.cjs` distribuisce in modo deterministico tutti i file `.test.cjs` in quattro gruppi sequenziali, senza duplicati né omissioni; ogni processo termina e rilascia VM/asset prima del successivo. Windows conserva `--test-isolation=none`, Linux `--test-concurrency=2`. Ogni fase ha budget180s; nessun gruppo vuoto o test saltato. Il rapporto completo registra separatamente tutti i gruppi e rimane FAIL se uno fallisce. I test verificano l’inventario reale e i confini del raggruppamento. Non attribuire un miglioramento di tempo totale prima della misura; lo scopo immediato è mantenere budget e memoria per processo senza ridurre la copertura.
