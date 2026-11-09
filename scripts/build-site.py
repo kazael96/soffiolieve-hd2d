@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Combine editable sources with the verified v0.8 asset package."""
 import argparse
+import errno
 import hashlib
 import json
 from pathlib import Path
@@ -100,6 +101,21 @@ def bundle_entries(site):
     index.write_text(html,encoding='utf8',newline='\n')
     return {'scripts':[s[0] for s in scripts],'styles':styles}
 
+def publish_staging(site, target):
+    """Move exclusively owned staging files, copying only across volumes."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.exists() or target.is_symlink():
+        raise ValueError(f"Output already exists: {target}. Choose an empty destination.")
+    try:
+        site.rename(target)
+        return 'rename'
+    except OSError as error:
+        if error.errno != errno.EXDEV:
+            raise
+    shutil.copytree(site, target)
+    return 'copy'
+
+
 def build(archive, target):
     with archive.open("rb") as stream:
         digest = hashlib.file_digest(stream, "sha256").hexdigest()
@@ -165,8 +181,7 @@ def build(archive, target):
             'version': '0.50', 'revision': revision,
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(site, target)
+        publish_staging(site, target)
     print(f"Built Soffiolieve 0.50 ({revision}) in {target}")
 
 

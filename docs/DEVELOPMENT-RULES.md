@@ -81,6 +81,14 @@ Richiesta successiva del5 novembre2026: dopo il completamento della storia princ
 
 Un controllo fallito va corretto o segnalato con causa e limite concreto; non rimuoverlo per ottenere un rapporto verde. Le prove su viewport telefono non certificano ogni GPU Android fisica e nessuna suite dimostra assenza assoluta di bug.
 
+### Efficienza del ciclo di sviluppo e dei rilasci
+
+Richiesta del9 novembre2026: velocizzare i rilasci conservando la qualità. Durante lo sviluppo usare prima regressioni mirate al componente e prove brevi per localizzare i difetti; raggruppare correzioni coerenti prima di ricostruire una candidata. La candidata destinata alla pubblicazione deve comunque superare l'intera suite e i replay richiesti nei tre formati. Non trasformare un FAIL in PASS aumentando soltanto il timeout o eliminando l'asserzione.
+
+Riutilizzare un rapporto soltanto per gli stessi sorgenti/asset e lo stesso comportamento verificato, con revisione e perimetro espliciti. Una modifica del controllore condiviso richiede le regressioni dei capitoli che lo usano; la cache non sostituisce la verifica del risultato. Conservare separatamente build, fixture e rapporti per poter ricondurre ogni esito alla candidata esatta.
+
+Ottimizzare il generatore evitando copie integrali superflue: la build completamente preparata può essere spostata dalla cartella temporanea alla destinazione sullo stesso volume. Deve restare indipendente da sorgenti e build precedenti; vietati collegamenti mutabili condivisi. Su volumi diversi usare la copia, rifiutare destinazioni già esistenti e conservare tutti i controlli SHA-256 e dei percorsi. Misurare i miglioramenti; non promettere percentuali di accelerazione prima dei confronti. Le cache incrementali degli asset restano un'estensione da implementare e collaudare, non una capacità già presente.
+
 ## 1. Uscite e sparizioni dei personaggi
 
 Un personaggio non deve sparire in un punto che il giocatore può vedere. Prima della rimozione deve raggiungere un'uscita coerente, attraversare una porta, uscire dall'inquadratura o passare dietro un elemento che lo nasconda realmente. Deve restare non visibile anche durante la rimozione, tenendo conto dei movimenti della camera e dello zoom.
