@@ -1,7 +1,7 @@
 /* Persistent physical itineraries across the chapter049 doors and joined fields. */
 (function(root){
  let options={};const entryTrips=new WeakMap(),version=2,pairs=[[96,191],[331,194]],point=(x,y)=>({x,y});
- const sameField=(a,b)=>a===b||!!root.OpelucidChapter?.sameField(a,b)||!!root.IcirrusChapter?.sameField(a,b)||pairs.some(p=>p.includes(a)&&p.includes(b));
+ const sameField=(a,b)=>a===b||!!root.OpelucidReturns?.sameField?.(a,b)||!!root.OpelucidChapter?.sameField(a,b)||!!root.IcirrusChapter?.sameField(a,b)||pairs.some(p=>p.includes(a)&&p.includes(b));
  const door=(zone,x,y,dx,dy,next=null,height=0)=>({zone,kind:'door',anchor:point(x,y),dx,dy,next,height});
  const edge=(zone,x,y,dx,dy,next=null)=>({zone,kind:'path',anchor:point(x,y),dx,dy,next,height:0});
  const arrival=(zone,x,y,destinationZone,targetUid,height=0)=>({zone,kind:'arrival',anchor:point(x,y),destinationZone,targetUid,height});
@@ -47,14 +47,14 @@
   const path=points.concat(root.FieldActorExits.route(lead,to,blocked)),last=path.at(-1)||lead;if(root.IcirrusChapter?.zones.includes(zone)&&Math.hypot(last.x-to.x,last.y-to.y)<.8&&!blocked(to.x,to.y))path.push({...to});return path;
  }
  function build(destination,leg,actor,fallback){const d=itineraries[destination]?.()[leg];if(!d)return null;
-  const goal=d.stagePoint|| (d.kind==='door'&&Math.hypot(actor.x-d.anchor.x,actor.y-d.anchor.y)>.01?point(d.anchor.x-d.dx,d.anchor.y-d.dy):{...d.anchor,...(travelZone(d.zone)?{height:d.height||0}:{})}),points=walk(actor,goal,d.zone,fallback),last=points.at(-1)||actor;
+  const nativeTravel=travelZone(d.zone)||d.worldReturn,goal=d.stagePoint|| (d.kind==='door'&&Math.hypot(actor.x-d.anchor.x,actor.y-d.anchor.y)>.01?point(d.anchor.x-d.dx,d.anchor.y-d.dy):{...d.anchor,...(nativeTravel?{height:d.height||0}:{})}),points=d.worldReturn&&leg>0?root.OpelucidReturns.points(d,actor):walk(actor,goal,d.zone,fallback),last=points.at(-1)||actor;
   // A partial route is a recoverable path error; never append a wall-crossing
   // final segment and pretend that the actor has reached a blocked doorway.
   if(Math.hypot(last.x-goal.x,last.y-goal.y)>.01)throw Error('Itinerario non percorribile: '+actor.name+' → '+destination+' ('+leg+')');
-  if(d.kind==='door')points.push({...d.anchor});if(['door','path'].includes(d.kind))points.push(point(d.anchor.x+d.dx*2.8,d.anchor.y+d.dy*2.8));
-  return {kind:d.kind,points,anchor:{...d.anchor},clip:d.kind==='door'?[-d.dx,0,-d.dy,d.dx*d.anchor.x+d.dy*d.anchor.y+(d.dy<0?1.3:0)]:null,background:true,destination,itineraryVersion:version,chapter049:true,leg,...(travelZone(d.zone)?{nativeTravelVersion:1,startPose:{x:actor.x,y:actor.y,height:actor.height||0}}:{}),...(actor.incomingPortal?{entryCorridor:actor.incomingPortal}:{}),...(d.kind==='cannon'?{cannon:d.cannon,cannonDirection:d.cannonDirection}:{}),...(d.kind==='arrival'?{destinationZone:d.destinationZone,targetUid:d.targetUid}:{})};
+  if(d.kind==='door')points.push({...d.anchor,...(d.worldReturn?{height:d.height}: {})});if(['door','path'].includes(d.kind))points.push({...point(d.anchor.x+d.dx*2.8,d.anchor.y+d.dy*2.8),...(d.worldReturn?{height:d.height}:{})});
+  return {kind:d.kind,points,anchor:{...d.anchor},clip:d.kind==='door'?[-d.dx,0,-d.dy,d.dx*d.anchor.x+d.dy*d.anchor.y+(d.dy<0?1.3:0)]:null,background:true,destination,itineraryVersion:version,chapter049:true,leg,...(nativeTravel?{nativeTravelVersion:1,startPose:{x:actor.x,y:actor.y,height:actor.height||0}}:{}),...(d.worldReturn?{worldReturn:true}:{}),...(actor.incomingPortal?{entryCorridor:actor.incomingPortal}:{}),...(d.kind==='cannon'?{cannon:d.cannon,cannonDirection:d.cannonDirection}:{}),...(d.kind==='arrival'?{destinationZone:d.destinationZone,targetUid:d.targetUid}:{})};
  }
- function planExit(actor,zone,blocked){let destination=root.IcirrusContinuity?.destination(actor,zone);if(destination)return build(destination,0,actor,blocked);
+ function planExit(actor,zone,blocked){let destination=root.OpelucidReturns?.destination(actor,zone,options.native)||root.IcirrusContinuity?.destination(actor,zone);if(destination)return build(destination,0,actor,blocked);
   if(zone===96&&actor.name==='Komor')destination=[11].includes(actor.uid)?'komor-next-journey':'cold-storage-front';
   else if(zone===96&&actor.name==='Rafan')destination='driftveil-gym';
   else if(zone===96&&actor.name==='Belle')destination='belle-chargestone';
