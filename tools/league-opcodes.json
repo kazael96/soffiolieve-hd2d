@@ -1,0 +1,414 @@
+{
+  "139": {
+    "spec": {
+      "name": "NativeOpcode139",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21aeb40",
+    "overlay": 21,
+    "source": "IRBI 0x21aeb40: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 139 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "126": {
+    "spec": {
+      "name": "NativeOpcode126",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b2118",
+    "overlay": 21,
+    "source": "IRBI 0x21b2118: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 126 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "217": {
+    "spec": {
+      "name": "NativeOpcode217",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x215ac50",
+    "overlay": 10,
+    "source": "IRBI 0x215ac50: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 217 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "299": {
+    "spec": {
+      "name": "NativeOpcode299",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b2b08",
+    "overlay": 21,
+    "source": "IRBI 0x21b2b08: 3 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 299 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "420": {
+    "spec": {
+      "name": "NativeOpcode420",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b5570",
+    "overlay": 21,
+    "source": "IRBI 0x21b5570: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 420 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "492": {
+    "spec": {
+      "name": "NativeOpcode492",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b1c4",
+    "overlay": 10,
+    "source": "IRBI 0x215b1c4: 5 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 492 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "443": {
+    "spec": {
+      "name": "NativeOpcode443",
+      "args": []
+    },
+    "handler": "0x21cc428",
+    "overlay": 21,
+    "source": "IRBI 0x21cc428: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 443 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "302": {
+    "spec": {
+      "name": "NativeOpcode302",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b2b5c",
+    "overlay": 21,
+    "source": "IRBI 0x21b2b5c: 3 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 302 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "191": {
+    "spec": {
+      "name": "NativeOpcode191",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21afd64",
+    "overlay": 21,
+    "source": "IRBI 0x21afd64: 4 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 191 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "224": {
+    "spec": {
+      "name": "NativeOpcode224",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x215a950",
+    "overlay": 10,
+    "source": "IRBI 0x215a950: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 224 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "419": {
+    "spec": {
+      "name": "NativeOpcode419",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b5534",
+    "overlay": 21,
+    "source": "IRBI 0x21b5534: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 419 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "326": {
+    "spec": {
+      "name": "NativeOpcode326",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b5310",
+    "overlay": 21,
+    "source": "IRBI 0x21b5310: 2 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 326 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "418": {
+    "spec": {
+      "name": "NativeOpcode418",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b54f4",
+    "overlay": 21,
+    "source": "IRBI 0x21b54f4: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 418 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "300": {
+    "spec": {
+      "name": "NativeOpcode300",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b2d3c",
+    "overlay": 21,
+    "source": "IRBI 0x21b2d3c: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 300 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "469": {
+    "spec": {
+      "name": "NativeOpcode469",
+      "args": []
+    },
+    "handler": "0x2164868",
+    "overlay": 10,
+    "source": "IRBI 0x2164868: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 469 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "408": {
+    "spec": {
+      "name": "NativeOpcode408",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b267c",
+    "overlay": 21,
+    "source": "IRBI 0x21b267c: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 408 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "601": {
+    "spec": {
+      "name": "NativeOpcode601",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21aed78",
+    "overlay": 21,
+    "source": "IRBI 0x21aed78: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 601 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "407": {
+    "spec": {
+      "name": "NativeOpcode407",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b263c",
+    "overlay": 21,
+    "source": "IRBI 0x21b263c: 2 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 407 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "342": {
+    "spec": {
+      "name": "NativeOpcode342",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b4dc4",
+    "overlay": 21,
+    "source": "IRBI 0x21b4dc4: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 342 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "122": {
+    "spec": {
+      "name": "NativeOpcode122",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b2004",
+    "overlay": 21,
+    "source": "IRBI 0x21b2004: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 122 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "409": {
+    "spec": {
+      "name": "NativeOpcode409",
+      "args": [
+        "u16"
+      ]
+    },
+    "handler": "0x21b26f8",
+    "overlay": 21,
+    "source": "IRBI 0x21b26f8: 1 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 409 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "597": {
+    "spec": {
+      "name": "NativeOpcode597",
+      "args": [
+        "u16",
+        "u16",
+        "u16",
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21d2e54",
+    "overlay": 21,
+    "source": "IRBI 0x21d2e54: 6 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 597 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "410": {
+    "spec": {
+      "name": "NativeOpcode410",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b26b4",
+    "overlay": 21,
+    "source": "IRBI 0x21b26b4: 2 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 410 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "598": {
+    "spec": {
+      "name": "NativeOpcode598",
+      "args": [
+        "u16",
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21d2f00",
+    "overlay": 21,
+    "source": "IRBI 0x21d2f00: 3 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 598 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "406": {
+    "spec": {
+      "name": "NativeOpcode406",
+      "args": []
+    },
+    "handler": "0x215cd70",
+    "overlay": 10,
+    "source": "IRBI 0x215cd70: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 406 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "600": {
+    "spec": {
+      "name": "NativeOpcode600",
+      "args": []
+    },
+    "handler": "0x21d2f78",
+    "overlay": 21,
+    "source": "IRBI 0x21d2f78: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 600 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "599": {
+    "spec": {
+      "name": "NativeOpcode599",
+      "args": []
+    },
+    "handler": "0x21d2f50",
+    "overlay": 21,
+    "source": "IRBI 0x21d2f50: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 599 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "293": {
+    "spec": {
+      "name": "NativeOpcode293",
+      "args": []
+    },
+    "handler": "0x21b29b0",
+    "overlay": 21,
+    "source": "IRBI 0x21b29b0: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 293 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "581": {
+    "spec": {
+      "name": "NativeOpcode581",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x21b659c",
+    "overlay": 21,
+    "source": "IRBI 0x21b659c: 2 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 581 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "289": {
+    "spec": {
+      "name": "NativeOpcode289",
+      "args": [
+        "u16",
+        "u16"
+      ]
+    },
+    "handler": "0x215b894",
+    "overlay": 10,
+    "source": "IRBI 0x215b894: 2 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 289 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  },
+  "575": {
+    "spec": {
+      "name": "NativeOpcode575",
+      "args": []
+    },
+    "handler": "0x21d2e2c",
+    "overlay": 21,
+    "source": "IRBI 0x21d2e2c: 0 halfword operand reads; context accessors215a4dc/e4/f4 do not advance the script. Verify via tools/research-opelucid-opcodes.py ROM 575 --bytes512. Destination reader21599e8 and raw reader02011330 each consume one halfword.",
+    "rawArgumentWidthsOnly": true,
+    "runtimeSupport": "Descriptor for strict extraction only; does not install runtime semantics"
+  }
+}
