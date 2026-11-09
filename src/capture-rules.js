@@ -14,6 +14,10 @@
   if(id===6){const types=mon.types||String(mon.type||'').split('/'),has=type=>typeof mon.hasType==='function'?mon.hasType(type):types.includes(type)||types.includes(type==='Water'?'Acqua':'Coleottero');return has('Water')||has('Bug')?3:1;}
   if(id===8)return mon.level<30?Math.floor(Math.min(40,41-mon.level)*ONE/10)/ONE:1;
   if(id===9)return context.caught?3:1;
+  // Overlay93:021cbd2e and021cbd82, elapsed battle turns at +0x10.
+  const elapsed=Math.max(0,Math.floor(context.elapsedTurns)||0);
+  if(id===10)return Math.min(16384,4096+1229*elapsed)/4096;
+  if(id===15)return elapsed===0?5:1;
   if(id===13){const periods=context.timePeriods||root.MISTRALTON_BALL?.timePeriods,period=periods?.[context.season??new Date().getMonth()%4]?.[context.hour??new Date().getHours()];return context.terrain==='cave'||context.cave||period===3||period===4?3.5:1;}
   return 1;
  }

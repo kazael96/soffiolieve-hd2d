@@ -52,3 +52,9 @@ data['referenceNewMachineItems']=new_machine_ids
 data['chapterScope']={'zones':""" + repr(selected) + """,'levelCap':43,'nextGym':133,'note':'Catalog reference only; sources require actual event/service integration'}
 """ + marker, 1)
 exec(compile(source, str(Path(__file__).with_name('extract-pinwheel-data.py')), 'exec'))
+
+# Extend the inherited shop table for native Center122 fixed stock8.
+from importlib import util as _util
+_spec=_util.spec_from_file_location("opelucid_market",Path(__file__).with_name("extend-opelucid-market.py"))
+_market=_util.module_from_spec(_spec);_spec.loader.exec_module(_market)
+_market.extend(a.rom,a.output)

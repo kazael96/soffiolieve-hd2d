@@ -25,3 +25,9 @@ source = source.replace('[(519,0),(522,0),(524,0),(527,0),(532,1),(535,2)]', rep
 source = source.replace('[14,18,21,150,373]', repr(items)).replace('route3-menu.js', 'opelucid-menu.js').replace('ROUTE3_MENU', 'OPELUCID_MENU')
 exec(compile(source, str(original), 'exec'))
 print('Native051 menu:', len(slots), 'species,', len(items), 'items; reviewed palette selection, no native LUT claim')
+
+# New fixed-stock items also need native ball cells and letter paper.
+import importlib.util as _util
+_spec=_util.spec_from_file_location("opelucid_market_assets",Path(__file__).with_name("extract-opelucid-market-assets.py"))
+_market_assets=_util.module_from_spec(_spec);_spec.loader.exec_module(_market_assets)
+_market_assets.extract(a.rom,a.output,root.parent/"opelucid-market-assets-work")
