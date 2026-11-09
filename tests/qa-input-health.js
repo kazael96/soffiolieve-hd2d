@@ -15,5 +15,12 @@
    assert(){if(failure)throw failure;}
   };
  }
- const api={create};root.QAInputHealth=api;if(typeof module!=='undefined')module.exports=api;
+ function waypointKey(p,goal,preferred,{strict=false,locked=false}={}){
+  if(locked)return null;if(strict)return preferred;
+  const dx=goal.x-p.x,dy=goal.y-p.y;
+  if(Math.abs(dx)>.12)return dx>0?'ArrowRight':'ArrowLeft';
+  if(Math.abs(dy)>.12)return dy>0?'ArrowDown':'ArrowUp';
+  return null;
+ }
+ const api={create,waypointKey};root.QAInputHealth=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);
