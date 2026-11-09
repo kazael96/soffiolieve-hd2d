@@ -80,6 +80,8 @@
   }
   function face(id,dir){const n=actor(id);if(!n)return;if(id===255)facing=frames[dir];else pose(n,dir);}
   function putActor(record){
+    const graphic=window.LeagueGraphics?.model(native.zone,record.model)??record.model;
+    if(graphic!==record.model)record={...record,model:graphic};
     if(native.zone===343&&record.model===162)record={...record,model:209};
     if(record.rail&&!record.railOriginal&&window.NativeRails?.has(native.zone))record=NativeRails.actor(native.zone,record);
     const n={...world(record.x,record.z),...(record.railOriginal?{railOriginal:record.railOriginal,railHeight:record.y/65536}:{}),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:(record.y||0)/65536};

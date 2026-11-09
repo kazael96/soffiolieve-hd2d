@@ -1,0 +1,107 @@
+{
+  "source": "IRBI program242 entry1, original operands/offsets; Native406 is isolated only in the graphic-selection test",
+  "scripts": {
+    "242": {
+      "entries": [
+        113,
+        68,
+        1544,
+        1586,
+        1628,
+        1670,
+        1712,
+        1754,
+        1194,
+        1354,
+        925,
+        1044
+      ],
+      "supportedEntries": [
+        1
+      ],
+      "code": {
+        "68": {
+          "op": 406,
+          "name": "NativeOpcode406",
+          "args": [],
+          "end": 70
+        },
+        "70": {
+          "op": 224,
+          "name": "NativeOpcode224",
+          "args": [
+            32784
+          ],
+          "end": 74
+        },
+        "74": {
+          "op": 9,
+          "name": "StackPush",
+          "args": [
+            32784
+          ],
+          "end": 78
+        },
+        "78": {
+          "op": 8,
+          "name": "StackPushConst",
+          "args": [
+            21
+          ],
+          "end": 82
+        },
+        "82": {
+          "op": 17,
+          "name": "StackCmp",
+          "args": [
+            1
+          ],
+          "end": 86
+        },
+        "86": {
+          "op": 31,
+          "name": "VMJumpIf",
+          "args": [
+            255,
+            105
+          ],
+          "end": 93
+        },
+        "93": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            16416,
+            180
+          ],
+          "end": 99
+        },
+        "99": {
+          "op": 30,
+          "name": "VMJump",
+          "args": [
+            111
+          ],
+          "end": 105
+        },
+        "111": {
+          "op": 2,
+          "name": "VMHalt",
+          "args": [],
+          "end": 113
+        },
+        "105": {
+          "op": 40,
+          "name": "WorkSetConst",
+          "args": [
+            16416,
+            92
+          ],
+          "end": 111
+        }
+      },
+      "movements": {},
+      "sourceSha256": "ec94585af523854c50b9455818bb04aa2424d553e57d14c17648e0f68725c896"
+    }
+  }
+}
