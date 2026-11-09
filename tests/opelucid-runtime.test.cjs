@@ -44,7 +44,11 @@ test('native119 turns the player for405; the independent slide can autosave and 
  for(let i=0;i<200&&!c.NativeStory.fieldCheckpointAllowed;i++){await Promise.resolve();c.Journey.step(1/300,false);}
  assert.equal(c.facing,0);assert.equal(c.OpelucidGym.rails.busy,true);assert.equal(c.NativeStory.vm.running,false);assert.equal(c.NativeStory.fieldCheckpointAllowed,true);assert.equal(c.Journey.save(true),true);
  const saved=c.StoryState.read(c.localStorage);assert.ok(saved.original.brycenIceRide);const restored=await setup(saved);assert.equal(restored.OpelucidGym.rails.busy,true);assert.equal(restored.player.x,saved.player.x);assert.equal(restored.player.y,saved.player.y);
- await drain(restored,Promise.resolve(),0,'p1',()=>!restored.NativeStory.locked);assert.equal(restored.NativeStory.state.brycenIceRide,undefined);assert.ok(Math.abs(restored.player.x+4.5)<1e-6);assert.ok(Math.abs(restored.player.y-44.5)<1e-6);
+ await drain(restored,Promise.resolve(),0,'p1',()=>!restored.NativeStory.locked);assert.equal(restored.NativeStory.state.brycenIceRide,undefined);
+ // Native163 is line2/front2 at (-4.5,42.5). The old endpoint44.5
+ // is two blocked padding cells beyond the playable landing boundary.
+ assert.ok(Math.abs(restored.player.x+4.5)<1e-6);assert.ok(Math.abs(restored.player.y-42.5)<1e-6,JSON.stringify(restored.player));assert.equal(restored.blocked(restored.player.x,restored.player.y),false);
+ await drain(c,Promise.resolve(),0,'p1',()=>!c.NativeStory.locked);assert.equal(c.NativeStory.state.brycenIceRide,undefined);assert.equal(restored.player.x,c.player.x);assert.equal(restored.player.y,c.player.y);assert.equal(restored.NativeStory.state.fieldHeight,c.NativeStory.state.fieldHeight);
 });
 
 test('corrupt puzzle task is isolated and machine text references never grant an unavailable TM',async()=>{

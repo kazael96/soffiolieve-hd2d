@@ -349,3 +349,6 @@ La nuova esecuzione headless-twentyfifth-verified riguarda la privata25 2da29698
 
 
 Esito headless25 concluso: PASS su privata2da296982e7e370f, fixture765902f84d3bee1a,24 casi/tre formati e114 PNG esportati (38 per formato). Ispezionate catture della stanza164, risucchio161, atterraggio, puzzle/ritorno e servizi; il corpo sommerso non emerge sotto il pavimento. `headless-twentyfifth-verified/report.json` registra backend ed errori; i rapporti esportati sono verificati dal runner oltre al DOM.14 regressioni Node del banco e1Python PASS. La suite completa44 fasi deep-twentyfifth-final resta da eseguire; nessuna pubblicazione051 da questi soli PASS.
+
+
+La prima CLI25 trova una vecchia aspettativa di ripresa della rampa0: y44.5 è il padding finale bloccato, mentre il confine163 nativo linea2/front2 è(-4.5,42.5). La candidata è corretta e non è cambiata; il test controlla ora confine percorribile e uguaglianza di posizione/quota fra ripresa e viaggio continuo.26 prove del file passano. Conservare il FAIL di deep-twentyfifth-verified e ripetere la suite completa finale; non attribuire al runtime una correzione fatta soltanto alla fixture.
