@@ -22,9 +22,54 @@ def load(name, file):
 
 gym = load('league_gym', 'extract-league-gym.py')
 geo = load('league_geography', 'export-league-scenes.py')
+seasons = load('league_season_export', 'extract-league-seasons.py')
+builder = load('league_geometry_staging', '../scripts/build-site.py')
 
 
 class LeagueGeometryTests(unittest.TestCase):
+    def test_season_export_keeps_native_rails_and_refuses_unintegrated_floor_changes(self):
+        import ast
+        source = seasons.build_source()
+        ast.parse(source)
+        self.assertEqual(len(seasons.ZONES), 12)
+        self.assertIn(214, seasons.ZONES)
+        self.assertNotIn(228, seasons.ZONES)
+        self.assertIn("if not is_ng: surfaces.append", source)
+        self.assertIn('assert member==original', source)
+        self.assertIn('Seasonal floor permissions changed', source)
+        self.assertIn('_quiet_run=quiet_run', source)
+
+    def test_season_partition_keeps_unmodified_center_and_only_current_family_dependencies(self):
+        manifest = {'families': {name: {'src': 'league-' + name + '-assets.js', 'zones': zones,
+                                     'pack': 'assets/league-' + name + '-pack.bin', 'variable': 'LEAGUE_PART_ASSETS'}
+                                 for name, zones in geo.FAMILIES.items() if name in ['route10', 'badgeGates', 'victoryOutside', 'leagueEntry']}}
+        catalog = {'season': 3, 'models': {}, 'textures': {}, 'scenes': {}}
+        with builder.build_staging() as folder:
+            output = Path(folder)
+            for name, part in manifest['families'].items():
+                base = {'family': name, 'models': {}, 'textures': {}, 'scenes': {}, 'sprites': {'105': ['juniper.png']}}
+                for zone in part['zones']:
+                    model, texture = 'base-' + str(zone), 'base-tex-' + str(zone)
+                    base['models'][model] = {'groups': [{'texture': texture}]}
+                    base['textures'][texture] = {'src': 'base.png'}
+                    base['scenes'][str(zone)] = {'instances': [{'model': model}]}
+                    if zone != 146:
+                        model, texture = 'native-' + str(zone), 'native-tex-' + str(zone)
+                        catalog['models'][model] = {'groups': [{'texture': texture}]}
+                        catalog['textures'][texture] = {'src': 'season.png'}
+                        catalog['scenes'][str(zone)] = {'instances': [{'model': model}]}
+                (output / part['src']).write_text('window.LEAGUE_PART_ASSETS=' + json.dumps(base) + ';', encoding='utf-8')
+            seasons.split_catalog(catalog, output, manifest)
+            read = lambda file: json.loads((output / file).read_text(encoding='utf-8').split('=', 1)[1].rstrip(';\n'))
+            center = read('league-leagueEntry-season3-assets.js')
+            self.assertEqual(set(center['models']), {'base-146', 'native-136'})
+            self.assertEqual(center['scenes']['146']['instances'][0]['model'], 'base-146')
+            self.assertEqual(center['sprites'], {'105': ['juniper.png']})
+            route = read('league-route10-season3-assets.js')
+            self.assertEqual(set(route['models']), {'native-355'})
+            self.assertEqual(route['season'], 3)
+            self.assertEqual(manifest['families']['route10']['seasons']['3']['zones'], [355])
+
     def test_native_button_pattern_uses_both_texture_palette_pairs_and_returns_to_rest(self):
         fixture = json.loads((ROOT / 'tests/fixtures/drayden-button-pattern.json').read_text(encoding='utf-8'))
         raw = bytes.fromhex(fixture['hex'])

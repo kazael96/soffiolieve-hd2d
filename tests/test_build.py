@@ -16,6 +16,26 @@ spec.loader.exec_module(builder)
 
 
 class BuildTests(unittest.TestCase):
+    def test_geographic_seasons_produce_separate_complete_family_packs(self):
+        with builder.build_staging() as folder:
+            site = Path(folder)
+            (site / 'assets').mkdir()
+            (site / 'assets/body.png').write_bytes(b'pixels')
+            part = {'src': 'league-route10-assets.js', 'pack': 'assets/league-route10-pack.bin', 'zones': [355], 'seasons': {}}
+            (site / part['src']).write_text('window.LEAGUE_PART_ASSETS={"extraImages":["assets/body.png"]};', encoding='utf-8')
+            for season in range(4):
+                row = {'src': f'league-route10-season{season}-assets.js', 'pack': f'assets/league-route10-season{season}-pack.bin', 'season': season, 'zones': [355]}
+                part['seasons'][str(season)] = row
+                (site / row['src']).write_text('window.LEAGUE_PART_ASSETS={"extraImages":["assets/body.png"]};', encoding='utf-8')
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps({'families': {'route10': part}}) + ';', encoding='utf-8')
+            packs = builder.geographic_packs(site, 'league')
+            self.assertEqual(len(packs), 5)
+            self.assertTrue(all(row['images'] == 1 for row in packs.values()))
+            del part['seasons']['3']
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps({'families': {'route10': part}}) + ';', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'Incomplete geographic seasons'):
+                builder.geographic_packs(site, 'league')
+
     def test_geographic_league_pack_keeps_direct_parent_images_and_explicit_material_patterns(self):
         with builder.build_staging() as folder:
             site = Path(folder)

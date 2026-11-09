@@ -11,8 +11,8 @@ function setup(){
  c.LeagueGym={install(){},prepare:async()=>{prepared.push(121);return true;},release:()=>released.push('gym')};
  c.RuntimeAssets={releaseImages:f=>released.push(f),preloadImages:async()=>true,bytes:async file=>{
   reads.push(file);if(file.endsWith('surface-data.js'))return Buffer.from('window.'+(file.startsWith('league')?'LEAGUE':'OPELUCID')+'_SURFACE_DATA='+JSON.stringify({grids:{},scenes:{120:[{member:file.startsWith('league')?999:74}]}})+';');
-  const pair=[...Object.entries(c.OPELUCID_PARTS.families),...Object.entries(c.LEAGUE_PARTS.families)].find(([name,part])=>part.src===file);if(!pair)throw Error('Unexpected catalog '+file);
-  const [name,part]=pair;return Buffer.from('window.'+(part.variable||'OPELUCID_PART_ASSETS')+'='+JSON.stringify({family:name,models:{[name]:{groups:[]}},textures:{},scenes:Object.fromEntries(part.zones.map(z=>[z,{instances:[{model:name}]}])),sprites:{}})+';');
+  const pair=[...Object.entries(c.OPELUCID_PARTS.families),...Object.entries(c.LEAGUE_PARTS.families)].flatMap(([name,part])=>[[name,part],...Object.values(part.seasons||{}).map(row=>[name,row])]).find(([name,part])=>part.src===file);if(!pair)throw Error('Unexpected catalog '+file);
+  const [name,part]=pair;return Buffer.from('window.'+(part.variable||'OPELUCID_PART_ASSETS')+'='+JSON.stringify({family:name,...(part.season!==undefined?{season:part.season}:{}),models:{[name]:{groups:[],season:part.season??0}},textures:{},scenes:Object.fromEntries(part.zones.map(z=>[z,{instances:[{model:name}]}])),sprites:{}})+';');
  }};
  vm.createContext(c);for(const file of ['league-geography','opelucid-resource-cache','opelucid-family-loader','opelucid-scene-window','opelucid-bootstrap'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
  return {c,reads,released,prepared};
@@ -31,4 +31,11 @@ test('an unavailable Gym controller leaves the descriptor pending and can recove
 });
 test('supplementary surface records cannot replace the previous owner of the three shared scenes',async()=>{
  const {c}=setup();await c.OpelucidChapter.ensure(114);assert.equal(c.samplerInput.scenes[120][0].member,74);
+});
+function seasonal(f){const {c}=f;let current=0;c.FieldSeason={current:()=>current};vm.runInContext(fs.readFileSync('src/league-seasons.js','utf8'),c);const part=c.LEAGUE_PARTS.families.leagueEntry;part.seasons=Object.fromEntries([0,1,2,3].map(season=>[season,{...part,season,src:'league-leagueEntry-season'+season+'-assets.js',pack:'assets/league-leagueEntry-season'+season+'-pack.bin'}]));return value=>current=value;}
+test('a season change uses a new part under the same canonical scene handle and three-family budget',async()=>{
+ const f=setup(),set=seasonal(f),{c,reads,released}=f,scene=c.OpelucidChapter.scene(136);await c.OpelucidChapter.ensure(136);assert.equal(c.OPENING_ASSETS.models.leagueEntry.season,0);set(3);await scene.ensureAssets();assert.equal(c.OPENING_ASSETS.scenes.zone136,scene);assert.equal(c.OPENING_ASSETS.models.leagueEntry.season,3);assert.equal(c.OpelucidChapter.loader.stats().limit,3);assert.ok(reads.includes('league-leagueEntry-season3-assets.js'));assert.ok(released.includes('assets/league-leagueEntry-season0-pack.bin'));
+});
+test('a pending preparation for the old season cannot complete as the current same-scene request',async()=>{
+ const f=setup(),set=seasonal(f),{c}=f,waiting=new Map();c.RuntimeAssets.preloadImages=pack=>new Promise(done=>waiting.set(pack,done));const old=c.OpelucidChapter.ensure(136);await new Promise(done=>setImmediate(done));assert.ok(waiting.has('assets/league-leagueEntry-season0-pack.bin'));set(1);const current=c.OpelucidChapter.ensure(136);await new Promise(done=>setImmediate(done));waiting.get('assets/league-leagueEntry-season0-pack.bin')(true);await new Promise(done=>setImmediate(done));assert.ok(waiting.has('assets/league-leagueEntry-season1-pack.bin'));waiting.get('assets/league-leagueEntry-season1-pack.bin')(true);assert.equal(await old,false);assert.equal(await current,true);assert.equal(c.OPENING_ASSETS.models.leagueEntry.season,1);assert.equal(c.OpelucidChapter.scene(136).assetsPending,false);
 });

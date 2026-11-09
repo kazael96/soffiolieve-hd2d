@@ -7,6 +7,7 @@
   if(!match)throw Error('Catalogo geografico non valido: '+name);
   let data;try{data=JSON.parse(match[1]);}catch{throw Error('Catalogo geografico non valido: '+name);}
   if(data.family!==name||!data.models||!data.textures||!data.scenes||!data.sprites||!Array.isArray(part.zones))throw Error('Catalogo geografico incompleto: '+name);
+  if(part.season!==undefined&&data.season!==part.season)throw Error('Stagione geografica errata: '+name);
   const actual=Object.keys(data.scenes).map(Number).sort((a,b)=>a-b),expected=[...part.zones].sort((a,b)=>a-b);
   if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error('Mappe geografiche incomplete: '+name);
   const sceneRows=Object.values(data.scenes);
@@ -21,14 +22,21 @@
   for(const model of Object.values(data.models))for(const group of model.groups||[])if(group.texture&&!data.textures[group.texture])throw Error('Texture geografica mancante: '+name);
   return data;
  }
- function create({manifest,assets,resources=root.RuntimeAssets,resource=file=>root.NativeTextLayout.resource(file),cacheFactory=root.OpelucidResourceCache?.create,onEvict=()=>{}}){
+ function create({manifest,assets,resources=root.RuntimeAssets,resource=file=>root.NativeTextLayout.resource(file),cacheFactory=root.OpelucidResourceCache?.create,onEvict=()=>{},resolvePart=(name,part)=>part}){
   if(!manifest?.families||!resources?.releaseImages||typeof cacheFactory!=='function')throw Error('Trasporto geografico non disponibile');
-  const pack=part=>resource(part.pack);
-  function release(name,data){resources.releaseImages(pack(manifest.families[name]));onEvict(name,data);}
-  return cacheFactory({assets,manifest:manifest.families,limit:manifest.residentLimit,onEvict:release,onDiscard:release,loadFamily:async(name,part)=>{
-   const data=parse(await resources.bytes(resource(part.src)),name,part);
-   if(!await resources.preloadImages(pack(part))){resources.releaseImages(pack(part));throw Error('Immagini geografiche incomplete: '+name);}
-   return data;
+  const pack=part=>resource(part.pack),loadedParts=new WeakMap(),same=(a,b)=>a.src===b.src&&a.pack===b.pack&&a.season===b.season;
+  function release(name,data){resources.releaseImages(pack(loadedParts.get(data)||manifest.families[name]));loadedParts.delete(data);onEvict(name,data);}
+  return cacheFactory({assets,manifest:manifest.families,limit:manifest.residentLimit,onEvict:release,onDiscard:release,loadFamily:async(name,base)=>{
+   for(let changes=0;changes<4;changes++){
+    const part=resolvePart(name,base),current=()=>same(part,resolvePart(name,base)),data=parse(await resources.bytes(resource(part.src)),name,part);
+    if(!current())continue;
+    let images;try{images=await resources.preloadImages(pack(part));}catch(error){resources.releaseImages(pack(part));if(!current())continue;throw error;}
+    let valid;try{valid=current();}catch(error){resources.releaseImages(pack(part));throw error;}
+    if(!valid){resources.releaseImages(pack(part));continue;}
+    if(!images){resources.releaseImages(pack(part));throw Error('Immagini geografiche incomplete: '+name);}
+    loadedParts.set(data,part);return data;
+   }
+   throw Error('La stagione geografica continua a cambiare: '+name);
   }});
  }
  const api={create,parse};root.OpelucidFamilyLoader=api;if(typeof module!=='undefined')module.exports=api;

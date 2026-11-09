@@ -85,6 +85,13 @@ def geographic_packs(site, prefix='opelucid'):
         if not re.fullmatch(pattern,name) or part['src']!=f'{prefix}-{name}-assets.js' or part['pack']!=f'assets/{prefix}-{name}-pack.bin':
             raise ValueError('Invalid geographic pack path')
         result[name]={'pack':part['pack'],**startup_pack(site,[part['src']],part['pack'],strict=True)}
+        variants=part.get('seasons',{})
+        if variants and (prefix!='league' or set(variants)!={'0','1','2','3'}):raise ValueError('Incomplete geographic seasons')
+        for season,variant in variants.items():
+            suffix=f'{name}-season{season}'
+            if variant.get('season')!=int(season) or variant['src']!=f'league-{suffix}-assets.js' or variant['pack']!=f'assets/league-{suffix}-pack.bin' or sorted(variant.get('zones',[]))!=sorted(part.get('zones',[])):
+                raise ValueError('Invalid geographic season path or zones')
+            result[suffix]={'pack':variant['pack'],**startup_pack(site,[variant['src']],variant['pack'],strict=True)}
     return result
 
 
@@ -150,7 +157,7 @@ def build(archive, target):
         opelucid_packs = geographic_packs(site)
         league_packs = geographic_packs(site, 'league')
         for season in range(4):
-            for prefix in ['field','opelucid','league']:
+            for prefix in ['field','opelucid']:
                 if (site / f'{prefix}-season-{season}-assets.js').exists():
                     startup_pack(site,[f'{prefix}-season-{season}-assets.js'],f'assets/{prefix}-season-{season}-pack.bin')
         entrypoints = bundle_entries(site)
@@ -160,7 +167,7 @@ def build(archive, target):
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
         for season in range(4):
-            for prefix in ['field','opelucid','league']:
+            for prefix in ['field','opelucid']:
                 pack = site / f'assets/{prefix}-season-{season}-pack.bin'
                 if pack.exists():
                     asset_hashes[pack.relative_to(site).as_posix()] = hashlib.sha256(pack.read_bytes()).hexdigest()
