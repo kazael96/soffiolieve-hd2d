@@ -83,6 +83,8 @@ Un controllo fallito va corretto o segnalato con causa e limite concreto; non ri
 
 ### Efficienza del ciclo di sviluppo e dei rilasci
 
+Dal9 novembre2026 l'utente richiede lavoro senza controllo del PC. Le verifiche grafiche vengono eseguite in un browser headless separato e con profilo temporaneo; evitare interazioni con mouse/tastiera, cambio del focus o browser personali. `scripts/test-browser-headless.cjs` avvia e arresta il proprio server locale, esegue le fixture isolate nei tre formati e conserva rapporti e PNG. La modalità è sempre invisibile e non accetta un'opzione headed. Distinguere il rendering software ANGLE SwiftShader da una GPU Android fisica: l'audio interno può essere attivo mentre l'uscita del processo di test rimane muta. Conservare il controllo manuale delle immagini esportate; non richiedere che l'utente mantenga una finestra in primo piano.
+
 Richiesta del9 novembre2026: velocizzare i rilasci conservando la qualità. Durante lo sviluppo usare prima regressioni mirate al componente e prove brevi per localizzare i difetti; raggruppare correzioni coerenti prima di ricostruire una candidata. La candidata destinata alla pubblicazione deve comunque superare l'intera suite e i replay richiesti nei tre formati. Non trasformare un FAIL in PASS aumentando soltanto il timeout o eliminando l'asserzione.
 
 Riutilizzare un rapporto soltanto per gli stessi sorgenti/asset e lo stesso comportamento verificato, con revisione e perimetro espliciti. Una modifica del controllore condiviso richiede le regressioni dei capitoli che lo usano; la cache non sostituisce la verifica del risultato. Conservare separatamente build, fixture e rapporti per poter ricondurre ogni esito alla candidata esatta.

@@ -12,9 +12,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('site', type=Path)
 parser.add_argument('qa', type=Path)
 parser.add_argument('--port', type=int, default=4182)
-args = parser.parse_args()
+args = None
 
 class Handler(SimpleHTTPRequestHandler):
+    protocol_version = 'HTTP/1.1'
     def do_POST(self):
         # A local-only artifact sink keeps long GPU runs reviewable even if the
         # browser automation connection is interrupted. Never part of Pages.
@@ -23,7 +24,8 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(404)
             return
         origin = self.headers.get('Origin', '')
-        if origin not in (f'http://127.0.0.1:{args.port}', f'http://localhost:{args.port}'):
+        port = self.server.server_port
+        if origin not in (f'http://127.0.0.1:{port}', f'http://localhost:{port}'):
             self.send_error(403)
             return
         try:
@@ -72,5 +74,8 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, *unused):
         pass
 
-print(f'QA http://127.0.0.1:{args.port}/qa-browser.html', flush=True)
-ThreadingHTTPServer(('127.0.0.1', args.port), partial(Handler, directory=str(args.site.resolve()))).serve_forever()
+if __name__ == '__main__':
+    args = parser.parse_args()
+    server = ThreadingHTTPServer(('127.0.0.1', args.port), partial(Handler, directory=str(args.site.resolve())))
+    print(f'QA http://127.0.0.1:{server.server_port}/qa-browser.html', flush=True)
+    server.serve_forever()
