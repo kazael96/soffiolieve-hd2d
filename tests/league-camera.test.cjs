@@ -7,3 +7,7 @@ test('native camera motion is continuous and returns exactly to the low user vie
 test('scene/error cancellation restores missing properties and repeated presets keep the original field baseline',()=>{
  const r={zoom:1.4};C.begin(r,preset)(1);C.begin(r,preset)(1);C.reset(r);for(const k of ['cameraPitch','yaw','storyCameraHeight'])assert.equal(Object.hasOwn(r,k),false);assert.equal(C.returning(r),null);assert.throws(()=>C.begin(r,{targetFx:[NaN,0,0]}),/non valido/);
 });
+test('the real renderer keeps a nonzero native story yaw until the camera returns',()=>{
+ const c={window:{}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/world3d.js'),'utf8')+'\nwindow.Renderer=VillageRenderer;',c);const r=Object.assign(Object.create(c.window.Renderer.prototype),{scene:{zone:214},contextLost:true,zoom:1.4});
+ C.begin(r,{...preset,yawTurn16:163})(1);r.draw(0,[]);assert.ok(Math.abs(r.yaw-163*Math.PI*2/65536)<1e-12);assert.equal(r.storyCameraYaw,r.yaw);C.returning(r)(1);r.draw(0,[]);assert.equal(r.yaw,0);assert.equal(Object.hasOwn(r,'storyCameraYaw'),false);
+});

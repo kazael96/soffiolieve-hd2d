@@ -71,10 +71,11 @@
   const fieldMotion=window.IcirrusFieldMotion?.create({state:()=>native,actor,sound:id=>AudioEngine.playSound(id)});
   const fieldFall=window.OpelucidFieldFall?.create({state:()=>native,actor,ground:(x,y)=>renderer.groundHeight(x,y),sound:id=>AudioEngine.playSound(id)});
   const quicksand=window.OpelucidQuicksand?.create({state:()=>native,hero:()=>player,ground:(x,y)=>renderer.groundHeight(x,y)});
+  const slide=window.LeagueSlide?.create({state:()=>native,pose,sound:id=>AudioEngine.playSound(id),stop:id=>AudioEngine.stopSound?.(id)});
   async function prepareNpcFall(body,ids){await warmFieldSounds(ids);if(native.zone!==body.fieldZone)return;const prepare=async()=>{const required=[...fieldActors(),body];await renderer.requireActors?.(required);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(required)))throw renderer.loadingError||Error('Grafica della discesa non pronta');};if(renderer.resourceGate)await renderer.resourceGate('npc-sand-'+body.name,prepare);else await prepare();}
   async function warmFieldSounds(ids){if(!AudioEngine.enabled)return;const tracks=[];try{const load=async()=>{for(const track of tracks)track.stop();tracks.length=0;for(const id of ids){const record=window.FIELD_AUDIO?.[id];if(!record)throw Error('Suono originale di campo mancante: '+id);const track=AudioEngine.createCinematic(record.src);tracks.push(track);await track.prepare();}};if(renderer.resourceGate)await renderer.resourceGate('native-field-sounds-'+ids.join('-'),load);else await load();}finally{for(const track of tracks)track.stop();}}
   function pose(n,dir,step=0){
-    if(!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
+    if(!n.nativeSlide&&!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
     n.height=window.MistraltonGym?.actorHeight(n,n.height)??n.height;
     n.direction=dir;const fieldFrame=window.MistraltonPuzzles?.actorFrame?.(n);if(fieldFrame!==null&&fieldFrame!==undefined){n.frame=fieldFrame;n.flip=false;return;}const count=OPENING_SPRITES[n.name]?.length||window.ROM_SPRITES?.[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
@@ -109,6 +110,7 @@
     }
     const saved=native.actors?.[native.zone]||[];
     for(const n of npcs){const previous=saved.find(p=>p.uid===n.uid),record=data().actors.find(p=>p.id===n.uid);if(previous&&(!record.flag||!(native.actorFlags?.[native.zone]||[]).includes(record.flag)))Object.assign(n,structuredClone(previous));}
+    slide?.adopt(previousActors,npcs);
     if(native.zone===199)for(const n of npcs)if(n.model<162)n.height=window.IcirrusChapter?.surfaceAt(native.zone,n.x,n.y,n.height)?.height??n.height;
 
     if(native.zone===389){
@@ -333,7 +335,7 @@
       queued=null;reservedLiftArrival=null;failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
       state.checkpoint=before;await showPage('La scena originale non può proseguire: '+error.message);
-    }finally{eventRunning=false;if(failed){window.LeagueCamera?.reset(renderer);stopScriptSounds();}if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
+    }finally{eventRunning=false;if(failed){slide?.reset();window.LeagueCamera?.reset(renderer);stopScriptSounds();}if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
     }
   }
   async function command(c,a,v,m){
@@ -546,11 +548,12 @@
       case 'EnableRunningShoes':native.runningShoes=true;break;
       case 'MapReplaceIsEventSet':m.set(a[1],native.roomMess?1:0);break;
       case 'EVCameraInit':window.LeagueCamera?.reset(renderer);renderer.storyCamera=[...renderer.center];break;
-      case 'EVCameraEnd':case 'EVCameraRebind':if(cameraTask?.view){cameraTask.resolve();cameraTask=null;}window.LeagueCamera?.reset(renderer);renderer.storyCamera=null;break;
+      case 'EVCameraEnd':case 'EVCameraRebind':if(native.zone===214&&slide?.returnPromise)await slide.returnPromise;if(cameraTask?.view){cameraTask.resolve();cameraTask=null;}window.LeagueCamera?.reset(renderer);renderer.storyCamera=null;break;
       case 'EVCameraUnbind':renderer.storyCamera??=[...renderer.center];break;
-      case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6]);break;
+      case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6],native.zone===214&&slide&&window.LeagueCamera?LeagueCamera.begin(renderer,{pitchTurn16:v[0],yawTurn16:v[1],targetFx:[v[3],v[4],v[5]],distanceFx:v[2]}):null);break;
+      case 'NativeOpcode122':{const body=actor(v[0]);if(!slide||native.zone!==214||!body)throw Error('Scivolata originale non disponibile');await prepareNpcFall(body,[1773]);if(native.zone===214&&actor(v[0])===body)await slide.start(body);break;}
       case 'NativeOpcode326':{const preset=window.LEAGUE_CAMERA_PRESETS?.presets?.[v[0]];if(!preset||!window.LeagueCamera)throw Error('Camera originale del portale non disponibile');const [ox,oz]=origin();cameraTo([preset.targetFx[0]/65536-ox,preset.targetFx[2]/65536-oz],v[1],LeagueCamera.begin(renderer,preset));break;}
-      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0],window.LeagueCamera?.returning(renderer));break;
+      case 'EVCameraMoveToDefault':case 'EVCameraReturn':if(native.zone===214&&m.bank===428&&slide?.completedBody&&!slide.returnPromise)slide.returnToRole(slide.completedBody);cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0],window.LeagueCamera?.returning(renderer));break;
       case 'EVCameraWait':if(cameraTask)await cameraTask.promise;break;
       case 'FadeEx':fade(v[1]===0?1:0,v[3]*8,v[0]===3?'#fff':'#000');break;
       case 'FadeExWait':case 'CallLeagueLiftWarp':await fadeTask;break;
@@ -615,6 +618,7 @@
   }
   async function changeZone(zone,x,z,entryHeight){
     window.LeagueCamera?.reset(renderer);
+    slide?.reset();
     quicksand?.reset();
     fieldFall?.reset();
     dragonFlight?.reset();
@@ -802,7 +806,7 @@
     if(renderer.scene.chapter050&&!window.IcirrusGym?.busy){const at=window.IcirrusChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);const rail=renderer.scene.railZone&&NativeRails.locate(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0});if(rail)native.fieldHeight=rail.height;else if(at)native.fieldHeight=at.height;}
     if(renderer.scene.chapter051&&!(window.LeagueGym?.busy||window.OpelucidGym?.busy)){const at=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(at)native.fieldHeight=at.height;}
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
-    try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);c.view?.(f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
+    try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);slide?.tick(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);c.view?.(f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);window.LeagueGym?.tick(dt);fieldMotion?.tick(dt);fieldFall?.tick(dt);quicksand?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
     const held=!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.busy||window.OpelucidGym?.busy)||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);

@@ -198,3 +198,6 @@ Leggere [LEAGUE-GATES-052.md](LEAGUE-GATES-052.md): programmi originali degli ot
 
 
 Consolidamento Portali/ascensori: privata9 33d47d21a8fded5c, suite completa46fasi PASS/1060Node/33Python e GPU12casi/3formati/90PNG della medesima candidata. Leggere LEAGUE-GATES-052.md per ambito, prerequisiti, baseline fallite e limiti. Banco ora conserva log durante ogni fase e separa sei processi con identico180s; nessun file di test escluso. Restano i requisiti grafici/narrativi elencati: questa verifica dei componenti non completa o pubblica052 e non aumenta da sola la storia giocabile.
+
+
+Checkpoint discesa214: leggere [VICTORY-SLIDE-052.md](VICTORY-SLIDE-052.md). Privata10 `2ef099be9ea443de`: comando122, raccordo fisico dello stesso corpo5→0, camera323/yaw e suono1773 collegati.32regressioni mirate e9casiGPU nei3formati PASS;102PNG rivisti. Suite completa della stessa candidata:46fasi PASS/1069Node/33Python,790.532s;14SHA runtime/banco immutati. Non è una consegna052. Restano polvere/player160, continuità finoLega,18contesti, servizi e rifiniture;052 non attivata/pubblicata, finale e MN ancora da realizzare. Nessun controllo delPC.
