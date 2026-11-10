@@ -3,14 +3,15 @@ const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_pro
 const viewports=[['desktop',1280,720],['portrait',390,844],['landscape',844,390]];
 function options(argv){
  const positional=argv.filter(a=>!a.startsWith('--')),flags=new Map();
- for(const arg of argv.filter(a=>a.startsWith('--'))){const at=arg.indexOf('=');if(at<3)throw Error('Use --name=value');const name=arg.slice(2,at);if(!['python','playwright','browser','cases','timeout','renderer','preview'].includes(name)||flags.has(name))throw Error('Unsupported or repeated option: '+name);flags.set(name,arg.slice(at+1));}
+ for(const arg of argv.filter(a=>a.startsWith('--'))){const at=arg.indexOf('=');if(at<3)throw Error('Use --name=value');const name=arg.slice(2,at);if(!['python','playwright','browser','cases','timeout','renderer','preview','fail-fast'].includes(name)||flags.has(name))throw Error('Unsupported or repeated option: '+name);flags.set(name,arg.slice(at+1));}
  if(positional.length!==2)throw Error('Pass built site and external report directory');
  const site=path.resolve(positional[0]),out=path.resolve(positional[1]);if(out===site||out.startsWith(site+path.sep))throw Error('Reports must remain outside the published site');
  const cases=(flags.has('cases')?flags.get('cases'):'qaSubmerged051,qaNpcFalls051,qaQuicksand051').split(',');if(cases.some(id=>!/^qa[A-Za-z0-9]+$/.test(id))||new Set(cases).size!==cases.length)throw Error('Invalid or repeated case ID');
  const timeout=Number(flags.get('timeout')||300000);if(!Number.isInteger(timeout)||timeout<1000||timeout>900000)throw Error('Invalid case budget');
  const renderer=flags.get('renderer')||'auto';if(!['auto','software'].includes(renderer))throw Error('Invalid renderer');
  const preview=flags.get('preview');if(preview!==undefined&&preview!=='leagueGym')throw Error('Invalid isolated preview');
- return {site,out,cases,timeout,renderer,preview,python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};
+ if(flags.has('fail-fast')&&!['true','false'].includes(flags.get('fail-fast')))throw Error('Invalid fail-fast option');
+ return {site,out,cases,timeout,renderer,preview,failFast:flags.get('fail-fast')==='true',python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};
 }
 function launchOptions(browser,renderer='auto'){return {headless:true,chromiumSandbox:true,...(browser?{executablePath:browser}:{}),args:renderer==='software'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]};}
 function validate(report,build,viewport,count){
@@ -39,6 +40,7 @@ async function run(o){
     const saved=JSON.parse(fs.readFileSync(path.join(fixture,`report-${width}x${height}.json`),'utf8'));if(!validate(saved,manifest.revision,{width,height},o.cases.length))throw Error('The exported report does not certify passing cases');row.artifacts={reportSink:true,snapshots:fs.readdirSync(fixture).filter(f=>f.startsWith(width+'x'+height+'-')&&f.endsWith('.png')).length};
     await page.screenshot({path:path.join(o.out,name+'-screen.png')});row.result=row.cases.length===o.cases.length&&row.cases.every(c=>c.result==='PASS')&&!errors.length&&row.report.errors.length===0?'PASS':'FAIL';
    }catch(e){row.result='FAIL';row.error=String(e.stack||e);await page.screenshot({path:path.join(o.out,name+'-failure.png'),timeout:10000}).catch(()=>{});row.dom=await page.content().catch(()=>'');console.error('FAIL '+name+' '+e.message);}finally{row.consoleErrors=consoleErrors;row.failedRequests=failedRequests;await context.close();save();}
+   if(o.failFast&&row.result==='FAIL'){report.stoppedAfterFailure=name;break;}
   }
   report.result=report.viewports.length===viewports.length&&report.viewports.every(r=>r.result==='PASS')?'PASS':'FAIL';
  }catch(e){report.result='FAIL';report.error=String(e.stack||e);throw e;}finally{await browser?.close();service?.server.kill();service?.log.end();save();}

@@ -11,6 +11,10 @@ test('component previews require an explicit supported CLI choice and still use 
  assert.equal(runner.options(['site','reports','--preview=leagueGym']).preview,'leagueGym');assert.equal(runner.options(['site','reports']).preview,undefined);
  assert.throws(()=>runner.options(['site','reports','--preview=arbitrary']),/Invalid isolated preview/);assert.equal(runner.launchOptions().headless,true);
 });
+
+test('development fail-fast is explicit, never enabled by default and rejects ambiguous values',()=>{
+ assert.equal(runner.options(['site','reports']).failFast,false);assert.equal(runner.options(['site','reports','--fail-fast=true']).failFast,true);assert.equal(runner.options(['site','reports','--fail-fast=false']).failFast,false);assert.throws(()=>runner.options(['site','reports','--fail-fast=yes']),/Invalid/);
+});
 test('a cached passing case, wrong candidate, wrong viewport or unfinished replay cannot certify a new case',()=>{
  const r={build:'current',fixture:'fixture',viewport:[390,844],running:false,cases:[{result:'PASS'}],errors:[]};assert.equal(runner.validate(r,'current',{width:390,height:844},1),true);
  for(const [copy,build,vp,count]of [[r,'old',{width:390,height:844},1],[r,'current',{width:844,height:390},1],[r,'current',{width:390,height:844},2],[{...r,running:true},'current',{width:390,height:844},1]])assert.throws(()=>runner.validate(copy,build,vp,count));

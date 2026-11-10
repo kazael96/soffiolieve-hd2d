@@ -41,6 +41,11 @@ test('valid hop checkpoints preserve all native samples and fractions',()=>{
  }
 });
 
+test('continuous button approaches survive load, while corrupt approaches recover without losing inventory',()=>{
+ const n={zone:121,fieldHeight:1,extraItems:{1:4},draydenJump:{version:1,direction:2,origin:[32.5,6.5,1],frame:0,fraction:0,approach:{from:[32.99,6.79,1],progress:.4}}},before=structuredClone(n);clean(n);assert.deepEqual(n,before);
+ for(const bad of [{from:[32.99,6.79,1],progress:Infinity},{from:[32.99,6.79,1],progress:1},{from:[99,99,1],progress:.4},{from:[32.99,6.79,2],progress:.4}]){const copy=structuredClone(before);copy.draydenJump.approach=bad;assert.deepEqual(clean(copy),{x:11.5,y:33.5});assert.equal(copy.draydenJump,undefined);assert.deepEqual(copy.extraItems,{1:4});}
+});
+
 test('corrupt records recover to the native entrance without touching other progress',()=>{
  for(const draydenPuzzle of [null,{}, {version:1,dragons:[{neck:8,arms:[0,1]}]}]){
   const n={zone:121,flags:[33],vars:{12:5},extraItems:{1:2},fieldHeight:12,railCurrent:{zone:121,line:47},draydenPuzzle};

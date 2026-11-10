@@ -945,6 +945,34 @@
   check(renderer.scene.instances.filter(i=>i.drayden!==undefined).length===16,'052 mechanisms missing or duplicated');
   return {views,scope:QA052Preview.scope,input:'Real keyboard/D-pad entrance walk; explicit component task calls, not a complete Gym traversal',audio:'Native clips active, headless speaker output muted',puzzle:LeagueGym.task.snapshot,residentFamilies:OpelucidChapter.loader.stats()};
  });
+ const draydenInput052=/*QA_DRAYDEN_INPUT*/null;
+ case049('qaGymFull052','Aristide052: traversata originale con comandi reali','league052-real-renderer-full-gym-navigation',async()=>{
+  check(window.QA052Preview&&window.LeagueGym&&draydenInput052,'Explicit052 preview/input missing');await seed049();const n=NativeStory.state;n.badges=[0,1,2,3,4,5,6];n.trainerWins=[...new Set([...n.trainerWins,...Object.keys(LEAGUE_DATA.trainers).map(Number)])];for(const key of ['draydenPuzzle','draydenJump','draydenRailWalk'])delete n[key];n.vars[16553]=1;
+  preparedResources049.preview=QA052Preview.scope;preparedResources049.preparedTrainers='Victories prepared to isolate navigation; no battle/story completion proof';await enableField051();await enter049(121,27,49);const rate=Number(new URLSearchParams(location.search).get('gymSpeed')||2);check([1,2,4].includes(rate),'Invalid052 replay speed');GameSpeed.set(rate);
+  const entries=[],views=[await scene049('052 percorso ingresso',0)],visited=[],run=NativeStory.vm.run.bind(NativeStory.vm),oldRun=NativeStory.vm.run;NativeStory.vm.run=(bank,entry)=>{entries.push({bank,entry});return run(bank,entry);};
+  try{for(const [phase,action]of draydenInput052.actions.entries()){
+   const before=entries.length,points=action.walk.filter((p,i,rows)=>i===0||i===rows.length-1||JSON.stringify(rows[i+1]?.input)!==JSON.stringify(p.input)).map(p=>QAInputHealth.nativeWaypoint(p,{tables:LEAGUE_RAILS[121],position:(line,front)=>NativeRails.position(121,line,front),floor:(x,z,h)=>OpelucidChapter.rawSurfaceAt(121,x,z,h)}));let event=false;
+   for(let index=1;index<points.length;index++){
+    const target=points[index],health=QAInputHealth.create(),trail=[];let active=true,raf,previous=performance.now(),held;
+    const arrived=()=>QAInputHealth.nativeReached(player,target,{height:n.fieldHeight,blocked:(x,z)=>blocked(x,z,{surf:true}),current:n.draydenRailWalk,tables:LEAGUE_RAILS[121]})&&!LeagueGym.busy,eventStarted=()=>action.entry!==undefined&&entries.length>before;
+    const steer=()=>{if(!active)return;const now=performance.now(),failed=health.sample({dt:now-previous,held:held||null,locked:NativeStory.locked});let wanted=null;
+     if(!failed&&!arrived()&&!eventStarted()&&!NativeStory.locked){let input=target.input,current=n.draydenRailWalk;
+      if((!LeagueGym.rail.owned&&!target.rail)||current?.mode==='exit'||!current&&target.rail?.mode==='exit'){const dx=target.x-player.x,dz=target.z-player.y;input=Math.abs(dx)>Math.abs(dz)?[Math.sign(dx),0]:[0,Math.sign(dz)];}
+      else if(current?.mode==='walk'&&target.rail?.mode==='walk'&&current.line===target.rail.line){const forward={1:[0,-1],2:[1,0],3:[0,1],4:[-1,0]}[LEAGUE_RAILS[121].lines[current.line].direction],sign=Math.sign(target.rail.front-current.front);if(sign)input=forward.map(v=>v*sign);}
+      wanted=input[0]?input[0]>0?'ArrowRight':'ArrowLeft':input[1]>0?'ArrowDown':'ArrowUp';
+      wanted=QAInputHealth.railKey(player,{x:target.x,y:target.z,rail:target.rail},wanted,current,LEAGUE_RAILS[121]);
+      if(!current||current.mode==='exit')wanted=QAInputHealth.corridorKey(player,{x:target.x,y:target.z},wanted,(x,z)=>blocked(x,z,{surf:true}),NativeStory.occupied);
+     }
+     if(held&&held!==wanted)release049();held=wanted;if(wanted)down049(wanted);trail.push({x:player.x,z:player.y,height:n.fieldHeight,rail:n.draydenRailWalk&&structuredClone(n.draydenRailWalk),held,locked:NativeStory.locked});if(trail.length>12)trail.shift();document.getElementById('world').dataset.qaDraydenProgress=JSON.stringify({phase,index,target,entries,trail});previous=now;raf=requestAnimationFrame(steer);
+    };raf=requestAnimationFrame(steer);
+    try{await auto049(until(()=>{health.assert();return arrived()||eventStarted();},'052 navigation '+phase+':'+index,40000),41000);}catch(error){throw Error(error.message+' QA052_ROUTE '+JSON.stringify({phase,index,target,entries,trail}));}finally{active=false;cancelAnimationFrame(raf);release049();}
+    visited.push({phase,index,actual:{...player},height:n.fieldHeight});if(eventStarted()){event=true;break;}
+   }
+   if(action.entry!==undefined){await auto049(until(()=>entries.length>before&&!NativeStory.locked&&!NativeStory.vm.running,'052 original button finishes '+phase,25000),26000);check(entries[before]?.bank===242&&entries[before]?.entry===action.entry,'052 unexpected native event');views.push(await scene049('052 percorso pulsante '+phase,n.fieldHeight));}
+  }
+  const boss=NativeStory.visualActors().find(a=>a.uid===4&&a.model===180),gx=Math.floor(player.x+16),gz=Math.floor(player.y+16);check(gx===Math.floor(draydenInput052.goal.x+16)&&gz===Math.floor(draydenInput052.goal.z+16)&&Math.abs(n.fieldHeight-12)<.01&&facing===0&&boss&&Math.floor(boss.x+16)===gx&&Math.floor(boss.y+16)===gz-1,'052 native cell/facing/Aristide interaction approach differs');views.push(await scene049('052 arrivo davanti Aristide',n.fieldHeight));return {visited,entries,views,speed:rate,scope:'Continuous real keyboard input from native entrance to the native interaction cell in front of Aristide; victories prepared, no boss battle, rewards, return or story completion certification'};
+  }finally{NativeStory.vm.run=oldRun;release049();}
+ });
  case049('qaGym051','Silvestro051: ingresso, scivolata e interruttore reali','opelucid051-real-renderer-gym-input-and-native-mechanisms',async()=>{
   await seed049({},[576,577,579,678]);const n=NativeStory.state;n.badges=[0,1,2,3,4,5];preparedResources049.badges=[...n.badges];delete n.brycenPuzzle;delete n.brycenIceRide;delete n.brycenIceSlide;
   await enter049(114,17,62);const views=[await scene049('051 palestra ingresso',0)];

@@ -26,7 +26,7 @@
  // Descriptors installed above retain this wrapper, including on a cold saved-map load.
  for(const z of sceneWindow.zones)sceneWindow.scene(z).ensureAssets=()=>sceneWindow.prepare(z);
  function blockedAt(zone,x,z){if(extended&&zone===121){const row=LeagueSurfaces.at(zone,x,z,window.NativeStory?.state.fieldHeight??0,surfaces);return !row||!!(row.flags&1);}if([209,211,...(extended?[214]:[])].includes(zone)){const hint=window.NativeStory?.state.railCurrent,native=window.NativeStory?.state;return !window.NativeRails?.locate(zone,x,z,hint?.zone===zone?hint:{height:native?.zone===zone?native.fieldHeight??0:0});}return sceneWindow.blockedAt(zone,x,z);}
- window.OpelucidChapter={...sceneWindow,blockedAt,ensure:zone=>zone===undefined?metadata():sceneWindow.prepare(zone),loader,get ready(){return !!surfaces;}};
+ window.OpelucidChapter={...sceneWindow,blockedAt,rawSurfaceAt:(zone,x,z,height)=>surfaces?.at(variant(zone)?.surfaceZone??zone,x,z,height),ensure:zone=>zone===undefined?metadata():sceneWindow.prepare(zone),loader,get ready(){return !!surfaces;}};
  Object.assign(PINWHEEL_RAILS,OPELUCID_RAILS);
  if(extended)Object.assign(PINWHEEL_RAILS,window.LEAGUE_RAILS);
 })();

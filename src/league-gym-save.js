@@ -22,7 +22,7 @@
     const r=n.draydenJump;
     if(n.zone!==121||!r||!Array.isArray(r.origin)||!r.origin.every(v=>Number.isFinite(v)&&Math.abs(v)<4096))throw Error('Salto fuori contesto');
     const probe={zone:121,draydenJump:r};jumpFactory({data,state:()=>probe}).busy;
-    n.draydenJump={version:1,direction:r.direction,origin:[...r.origin],frame:r.frame,fraction:r.fraction};
+    n.draydenJump={version:1,direction:r.direction,origin:[...r.origin],frame:r.frame,fraction:r.fraction,...(r.approach?{approach:{from:[...r.approach.from],progress:r.approach.progress}}:{})};
    }catch{delete n.draydenJump;recovered=n.zone===121||recovered;}
   }
   if(n.draydenPuzzle?.task&&n.draydenJump){delete n.draydenPuzzle.task;delete n.draydenJump;recovered=true;}
