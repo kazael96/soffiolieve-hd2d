@@ -8,6 +8,10 @@ test('a cold entrance loads native Gym geography, actors, initializer, original 
  assert.ok(c.NativeStory.visualActors().some(a=>a.model===180&&a.uid===4));assert.equal(c.OpelucidChapter.loader.stats().limit,3);assert.equal(c.elements.get('world').dataset.eventError,undefined);
 });
 
+test('the Gym interior background matches its dark native geometry instead of exposing the outdoor teal void',async()=>{
+ const c=await setup();assert.deepEqual(Array.from(c.renderer.scene.clearColor||[]),[0,0,0]);
+});
+
 test('the retained input route still refers to the reviewed original map, surfaces, rails and puzzle',()=>{
  const fs=require('node:fs'),crypto=require('node:crypto');for(const [file,hash]of Object.entries(reference.sources))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../src',file))).digest('hex'),hash,file);
 });

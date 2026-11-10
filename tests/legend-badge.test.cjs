@@ -1,0 +1,5 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),root=path.resolve(__dirname,'../src');
+test('both native Legend Badge receipts have their original animated models and textures',()=>{
+ const c={};c.window=c;vm.createContext(c);for(const file of ['field-effect-assets.js','mistralton-badge-assets.js','icirrus-badge-assets.js','opelucid-badge-assets.js','league-badge-assets.js'])if(fs.existsSync(path.join(root,file)))vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),c,{filename:file});
+ for(const [id,name]of [[10,'legendBadgeM'],[49,'legendBadgeF']]){const a=c.FIELD_EFFECT_ASSETS,e=a.effects[id];assert.ok(e,'Original Aristide receipt unavailable: '+id);assert.equal(e.item,name);assert.equal(e.label,'Medaglia Leggenda');assert.equal(e.frames,361);assert.equal(e.descriptor[4],16);const file=path.join(root,a.models[name].url),raw=fs.readFileSync(file),doc=JSON.parse(raw.subarray(20,20+raw.readUInt32LE(12)));assert.ok(doc.animations?.length);for(const image of doc.images||[])if(image.uri)assert.ok(fs.existsSync(path.join(path.dirname(file),image.uri)),image.uri);}
+});

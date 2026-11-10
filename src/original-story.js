@@ -517,16 +517,16 @@
       case 'ItemCheckSpace':m.set(a[2],journey.itemCount(v[0])+v[1]<=999?1:0);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.OPELUCID_DATA?.itemNames[item]||window.ICIRRUS_DATA?.itemNames[item]||window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.LEAGUE_DATA?.itemNames[item]||window.OPELUCID_DATA?.itemNames[item]||window.ICIRRUS_DATA?.itemNames[item]||window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],window.OPELUCID_DATA?.itemPockets?.[v[0]]??window.ICIRRUS_DATA?.itemPockets?.[v[0]]??window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
+      case 'ItemGetPocket':m.set(a[1],window.LEAGUE_DATA?.itemPockets?.[v[0]]??window.OPELUCID_DATA?.itemPockets?.[v[0]]??window.ICIRRUS_DATA?.itemPockets?.[v[0]]??window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id=({...window.NATIVE_MACHINE_TEXT?.moves,...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,...window.OPELUCID_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id=({...window.NATIVE_MACHINE_TEXT?.moves,...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,...window.OPELUCID_DATA?.machines,...window.LEAGUE_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -713,6 +713,14 @@
       if(native.zone===199&&window.IcirrusSeasons?.portalOpen(w)===false)continue;
       if(native.zone===90&&w.zone===62&&value(16578)===0)continue;
       if(native.zone===18&&w.zone===19&&value(16522)!==7)continue;
+      // IRBI121 upper return pad: transition5/a0 is entered from any side,
+      // unlike a directional door. Keep its native elevation so approaching
+      // the same X/Z on a lower deck cannot start a teleport through the floor.
+      if(native.zone===121&&w.a===0&&w.transition===5){
+        const point=warpPoint(w),[ox,oz]=origin(),cx=point.x-ox,cz=point.z-oz;
+        if(!(dx||dz)||Math.abs((native.fieldHeight??0)-(w.y<<16>>16)/16)>.25||Math.abs(x-cx)>.45||Math.abs(z-cz)>.45)continue;
+        return enterWarp(w);
+      }
       if(warpDirections[w.a]!==dir)continue;
       const point=warpPoint(w),cx=point.x-origin()[0],cz=point.z-origin()[1];
       const before=(player.x-cx)*ux+(player.y-cz)*uz,after=(x-cx)*ux+(z-cz)*uz,lateral=Math.abs((player.x-cx)*uz-(player.y-cz)*ux);

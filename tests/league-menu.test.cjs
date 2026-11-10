@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),root=path.resolve(__dirname,'../src');
+test('new species and gift items including TM82 have original menu sprites without replacing earlier catalog entries',()=>{
+ const c={MENU_ASSETS:{pokemonIcons:{old:{sentinel:1}}},PARTY_DETAIL_ASSETS:{itemMap:{old:{sentinel:1}}}};c.window=c;vm.createContext(c);for(const file of ['opelucid-data.js','league-data.js','league-menu.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),c);
+ const previous=new Set(Object.values(c.OPELUCID_DATA.progression).map(p=>p.id)),added=Object.values(c.LEAGUE_DATA.progression).filter(p=>!previous.has(p.id));assert.equal(added.length,13);assert.equal(Object.keys(c.LEAGUE_MENU.icons).length,13);assert.equal(c.MENU_ASSETS.pokemonIcons.old.sentinel,1);assert.equal(c.PARTY_DETAIL_ASSETS.itemMap.old.sentinel,1);
+ const check=record=>{const raw=fs.readFileSync(path.join(root,record.src));assert.equal(raw.subarray(1,4).toString(),'PNG');assert.equal(raw.readUInt32BE(16),record.size[0]);assert.equal(raw.readUInt32BE(20),record.size[1]);};
+ for(const p of added){const icon=c.MENU_ASSETS.pokemonIcons[p.id];assert.ok(icon);assert.equal(icon.cells.length,3);assert.equal(icon.source.char,p.id*2+7);for(const cell of icon.cells)check(cell);}
+ for(const [id,name]of Object.entries(c.LEAGUE_DATA.itemNames))if(!c.OPELUCID_DATA.itemNames[id]){const item=c.PARTY_DETAIL_ASSETS.itemMap[id];assert.ok(item,name);assert.equal(item.source.mappingAddress,'0x'+(0x0209eaec+Number(id)*4).toString(16));check(item);}assert.ok(c.PARTY_DETAIL_ASSETS.itemMap[409]);
+});

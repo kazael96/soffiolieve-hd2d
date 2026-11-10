@@ -21,7 +21,7 @@ test('the input health monitor is delivered before the QA driver and never inser
 
 test('the explicit Gym052 preview stays inside the QA index, filters future areas, and installs audio after prior catalogs',t=>{
  const f=fixture(t),out=path.join(f.dir,'qa'),preview=require('../scripts/gym-preview052.cjs');
- const html=f.html.replace('</head>','<script src="opelucid-bootstrap.js?v=build"></script><script src="opelucid-audio.js?v=build"></script><script src="training-moves.js?v=build"></script></head>');fs.writeFileSync(path.join(f.site,'index.html'),html);
+ const html=f.html.replace('</head>','<script src="opelucid-bootstrap.js?v=build"></script><script src="opelucid-audio.js?v=build"></script><script src="training-moves.js?v=build"></script><script src="opelucid-badge-assets.js?v=build"></script><script src="opelucid-battles.js?v=build"></script><script src="opelucid-menu.js?v=build"></script></head>');fs.writeFileSync(path.join(f.site,'index.html'),html);
  const source=fs.readFileSync(path.join(__dirname,'../scripts/gym-preview052.cjs'),'utf8'),names=[...source.matchAll(/'(league-[a-z-]+|trainer-intro-music(?:-data)?)'/g)].map(m=>m[1]);
  for(const name of new Set(names))fs.writeFileSync(path.join(f.site,name+'.js'),'/* isolated file fixture */');
  build(f.site,out,{preview:'leagueGym'});const result=fs.readFileSync(path.join(out,'index.html'),'utf8');
