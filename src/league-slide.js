@@ -9,7 +9,7 @@
  function plan(zone,body,{data=root.PINWHEEL_RAILS,rails=root.NativeRails}={}){
   const table=data?.[zone],dir=[[0,-1],[0,1],[-1,0],[1,0]][body?.direction];
   if(zone!==214||!table||!rails||!dir||![body.x,body.y,body.height].every(Number.isFinite)||body.height<=-.625)return null;
-  const position=(line,front,side)=>{const p=rails.position(zone,line,front,side);return [p.x-16,p.height,p.z-16];},from=[body.x,body.height,body.y],reach=(body.height+.625)*4731/4096,ray=[dir[0]*reach,-body.height-.625,dir[1]*reach],candidates=[];
+  const position=(line,front,side)=>{const p=rails.position(zone,line,front,side);return [p.x-16,p.height,p.z-16];},start=[body.x,body.height,body.y],from=add(start,[dir[0],0,dir[1]]),reach=(body.height+.625)*4731/4096,ray=[dir[0]*reach,-body.height-.625,dir[1]*reach],candidates=[];
   for(const [id,line]of table.lines.entries()){
    const a=table.points[line.a].position.map((v,i)=>v-(i===1?0:16)),b=table.points[line.b].position.map((v,i)=>v-(i===1?0:16)),axis=sub(b,a),normal=cross(axis,cross(axis,[0,1,0])),den=dot(normal,ray);if(Math.abs(den)<1e-10)continue;
    const f=dot(normal,sub(a,from))/den;if(f<=1e-7||f>1)continue;const hit=add(from,mul(ray,f)),kind=table.curves[line.curve]?.kind;
@@ -28,12 +28,20 @@
   // Original021b7968 selects the closest accepted projection before the task
   // searches inward; a blocked nearest destination never selects a farther one.
   candidates.sort((a,b)=>a.distance-b.distance);const projected=candidates[0];if(!projected)return null;
-  const line=table.lines[projected.line],cap=Math.floor(rails.halfWidth(zone,projected.line,projected.front));let landing;
-  for(let side=Math.min(cap,projected.side+2);side>=-cap;side--){const value=line.tiles.values[projected.front*line.tiles.width+side+Math.floor(line.tiles.width/2)];if(Number.isInteger(value)&&!((value>>>16)&1)){landing={line:projected.line,front:projected.front,side};break;}}
-  if(!landing)return null;const to=position(landing.line,landing.front,landing.side),distance=length(sub(to,from));if(distance<1e-6)return null;
-  return {zone,from:{x:from[0],y:from[2],height:from[1]},to:{x:to[0],y:to[2],height:to[1]},landing,distance,frames:Math.ceil(distance/.5),sound:1773};
+  const line=table.lines[projected.line],cap=Math.floor(rails.halfWidth(zone,projected.line,projected.front)),free=side=>{if(side<-cap||side>cap)return false;const value=line.tiles.values[projected.front*line.tiles.width+side+Math.floor(line.tiles.width/2)];return Number.isInteger(value)&&!((value>>>16)&1);};let landing=free(projected.side)?{...projected}:null;
+  // 021f37d2 tests the original projection. 021f37e6 adds two, then the
+  // loop PRE-decrements and retains every free point up to the first wall.
+  // It does not stop at the first free point or skip a blocked gap.
+  for(let side=Math.min(cap,projected.side+2)-1;side>=-cap;side--){if(!free(side))break;landing={line:projected.line,front:projected.front,side};}
+  if(!landing)return null;landing={line:landing.line,front:landing.front,side:landing.side};const to=position(landing.line,landing.front,landing.side),slideDistance=length(sub(to,from));if(slideDistance<1e-6)return null;
+  const nativeFrames=Math.ceil(slideDistance/.5);
+  // Original task offsets the ray origin one tile forward. HD-2D reaches
+  // that edge in two visible half-steps instead of moving the body instantly.
+  return {zone,from:{x:start[0],y:start[2],height:start[1]},approach:{x:from[0],y:from[2],height:from[1]},to:{x:to[0],y:to[2],height:to[1]},landing,distance:length(sub(to,start)),slideDistance,nativeFrames,approachFrames:2,frames:nativeFrames+2,sound:1773};
  }
+ function sample(plan,frame){const edge=frame<=plan.approachFrames,from=edge?plan.from:plan.approach,to=edge?plan.approach:plan.to,f=edge?frame/plan.approachFrames:frame>=plan.frames?1:Math.min(1,(frame-plan.approachFrames)*.5/plan.slideDistance);return Object.fromEntries(['x','y','height'].map(k=>[k,from[k]+(to[k]-from[k])*f]));}
  function create(options={}){
+  const effects=options.effects||root.LeagueSlideEffects?.create();
   const state=options.state||(()=>root.NativeStory?.state),pose=options.pose||(()=>{}),sound=options.sound||(id=>root.AudioEngine?.playSound(id)),stop=options.stop||(id=>root.AudioEngine?.stopSound(id)),path=options.path||root.LEAGUE_SLIDE_PATH;let current=null,completedBody=null,arrivedBody=null,returnPromise=null;
   function finish(ok){const task=current;if(!task)return;current=null;
    if(ok){task.body.railHeight=task.body.height;if(task.kind==='slide'){completedBody=task.body;if(task.body.railOriginal)task.body.railOriginal={...task.body.railOriginal,x:task.plan.landing.line,z:task.plan.landing.front,y:task.plan.landing.side&65535};}else{arrivedBody=task.body;task.body.railOriginal={...path.targetRecord};task.body.direction=path.targetRecord.direction;}}
@@ -49,14 +57,15 @@
    const points=[{x:body.x,y:body.y,height:body.height},...path.points.map(p=>({x:p[0],y:p[1],height:p[2]}))],sizes=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y,p.height-points[i].height));let resolve;
    returnPromise=new Promise(done=>resolve=done);current={kind:'return',body,plan:{zone:214},points,sizes,distance:sizes.reduce((a,b)=>a+b,0),age:0,promise:returnPromise,resolve};body.nativeSlide=true;return returnPromise;
   }
-  function tick(dt){const task=current;if(!task)return;if(state()?.zone!==task.plan.zone){finish(false);return;}if(!Number.isFinite(dt)||dt<=0)return;task.age+=dt;
+  function tick(dt){effects?.tick(dt);const task=current;if(!task)return;if(state()?.zone!==task.plan.zone){finish(false);effects?.clear();return;}if(!Number.isFinite(dt)||dt<=0)return;task.age+=dt;
    if(task.kind==='return'){let left=Math.min(task.distance,task.age*3.5),at=0;while(at<task.sizes.length-1&&left>task.sizes[at])left-=task.sizes[at++];const a=task.points[at],b=task.points[at+1],f=task.sizes[at]>1e-8?Math.min(1,left/task.sizes[at]):1;for(const key of ['x','y','height'])task.body[key]=a[key]+(b[key]-a[key])*f;const dx=b.x-a.x,dy=b.y-a.y;if(Math.hypot(dx,dy)>1e-8)task.body.direction=Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0;pose(task.body,task.body.direction,[0,1,0,2][Math.floor(task.age*15)%4]);if(task.age*3.5>=task.distance)finish(true);return;}
-   const frame=Math.min(task.plan.frames,Math.floor(task.age*30+1e-8));if(frame===task.frame)return;task.frame=frame;const p=task.plan,f=frame===p.frames?1:Math.min(1,frame*.5/p.distance);
-   for(const key of ['x','y','height'])task.body[key]=p.from[key]+(p.to[key]-p.from[key])*f;pose(task.body,task.body.direction,[0,1,0,2][Math.floor(frame/2)%4]);if(frame===p.frames)finish(true);
+   const frame=Math.min(task.plan.frames,Math.floor(task.age*30+1e-8));if(frame===task.frame)return;const p=task.plan;
+   for(let i=task.frame+1;i<=frame;i++){const nativeFrame=i-p.approachFrames;if(nativeFrame>0&&nativeFrame<p.nativeFrames&&nativeFrame%2===0)effects?.emit(sample(p,i-1),Math.max(0,task.age-i/30));}
+   task.frame=frame;Object.assign(task.body,sample(p,frame));pose(task.body,task.body.direction,[0,1,0,2][Math.floor(frame/2)%4]);if(frame===p.frames)finish(true);
   }
   function adopt(previous,actors){const n=state(),body=arrivedBody;if(!body||!path||n.zone!==214||!n.flags?.includes(path.sourceFlag)||n.flags.includes(path.targetFlag)||!previous.includes(body))return false;const index=actors.findIndex(a=>a.uid===path.targetUid&&a.model===body.model);if(index<0)throw Error('Ruolo di arrivo della discesa mancante');const next=actors[index];if(Math.hypot(body.x-next.x,body.y-next.y,body.height-next.height)>.001)throw Error('Ruolo di arrivo fuori dalla posizione fisica');Object.assign(body,{uid:next.uid,script:next.script,direction:next.direction,railOriginal:next.railOriginal||body.railOriginal,railHeight:body.height,wander:next.wander});actors[index]=body;completedBody=arrivedBody=null;returnPromise=null;return true;}
-  function reset(){finish(false);completedBody=arrivedBody=null;returnPromise=null;}
-  return {start,tick,returnToRole,adopt,reset,get completedBody(){return completedBody;},get returnPromise(){return returnPromise;},get busy(){return !!current;},get body(){return current?.body;}};
+  function reset(){finish(false);effects?.clear();completedBody=arrivedBody=null;returnPromise=null;}
+  return {start,tick,returnToRole,adopt,reset,resources:()=>effects?.resources()||[],visuals:()=>effects?.visuals()||[],get completedBody(){return completedBody;},get returnPromise(){return returnPromise;},get busy(){return !!current;},get body(){return current?.body;}};
  }
 
  const api={plan,create};root.LeagueSlide=api;if(typeof module!=='undefined')module.exports=api;
