@@ -23,7 +23,7 @@ def build_source():
     source = source.replace(old, """if method.startswith('reused') and abs(len(audio)-record['duration']*rate)<=rate*.000501:
             record={**record,'duration':len(audio)/rate}
         """ + old)
-    source = source.replace('sustained=identifier in [1738,1741,1754]', 'sustained=identifier in [1748,1788]')
+    source = source.replace('sustained=identifier in [1738,1741,1754]', 'sustained=identifier in [1748,1788,1774]')
     # Exporter modules only define functions; the original CLI block stays idle.
     return source
 
@@ -40,7 +40,7 @@ def main():
     scope = {'__name__': 'league_audio_export', '__file__': str(Path(__file__).with_name('render-mistralton-audio.py'))}
     exec(compile(build_source(), scope['__file__'], 'exec'), scope)
     scope.update(MUSIC=sorted(set(args.music)), SOUNDS=sorted(set(args.sounds)), CRIES=[],
-                 SOUND_HANDLERS={n: ['IRBI overlay46 native dragon task'] for n in args.sounds})
+                 SOUND_HANDLERS={n: ['IRBI scripts712/714/716/718/720/722/724/726 badge gate opening' if n in [1774, 1775] else 'IRBI overlay46 native dragon task'] for n in args.sounds})
     scope['export'](args.work.resolve(), args.output.resolve(), args.reference.resolve(), args.report_dir.resolve())
 
 

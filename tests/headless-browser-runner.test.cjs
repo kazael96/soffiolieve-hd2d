@@ -9,6 +9,7 @@ test('the background runner preserves explicit case inventory and rejects duplic
 
 test('component previews require an explicit supported CLI choice and still use the invisible runner',()=>{
  assert.equal(runner.options(['site','reports','--preview=leagueGym']).preview,'leagueGym');assert.equal(runner.options(['site','reports']).preview,undefined);
+ assert.equal(runner.options(['site','reports','--preview=leagueFields']).preview,'leagueFields');
  assert.throws(()=>runner.options(['site','reports','--preview=arbitrary']),/Invalid isolated preview/);assert.equal(runner.launchOptions().headless,true);
 });
 

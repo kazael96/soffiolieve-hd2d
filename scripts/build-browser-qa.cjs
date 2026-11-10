@@ -3,8 +3,8 @@ const fs=require('fs'),path=require('path');
 function build(input,output,{preview}={}){const site=path.resolve(input),out=path.resolve(output);
 if(site===out||out.startsWith(site+path.sep))throw Error('QA output must be outside the published site');
 let html=fs.readFileSync(path.join(site,'index.html'),'utf8');
-if(preview!==undefined&&preview!=='leagueGym')throw Error('Unsupported isolated preview');
-if(preview)html=require('./gym-preview052.cjs').inject(html,site);
+if(preview!==undefined&&!['leagueGym','leagueFields'].includes(preview))throw Error('Unsupported isolated preview');
+if(preview)html=require('./gym-preview052.cjs').inject(html,site,{fields:preview==='leagueFields'});
 // The release uses the valid optional-head syntax. Install hooks there too.
 if(!/<head\b/i.test(html))html=html.replace(/(<html\b[^>]*>)/i,'$1\n<head>').replace(/(<body\b)/i,'</head>\n$1');
 const brycenInput=fs.readFileSync(path.join(__dirname,'../tests/fixtures/brycen-input-route.json'),'utf8');JSON.parse(brycenInput);

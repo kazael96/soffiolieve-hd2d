@@ -55,6 +55,8 @@
   function warmTutorial(){if(native.zone!==317||value(16508)>=1||tutorialWarm||!window.BattleEnvironment||!window.ROM_SPRITE_ANIM)return;tutorialWarm=Promise.all([window.BattleScreen?.prepare?.(),BattleEnvironment.prepare(Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass'})),ROM_SPRITE_ANIM.prepare([{id:572,back:true},{id:504,back:false}]),window.NativeCapture?.preload(),window.MoveFX?.preload(1),window.AudioEngine?.preloadMove(1,{p1:572,p2:504})]).catch(()=>{tutorialWarm=null;});}
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
   let eventRunning=false,surfService=false,pcService=false,queued=null,reservedLiftArrival=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
+  const scriptSounds=new Set();
+  function stopScriptSounds(){for(const id of scriptSounds)AudioEngine.stopSound?.(id);scriptSounds.clear();}
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
@@ -158,9 +160,9 @@
   function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs.filter(n=>!n.projection));}
   function delay(frames){return window.GameSpeed?.wait(Math.max(0,frames)*1000/30)||new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
   function applyRoom(){if(state.scene==='bedroom')renderer.scene=OPENING_ASSETS.scenes[native.roomMess?'bedroomMess':'bedroom'];}
-  function cameraTo(target,frames){
+  function cameraTo(target,frames,view=null){
     const start=[...(renderer.storyCamera||renderer.center)];
-    let resolve;const promise=new Promise(r=>resolve=r);cameraTask={start,target,elapsed:0,duration:frames/30,promise,resolve};
+    let resolve;const promise=new Promise(r=>resolve=r);cameraTask={start,target,elapsed:0,duration:frames/30,promise,resolve,view};
   }
   function fade(to,frames=8,color='#000'){
     let cover=$('fieldFade');if(!cover){cover=document.createElement('div');cover.id='fieldFade';cover.style.cssText='position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0';document.body.append(cover);}
@@ -331,7 +333,7 @@
       queued=null;reservedLiftArrival=null;failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
       state.checkpoint=before;await showPage('La scena originale non può proseguire: '+error.message);
-    }finally{eventRunning=false;if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
+    }finally{eventRunning=false;if(failed){window.LeagueCamera?.reset(renderer);stopScriptSounds();}if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
     }
   }
   async function command(c,a,v,m){
@@ -438,7 +440,8 @@
       case 'GymCurtainSwitch':case 'GymCurtainFeedback':case 'GymCurtainReset':native.gymSwitch=v[0];break;
       case 'NativeOpcode386':native.libraryOpening=!!v[0];break;
       case 'NativeOpcode389':native.libraryOpening=true;break;
-      case 'NativeOpcode167':AudioEngine.setScene(data().music);break;
+      // IRBI021af16c stops the sound players owned by the field-script mask.
+      case 'NativeOpcode167':stopScriptSounds();break;
       case 'NativeOpcode490':native.libraryPatches??={};native.libraryPatches[v[1]+':'+v[3]]={kind:v[0],height:v[2]};break;
       case 'NativeOpcode182':m.set(a[2],journey.consumeItem(v[0],v[1])?1:0);break;
       case 'NativeOpcode258':m.set(a[0],0);break; // Egg predicate; the demo has no eggs or breeding service.
@@ -542,11 +545,12 @@
       case 'MapReplaceSetEvent':if(window.OPELUCID_MAP_VARIANTS&&v[0]===OPELUCID_MAP_VARIANTS.event){native.vars[OPELUCID_MAP_VARIANTS.work]=v[1]?OPELUCID_MAP_VARIANTS.value:0;}else if(m.bank===638){native.route2MapEvent=v[0];}else if(m.bank>=778){native.roomMess=true;applyRoom();}else native.mapEvents={...(native.mapEvents||{}),[native.zone]:v[0]};break;
       case 'EnableRunningShoes':native.runningShoes=true;break;
       case 'MapReplaceIsEventSet':m.set(a[1],native.roomMess?1:0);break;
-      case 'EVCameraInit':renderer.storyCamera=[...renderer.center];break;
-      case 'EVCameraEnd':case 'EVCameraRebind':renderer.storyCamera=null;break;
+      case 'EVCameraInit':window.LeagueCamera?.reset(renderer);renderer.storyCamera=[...renderer.center];break;
+      case 'EVCameraEnd':case 'EVCameraRebind':if(cameraTask?.view){cameraTask.resolve();cameraTask=null;}window.LeagueCamera?.reset(renderer);renderer.storyCamera=null;break;
       case 'EVCameraUnbind':renderer.storyCamera??=[...renderer.center];break;
       case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6]);break;
-      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0]);break;
+      case 'NativeOpcode326':{const preset=window.LEAGUE_CAMERA_PRESETS?.presets?.[v[0]];if(!preset||!window.LeagueCamera)throw Error('Camera originale del portale non disponibile');const [ox,oz]=origin();cameraTo([preset.targetFx[0]/65536-ox,preset.targetFx[2]/65536-oz],v[1],LeagueCamera.begin(renderer,preset));break;}
+      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0],window.LeagueCamera?.returning(renderer));break;
       case 'EVCameraWait':if(cameraTask)await cameraTask.promise;break;
       case 'FadeEx':fade(v[1]===0?1:0,v[3]*8,v[0]===3?'#fff':'#000');break;
       case 'FadeExWait':case 'CallLeagueLiftWarp':await fadeTask;break;
@@ -554,11 +558,14 @@
       case 'NativeOpcode438':case 'CMD_1ae':fade(1);break;
       case 'BGMPlay':native.music=v[0];AudioEngine.setScene(v[0]);break;
       case 'BGMChangeMap':native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);break;
-      case 'SEPlay':case 'MEPlay':soundTask=AudioEngine.playSound(v[0]);break;
+      case 'SEPlay':case 'MEPlay':scriptSounds.add(v[0]);soundTask=AudioEngine.playSound(v[0]);break;
       case 'SEWait':case 'MEWait':await soundTask;break;
       case 'PVPlay':soundTask=AudioEngine.cry(v[0]);break;
       case 'PVWait':await soundTask;break;
       case 'BMCreateHandleByGPos':{const [ox,oz]=origin();m.set(a[0],fieldModels?fieldModels.create(v[1],v[2]-ox,v[3]-oz):v[1]);native.door={x:v[2],z:v[3],type:v[1],open:false};break;}
+      // IRBI021b2b08 finds the loaded model and disables its two render modes.
+      // An absent match is an original no-op, not a missing-resource fallback.
+      case 'NativeOpcode299':{const [ox,oz]=origin();fieldModels?.hide(v[0],v[1]-ox,v[2]-oz);break;}
       case 'BMHndAudioVisualAnmPlay':native.door.open=v[1]===0;if(fieldModels)await fieldModels.play(v[0],v[1]);break;
       case 'BMHndAnmWait':if(fieldModels)await fieldModels.wait(v[0]);else await delay(8);break;
       case 'BMReleaseHandle':fieldModels?.release(v[0]);native.door=null;break;
@@ -607,13 +614,14 @@
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function changeZone(zone,x,z,entryHeight){
+    window.LeagueCamera?.reset(renderer);
     quicksand?.reset();
     fieldFall?.reset();
     dragonFlight?.reset();
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
     if(SceneCamera.tracks(OPENING_ASSETS.scenes[zoneScenes[zone]])){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
-    captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:!!OPENING_ASSETS.scenes[zoneScenes[zone]].outdoor,fromOutdoor:!!renderer.scene.outdoor,busy:!!window.LeagueGym?.busy||[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.OpelucidChapter?.zones.includes(zone))await OpelucidChapter.ensure(zone);else if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.OpelucidGym?.enter(zone);window.LeagueGym?.enter(zone);window.DragonspiralJump?.enter();window.SurfField?.enter();syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
+    captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:!!OPENING_ASSETS.scenes[zoneScenes[zone]].outdoor,fromOutdoor:!!renderer.scene.outdoor,busy:!!window.LeagueGym?.busy||[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.OpelucidChapter?.zones.includes(zone))await OpelucidChapter.ensure(zone);else if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;FieldEventVM.resetMapState(native);if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.OpelucidGym?.enter(zone);window.LeagueGym?.enter(zone);window.DragonspiralJump?.enter();window.SurfField?.enter();syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
     const initFlags=native.flags.join(',');for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
     if((window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))&&native.flags.join(',')!==initFlags)syncActors();
     if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;if(zone===107)native.mistralton=true;if(zone===113)native.icirrus=true;derivePhase();
@@ -794,7 +802,7 @@
     if(renderer.scene.chapter050&&!window.IcirrusGym?.busy){const at=window.IcirrusChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);const rail=renderer.scene.railZone&&NativeRails.locate(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0});if(rail)native.fieldHeight=rail.height;else if(at)native.fieldHeight=at.height;}
     if(renderer.scene.chapter051&&!(window.LeagueGym?.busy||window.OpelucidGym?.busy)){const at=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(at)native.fieldHeight=at.height;}
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
-    try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
+    try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);c.view?.(f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
     window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);window.LeagueGym?.tick(dt);fieldMotion?.tick(dt);fieldFall?.tick(dt);quicksand?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
     const held=!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.busy||window.OpelucidGym?.busy)||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);

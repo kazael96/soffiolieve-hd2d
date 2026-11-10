@@ -1,0 +1,3 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{replay}=require('../tools/replay-badge-gates.cjs');
+test('native gate mazes and automatic triggers work through actual frame input at x1/x2/x4',async()=>{for(const speed of [1,2,4]){const r=await replay(speed,60);assert.equal(r.result,'PASS');assert.equal(r.zone,364);assert.deepEqual(r.entries.map(p=>p[0]),[712,714,716,718,720,722,724,726]);}});
+test('gate turns remain reachable at20Hz with multiple physical chunks per rendered frame',async()=>{const r=await replay(2,20);assert.equal(r.result,'PASS');assert.equal(r.zone,364);});

@@ -27,3 +27,10 @@ test('actual native model, texture and barrier joint tracks remain finite on the
  for(const [key,record]of Object.entries(data.models)){const model=await c.StarterScene.loadGLB(record.url);assert.equal(model.animationSets.length,key==='barrier'?1:2);for(let i=0;i<model.animationSets.length;i++){const end=Math.max(...model.animationSets[i].map(t=>t.times.at(-1)*60));let first,last;for(const frame of [0,1,Math.floor(end/2),end]){const groups=c.FieldModels.geometry(model,{},i,frame);assert.ok(groups.length);for(const g of groups){assert.equal(g.verts.length%33,0);assert.ok(g.verts.every(Number.isFinite));const uri=model.doc.images[model.doc.textures[g.textureIndex].source].uri,texture=record.model+'-'+path.basename(uri,'.png');assert.ok(data.textures[texture],texture);assert.ok(fs.existsSync(path.join(root,data.textures[texture].src)));}if(frame===0)first=JSON.stringify(groups);if(frame===end)last=JSON.stringify(groups);samples++;}if(key==='barrier')barrierChanged=first!==last;}}
  assert.equal(samples,20);assert.equal(barrierChanged,true);
 });
+
+// Native map setup clears transient flags; serialized physical lift positions remain authoritative.
+test('map entry rebuilds only lift switch flags from saved endpoints after transient work is cleared',()=>{
+ const {controller:c,state}=setup({state:{flags:[136,2421],clayLifts:[1,0,1,0,1,0]}});
+ for(const zone of [97,98]){state.zone=zone;state.flags=[136,2421];c.enter(zone,zone===97?50:0);const expected=data.lifts.flatMap((lift,i)=>lift.heights[state.clayLifts[i]]===Math.min(...lift.heights)?[10+i]:[]);assert.deepEqual(state.flags,[136,2421,...expected]);assert.deepEqual(state.clayLifts,[1,0,1,0,1,0]);}
+ state.zone=96;state.flags=[136];c.enter(96);assert.deepEqual(state.flags,[136],'Outside the Gym no temporary flags are synthesized');
+});

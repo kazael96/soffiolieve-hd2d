@@ -2,6 +2,9 @@
 (function(root){
   const cmp=(kind,a,b)=>[a<b,a===b,a>b,a<=b,a>=b,a!==b,!!a||!!b,!!a&&!!b][kind];
   class FieldEventVM {
+    // IRBI021589e0 ->021588f4: flags0..99 inclusive; Work4000..401e.
+    // Preserve story work/flags and the special401f word.
+    static resetMapState(state){state.flags=state.flags.filter(id=>id>99);for(let id=0x4000;id<0x401f;id++)delete state.vars[id];}
     constructor(data,state,host){this.data=data;this.state=state;this.host=host;this.stack=[];this.words={};this.trace=[];this.running=false;}
     value(v){return v>=0x4000&&v<0xc000?(this.state.vars[v]||0):v;}
     set(v,n){this.state.vars[v]=n;}
