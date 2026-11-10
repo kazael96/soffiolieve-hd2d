@@ -933,6 +933,18 @@
  }
  case049('qaMoves051','Nuove coppie051: corpo, mossa e reazioni sui due lati','opelucid051-real-renderer-delta-matrix-both-sides-and-recovery',()=>replayMoves051());
  case049('qaPoses051','Pose dei15 nuovi Pokémon051 sui due lati','opelucid051-real-renderer-15-new-body-rigs',()=>replayMoves051({posesOnly:true}));
+ case049('qaGym052','Aristide052: ingresso e meccanismi, anteprima isolata','league052-component-preview-native-gym-renderer',async()=>{
+  check(window.QA052Preview&&window.LeagueGym,'Explicit Gym052 preview not enabled');await seed049();const n=NativeStory.state;n.badges=[0,1,2,3,4,5,6];n.trainerWins=[...new Set([...n.trainerWins,...Object.keys(LEAGUE_DATA.trainers).map(Number)])];delete n.draydenPuzzle;delete n.draydenJump;preparedResources049.preview=QA052Preview.scope;preparedResources049.preparedTrainers='Victories prepared to isolate geometry and mechanism presentation; not battle/story proof';
+  await enter049(121,27,49);await auto049(NativeStory.run(1,242));const views=[await scene049('052 palestra ingresso WB',0)];
+  await walk049(27,46);views.push(await scene049('052 palestra cammino ingresso',0));
+  const audioBefore=AudioEngine.errors.length;AudioEngine.enable=qa049AudioEnable;await qa049AudioEnable();check(AudioEngine.enabled,'052 preview audio unavailable');
+  for(const kind of ['button','arm','neck']){
+   const pending=LeagueGym.task.begin(kind,0,1);await auto049(pending);check(!LeagueGym.busy,'052 task did not release field input '+kind);views.push(await scene049('052 drago '+kind,NativeStory.state.fieldHeight));
+  }
+  check(AudioEngine.errors.length===audioBefore,'052 native gym audio failed');AudioEngine.disable();
+  check(renderer.scene.instances.filter(i=>i.drayden!==undefined).length===16,'052 mechanisms missing or duplicated');
+  return {views,scope:QA052Preview.scope,input:'Real keyboard/D-pad entrance walk; explicit component task calls, not a complete Gym traversal',audio:'Native clips active, headless speaker output muted',puzzle:LeagueGym.task.snapshot,residentFamilies:OpelucidChapter.loader.stats()};
+ });
  case049('qaGym051','Silvestro051: ingresso, scivolata e interruttore reali','opelucid051-real-renderer-gym-input-and-native-mechanisms',async()=>{
   await seed049({},[576,577,579,678]);const n=NativeStory.state;n.badges=[0,1,2,3,4,5];preparedResources049.badges=[...n.badges];delete n.brycenPuzzle;delete n.brycenIceRide;delete n.brycenIceSlide;
   await enter049(114,17,62);const views=[await scene049('051 palestra ingresso',0)];

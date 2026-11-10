@@ -14,6 +14,7 @@
   }
   async function command(name,args,values=args){
    if(!active())return false;
+   if(name==='NativeOpcode139'){if(!root.TrainerIntroMusic)throw Error('Musica di incontro originale non disponibile');await root.TrainerIntroMusic.start(values[0]);return true;}
    if(name==='NativeOpcode406'){task.snapshot;return true;}
    if(!['NativeOpcode407','NativeOpcode408','NativeOpcode409','NativeOpcode410'].includes(name))return false;
    if(name==='NativeOpcode408'){if(task.busy)throw Error('Il drago è ancora in movimento');if(!await jump.begin(args[0])||!active())throw Error('Salto della palestra annullato');return true;}

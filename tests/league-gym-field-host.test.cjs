@@ -21,3 +21,22 @@ test('stepping from a dragon ribbon onto a WB floor clears the old rail hint bef
  c.NativeRails={...c.NativeRails,has:z=>z===121,locate:()=>null};c.OpelucidChapter.surfaceAt=()=>({height:0,flags:128});
  c.Journey.step(1/30,false);assert.equal(n.fieldHeight,0);assert.equal(n.railCurrent,undefined);
 });
+
+test('native139 starts the veteran encounter music through the actual field VM before continuing',async()=>{
+ const c=await setup(),n=c.NativeStory.state,before=n.music,calls=[];
+ c.ORIGINAL_EVENTS.scripts[242]={entries:[0],supportedEntries:[0],code:{0:{op:139,name:'NativeOpcode139',args:[274],end:4},4:{op:2,name:'VMHalt',args:[],end:6}},movements:{}};
+ c.OPENING_TRAINERS[274]={trainerClass:70};c.FIELD_AUDIO={1117:{src:'native-intro.flac'}};c.AudioEngine.setScene=async id=>calls.push(id);
+ for(const file of ['trainer-intro-music-data','trainer-intro-music'])vm.runInContext(fs.readFileSync(path.join(source,file+'.js'),'utf8'),c);
+ await drain(c,c.NativeStory.run(0,242));assert.deepEqual(calls,[1117]);assert.equal(n.music,before);assert.equal(c.NativeStory.locked,false);
+});
+
+test('the actual Gym initializer recognizes Black and initializes all three native dragon poses',async()=>{
+ const c=await setup(),reference=require('./fixtures/drayden-graphic-init.json');c.ORIGINAL_EVENTS.scripts[242]=structuredClone(reference.scripts[242]);
+ await drain(c,c.NativeStory.run(1,242));assert.equal(c.NativeStory.state.vars[16416],180);assert.deepEqual(JSON.parse(JSON.stringify(c.LeagueGym.task.snapshot.dragons)),[{neck:3,arms:[0,1]},{neck:1,arms:[1,1]},{neck:2,arms:[1,0]}]);assert.equal(c.NativeStory.locked,false);
+});
+
+test('a Gym button trigger on a higher deck cannot start while walking underneath it',async()=>{
+ const c=await setup(),n=c.NativeStory.state;n.fieldHeight=0;n.vars[16384]=0;delete n.railCurrent;
+ c.OpelucidChapter.surfaceAt=()=>({height:0,flags:128});c.ORIGINAL_EVENTS.zones[121].triggers=[{script:3,var:16384,value:0,type:0,rail:0,x:28,z:30,width:2,height:2,y:96}];
+ c.Journey.step(1/30,true,.2);assert.equal(c.NativeStory.locked,false,'An event on the other floor stole input');assert.equal(c.LeagueGym.busy,false);
+});

@@ -1,12 +1,14 @@
 /* Generates an isolated fixture only. Never overlays or edits the release directory. */
 const fs=require('fs'),path=require('path');
-function build(input,output){const site=path.resolve(input),out=path.resolve(output);
+function build(input,output,{preview}={}){const site=path.resolve(input),out=path.resolve(output);
 if(site===out||out.startsWith(site+path.sep))throw Error('QA output must be outside the published site');
 let html=fs.readFileSync(path.join(site,'index.html'),'utf8');
+if(preview!==undefined&&preview!=='leagueGym')throw Error('Unsupported isolated preview');
+if(preview)html=require('./gym-preview052.cjs').inject(html,site);
 // The release uses the valid optional-head syntax. Install hooks there too.
 if(!/<head\b/i.test(html))html=html.replace(/(<html\b[^>]*>)/i,'$1\n<head>').replace(/(<body\b)/i,'</head>\n$1');
 const brycenInput=fs.readFileSync(path.join(__dirname,'../tests/fixtures/brycen-input-route.json'),'utf8');JSON.parse(brycenInput);
-const fixture=require('crypto').createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../tests/browser-qa.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/ambient-audit.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/qa-input-health.js'))).update(brycenInput).update(fs.readFileSync(__filename)).digest('hex').slice(0,16);
+const fixture=require('crypto').createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../tests/browser-qa.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/ambient-audit.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/qa-input-health.js'))).update(brycenInput).update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname,'gym-preview052.cjs'))).update(preview||'release').digest('hex').slice(0,16);
 html=html.replace(/<title>[^<]*<\/title>/,'<title>Collaudo approfondito · 0.51</title>').replace('<html ', '<html data-qa-fixture="'+fixture+'" ');
 html=html.replace('<head>','<head><base href="/"><script>window.DeepQAEarlyErrors=[];addEventListener("error",e=>DeepQAEarlyErrors.push(e.message));addEventListener("unhandledrejection",e=>DeepQAEarlyErrors.push(String(e.reason)));</script>').replace(/window.SpeciesStudioMode=\[[^;]+;/,'window.SpeciesStudioMode=true;');
 if(!html.includes('window.SpeciesStudioMode=true;'))throw Error('Save isolation could not be installed');

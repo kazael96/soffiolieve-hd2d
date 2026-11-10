@@ -3,13 +3,14 @@ const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_pro
 const viewports=[['desktop',1280,720],['portrait',390,844],['landscape',844,390]];
 function options(argv){
  const positional=argv.filter(a=>!a.startsWith('--')),flags=new Map();
- for(const arg of argv.filter(a=>a.startsWith('--'))){const at=arg.indexOf('=');if(at<3)throw Error('Use --name=value');const name=arg.slice(2,at);if(!['python','playwright','browser','cases','timeout','renderer'].includes(name)||flags.has(name))throw Error('Unsupported or repeated option: '+name);flags.set(name,arg.slice(at+1));}
+ for(const arg of argv.filter(a=>a.startsWith('--'))){const at=arg.indexOf('=');if(at<3)throw Error('Use --name=value');const name=arg.slice(2,at);if(!['python','playwright','browser','cases','timeout','renderer','preview'].includes(name)||flags.has(name))throw Error('Unsupported or repeated option: '+name);flags.set(name,arg.slice(at+1));}
  if(positional.length!==2)throw Error('Pass built site and external report directory');
  const site=path.resolve(positional[0]),out=path.resolve(positional[1]);if(out===site||out.startsWith(site+path.sep))throw Error('Reports must remain outside the published site');
  const cases=(flags.has('cases')?flags.get('cases'):'qaSubmerged051,qaNpcFalls051,qaQuicksand051').split(',');if(cases.some(id=>!/^qa[A-Za-z0-9]+$/.test(id))||new Set(cases).size!==cases.length)throw Error('Invalid or repeated case ID');
  const timeout=Number(flags.get('timeout')||300000);if(!Number.isInteger(timeout)||timeout<1000||timeout>900000)throw Error('Invalid case budget');
  const renderer=flags.get('renderer')||'auto';if(!['auto','software'].includes(renderer))throw Error('Invalid renderer');
- return {site,out,cases,timeout,renderer,python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};
+ const preview=flags.get('preview');if(preview!==undefined&&preview!=='leagueGym')throw Error('Invalid isolated preview');
+ return {site,out,cases,timeout,renderer,preview,python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};
 }
 function launchOptions(browser,renderer='auto'){return {headless:true,chromiumSandbox:true,...(browser?{executablePath:browser}:{}),args:renderer==='software'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]};}
 function validate(report,build,viewport,count){
@@ -23,8 +24,8 @@ async function startServer(o,fixture){
  try{const url=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('QA server did not start')),15000);server.on('error',e=>{clearTimeout(timer);reject(e);});server.on('exit',code=>{clearTimeout(timer);reject(Error('QA server exited: '+code));});server.stdout.on('data',chunk=>{buffer+=chunk;const match=buffer.match(/QA (http:\/\/127\.0\.0\.1:\d+\/qa-browser\.html)/);if(match){clearTimeout(timer);resolve(match[1]);}});});return {server,log,url};}catch(e){server.kill();log.end();throw e;}
 }
 async function run(o){
- fs.mkdirSync(o.out,{recursive:true});const manifest=JSON.parse(fs.readFileSync(path.join(o.site,'build.json'),'utf8')),fixture=path.join(o.out,'fixture');require('./build-browser-qa.cjs')(o.site,fixture);
- const {chromium}=require(o.playwright);let service,browser;const report={schema:1,build:manifest.revision,version:manifest.version,created:new Date().toISOString(),result:'RUNNING',environment:{headless:true,isolatedProfile:true,rendererRequested:o.renderer,audioOutputMuted:true,personalBrowserAttached:false},requestedCases:o.cases,viewports:[],limits:['Desktop WebGL backend recorded per viewport, not physical Android GPU certification','Audio engine active when fieldAudio=1; speaker output muted by the test browser','No audible cartridge comparison','Fixture prerequisites remain explicit in individual case details']};
+ fs.mkdirSync(o.out,{recursive:true});const manifest=JSON.parse(fs.readFileSync(path.join(o.site,'build.json'),'utf8')),fixture=path.join(o.out,'fixture');require('./build-browser-qa.cjs')(o.site,fixture,{preview:o.preview});
+ const {chromium}=require(o.playwright);let service,browser;const report={schema:1,build:manifest.revision,version:manifest.version,created:new Date().toISOString(),result:'RUNNING',environment:{headless:true,isolatedProfile:true,rendererRequested:o.renderer,audioOutputMuted:true,personalBrowserAttached:false},requestedCases:o.cases,preview:o.preview||null,viewports:[],limits:['Desktop WebGL backend recorded per viewport, not physical Android GPU certification','Audio engine active when fieldAudio=1; speaker output muted by the test browser','No audible cartridge comparison','Fixture prerequisites remain explicit in individual case details']};
  const save=()=>fs.writeFileSync(path.join(o.out,'report.json'),JSON.stringify(report,null,2)+'\n');save();
  try{
   service=await startServer(o,fixture);browser=await chromium.launch(launchOptions(o.browser,o.renderer));report.environment.browser=browser.version();

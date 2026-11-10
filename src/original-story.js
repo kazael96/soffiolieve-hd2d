@@ -453,7 +453,7 @@
       case 'NativeOpcode283':{const p=GEN5.species.find(p=>p.en===state.party[v[2]]?.name);m.set(a[0],p?.types[0]??0);m.set(a[1],p?.types[1]??p?.types[0]??0);break;}
       case 'CGearScene':native.cgear=true;break;
       case 'CGearNotice':await showPage('Il C-Gear è stato attivato. Le funzioni wireless non sono disponibili nella demo.');break;
-      case 'NativeConstant21':m.set(a[0],21);break;
+      case 'NativeOpcode224':case 'NativeConstant21':m.set(a[0],21);break; // IRBI 0215a950: Black version discriminator.
       case 'NativeOpcode492':{const n=actor(v[0]);if(n){Object.assign(n,world(v[2],v[4]));pose(n,v[1]);}break;}
       case 'NativeOpcode475':native.route3Survey=v[0];break;
       case 'NativeOpcode139':break; // Native trainer intro is covered by the battle entry transition.
@@ -805,7 +805,7 @@
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
     // Native type6 uses the separate header-gated query2162780/2162830.
     // It is not an unconditional footstep script (Cold Storage contains2000).
-    for(const trigger of data().triggers)if(trigger.type!==6&&!(native.zone===114&&Math.abs((native.fieldHeight??0)-trigger.y/16)>.25)&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
+    for(const trigger of data().triggers)if(trigger.type!==6&&!((native.zone===114||native.zone===121&&!trigger.rail)&&Math.abs((native.fieldHeight??0)-trigger.y/16)>.25)&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
       const surface=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(window.OpelucidQuicksand?.trigger(native.zone,trigger,player,{behavior:surface?.behavior,running:!!keys.Shift,mounted:window.Bicycle?.mounted()})===false)continue;
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.

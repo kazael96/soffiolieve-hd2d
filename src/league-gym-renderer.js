@@ -21,7 +21,10 @@
    for(const instance of instances)if(assets.models[instance.model]===data.geometry[keyOf(instance.drayden)])delete assets.models[instance.model];
    for(const [renderer,owned]of renderers)for(const [key,groups]of owned)if(renderer.models[key]===groups){for(const group of groups)renderer.gl.deleteBuffer(group.buf);delete renderer.models[key];renderer.draydenFrames?.delete(key);}renderers.clear();
   }
-  function hidden(index){const p=hero();return !!p&&height()<=4&&p.x>=0&&p.y>=14&&(index>=10&&index<=15);}
+  // The DS hides these supports together with four NPCs. The wider HD-2D
+  // camera can see those bodies; retain their actual geometry and let depth
+  // occlusion work, without making characters disappear at a height boundary.
+  function hidden(){return false;}
   function apply(renderer){
    if(renderer.scene.zone!==121||!prepared)return;
    renderer.draydenFrames??=new Map();

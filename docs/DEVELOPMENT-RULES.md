@@ -44,6 +44,8 @@ Riferimento corrente: [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md). Dopo il 
 
 Richiesta successiva del5 novembre2026: dopo il completamento della storia principale, estendere le coreografie personalizzate alle MN nel mondo di gioco, per ogni specie/forma compatibile, comprese Volo e Surf. Verificare corpo, contatto con il protagonista e il terreno, orientamento, spostamento, partenza/arrivo e uso concreto dell'azione. Un cut-in o un profilo di lotta da soli non completano una coppia specie/forma–MN sul campo. Conservare disponibilità e meccaniche native e una matrice distinta dalle mosse in combattimento.
 
+Matrice successiva in lavorazione: [SPECIES-MOVES-052.md](SPECIES-MOVES-052.md),3675 coppie su137 record fino al50, con prove numeriche esplicite. Il documento distingue i componenti predisposti dai pixel e dalla storia ancora da collaudare; non sostituisce una consegna verificata.
+
 ### E. Audio e sincronizzazione
 
 - Conservare musica del luogo e delle lotte, versi ed effetti delle mosse originali, comprese modulazioni dinamiche di pitch e volume quando previste dai dati.

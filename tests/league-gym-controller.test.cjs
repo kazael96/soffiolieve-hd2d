@@ -15,7 +15,7 @@ test('real VM button programs execute hop, pattern, arm and neck sequentially wi
  }
 });
 test('unknown/native commands from another zone remain unhandled and leaving a scene cannot mutate its hero',async()=>{
- const f=setup();assert.equal(await f.controller.command('NativeOpcode139',[274]),false);const pending=f.controller.command('NativeOpcode408',[2]);f.controller.tick(.1);assert.equal(f.controller.heightAt(f.hero.x,f.hero.y),6.5);assert.equal(f.controller.heightAt(-100,-100),null);
+ const f=setup();assert.equal(await f.controller.command('UnknownTestCommand',[274]),false);const pending=f.controller.command('NativeOpcode408',[2]);f.controller.tick(.1);assert.equal(f.controller.heightAt(f.hero.x,f.hero.y),6.5);assert.equal(f.controller.heightAt(-100,-100),null);
  f.native.zone=136;Object.assign(f.hero,{x:90,y:80});f.native.fieldHeight=20;f.controller.enter(136);await assert.rejects(pending,/annullato/);assert.deepEqual(f.hero,{x:90,y:80});assert.equal(f.native.fieldHeight,20);assert.equal(await f.controller.command('NativeOpcode406',[]),false);assert.equal(f.controller.busy,false);f.controller.dispose();
 });
 test('rail gate installation is owned, idempotent and preserves unrelated zones',()=>{

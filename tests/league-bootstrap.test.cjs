@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-function setup(){
+function setup(extra={}){
  const reads=[],released=[],prepared=[],c={TextDecoder,OPENING_ASSETS:{models:{},textures:{},scenes:{}},OPENING_SPRITES:{},OPENING_DATA:{},TRAINING_DATA:{},PINWHEEL_RAILS:{},OPELUCID_RAILS:{},LEAGUE_RAILS:{121:{original:true},214:{original:true}},OPELUCID_SPRITES:{},OPELUCID_DATA:{levelCap:43,capSteps:[]},NativeTextLayout:{resource:f=>f},NativeStory:{state:{zone:121,fieldHeight:9,vars:{}}},NativeRails:{locate:(zone,x,z,hint)=>x===999?null:{height:hint.height,line:0}}};
  c.NativeSurfaces={create:input=>{c.samplerInput=input;return {at:()=>({height:2,flags:0})};}};
  for(const key of ['evolutions','progression','pokemonData','compatibility','machines']){c.TRAINING_DATA[key]={};c.OPELUCID_DATA[key]={};}
@@ -14,7 +14,7 @@ function setup(){
   const pair=[...Object.entries(c.OPELUCID_PARTS.families),...Object.entries(c.LEAGUE_PARTS.families)].flatMap(([name,part])=>[[name,part],...Object.values(part.seasons||{}).map(row=>[name,row])]).find(([name,part])=>part.src===file);if(!pair)throw Error('Unexpected catalog '+file);
   const [name,part]=pair;return Buffer.from('window.'+(part.variable||'OPELUCID_PART_ASSETS')+'='+JSON.stringify({family:name,...(part.season!==undefined?{season:part.season}:{}),models:{[name]:{groups:[],season:part.season??0}},textures:{},scenes:Object.fromEntries(part.zones.map(z=>[z,{instances:[{model:name}]}])),sprites:{}})+';');
  }};
- vm.createContext(c);for(const file of ['league-geography','league-surfaces','opelucid-resource-cache','opelucid-family-loader','opelucid-scene-window','opelucid-bootstrap'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
+ Object.assign(c,extra);vm.createContext(c);for(const file of ['league-geography','league-surfaces','opelucid-resource-cache','opelucid-family-loader','opelucid-scene-window','opelucid-bootstrap'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
  return {c,reads,released,prepared};
 }
 test('one registered chapter owns old and new scene handles with a shared three-family cache',async()=>{
@@ -22,6 +22,13 @@ test('one registered chapter owns old and new scene handles with a shared three-
  for(const zone of [114,121,214,136])assert.equal(await c.OpelucidChapter.ensure(zone),true);
  assert.equal(c.OPENING_ASSETS.scenes.zone120,old);assert.equal(c.OPENING_ASSETS.scenes.zone121,gym);assert.deepEqual(Array.from(c.OpelucidChapter.loader.stats().resident),['drayden','victoryOutside','leagueEntry']);assert.equal(c.OPENING_ASSETS.models.brycen,undefined);assert.equal(c.OpelucidChapter.scene(114).assetsPending,true);assert.deepEqual(prepared,[121]);assert.ok(released.includes('assets/opelucid-brycen-pack.bin'));assert.equal(reads.filter(f=>f.endsWith('surface-data.js')).length,2);
  assert.equal(c.PINWHEEL_RAILS[121],c.LEAGUE_RAILS[121]);c.OpelucidChapter.loader.clear();assert.ok(released.includes('gym'));
+});
+
+test('declared League data supplies new graphics and the native post-eighth-badge cap without lowering a legacy Pokemon',()=>{
+ const next={levelCap:50,capSteps:[{badge:7,level:43},{badge:8,level:50}]};for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])next[key]={newRecord:{native:true}};
+ const {c}=setup({LEAGUE_DATA:next,LEAGUE_SPRITES:{180:['aristide.png'],187:['gym-guide.png']}});vm.runInContext(fs.readFileSync('src/training.js','utf8'),c);
+ assert.equal(c.OPENING_DATA.newRecord.native,true);assert.equal(c.TRAINING_DATA.progression.newRecord.native,true);assert.equal(c.OPENING_SPRITES.Aristide[0],'aristide.png');assert.equal(c.OPENING_SPRITES.Original187[0],'gym-guide.png');
+ c.NativeStory.state.badges=[0,1,2,3,4,5,6];assert.equal(c.Training.limit(),43);c.NativeStory.state.badges.push(7);assert.equal(c.Training.limit(),50);assert.equal(c.Training.cap({level:65}),65);
 });
 test('new native rail floors cannot silently fall back to a WB plane when the rail is blocked',async()=>{
  const {c}=setup();await c.OpelucidChapter.ensure(121);assert.equal(c.OpelucidChapter.surfaceAt(121,0,0,9).height,9);assert.equal(c.OpelucidChapter.surfaceAt(121,999,0,9),null);assert.equal(c.OpelucidChapter.blockedAt(121,999,0),true);assert.equal(c.OpelucidChapter.blockedAt(121,0,0),false);

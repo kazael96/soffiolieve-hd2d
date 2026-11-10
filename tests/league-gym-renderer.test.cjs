@@ -19,10 +19,14 @@ test('sixteen independent instances retain native rotation, reuse GPU buffers, s
  const button=f.task.begin('button',0,1);f.task.tick(13/30);f.view.apply(f.renderer);assert.equal(f.renderer.models['lg-gym-instance4'][0].texture,'button-pressed');f.task.tick(13/30);f.view.apply(f.renderer);assert.equal(f.renderer.models['lg-gym-instance4'][0].texture,'button-rest');f.task.tick(1/30);await button;assert.equal(f.buffers,16);
  f.renderer.resourceEpoch++;f.view.apply(f.renderer);assert.ok(f.writes.length>writes);f.view.release();assert.equal(f.assets.scenes.zone121.instances.length,0);assert.equal(Object.keys(f.assets.models).length,0);assert.equal(Object.keys(f.renderer.models).length,0);assert.equal(f.deleted.length,16);
 });
-test('native lower-floor cutaway hides only its six geometry instances and changes back at the original boundary',async()=>{
- const hero={x:0,y:14};let height=4;const f=setup({hero:()=>hero,height:()=>height});await f.view.prepare();f.view.apply(f.renderer);assert.equal(f.buffers,10);for(let i=10;i<16;i++)assert.equal(f.renderer.models['lg-gym-instance'+i].length,0);
- height=4.001;f.view.apply(f.renderer);assert.equal(f.buffers,16);height=4;hero.y=13.999;f.view.apply(f.renderer);for(let i=0;i<16;i++)assert.equal(f.renderer.models['lg-gym-instance'+i].length,1);hero.y=14;f.view.apply(f.renderer);assert.equal(f.deleted.length,6);f.view.release();assert.equal(f.deleted.length,16);
+test('the wider HD-2D camera retains upper supports across the native cutaway boundary instead of leaving visible NPCs suspended',async()=>{
+ const hero={x:0,y:14};let height=4;const f=setup({hero:()=>hero,height:()=>height});await f.view.prepare();
+ for(const [h,z]of [[4,14],[4.001,14],[4,13.999],[4,14]]){
+  height=h;hero.y=z;f.view.apply(f.renderer);assert.equal(f.buffers,16);for(let i=0;i<16;i++)assert.equal(f.renderer.models['lg-gym-instance'+i].length,1);
+ }
+ assert.equal(f.deleted.length,0);f.view.release();assert.equal(f.deleted.length,16);
 });
+
 test('failed/cancelled preparation never installs an incomplete room and a new preparation can recover',async()=>{
  let fail=true;const f=setup({loadGLB:async()=>{if(fail)throw Error('unavailable');return {doc:{}};}});await assert.rejects(f.view.prepare(),/unavailable/);assert.equal(f.view.ready,false);assert.equal(f.assets.scenes.zone121.instances.length,0);fail=false;assert.equal(await f.view.prepare(),true);f.view.release();
  const pending=[],g=setup({loadGLB:()=>new Promise(done=>pending.push(done))}),old=g.view.prepare();g.view.release();for(const done of pending)done({doc:{}});assert.equal(await old,false);assert.equal(g.view.ready,false);assert.equal(g.assets.scenes.zone121.instances.length,0);
