@@ -23,3 +23,4 @@ test('exported film audio retains the exact native control records, sample rate,
   assert.equal(a.cues[0].sequence,id==='13'?2044:2046);
  }
 });
+test('pausing a cinematic releases only the voice and resumes the same buffered clip at the visual frame',async()=>{const f=fixture();await f.api.enable();const audio=f.api.createCinematic('movie.flac');await audio.prepare();audio.sync(6,2);const old=f.fieldStarts()[0];audio.pause();assert.equal(old.source.stopCalls.length,1);assert.equal(audio.status.ready,true);audio.pause();assert.equal(old.source.stopCalls.length,1);audio.sync(6,4);assert.equal(f.fieldStarts().length,2);assert.equal(f.fieldStarts().at(-1).offset,.2);assert.equal(f.fieldStarts().at(-1).source.playbackRate.value,4);audio.stop();});

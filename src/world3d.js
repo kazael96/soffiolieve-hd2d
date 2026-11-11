@@ -69,7 +69,7 @@ class VillageRenderer {
  groundHeight(x,z,preferredHeight){
   // Native Route 5 is flat. Its map mesh also contains the lamp cap;
   // decorative geometry must not become a floor for actors or the player.
-  if(this.scene.chapter051){const explicit=window.LeagueGym?.heightAt(x,z)??window.DragonspiralJump?.heightAt(x,z)??window.OpelucidGym?.heightAt(x,z);if(explicit!==null&&explicit!==undefined)return explicit;const height=preferredHeight??window.NativeStory?.state.fieldHeight??0,row=window.OpelucidChapter?.surfaceAt(this.scene.zone,x,z,height),rail=this.scene.railZone&&window.NativeRails?.locate(this.scene.railZone,x,z,{height});return row?.height??rail?.height??height;}
+  if(this.scene.chapter051){const explicit=window.LeaguePlayerSlideMotion?.heightAt(x,z)??window.LeagueGym?.heightAt(x,z)??window.DragonspiralJump?.heightAt(x,z)??window.OpelucidGym?.heightAt(x,z);if(explicit!==null&&explicit!==undefined)return explicit;const height=preferredHeight??window.NativeStory?.state.fieldHeight??0,row=window.OpelucidChapter?.surfaceAt(this.scene.zone,x,z,height),rail=this.scene.railZone&&window.NativeRails?.locate(this.scene.railZone,x,z,{height});return row?.height??rail?.height??height;}
   if(Number.isFinite(this.scene.groundPlane))return this.scene.groundPlane;
   const zone=this.scene.railZone,hint=window.NativeStory?.state.railCurrent,rail=zone&&window.NativeRails?.locate(zone,x,z,preferredHeight===undefined?(hint?.zone===zone?hint:this.scene.chapter050?{height:window.NativeStory?.state.fieldHeight??0}:{}):{height:preferredHeight});
   if(this.scene.chapter050&&!rail){const native=window.IcirrusChapter?.surfaceAt(this.scene.zone,x,z,preferredHeight??window.NativeStory?.state.fieldHeight??0);if(native)return native.height;}

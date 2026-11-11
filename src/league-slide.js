@@ -1,14 +1,14 @@
 /* IRBI overlay63, 021f365c: native lower-ribbon projection, side+2,
  * passable-side search and half-tile steps at30Hz. Geometry uses the existing
  * HD-2D floating rail evaluator; this is not bit-exact DS fixed-point emulation.
- * The currently integrated scope is the214 demonstration, not every field slide. */
+ * The planner is shared by the214 demonstration and the guarded player adapter. */
 (function(root){
  const sub=(a,b)=>a.map((v,i)=>v-b[i]),add=(a,b)=>a.map((v,i)=>v+b[i]),mul=(a,f)=>a.map(v=>v*f),dot=(a,b)=>a.reduce((sum,v,i)=>sum+v*b[i],0),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],length=a=>Math.hypot(...a);
  // 021b825c rounds signed native16-unit distances, half away from zero.
  const cell=n=>Math.sign(n)*Math.floor((Math.floor(Math.abs(n)*16+1e-8)+8)/16);
- function plan(zone,body,{data=root.PINWHEEL_RAILS,rails=root.NativeRails}={}){
-  const table=data?.[zone],dir=[[0,-1],[0,1],[-1,0],[1,0]][body?.direction];
-  if(zone!==214||!table||!rails||!dir||![body.x,body.y,body.height].every(Number.isFinite)||body.height<=-.625)return null;
+ function plan(zone,body,{data=root.PINWHEEL_RAILS,rails=root.NativeRails,direction}={}){
+  const table=data?.[zone],dir=direction||[[0,-1],[0,1],[-1,0],[1,0]][body?.direction];
+  if(zone!==214||!table||!rails||!body||!Array.isArray(dir)||dir.length!==2||!dir.every(Number.isFinite)||Math.abs(Math.hypot(...dir)-1)>1e-6||![body.x,body.y,body.height].every(Number.isFinite)||body.height<=-.625)return null;
   const position=(line,front,side)=>{const p=rails.position(zone,line,front,side);return [p.x-16,p.height,p.z-16];},start=[body.x,body.height,body.y],from=add(start,[dir[0],0,dir[1]]),reach=(body.height+.625)*4731/4096,ray=[dir[0]*reach,-body.height-.625,dir[1]*reach],candidates=[];
   for(const [id,line]of table.lines.entries()){
    const a=table.points[line.a].position.map((v,i)=>v-(i===1?0:16)),b=table.points[line.b].position.map((v,i)=>v-(i===1?0:16)),axis=sub(b,a),normal=cross(axis,cross(axis,[0,1,0])),den=dot(normal,ray);if(Math.abs(den)<1e-10)continue;
@@ -68,5 +68,5 @@
   return {start,tick,returnToRole,adopt,reset,resources:()=>effects?.resources()||[],visuals:()=>effects?.visuals()||[],get completedBody(){return completedBody;},get returnPromise(){return returnPromise;},get busy(){return !!current;},get body(){return current?.body;}};
  }
 
- const api={plan,create};root.LeagueSlide=api;if(typeof module!=='undefined')module.exports=api;
+ const api={plan,sample,create};root.LeagueSlide=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);
