@@ -204,3 +204,8 @@ Checkpoint discesa214: leggere [VICTORY-SLIDE-052.md](VICTORY-SLIDE-052.md). Pri
 
 
 Ultimo consolidamento Via Vittoria: leggere l’ultima sezione di [VICTORY-SLIDE-052.md](VICTORY-SLIDE-052.md), che supera i primi dati geometrici della10/11. Privata12 `6d094556a8edbd8b`, origine/scansione native corrette e polvere originale, stesso corpo fino al ruolo0:46fasi PASS/1074Node/36Python e9casiGPU/3formati/102PNG rivisti.19SHA sorgenti/banco/asset immutati; primoFAILUTF-8 del banco e interruzione11conservati.10/11archiviate/rimosse secondoH.8,051pubblica e12verificata conservate. Ricerca per giocatore69celle e materiali16luoghi soltanto predisposta esternamente: non aggiunge storia o fondali. Nessuna052attiva/pubblicata; restano giocatore/continuità/contesti/servizi/bordi prima della consegna, poi primo finale e MN. Nessun controllo delPC.
+
+
+### Fondali e incontri verso la Lega: componente15 verificato
+
+Leggere [LEAGUE-BATTLE-PLACES-052.md](LEAGUE-BATTLE-PLACES-052.md):20nuovi contesti nativi, inclusi i due laghi,16varianti stagionali, specie ambientali dalle tabelle originali e collegamento del vero Journey alle superficiNG214. Privata15 32110f716e752a5f PASS46fasi/1084Node/36Python,693.690s;15SHA invariati.9casiGPU/3formati/114PNG rivisti, anteprime preparate senza audio: non traversata completa, nuove vittorie o Android fisico.13/14respinte per difetti visivi e conservate come prove esterne. H.8 conserva051pubblica e15, archivia/rimuove12 dopo sostituzione verificata. Nessuna052attiva/pubblicata. Restano giocatore69celle, continuità, filtro postgame, servizi e margini del campo prima della consegna; poi primo finale e MN. Solo file/CLI/headless, nessun controllo delPC.

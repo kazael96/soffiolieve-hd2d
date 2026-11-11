@@ -151,8 +151,10 @@
     const surfing=!!window.SurfField?.mounted(),next=window.SurfField?.encounters()||window.IcirrusEncounters?.table(window.NativeStory?.state.zone)||window.MISTRALTON_DATA?.encounters?.[window.NativeStory?.state.zone]||window.DRIFTVEIL_DATA?.encounters?.[window.NativeStory?.state.zone]||window.NIMBASA_DATA?.encounters?.[window.NativeStory?.state.zone]||window.PINWHEEL_DATA?.encounters?.[window.NativeStory?.state.zone]||window.ROUTE3_DATA?.encounters?.[window.NativeStory?.state.zone],route2=window.ROUTE2_DATA&&window.NativeStory?.state.zone===319,dream=window.NativeStory?.state.zone===152,enc=next|| (dream?STRIATON_DATA.encounters:route2?ROUTE2_DATA.encounters:null);const onRoute=!!enc||window.NativeStory?.state.zone===OPENING_ENCOUNTER_RULES.zone;encounterState.rate=enc?enc.rate:OPENING_ENCOUNTER_RULES.rate;
     const g=onRoute?(dream||next?renderer.scene:outdoor).permissionGrids.find(g=>player.x>=g.x-16&&player.x<g.x+16&&player.y>=g.z-16&&player.y<g.z+16):null;
     const tile=g?8+(Math.floor(player.y-g.z)+16)*256+(Math.floor(player.x-g.x)+16)*8:0;
-    const dark=next?.dark&&g?.bytes[tile]===6,table=dark?next.dark.slots:enc?enc.slots:OPENING_ENCOUNTERS;if(dark)encounterState.rate=next.dark.rate;
-    if(encounterState.advance(distance,!!g&&RouteEncounter.terrain(g.bytes[tile]|g.bytes[tile+1]<<8,g.bytes[tile+2]|g.bytes[tile+3]<<8,surfing),n=>Math.floor(Math.random()*n))){
+    const native=window.NativeStory?.state,rail=onRoute&&native&&renderer.scene.railZone?window.NativeRails?.surfaceAt(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0}):null;
+    const behavior=rail?.behavior??(g?g.bytes[tile]|g.bytes[tile+1]<<8:255),flags=rail?.flags??(g?g.bytes[tile+2]|g.bytes[tile+3]<<8:0);
+    const dark=next?.dark&&behavior===6,table=dark?next.dark.slots:enc?enc.slots:OPENING_ENCOUNTERS;if(dark)encounterState.rate=next.dark.rate;
+    if(encounterState.advance(distance,!!(rail||g)&&RouteEncounter.terrain(behavior,flags,surfing),n=>Math.floor(Math.random()*n))){
       const pick=()=>{let roll=Math.random()*100;const e=table.find(slot=>(roll-=slot.weight)<0)||table.at(-1);return monConfig(newStoryMon(e.name,e.level??e.min+Math.floor(Math.random()*(e.max-e.min+1))));};
       // IRBI overlay21 021a935e..021a937a: two healthy party members;
       // GFL_RandomLC(65535)/656 < 40 enables the second dark-grass slot.

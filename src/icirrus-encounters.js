@@ -2,7 +2,8 @@
 (function(root){
  function chapterSeason(zone,season){
   if(!root.OpelucidChapter?.zones.includes(zone))return null;
-  return root.OPELUCID_DATA?.encounters[zone]?.seasons[season]||null;
+  const data=root.LEAGUE_DATA?.encounters?.[zone]??root.OPELUCID_DATA?.encounters?.[zone];
+  return data?.seasons[season]||null;
  }
  function table(zone,season=root.FieldSeason?.current()??new Date().getMonth()%4){
   const next=chapterSeason(zone,season);

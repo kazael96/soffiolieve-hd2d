@@ -9,7 +9,7 @@ function inject(html,site,{fields=false}={}){
   // order. It cannot certify startup transport performance of app.js.
   html=html.replace(app,files.map(f=>'<script src="'+f+'"></script>').join(''));
  }
- const metadata=['league-scenes','league-parts','league-events','league-data','league-sprites','league-rails','league-gym-data','league-field-models','league-camera-data','league-slide-data','league-slide-effects-data'];
+ const metadata=['league-scenes','league-parts','league-events','league-data','league-sprites','league-rails','league-gym-data','league-field-models','league-camera-data','league-slide-data','league-slide-effects-data','league-battle-data'];
  const controllers=['league-geography','league-surfaces','league-seasons','league-graphics','league-camera','league-gates','league-slide-effects','league-slide','league-gym-task','league-gym-jump','league-gym-save','league-gym-renderer','league-gym-rail','league-gym','league-gym-install','trainer-intro-music-data','trainer-intro-music'];
  for(const file of [...metadata,...controllers,'league-audio','league-moves','league-badge-assets','league-field','league-battles','league-menu'])if(!fs.existsSync(path.join(site,file+'.js')))throw Error('Missing Gym052 preview component: '+file);
  const marker=/<script src="opelucid-bootstrap\.js(?:\?[^"]*)?"><\/script>/;
