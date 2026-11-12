@@ -43,7 +43,7 @@ def tracks(texture, resources, per_set, destination, output):
                     raise ValueError('Original pattern name escapes destination')
                 rendered = textures[key['texture']].renderAsImage(palettes[key['palette']])
                 rendered.save(image)
-                key.update(url=image.relative_to(output).as_posix(), w=rendered.width, h=rendered.height, sourceSHA256=native['nativeSha256'], imageSHA256=hashlib.sha256(image.read_bytes()).hexdigest())
+                key.update(url=image.relative_to(output).as_posix(), w=rendered.width, h=rendered.height, nativeFrames=native['nativeFrames'], sourceSHA256=native['nativeSha256'], imageSHA256=hashlib.sha256(image.read_bytes()).hexdigest())
             target[material] = keys
     return result
 
