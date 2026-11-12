@@ -33,13 +33,37 @@
     for(let x=minX;x<=maxX;x++)for(let z=minZ;z<=maxZ;z++){const key=x+':'+z;if(!bins.has(key))bins.set(key,[]);bins.get(key).push(cell);}
    }
   }
+  if(+zone===214){
+   // Native shared endpoints are continuous. Independently oriented ribbon
+   // cross sections otherwise leave thin triangular slits in the HD mesh.
+   // Stitch only near-collinear, equally high, passable endpoint cells with
+   // identical behavior; never bridge disconnected rails or blocked tiles.
+   const p=(id,f,s)=>{const q=position(zone,id,f,s);return {x:q.x-16,z:q.z-16,height:q.height};};
+   const insert=cell=>{cells.push(cell);const q=cell.corners;for(let x=Math.floor(Math.min(...q.map(p=>p.x)));x<=Math.floor(Math.max(...q.map(p=>p.x)));x++)for(let z=Math.floor(Math.min(...q.map(p=>p.z)));z<=Math.floor(Math.max(...q.map(p=>p.z)));z++){const key=x+':'+z;if(!bins.has(key))bins.set(key,[]);bins.get(key).push(cell);}};
+   for(const point of r.points){const ids=point.lines.filter(id=>id<r.lines.length);
+    for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+     const a=ids[i],b=ids[j],la=r.lines[a],lb=r.lines[b],fa=r.points[la.a]===point?0:la.length,fb=r.points[lb.a]===point?0:lb.length,pa=p(a,fa,0),pb=p(b,fb,0);
+     if(Math.hypot(pa.x-pb.x,pa.z-pb.z,pa.height-pb.height)>1e-6)continue;
+     const aa=p(a,fa,1),bb=p(b,fb,1),alignment=(aa.x-pa.x)*(bb.x-pb.x)+(aa.z-pa.z)*(bb.z-pb.z),sign=alignment<0?-1:1;
+     if(Math.abs(alignment)<.9)continue;
+     const rowA=fa===0?0:la.tiles.length-1,rowB=fb===0?0:lb.tiles.length-1;
+     for(let side=-Math.floor(la.tiles.width/2);side<=Math.floor(la.tiles.width/2);side++){
+      const other=side*sign,colA=side+Math.floor(la.tiles.width/2),colB=other+Math.floor(lb.tiles.width/2);if(colB<0||colB>=lb.tiles.width)continue;
+      const va=la.tiles.values[rowA*la.tiles.width+colA],vb=lb.tiles.values[rowB*lb.tiles.width+colB];if(!Number.isInteger(va)||!Number.isInteger(vb)||(va|vb)&0x10000||(va&255)!==(vb&255))continue;
+      const cell={line:a,peer:b,front:rowA,side,junction:true};
+      if(side===0){for(const edge of [-.5,.5]){const qa=p(a,fa,edge),qb=p(b,fb,edge*sign);insert({...cell,corners:[pa,qa,qb,qb]});}}
+      else insert({...cell,corners:[p(a,fa,side-.5),p(a,fa,side+.5),p(b,fb,(side+.5)*sign),p(b,fb,(side-.5)*sign)]});
+     }
+    }
+   }
+  }
   const value={bins,cells};meshes.set(zone,value);return value;
  }
  function triangle(x,z,a,b,c){const d=(b.z-c.z)*(a.x-c.x)+(c.x-b.x)*(a.z-c.z);if(Math.abs(d)<1e-8)return null;const u=((b.z-c.z)*(x-c.x)+(c.x-b.x)*(z-c.z))/d,v=((c.z-a.z)*(x-c.x)+(a.x-c.x)*(z-c.z))/d;if(u<-.00001||v<-.00001||u+v>1.00001)return null;return a.height*u+b.height*v+c.height*(1-u-v);}
  function locate(zone,x,z,{height,line}={}){
   const list=mesh(zone)?.bins.get(Math.floor(x)+':'+Math.floor(z))||[],enabled=root.NativeRailGates?.[zone];let best=null,score=Infinity;
   if(enabled!==undefined&&typeof enabled!=='function')throw Error('Permessi dinamici dei binari non validi: '+zone);
-  for(const cell of list){if(enabled&&!enabled(cell.line))continue;const q=cell.corners,h=triangle(x,z,q[0],q[1],q[2])??triangle(x,z,q[0],q[2],q[3]);if(h===null)continue;
+  for(const cell of list){if(enabled&&(!enabled(cell.line)||cell.peer!==undefined&&!enabled(cell.peer)))continue;const q=cell.corners,h=triangle(x,z,q[0],q[1],q[2])??triangle(x,z,q[0],q[2],q[3]);if(h===null)continue;
    const delta=height===undefined?0:Math.abs(h-height);if(delta>1.8)continue;const distance=delta+(line===undefined||cell.line===line?0:.001);
    if(distance<score){score=distance;best={height:h,line:cell.line,front:cell.front,side:cell.side};}
   }

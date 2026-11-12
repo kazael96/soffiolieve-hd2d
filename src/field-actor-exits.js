@@ -113,7 +113,7 @@
   // The documented old Aralia routes are rebuilt from her valid saved pose;
   // their obsolete path/index must not prevent that compatibility migration.
   if(r.zone===317&&a.name==='Aralia'&&p&&!p.itineraryVersion&&(['path','resident'].includes(p.kind)||p.destination==='lab')){p={kind:'path',points:[],clip:null,...(p.destination==='lab'?{destination:'lab'}:{})};index=0;stage='walk';}
-  if(!p||!['path','door','stairs','resident','arrival','cannon','fall'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(v=>point(v)&&(v.jumpLift===undefined||Number.isFinite(v.jumpLift)&&v.jumpLift>=0&&v.jumpLift<=2)))return null;
+  if(!p||!['path','door','stairs','resident','arrival','cannon','fall','slide'].includes(p.kind)||!Array.isArray(p.points)||p.points.length>4096||!p.points.every(v=>point(v)&&(v.jumpLift===undefined||Number.isFinite(v.jumpLift)&&v.jumpLift>=0&&v.jumpLift<=2)))return null;
   if(['door','stairs','arrival','cannon','fall'].includes(p.kind)&&!point(p.anchor))return null;
   if(p.clip!=null&&(!Array.isArray(p.clip)||p.clip.length!==4||!p.clip.every(Number.isFinite)))return null;
   if(p.kind==='arrival'&&(!Number.isInteger(p.destinationZone)||!Number.isInteger(p.targetUid)))return null;
@@ -146,6 +146,7 @@
    dt=Math.min(.1,Math.max(0,dt));for(const [key,r]of this.records){const a=r.actor;r.age+=dt;
     if(root.MistraltonContinuity?.shouldTick(r)===false)continue;
     if(r.stage==='resident')continue;
+    if(root.LeagueNpcSlides?.tick(r,dt))continue;
     if(root.OpelucidNpcFalls?.tick(r,dt))continue;
     if(r.stage==='rejoin'){
      const b=r.target;if(!b){r.stage='walk';continue;}const d=Math.hypot(b.x-a.x,b.y-a.y),step=3.75*dt;

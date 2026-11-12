@@ -54,6 +54,14 @@ def build_source():
     replace("'icirrus','opelucid']", "'icirrus','opelucid','league']")
     replace("print('IRBI051:'", "print('IRBI052:'")
     marker = "(a.output/'league-data.js').write_text"
+    replace("new_machine_ids=sorted(item for item in ids", """# Keep all earlier obtainable machines before recalculating native compatibility.
+prior_machines=json.loads(_prior_text('opelucid-data.js').split('=',1)[1].rstrip(';\\n'))['machines']
+for item,move in prior_machines.items():
+    item=int(item)
+    if native_by_item.get(item)!=move:
+        raise ValueError('Earlier machine differs from ARM9: '+str(item))
+    data['machines'][item]=move
+new_machine_ids=sorted(item for item in ids""")
     replace(marker, 'separate_postgame(data)\n' + marker)
     helper = '''
 def _prior_text(name):
@@ -61,6 +69,12 @@ def _prior_text(name):
     if name not in allowed:
         raise ValueError('Unexpected predecessor catalog')
     return (Path(__file__).resolve().parents[1] / 'src' / name).read_text(encoding='utf8')
+'''
+    source += '''
+import importlib.util as _league_util
+_league_spec=_league_util.spec_from_file_location('league_market',Path(__file__).with_name('extend-league-market.py'))
+_league_market=_league_util.module_from_spec(_league_spec);_league_spec.loader.exec_module(_league_market)
+_league_market.extend(a.rom,a.output)
 '''
     return helper + '\n' + source
 

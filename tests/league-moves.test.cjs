@@ -1,9 +1,16 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{setup}=require('./helpers/league-moves-host.cjs');
+test('chapter052 retains every earlier machine and compatible species pair',()=>{
+ const c=setup(),previous={};require('node:vm').runInNewContext(fs.readFileSync(path.join(__dirname,'../src/opelucid-data.js'),'utf8'),{window:previous});
+ for(const [item,move]of Object.entries(previous.OPELUCID_DATA.machines)){
+  assert.equal(c.LEAGUE_DATA.machines[item],move,'lost earlier machine '+item);
+  for(const [name,items]of Object.entries(previous.OPELUCID_DATA.compatibility))if(items.includes(+item))assert.ok(c.LEAGUE_DATA.compatibility[name]?.includes(+item),'lost compatible machine '+name+'/'+item);
+ }
+});
 test('the earlier choreography registration fails explicitly on the newly exposed level50 move',()=>{
  assert.throws(()=>setup({withoutLeague:true}),/Coreografia non definita: Munna \/ 500/);
 });
-test('all3675 legal pairs on137 records register with their own species identity, rig and authored emission point',()=>{
- const c=setup();assert.equal(Object.keys(c.TrainingMoves.pairs).length,137);assert.equal(Object.values(c.TrainingMoves.pairs).reduce((sum,ids)=>sum+ids.length,0),3675);
+test('all3987 legal pairs on137 records register with their own species identity, rig and authored emission point',()=>{
+ const c=setup();assert.equal(Object.keys(c.TrainingMoves.pairs).length,137);assert.equal(Object.values(c.TrainingMoves.pairs).reduce((sum,ids)=>sum+ids.length,0),3987);
  for(const [name,ids]of Object.entries(c.TrainingMoves.pairs))for(const id of ids){const species=c.TRAINING_DATA.progression[name].id,p=c.SpeciesMoves.select(species,id);assert.ok(p,name+'/'+id);assert.equal(p.species,species);const rig=c.ChapterMoves.rigs[species]||c.DemoMoves.rigs[species];assert.ok(rig,name);if(p.chapter)assert.ok(Array.isArray(rig[p.attachment]),name+'/'+id+'/'+p.attachment);}
 });
 test('thirteen authored limb maps reference real non-overlapping native tracks on both sides',()=>{

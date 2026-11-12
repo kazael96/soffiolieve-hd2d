@@ -60,7 +60,7 @@ def extract(rom_path, output, palettes=None):
         return {'reviewOnly': True, 'species': species}
     f = files('a/0/2/5')
     arm = ndspy.codeCompression.decompress(rom.arm9)
-    for item in sorted(int(i) for i in current['itemNames'] if i not in old['itemNames']):
+    for item in sorted({int(i) for i in current['itemNames'] if i not in old['itemNames']} | {1,23,24,29}):
         char, palette = struct.unpack_from('<HH', arm, 0x0209eaec - rom.arm9RamAddress + item * 4)
         image, box = gfx.cells(f, char, 1, palette)[0]
         file = f'assets/party-details/item-{item}.png'

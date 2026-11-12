@@ -154,6 +154,7 @@ def build(archive, target):
         driftveil_pack = startup_pack(site,['driftveil-assets.js'],'assets/driftveil-pack.bin')
         mistralton_pack = startup_pack(site,['mistralton-assets.js'],'assets/mistralton-pack.bin')
         icirrus_pack = startup_pack(site,['icirrus-assets.js'],'assets/icirrus-pack.bin')
+        capture_pack = startup_pack(site,['capture-data.js','route2-ball.js','route3-ball.js','nimbasa-ball.js','driftveil-ball.js','mistralton-ball.js'],'assets/capture-pack.bin')
         opelucid_packs = geographic_packs(site)
         league_packs = geographic_packs(site, 'league')
         for season in range(4):
@@ -179,6 +180,7 @@ def build(archive, target):
         asset_hashes['assets/nimbasa-pack.bin'] = hashlib.sha256((site/'assets/nimbasa-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/castelia-pack.bin'] = hashlib.sha256((site/'assets/castelia-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/field-pack.bin'] = hashlib.sha256((site/'assets/field-pack.bin').read_bytes()).hexdigest()
+        asset_hashes['assets/capture-pack.bin'] = hashlib.sha256((site/'assets/capture-pack.bin').read_bytes()).hexdigest()
         revision = hashlib.sha256(json.dumps({'files': hashes, 'assets': asset_hashes}, sort_keys=True).encode()).hexdigest()[:16]
         index = site / 'index.html'
         html = index.read_text(encoding='utf-8')
@@ -188,11 +190,11 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.51', 'revision': revision,
+            'version': '0.52', 'revision': revision, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         publish_staging(site, target)
-    print(f"Built Soffiolieve 0.51 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.52 ({revision}) in {target}")
 
 
 if __name__ == '__main__':
