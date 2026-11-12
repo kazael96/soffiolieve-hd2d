@@ -21,3 +21,12 @@ test('a cached passing case, wrong candidate, wrong viewport or unfinished repla
  for(const [copy,build,vp,count]of [[r,'old',{width:390,height:844},1],[r,'current',{width:844,height:390},1],[r,'current',{width:390,height:844},2],[{...r,running:true},'current',{width:390,height:844},1]])assert.throws(()=>runner.validate(copy,build,vp,count));
  assert.equal(runner.validate({...r,cases:[{result:'FAIL'}]},'current',{width:390,height:844},1),false);assert.equal(runner.validate({...r,errors:['uncaught']},'current',{width:390,height:844},1),false);
 });
+
+test('focused graphical regression keeps all three formats by default and records an explicit subset',()=>{
+ assert.deepEqual(runner.options(['site','reports']).viewports.map(v=>v[0]),['desktop','portrait','landscape']);
+ const one=runner.options(['site','reports','--viewports=landscape']);assert.deepEqual(one.viewports,[['landscape',844,390]]);
+ for(const value of ['', 'landscape,landscape','phone','desktop,','landscape;anything'])assert.throws(()=>runner.options(['site','reports','--viewports='+value]));
+ assert.equal(runner.completeViewports([{name:'landscape',result:'PASS'}]),false);
+ assert.equal(runner.completeViewports([{name:'landscape',result:'PASS'}],one.viewports),true);
+ assert.equal(runner.completeViewports([{name:'portrait',result:'PASS'}],one.viewports),false);
+});

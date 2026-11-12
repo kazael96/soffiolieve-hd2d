@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_pro
 const viewports=[['desktop',1280,720],['portrait',390,844],['landscape',844,390]];
 function options(argv){
  const positional=argv.filter(a=>!a.startsWith('--')),flags=new Map();
- for(const arg of argv.filter(a=>a.startsWith('--'))){const at=arg.indexOf('=');if(at<3)throw Error('Use --name=value');const name=arg.slice(2,at);if(!['python','playwright','browser','cases','timeout','renderer','preview','fail-fast'].includes(name)||flags.has(name))throw Error('Unsupported or repeated option: '+name);flags.set(name,arg.slice(at+1));}
+ for(const arg of argv.filter(a=>a.startsWith('--'))){const at=arg.indexOf('=');if(at<3)throw Error('Use --name=value');const name=arg.slice(2,at);if(!['python','playwright','browser','cases','timeout','renderer','preview','fail-fast','viewports'].includes(name)||flags.has(name))throw Error('Unsupported or repeated option: '+name);flags.set(name,arg.slice(at+1));}
  if(positional.length!==2)throw Error('Pass built site and external report directory');
  const site=path.resolve(positional[0]),out=path.resolve(positional[1]);if(out===site||out.startsWith(site+path.sep))throw Error('Reports must remain outside the published site');
  const cases=(flags.has('cases')?flags.get('cases'):'qaSubmerged051,qaNpcFalls051,qaQuicksand051').split(',');if(cases.some(id=>!/^qa[A-Za-z0-9]+$/.test(id))||new Set(cases).size!==cases.length)throw Error('Invalid or repeated case ID');
@@ -11,8 +11,10 @@ function options(argv){
  const renderer=flags.get('renderer')||'auto';if(!['auto','software'].includes(renderer))throw Error('Invalid renderer');
  const preview=flags.get('preview');if(preview!==undefined&&!['leagueGym','leagueFields'].includes(preview))throw Error('Invalid isolated preview');
  if(flags.has('fail-fast')&&!['true','false'].includes(flags.get('fail-fast')))throw Error('Invalid fail-fast option');
- return {site,out,cases,timeout,renderer,preview,failFast:flags.get('fail-fast')==='true',python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};
+ const selected=flags.has('viewports')?flags.get('viewports').split(','):viewports.map(v=>v[0]);if(new Set(selected).size!==selected.length||selected.some(name=>!viewports.some(v=>v[0]===name)))throw Error('Invalid or repeated viewport');
+ return {site,out,cases,timeout,renderer,preview,viewports:selected.map(name=>viewports.find(v=>v[0]===name)),failFast:flags.get('fail-fast')==='true',python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};
 }
+function completeViewports(rows,expected=viewports){return rows.length===expected.length&&expected.every(([name,w,h],i)=>rows[i]?.name===name&&rows[i].result==='PASS'&&(!rows[i].viewport||(rows[i].viewport[0]===w&&rows[i].viewport[1]===h)));}
 function launchOptions(browser,renderer='auto'){return {headless:true,chromiumSandbox:true,...(browser?{executablePath:browser}:{}),args:renderer==='software'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]};}
 function validate(report,build,viewport,count){
  if(report.build!==build||!report.fixture||report.viewport?.[0]!==viewport.width||report.viewport?.[1]!==viewport.height)throw Error('Wrong build, fixture or viewport');
@@ -30,7 +32,7 @@ async function run(o){
  const save=()=>fs.writeFileSync(path.join(o.out,'report.json'),JSON.stringify(report,null,2)+'\n');save();
  try{
   service=await startServer(o,fixture);browser=await chromium.launch(launchOptions(o.browser,o.renderer));report.environment.browser=browser.version();
-  for(const [name,width,height]of viewports){const context=await browser.newContext({viewport:{width,height}}),page=await context.newPage(),errors=[],consoleErrors=[],failedRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});page.on('requestfailed',r=>failedRequests.push({url:r.url(),error:r.failure()?.errorText}));const row={name,viewport:[width,height],result:'RUNNING',cases:[],errors};report.viewports.push(row);save();
+  report.requestedViewports=(o.viewports||viewports).map(v=>v[0]);save();for(const [name,width,height]of o.viewports||viewports){const context=await browser.newContext({viewport:{width,height}}),page=await context.newPage(),errors=[],consoleErrors=[],failedRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});page.on('requestfailed',r=>failedRequests.push({url:r.url(),error:r.failure()?.errorText}));const row={name,viewport:[width,height],result:'RUNNING',cases:[],errors};report.viewports.push(row);save();
    try{
     await page.exposeFunction('DeepQAUiScreenshot',async label=>{if(typeof label!=='string'||!/^052 [A-Za-z0-9 ]{1,90}$/.test(label))throw Error('Invalid isolated UI screenshot label');const filename=width+'x'+height+'-'+label.replace(/[^a-zA-Z0-9-]/g,'-')+'.png';await page.screenshot({path:path.join(fixture,filename),timeout:15000});return {filename,viewport:[width,height],actualPage:true};});
     await page.goto(service.url+'?fieldAudio=1&headless=1',{waitUntil:'load',timeout:90000});
@@ -44,9 +46,9 @@ async function run(o){
    }catch(e){row.result='FAIL';row.error=String(e.stack||e);await page.screenshot({path:path.join(o.out,name+'-failure.png'),timeout:10000}).catch(()=>{});row.dom=await page.content().catch(()=>'');console.error('FAIL '+name+' '+e.message);}finally{row.consoleErrors=consoleErrors;row.failedRequests=failedRequests;await context.close();save();}
    if(o.failFast&&row.result==='FAIL'){report.stoppedAfterFailure=name;break;}
   }
-  report.result=report.viewports.length===viewports.length&&report.viewports.every(r=>r.result==='PASS')?'PASS':'FAIL';
+  report.result=completeViewports(report.viewports,o.viewports||viewports)?'PASS':'FAIL';
  }catch(e){report.result='FAIL';report.error=String(e.stack||e);throw e;}finally{await browser?.close();service?.server.kill();service?.log.end();save();}
  return report;
 }
 if(require.main===module)run(options(process.argv.slice(2))).then(r=>{console.log(r.result+' background browser QA');process.exitCode=r.result==='PASS'?0:1;}).catch(e=>{console.error(e);process.exitCode=1;});
-module.exports={options,launchOptions,validate,run};
+module.exports={options,launchOptions,validate,run,completeViewports};
