@@ -1383,5 +1383,20 @@
  case049('qaWinterWalk051','Percorso8 inverno051: scivolata con comandi e checkpoint','opelucid051-real-renderer-outdoor-ice-input-and-save',async()=>{
   const n=await seedEast051();n.trainerWins=[...new Set([...n.trainerWins,...Object.keys(OPELUCID_DATA.trainers).map(Number)])];preparedResources049.preparedTrainers='Chapter051 trainer victories seeded to isolate the winter movement';n.fieldSeason=FieldSeason.calendar();await enter049(345,215,178);n.fieldSeason=3;await enter049(345,215,178);GameSpeed.set(4);check(OpelucidSeasons.stats().season===3&&OpelucidChapter.surfaceAt(345,-568.5,-574.5,0).behavior===24,'051 winter ice not installed');await hold049('ArrowUp',()=>n.mistraltonIceSlide?.zone===345,'051 enter native winter ice',15000);const checkpoint=await checkpoint049(MistraltonPuzzles,'051 native winter field slide');await auto049(until(()=>!n.mistraltonIceSlide&&!NativeStory.locked,'051 winter slide endpoint',30000),35000);check(Math.abs(player.x+568.5)<1e-6&&Math.abs(player.y+577.5)<1e-6,'051 winter slide did not stop before native deep water');check(!blocked(player.x,player.y),'051 winter slide stopped inside a collision');const view=await scene049('051 Percorso8 scivolata invernale',n.fieldHeight);return {checkpoint,view,scope:'Actual Up input and automatic momentum on native winter terrain; isolated checkpoint roundtrip, not a page reload or a trainer battle'};
  });
+ if(window.QA053Preview)case049('qaFinaleTransport053','Finale053: trasporto nativo al Castello','finale053-actual-A-Castle-transport-and-native-return-context',async()=>{
+  await seed049({16591:1,16568:4,16545:1},[594,657,759,758,185,...FINALE_INITIAL_STATE.initialActorFlags]);
+  const n=NativeStory.state;n.badges=[0,1,2,3,4,5,6,7];n.returnContext=12;n.flags=n.flags.filter(flag=>flag!==669);GameSpeed.set(4);
+  preparedResources049={...preparedResources049,scope:'Explicit Castle-open flag185 and transport-visible flag669 prerequisites; exercises real interaction and native292:0, not the preceding Elite Four wins',badges:[0,1,2,3,4,5,6,7]};
+  await enter049(146,5,14);check(npcs.some(a=>a.uid===0&&a.model===98),'Native transport grunt missing');facing=6;
+  await AudioEngine.enable();const beforeErrors=AudioEngine.errors.length;
+  const before=await scene049('053 Centro Lega trasporto',n.fieldHeight);
+  document.getElementById('interact').click();await auto049(until(()=>n.zone===272&&!NativeStory.locked,'053 native Castle transport',90000),95000);
+  check(Math.abs(player.x+6.5)<1e-8&&Math.abs(player.y+7.5)<1e-8&&facing===3,'Native191 destination differs');check(!blocked(player.x,player.y),'Native191 landed in collision');
+  check(NativeStory.vm.trace.some(([bank,pc,op])=>bank===292&&pc===163&&op===191),'Transport did not execute original191');
+  const castle=await scene049('053 Castello sala trasporto',n.fieldHeight);
+  const snapshot=structuredClone(Journey.state);snapshot.player={...player};snapshot.facing=facing;let serialized;const storage={setItem:(k,v)=>serialized=v,getItem:()=>serialized};check(StoryState.write(storage,snapshot),'053 Castle save rejected');const loaded=StoryState.read(storage);check(loaded.original.zone===272&&loaded.original.returnContext===12,'053 Castle save lost return context');
+  check(AudioEngine.errors.length===beforeErrors,'053 original field audio error');AudioEngine.disable();
+  return {before,castle,originalProgram:292,originalOpcode:191,actualA:true,dialogueChoices:true,storageRoundtrip:true,pageReload:false,cap:Training.limit(n),audioErrors:AudioEngine.errors.length-beforeErrors};
+ });
  status.textContent='Pronto. Esegui prima i controlli, poi il ripristino GPU.';publish();
 })();

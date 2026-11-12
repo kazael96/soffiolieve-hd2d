@@ -32,7 +32,7 @@
  function setFieldMusicVolume(value){if(!Number.isInteger(value)||value<0||value>127)throw Error('Volume musica nativo non valido');if(value===fieldMusicVolume)return;fieldMusicVolume=value;applyMusicLevel(true);}
  function setMusicTrack(flag,on=true){if(!musicVoice?.layers||!ctx)return;const item=musicVoice.layers.find(v=>v.flag===flag);if(!item)return;const now=ctx.currentTime;item.gain.gain.cancelScheduledValues(now);item.gain.gain.setValueAtTime(item.gain.gain.value,now);item.gain.gain.linearRampToValueAtTime(on?1:0,now+(musicVoice.fadeFrames||60)/60);}
  async function setScene(next){scene=next;if(!enabled||!ctx)return;let token=++generation,id=typeof next==='number'?next:catalog.music[next],record=window.FIELD_AUDIO?.[id]||data.sounds[id];
-  if(id===1001){/* IRBI SEQ_BGM_SILENCE_FIELD: intentional silence, no sample request. */const old=musicVoice;musicVoice=null;for(const layer of old?.layers||[])fadeStop(layer,.25);fadeStop(old,.25);el('audioControls').dataset.music='1001';status('Musica sospesa');return;}
+  if(id===1001||record?.nativeSilence===true){/* Explicit original rest-only sequences require no PCM request. */const old=musicVoice;musicVoice=null;for(const layer of old?.layers||[])fadeStop(layer,.25);fadeStop(old,.25);el('audioControls').dataset.music=String(id);status('Musica sospesa');return;}
   if(!record){problem(Error('Musica non trovata: '+next));return}if(musicVoice?.id===id)return;
   const old=musicVoice;musicVoice=null;for(const layer of old?.layers||[])fadeStop(layer,.25);fadeStop(old,.25);status('Caricamento: '+(labels[next]||record?.name||next)+'…');
   try{const buffers=await Promise.all([load(record.src),...(record.layers||[]).map(layer=>load(layer.src))]);if(token!==generation||!enabled)return;

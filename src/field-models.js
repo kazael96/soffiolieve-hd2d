@@ -9,6 +9,7 @@
     for(const node of doc.scenes[doc.scene||0].nodes)visit(node,identity());
     return matrices;
   }
+  function materialPattern(metadata,animation,material,frame){const keys=metadata.materialTextures?.[animation]?.[material];if(!keys?.length)return null;let selected=null;for(const key of keys){if(key.frame>frame)break;selected=key;}if(!selected)throw Error('Texture animata originale non disponibile');return selected;}
   function geometry(model,metadata,animation,frame,units=16){
     const {doc,accessor}=model,{mul,sample}=root.StarterScene,tracks=model.animationSets[animation]||[];
     const matrices=worldMatrices(model,tracks,frame),properties={};
@@ -20,7 +21,7 @@
         const a=primitive.attributes,p=accessor(a.POSITION),normal=a.NORMAL===undefined?null:accessor(a.NORMAL),uv=a.TEXCOORD_0===undefined?null:accessor(a.TEXCOORD_0),colors=a.COLOR_0===undefined?null:accessor(a.COLOR_0);
         const joints=a.JOINTS_0===undefined?null:accessor(a.JOINTS_0),weights=a.WEIGHTS_0===undefined?null:accessor(a.WEIGHTS_0);
         const material=doc.materials[primitive.material],factor=material.pbrMetallicRoughness?.baseColorFactor||[1,1,1,1],textureIndex=material.pbrMetallicRoughness?.baseColorTexture?.index;
-        const tex=doc.textures?.[textureIndex],image=tex&&model.images[tex.source],sampler=doc.samplers?.[tex?.sampler]||{},w=image?.width||1,h=image?.height||1;
+        const tex=doc.textures?.[textureIndex],image=tex&&model.images[tex.source],sampler=doc.samplers?.[tex?.sampler]||{},pattern=materialPattern(metadata,animation,material.name,frame),w=pattern?.w||image?.width||1,h=pattern?.h||image?.height||1;
         const texOffset=properties[`/materials/${primitive.material}/pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform/offset`]||[0,0];
         const indices=primitive.indices===undefined?p.map((_,i)=>i):accessor(primitive.indices).flat(),verts=[];
         for(const index of indices){
@@ -29,14 +30,14 @@
           verts.push(...point,((uv?.[index]?.[0]||0)+texOffset[0])*w,((uv?.[index]?.[1]||0)+texOffset[1])*h,...factor.slice(0,3).map((c,i)=>c*(colors?.[index]?.[i]??1)),...norm);
         }
         const alpha=metadata.materialAlpha?.[material.name];
-        output.push({verts,material:material.name,doubleSided:!!material.doubleSided,textureIndex,alpha:alpha?alpha[Math.min(alpha.length-1,Math.floor(frame))]/31:factor[3],repeatS:sampler.wrapS!==33071,repeatT:sampler.wrapT!==33071,mirrorS:sampler.wrapS===33648,mirrorT:sampler.wrapT===33648});
+        output.push({verts,material:material.name,doubleSided:!!material.doubleSided,textureIndex,...(pattern?{patternURL:pattern.url}:{}),alpha:alpha?alpha[Math.min(alpha.length-1,Math.floor(frame))]/31:factor[3],repeatS:sampler.wrapS!==33071,repeatT:sampler.wrapT!==33071,mirrorS:sampler.wrapS===33648,mirrorT:sampler.wrapT===33648});
       }
     });return output;
   }
   function targets(scene,assets){
     const result=[];
     for(const instance of scene.instances){
-      const chapter=/^(route|striaton|pw|ca|mt|ic|op|lg)(?:-season[0-3])?-prop-(True|False)-(\d+)-(\d+)$/.exec(instance.model),match=/^(?:out-|in-)?prop-?(\d+)$/.exec(instance.model);if(!match&&!chapter)continue;
+      const chapter=/^(route|striaton|pw|ca|mt|ic|op|lg|fn)(?:-season[0-3])?-prop-(True|False)-(\d+)-(\d+)$/.exec(instance.model),match=/^(?:out-|in-)?prop-?(\d+)$/.exec(instance.model);if(!match&&!chapter)continue;
       const id=+(match?.[1]??chapter[4]),indoor=instance.model.startsWith('in-')||chapter?.[2]==='False',scope=chapter&&assets.scopes?.[chapter[1]],scopedKey=chapter&&chapter.slice(2).join('-'),child=indoor?null:scope?.children[scopedKey]||assets.children[id],record=scope?.models[child?.modelKey||scopedKey]||assets.models[child?.model??id];if(!record||indoor!==(record.source.archive==='a/2/3/0'))continue;
       const [x,y,z]=child?.offset||[0,0,0],c=Math.cos(instance.rotation),s=Math.sin(instance.rotation);
       result.push({instance,record,child:!!child,x:instance.x+x*c+z*s,y:instance.y+y,z:instance.z-x*s+z*c,rotation:instance.rotation,key:instance.model+':'+instance.x+':'+instance.z});
@@ -48,10 +49,20 @@
       this.waiters=[];this.ready=this.load();
       renderer.fieldModels=this;
     }
-    async load(records=Object.values(this.assets.models)){const results=await Promise.allSettled(records.map(async record=>{if(this.loaded.has(record.key))return;const model=await root.StarterScene.loadGLB(record.model);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache=new Map();this.loaded.set(record.key,model);}));const failed=results.find(r=>r.status==='rejected');this.error=failed?.reason||null;this.failedRecords=this.error?[...records]:null;if(this.error){this.renderer.modelsRecovering=true;this.renderer.status?.('Alcuni modelli non sono disponibili. Riprova il caricamento.',()=>this.renderer.contextLost?this.renderer.restoreContext():this.retry(),{key:'models',valid:()=>!!this.error&&!this.renderer.gl?.isContextLost()});return false;}for(const done of this.waiters.splice(0))done();return true;}
+    uploadTextures(model){model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.patternTextures=new Map([...(model.patternImages||[])].map(([url,image])=>[url,this.renderer.upload(image,false)]));}
+    async loadModel(record){
+      if(this.loaded.has(record.key))return;
+      const model=await root.StarterScene.loadGLB(record.model),urls=[...new Set(Object.values(record.materialTextures||{}).flatMap(materials=>Object.values(materials).flatMap(keys=>keys.map(key=>key.url))))];
+      if(urls.some(url=>typeof url!=='string'||!url))throw Error('Texture animata originale non disponibile');
+      // Finish all downloads before allocating GPU objects, so a failed
+      // pattern load can retry without leaving half-installed textures.
+      model.patternImages=new Map(await Promise.all(urls.map(async url=>[url,await root.RuntimeAssets.image(url)])));
+      this.uploadTextures(model);model.cache=new Map();this.loaded.set(record.key,model);
+    }
+    async load(records=Object.values(this.assets.models)){const results=await Promise.allSettled(records.map(record=>this.loadModel(record)));const failed=results.find(r=>r.status==='rejected');this.error=failed?.reason||null;this.failedRecords=this.error?[...records]:null;if(this.error){this.renderer.modelsRecovering=true;this.renderer.status?.('Alcuni modelli non sono disponibili. Riprova il caricamento.',()=>this.renderer.contextLost?this.renderer.restoreContext():this.retry(),{key:'models',valid:()=>!!this.error&&!this.renderer.gl?.isContextLost()});return false;}for(const done of this.waiters.splice(0))done();return true;}
     async prepareScene(scene=this.renderer.scene){const records=[...new Set(this.records(scene,true).map(target=>target.record))];if(records.some(record=>!this.loaded.has(record.key)))this.ready=this.load(records);if(!await this.ready)throw this.error||Error('Modelli della scena non disponibili');root.LeagueGates?.prepare(this,scene);this.renderer.modelsRecovering=false;this.renderer.recovery?.clear('models');return true;}
     async retry(){this.ready=this.load(this.failedRecords||Object.values(this.assets.models));const okay=await this.ready;if(okay){this.renderer.recovery?.clear('models');this.renderer.modelsRecovering=false;if(this.renderer.assetsReady&&!this.renderer.contextLost&&!this.renderer.resourceGates?.size){this.renderer.ready=true;document.getElementById('loading')?.remove();this.renderer.resumeSceneWaiters?.();}this.renderer.recovery?.refresh();}return okay;}
-    restoreGraphics(){for(const model of this.loaded.values()){const gl=this.renderer.gl;for(const t of model.textures||[])if(gl?.isTexture?.(t.texture))gl.deleteTexture(t.texture);for(const groups of model.cache.values())for(const group of groups)if(gl?.isBuffer?.(group.buf))gl.deleteBuffer(group.buf);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache.clear();}}
+    restoreGraphics(){for(const model of this.loaded.values()){const gl=this.renderer.gl;for(const t of [...(model.textures||[]),...(model.patternTextures?.values()||[])])if(gl?.isTexture?.(t.texture))gl.deleteTexture(t.texture);for(const groups of model.cache.values())for(const group of groups)if(gl?.isBuffer?.(group.buf))gl.deleteBuffer(group.buf);this.uploadTextures(model);model.cache.clear();}}
     records(scene=this.renderer.scene,refresh=false){
       const cached=this.scenes.get(scene);
       if(refresh||!cached||cached.instances!==scene.instances||cached.count!==scene.instances.length){
@@ -106,7 +117,7 @@
         }));
         g.uniform3f(r.loc.uOffset,target.x,target.y,target.z);g.uniform2f(r.loc.uRotation,Math.cos(target.rotation),Math.sin(target.rotation));g.uniform1f(r.loc.uSprite,0);g.uniform1f(r.loc.uShadow,0);
         for(const group of [...model.cache.get(key)].sort((a,b)=>(b.alpha===1)-(a.alpha===1))){
-          if(group.alpha<=0)continue;if(group.doubleSided)g.disable(g.CULL_FACE);else g.enable(g.CULL_FACE);r.bind(group.buf);r.texture(model.textures[group.textureIndex]||r.white,group.repeatS,group.repeatT,group.mirrorS,group.mirrorT);g.uniform1f(r.loc.uAlpha,group.alpha);g.depthMask(group.alpha>=1);g.drawArrays(g.TRIANGLES,0,group.count);
+          if(group.alpha<=0)continue;const texture=group.patternURL?model.patternTextures.get(group.patternURL):model.textures[group.textureIndex]||r.white;if(!texture)throw Error('Texture animata originale non caricata');if(group.doubleSided)g.disable(g.CULL_FACE);else g.enable(g.CULL_FACE);r.bind(group.buf);r.texture(texture,group.repeatS,group.repeatT,group.mirrorS,group.mirrorT);g.uniform1f(r.loc.uAlpha,group.alpha);g.depthMask(group.alpha>=1);g.drawArrays(g.TRIANGLES,0,group.count);
         }g.depthMask(true);g.disable(g.CULL_FACE);
       }
     }

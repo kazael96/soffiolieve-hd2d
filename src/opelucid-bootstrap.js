@@ -1,13 +1,16 @@
 /* Chapter051 geographic ownership. No aggregate geometry is loaded at startup. */
 (()=>{
- const extended=!!(window.LEAGUE_SCENES||window.LEAGUE_PARTS),definition=extended?LeagueGeography.combine({baseScenes:OPELUCID_SCENES,baseParts:OPELUCID_PARTS,scenes:window.LEAGUE_SCENES,parts:window.LEAGUE_PARTS}):{scenes:OPELUCID_SCENES,parts:OPELUCID_PARTS},chapterScenes=definition.scenes,chapterParts=definition.parts;
+ const extended=!!(window.LEAGUE_SCENES||window.LEAGUE_PARTS),finale=!!(window.FINALE_SCENES||window.FINALE_PARTS);
+ const previous=extended?LeagueGeography.combine({baseScenes:OPELUCID_SCENES,baseParts:OPELUCID_PARTS,scenes:window.LEAGUE_SCENES,parts:window.LEAGUE_PARTS}):{scenes:OPELUCID_SCENES,parts:OPELUCID_PARTS};
+ const definition=finale?LeagueGeography.combine({baseScenes:previous.scenes,baseParts:previous.parts,scenes:window.FINALE_SCENES,parts:window.FINALE_PARTS}):previous,chapterScenes=definition.scenes,chapterParts=definition.parts;
  let surfaces=null,metadataTask=null,sceneWindow;
  async function catalog(file,key){const text=new TextDecoder().decode(await RuntimeAssets.bytes(NativeTextLayout.resource(file))),prefix='window.'+key+'=';if(!text.trimStart().startsWith(prefix))throw Error('Catalogo del capitolo non valido: '+file);return JSON.parse(text.trimStart().slice(prefix.length).trim().replace(/;$/,''));}
  async function metadata(){if(metadataTask)return metadataTask;metadataTask=Promise.resolve().then(async()=>{
-  await window.IcirrusChapter?.ensure();window.OpelucidFieldModels?.install();const data=await catalog('opelucid-surface-data.js','OPELUCID_SURFACE_DATA');
+  await window.IcirrusChapter?.ensure();window.OpelucidFieldModels?.install();if(finale){if(!window.FinaleFieldModels)throw Error('Modelli animati del finale non disponibili');FinaleFieldModels.install();}const data=await catalog('opelucid-surface-data.js','OPELUCID_SURFACE_DATA');
   const next=extended?await catalog('league-surface-data.js','LEAGUE_SURFACE_DATA'):{grids:{},scenes:{}};
+  const last=finale?await catalog('finale-surface-data.js','FINALE_SURFACE_DATA'):{grids:{},scenes:{}};
   const added=extended?Object.fromEntries(Object.entries(next.scenes).filter(([zone])=>Object.hasOwn(LEAGUE_SCENES,zone))):{};
-  surfaces=NativeSurfaces.create({...NATIVE_SURFACE_DATA,grids:{...NATIVE_SURFACE_DATA.grids,...next.grids,...data.grids},scenes:{...NATIVE_SURFACE_DATA.scenes,...data.scenes,...added}});
+  surfaces=NativeSurfaces.create({...NATIVE_SURFACE_DATA,grids:{...NATIVE_SURFACE_DATA.grids,...next.grids,...data.grids,...last.grids},scenes:{...NATIVE_SURFACE_DATA.scenes,...data.scenes,...added,...last.scenes}});
   if(extended){window.LeagueFieldModels?.install();window.LeagueGym?.install();}
  }).catch(error=>{metadataTask=null;throw error;});return metadataTask;}
  const resources={bytes:(...args)=>RuntimeAssets.bytes(...args),preloadImages:(...args)=>RuntimeAssets.preloadImages(...args),releaseImages:(...args)=>RuntimeAssets.releaseImages(...args)};
@@ -19,9 +22,9 @@
   legacyEnsure:async z=>{if(window.IcirrusChapter?.zones.includes(z))await IcirrusChapter.ensure();else await window.NimbasaChapter?.ensure();},
   variant,surfaces:{at:(z,x,y,height)=>{if(extended&&[121,214].includes(z))return LeagueSurfaces.at(z,x,y,height,surfaces);return window.LeagueSeasons?.surfaceAt?.(z,x,y,height)||window.OpelucidSeasons?.surfaceAt(z,x,y,height)||surfaces?.at(variant(z)?.surfaceZone??z,x,y,height);}},afterPrepare:async (z,scene)=>{if(extended)window.LeagueGraphics?.applyScene(scene);if(z===114)await window.OpelucidGym?.prepare();if(z===121){if(!window.LeagueGym)throw Error('Meccanismi della palestra di Aristide non disponibili');await LeagueGym.prepare();}}
  }).register();
- const names={7:'Komor',91:'Silvestro',92:'Iris',97:'Nardo',100:'Ghecis',103:'N',104:'Gasparago',105:'Aralia',134:'Belle',180:'Aristide'};
- for(const sprites of [OPELUCID_SPRITES,...(extended&&window.LEAGUE_SPRITES?[LEAGUE_SPRITES]:[])])for(const [id,paths]of Object.entries(sprites))OPENING_SPRITES[names[id]||'Original'+id]??=paths;
- for(const data of [OPELUCID_DATA,...(extended&&window.LEAGUE_DATA?[LEAGUE_DATA]:[])]){Object.assign(OPENING_DATA,data.pokemonData);for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])Object.assign(TRAINING_DATA[key],data[key]);TRAINING_DATA.levelCap=data.levelCap;TRAINING_DATA.capSteps=data.capSteps;}
+ const names={7:'Komor',91:'Silvestro',92:'Iris',93:'Antemia',94:'Mirton',95:'Marzio',96:'Catlina',97:'Nardo',100:'Ghecis',103:'N',104:'Gasparago',105:'Aralia',134:'Belle',180:'Aristide'};
+ for(const sprites of [OPELUCID_SPRITES,...(extended&&window.LEAGUE_SPRITES?[LEAGUE_SPRITES]:[]),...(finale?[FINALE_SPRITES,FINALE_SELECTOR_SPRITES.sprites]:[])])for(const [id,paths]of Object.entries(sprites))OPENING_SPRITES[names[id]||'Original'+id]??=paths;
+ for(const data of [OPELUCID_DATA,...(extended&&window.LEAGUE_DATA?[LEAGUE_DATA]:[]),...(finale?[FINALE_DATA]:[])]){Object.assign(OPENING_DATA,data.pokemonData);for(const key of ['evolutions','progression','pokemonData','compatibility','machines'])Object.assign(TRAINING_DATA[key],data[key]);TRAINING_DATA.levelCap=data.levelCap;TRAINING_DATA.capSteps=data.capSteps;if(data.firstEndingPolicy)TRAINING_DATA.firstEndingPolicy=true;}
  let serial=0,pending=null,cacheSeason=null;const prepare=sceneWindow.prepare,cancel=sceneWindow.cancel;sceneWindow.cancel=()=>{serial++;pending=null;window.OpelucidSeasons?.cancel();window.LeagueSeasons?.cancel?.();cancel();};sceneWindow.prepare=zone=>{const season=window.FieldSeason?.current()??0;if(pending?.zone===zone&&pending.season===season)return pending.promise;if(pending&&pending.season!==season)cancel();const token=++serial,request={zone,season};request.promise=(async()=>{await metadata();if(token!==serial)return false;if(extended&&cacheSeason!==season){loader.clear();cacheSeason=season;}await window.OpelucidSeasons?.prepare(zone);await window.LeagueSeasons?.prepare?.(zone);if(token!==serial)return false;const result=await prepare(zone);return token===serial&&result;})().finally(()=>{if(pending===request)pending=null;});pending=request;return request.promise;};
  // Descriptors installed above retain this wrapper, including on a cold saved-map load.
  for(const z of sceneWindow.zones)sceneWindow.scene(z).ensureAssets=()=>sceneWindow.prepare(z);

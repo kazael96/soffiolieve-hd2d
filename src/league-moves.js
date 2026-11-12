@@ -39,7 +39,7 @@
    const p=select(sid,id,context);if(!p)return p;
    const preparing=[143,264].includes(id)&&context.preparing;
    const attachment=id===525?'tailPoint':id===508||[194,322,478,472].includes(id)?'body':p.species===631&&GEN5.moves.find(m=>m.id===id)?.type==='Fuoco'?'mouth':p.species===534&&[88,157,264,317,359,370,441,444,479].includes(id)?'hand':p.species===620&&[264,370,395,396,409,411].includes(id)?'hand':p.species===589&&id===529?'leaf':p.species===632&&['furySlash','leafBlade','crunch'].includes(p.kind)?'mouth':p.species===601?'body':p.attachment;
-   if(id===525){const rig=C.rigs[p.species]||DemoMoves.rigs[p.species];if(!tails[p.species])throw Error('Punto della coda non definito: '+p.species);rig.tailPoint=tails[p.species];}
+   if(id===525){const rig=C.rigs[p.species]||DemoMoves.rigs[p.species],point=tails[p.species]||window.FinaleMotion?.tails?.[p.species];if(!point)throw Error('Punto della coda non definito: '+p.species);rig.tailPoint=point;}
    if(['body','ground'].includes(attachment)){const rig=C.rigs[p.graphic]||C.rigs[p.species]||DemoMoves.rigs[p.species];if(rig)rig[attachment]??=attachment==='body'?[0,-.5]:[0,0];}
    return {...p,attachment,...(preparing?{preparing:true,target:'self',damage:false}:{})};
   };

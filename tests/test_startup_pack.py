@@ -48,6 +48,20 @@ class StartupPackTest(unittest.TestCase):
             part['pack']='../escape.bin';write()
             with self.assertRaisesRegex(ValueError,'Invalid geographic pack path'):builder.geographic_packs(site)
 
+    def test_finale_families_keep_original_bytes_in_separate_lazy_packs(self):
+        builder=self.builder()
+        with builder.build_staging() as folder:
+            site=Path(folder);(site/'assets').mkdir()
+            name='castleMiddle';image=b'original final chapter image bytes'
+            part={'src':'finale-castleMiddle-assets.js','pack':'assets/finale-castleMiddle-pack.bin'}
+            (site/'assets/native.png').write_bytes(image)
+            (site/part['src']).write_text('window.FINALE_PART_ASSETS='+json.dumps({'textures':{'native':{'src':'assets/native.png'}}})+';',encoding='utf8')
+            (site/'finale-parts.js').write_text('window.FINALE_PARTS='+json.dumps({'families':{name:part}})+';',encoding='utf8')
+            result=builder.geographic_packs(site,'finale');self.assertEqual(result[name]['images'],1)
+            raw=(site/part['pack']).read_bytes();length=struct.unpack_from('<I',raw,4)[0]
+            self.assertEqual(json.loads(raw[8:8+length]),{'assets/native.png':[0,len(image)]})
+            self.assertEqual(raw[8+length:],image)
+
     def test_numbered_chapter_catalogues_are_packed_without_changing_png_bytes(self):
         spec=importlib.util.spec_from_file_location('builder',Path(__file__).parents[1]/'scripts/build-site.py')
         builder=importlib.util.module_from_spec(spec)

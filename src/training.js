@@ -6,6 +6,7 @@
   if(!Array.isArray(steps)||!steps.length)return ceiling;
   const badges=Array.isArray(progress?.badges)?progress.badges:[];
   for(const step of steps)if(Number.isInteger(step.badge)&&Number.isInteger(step.level)&&!badges.includes(step.badge))return Math.min(ceiling,Math.max(1,step.level));
+  if(d.firstEndingPolicy){if(!root.FinaleProgression)throw Error('Progressione della Lega non disponibile');return root.FinaleProgression.limit(progress,ceiling);}
   return ceiling;
  }
  function cap(p){return Math.min(100,Math.max(limit(),p.level));}

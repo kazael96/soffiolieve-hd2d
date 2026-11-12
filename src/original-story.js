@@ -14,6 +14,7 @@
   if(window.ICIRRUS_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ICIRRUS_EVENTS[k]);Object.assign(OPENING_TRAINERS,ICIRRUS_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,ICIRRUS_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ICIRRUS_DATA.itemDescriptions);}
   if(window.OPELUCID_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],OPELUCID_EVENTS[k]);Object.assign(OPENING_TRAINERS,OPELUCID_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,OPELUCID_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,OPELUCID_DATA.itemDescriptions);}
   if(window.LEAGUE_EVENTS){if(!window.LEAGUE_DATA)throw Error('Dati della tappa Lega non disponibili');for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],LEAGUE_EVENTS[k]);Object.assign(OPENING_TRAINERS,LEAGUE_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,LEAGUE_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,LEAGUE_DATA.itemDescriptions);}
+  if(window.FINALE_EVENTS){if(!window.FINALE_DATA)throw Error('Dati del finale non disponibili');for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],FINALE_EVENTS[k]);Object.assign(OPENING_TRAINERS,FINALE_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,FINALE_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,FINALE_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
@@ -44,7 +45,8 @@
   // IRBI common init866 sets662; only Skyla's gym program220 clears it.
   if(window.MISTRALTON_DATA&&!native.badges?.includes(5)&&!native.flags.includes(662))native.flags.push(662);
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
-  const names={180:'Aristide',91:'Silvestro',90:'Anemone',104:'Gasparago',182:'Triade',192:'Violante',88:'Camelia',89:'Rafan',97:'Nardo',92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
+  if(window.FINALE_DATA){if(!window.FinaleMigration)throw Error('Migrazione del finale non disponibile');FinaleMigration.migrate(native);}
+  const names={180:'Aristide',91:'Silvestro',90:'Anemone',93:'Antemia',94:'Mirton',95:'Marzio',96:'Catlina',104:'Gasparago',182:'Triade',192:'Violante',88:'Camelia',89:'Rafan',97:'Nardo',92:'Iris',86:'Aloé',87:'Artemisio',76:'Cirillo',74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna',7:'Komor',134:'Belle',105:'Aralia',147:'Mamma',24:'Padre',208:'Regalo',18:'Viandante',103:'N',100:'Ghecis'};
   const frames=[0,3,6,9],directions=[[0,-1],[0,1],[-1,0],[1,0]];
   let phoneLayout=null;
   let motions=[],pendingBattle=null,currentActor=null,pendingMessage=null,sceneChanging=false,failed=null,ambientTime=0,settleWaiters=[];
@@ -67,7 +69,7 @@
   const origin=()=>(window.OpelucidChapter?.globalZones.includes(native.zone)||window.IcirrusChapter?.globalZones.includes(native.zone)||window.MistraltonChapter?.globalZones.includes(native.zone))?[784,752]:[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
   // City WB exits encode the corner and span, alongside rail-position unions.
-  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.LEAGUE_EVENTS?.zones[zone]||window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.LEAGUE_EVENTS?.zones[zone]||window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
+  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.FINALE_EVENTS?.zones[zone]||window.LEAGUE_EVENTS?.zones[zone]||window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.FINALE_EVENTS?.zones[zone]||window.LEAGUE_EVENTS?.zones[zone]||window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
@@ -228,11 +230,12 @@
     if(!Number.isInteger(selected)||selected<0||selected>2)throw Error('Invalid original starter selection');
     vm.words[1]=['Snivy','Tepig','Oshawott'][selected];return selected;
   }
+  function recordHealCenter(){native.healZone=centerZones.has(native.zone)?native.zone:398;window.NativeReturnLocation?.setCenter?.(native,native.healZone);}
   async function healAtCenter(){
     const say=async i=>{for(const page of messagePages(ORIGINAL_EVENTS.texts[346][i],vm.words))await showPage(page);};
     await say(2);if(await choice(['SÌ','NO'])!==0){await say(8);return false;}
     await say(6);journey.heal();await AudioEngine.playSound(1369);await say(7);await say(8);
-    native.healZone=centerZones.has(native.zone)?native.zone:398;if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
+    recordHealCenter();if(native.zone===398&&value(16507)===1)vm.set(16507,2);return true;
   }
   async function cityService(script){
     if(eventRunning||sceneChanging||journey.processing||failed)return;
@@ -344,7 +347,7 @@
       if(bank===778&&native.zone===396&&value(16505)===0)await vm.run(792,0);
       if(native.zone===398&&value(16507)===0)await vm.run(796,0);
       if(native.zone===398&&value(16507)===2)await vm.run(796,6);
-      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await changeZone(centerZones.has(native.healZone)?native.healZone:398,7,13);}
+      if(native.blackoutQueued){native.blackoutQueued=false;journey.heal();renderer.storyCamera=null;await returnAfterBlackout();}
       for(let chain=0;chain<5;chain++){if(![9,10].includes(native.zone))break;const next=data().onEnter?.find(e=>value(e.var)===e.value);if(!next||data().script===bank&&next.entry===entry)break;bank=data().script;entry=next.entry;await vm.run(bank,entry);}
       derivePhase();captureActors();if((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||native.zone===317||window.PINWHEEL_EVENTS&&[16,17,18,19,154,155,28,29,30,31,32,33,34,35,38,40,41,51,56,326,327,328,90,62,65,63,64,91,329,253,96,99].includes(native.zone))syncActors();await renderer.prepareScene?.();captureActors();eventRunning=false;journey.save(true);
     }catch(error){
@@ -390,7 +393,9 @@
       case 'TrainerSetDefeated':native.trainerWins??=[];if(!native.trainerWins.includes(v[0]))native.trainerWins.push(v[0]);break;
       case 'GymCurtainInit':native.gymCurtains=v[0];break;
       case 'NativeOpcode196':if(queued!==null&&[97,98].includes(v[0])){await fade(1,8);reservedLiftArrival=v[0];}native.clayHeight=v[2]<<16>>16;await changeZone(v[0],v[1],v[3]);facing=frames[v[4]]??facing;break;
+      case 'NativeOpcode191':await changeZone(v[0],v[1],v[2]);face(255,v[3]);break; // IRBI021afd64: map, X, Z and direction, with native height0.
       case 'NativeOpcode223':{const list=v[0]===1?state.dex.caught:state.dex.seen;m.set(a[2],list.some(name=>GEN5.dex.species.get(name).num===v[1])?1:0);break;}
+      case 'NativeOpcode217':if(!window.NativeReturnLocation?.set)throw Error('Tabella dei ritorni originali non disponibile');NativeReturnLocation.set(native,v[0]);break;
       case 'NativeOpcode221':{const list=v[0]===1?state.dex.caught:state.dex.seen;m.set(a[1],new Set(list.map(name=>GEN5.dex.species.get(name).num)).size);break;}
       case 'NativeOpcode466':native.pokedexForms=true;break;
       case 'NativeOpcode123':{const p=world(v[1],v[3]);await fieldMotion.jump(v[0],[p.x,v[2]<<16>>16,p.y]);break;}
@@ -516,7 +521,7 @@
         const trainer=OPENING_TRAINERS[v[0]];if(!trainer)throw Error('Trainer outside opening '+v[0]);
         const kind=trainer.name;if(kind==='Belle'||kind==='Komor')state.phase=kind==='Belle'?'belle':'komor';rival=kind;journey.update();
         const completed=new Promise(resolve=>pendingBattle=resolve);
-        try{await startBattle(true,{story:kind,trainerId:v[0],noBlackout:!!(v[2]&1),aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}break;
+        try{await startBattle(true,{story:kind,trainerId:v[0],noBlackout:!!(v[2]&1),aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;window.FinaleProgression?.recordBattle(native,v[0],native.won);}finally{pendingBattle=null;}break;
       }
       case 'TrainerBattleIsVictory':m.set(a[0],native.won?1:0);break;
       case 'CallTrainerBattleEnd':break;
@@ -528,7 +533,7 @@
       case 'RTGetTextFile':m.set(a[0],textBank);break;
       case 'RTCallGlobal':{
         if(v[0]===10456){const item=value(32776),count=value(32777);if(!ORIGINAL_EVENTS.itemNames[item])throw Error('Unknown gift item '+item);const added=journey.addItem(item,count);m.set(32778,added?1:0);await showPage(added?'Hai ricevuto '+ORIGINAL_EVENTS.itemNames[item]+'!':'La Borsa è piena.');break;}
-        if([10394,10395,10396].includes(v[0])){native.healZone=centerZones.has(native.zone)?native.zone:398;break;}
+        if([10394,10395,10396].includes(v[0])){recordHealCenter();break;}
         if(v[0]===10110){if(window.MistraltonServices)await MistraltonServices.open({journey,native,stock:value(32768),type:value(32769),choice,showPage,playSound:id=>AudioEngine.playSound(id)});else await healAtCenter();break;}
         if(v[0]===2814)window.MistraltonServices?.install(ORIGINAL_EVENTS);
         if(![2800,2801,2805,2806,2807,2814].includes(v[0]))throw Error('Global script outside opening '+v[0]);
@@ -538,16 +543,16 @@
       case 'ItemCheckSpace':m.set(a[2],journey.itemCount(v[0])+v[1]<=999?1:0);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.LEAGUE_DATA?.itemNames[item]||window.OPELUCID_DATA?.itemNames[item]||window.ICIRRUS_DATA?.itemNames[item]||window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.FINALE_DATA?.itemNames[item]||window.LEAGUE_DATA?.itemNames[item]||window.OPELUCID_DATA?.itemNames[item]||window.ICIRRUS_DATA?.itemNames[item]||window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],window.LEAGUE_DATA?.itemPockets?.[v[0]]??window.OPELUCID_DATA?.itemPockets?.[v[0]]??window.ICIRRUS_DATA?.itemPockets?.[v[0]]??window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
+      case 'ItemGetPocket':m.set(a[1],window.FINALE_DATA?.itemPockets?.[v[0]]??window.LEAGUE_DATA?.itemPockets?.[v[0]]??window.OPELUCID_DATA?.itemPockets?.[v[0]]??window.ICIRRUS_DATA?.itemPockets?.[v[0]]??window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id=({...window.NATIVE_MACHINE_TEXT?.moves,...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,...window.OPELUCID_DATA?.machines,...window.LEAGUE_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id=({...window.NATIVE_MACHINE_TEXT?.moves,...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,...window.OPELUCID_DATA?.machines,...window.LEAGUE_DATA?.machines,...window.FINALE_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -632,6 +637,12 @@
       }
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
+  async function returnAfterBlackout(legacy=false){
+    const point=window.NativeReturnLocation?.respawn?.(native);
+    if(point){await changeZone(point.zone,point.x,point.z);face(255,point.facing);return;}
+    if(centerZones.has(native.healZone))await changeZone(native.healZone,7,13);
+    else await changeZone(legacy?390:398,legacy?5:7,legacy?8:13);
+  }
   async function changeZone(zone,x,z,entryHeight){
     window.LeagueCamera?.reset(renderer);
     slide?.reset();
@@ -645,6 +656,7 @@
     if(SceneCamera.tracks(nextScene)){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
     captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:zoneScenes[zone]==='town'||!!nextScene.outdoor,fromOutdoor:renderer.scene===journey.outdoor||!!renderer.scene.outdoor,busy:!!window.LeagueGym?.busy||[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.OpelucidChapter?.zones.includes(zone))await OpelucidChapter.ensure(zone);else if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;FieldEventVM.resetMapState(native);if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.OpelucidGym?.enter(zone);window.LeagueGym?.enter(zone);playerSlide?.enter();window.DragonspiralJump?.enter();window.SurfField?.enter();syncActors();if(native.playerSlideRecovered){toast('La posizione è stata recuperata all’ingresso della Via Vittoria.');delete native.playerSlideRecovered;}window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
     const initFlags=native.flags.join(',');for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
+    window.FinaleProgression?.enter(native,zone);
     if((window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))&&native.flags.join(',')!==initFlags)syncActors();
     if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;if(zone===107)native.mistralton=true;if(zone===113)native.icirrus=true;derivePhase();
     captureActors();await renderer.prepareScene?.();if(restoreField)await fade(0,8);
@@ -782,12 +794,12 @@
       const completed=new Promise(resolve=>pendingBattle=resolve);rival=trainer.name;
       try{await startBattle(true,{story:trainer.name,trainerId:id,aiFlags:trainer.aiFlags,doubles:trainer.battleStyle===1,p1:journey.configs(),p2:structuredClone(trainer.party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||p.item||''}))});await completed;}finally{pendingBattle=null;}
       if(native.won){native.trainerWins??=[];if(!native.trainerWins.includes(id))native.trainerWins.push(id);if([150,546].includes(id)){journey.heal();await showPage('I tuoi Pokémon sono di nuovo in piena forma!');}}
-      else{journey.heal();await changeZone(centerZones.has(native.healZone)?native.healZone:398,7,13);}
+      else{journey.heal();await returnAfterBlackout();}
     }catch(error){failed=error;console.error(error);$('world').dataset.eventError=error.message;await showPage(error.message);}
     finally{eventRunning=false;n.emote=null;derivePhase();captureActors();if(!failed)journey.save(true);}
   }
   async function routeItem(n){
-    if(eventRunning||!n)return;const item=window.OPELUCID_DATA?.items?.[n.script]||window.ICIRRUS_DATA?.items?.[n.script]||window.MISTRALTON_DATA?.items?.[n.script]||window.DRIFTVEIL_DATA?.items?.[n.script]||window.NIMBASA_DATA?.items?.[n.script]||window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
+    if(eventRunning||!n)return;const item=window.FINALE_DATA?.items?.[n.script]||window.LEAGUE_DATA?.items?.[n.script]||window.OPELUCID_DATA?.items?.[n.script]||window.ICIRRUS_DATA?.items?.[n.script]||window.MISTRALTON_DATA?.items?.[n.script]||window.DRIFTVEIL_DATA?.items?.[n.script]||window.NIMBASA_DATA?.items?.[n.script]||window.CASTELIA_DATA?.items?.[n.script]||window.PINWHEEL_DATA?.items?.[n.script]||window.ROUTE3_DATA?.items?.[n.script]||window.STRIATON_DATA?.items?.[n.script]||window.ROUTE2_DATA?.items?.[n.script];if(!item)return;
     eventRunning=true;try{if(!journey.addItem(item.id,item.count)){await showPage('La Borsa è piena.');return;}if(native.zone===319){native.routeItems??=[];native.routeItems.push(n.uid);}native.collectedItems??={};native.collectedItems[native.zone]??=[];native.collectedItems[native.zone].push(n.uid);const record=data().actors.find(a=>a.id===n.uid);if(record?.flag&&!has(record.flag))native.flags.push(record.flag);n.hidden=true;await showPage('Hai trovato '+ORIGINAL_EVENTS.itemNames[item.id]+'!');captureActors();journey.save(true);}finally{eventRunning=false;}
   }
   function target(){
@@ -866,7 +878,7 @@
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,visualEffects:()=>[...(slide?.visuals()||[]),...(playerSlide?.visuals()||[]),...(window.LeagueNpcSlides?.visuals()||[])],routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>centerZones.has(native.healZone)?changeZone(native.healZone,7,13):changeZone(390,5,8),get music(){return window.SurfField?.music()||(window.Bicycle?.mounted()?1012:window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music);},get fieldCheckpointAllowed(){return (pcService||!!playerSlide?.checkpointable||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.checkpointable||window.OpelucidGym?.checkpointable)||!!window.IcirrusGym?.busy||!!window.SurfField?.checkpointable)&&(!eventRunning||surfService||pcService)&&!sceneChanging&&!vm.running&&!failed&&!journey.processing;},get locked(){return !!playerSlide?.busy||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.busy||window.OpelucidGym?.busy)||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,visualEffects:()=>[...(slide?.visuals()||[]),...(playerSlide?.visuals()||[]),...(window.LeagueNpcSlides?.visuals()||[])],routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>returnAfterBlackout(true),get music(){return window.SurfField?.music()||(window.Bicycle?.mounted()?1012:window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music);},get fieldCheckpointAllowed(){return (pcService||!!playerSlide?.checkpointable||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.checkpointable||window.OpelucidGym?.checkpointable)||!!window.IcirrusGym?.busy||!!window.SurfField?.checkpointable)&&(!eventRunning||surfService||pcService)&&!sceneChanging&&!vm.running&&!failed&&!journey.processing;},get locked(){return !!playerSlide?.busy||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.busy||window.OpelucidGym?.busy)||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
   NativeStory.useEscapeRope=useEscapeRope;
   NativeStory.useFly=useFly;NativeStory.useSurf=useSurf;
   window.SurfField?.restore();window.IcirrusGym?.restore();window.OpelucidGym?.restore();window.LeagueGym?.restore();window.DragonspiralJump?.restore();window.MistraltonGym?.restore();window.MistraltonPuzzles?.restore();window.MistraltonContinuity?.enterZone(native.zone,{covered:fieldCovered});
