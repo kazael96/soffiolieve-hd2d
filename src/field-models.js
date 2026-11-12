@@ -36,7 +36,7 @@
   function targets(scene,assets){
     const result=[];
     for(const instance of scene.instances){
-      const chapter=/^(route|striaton|pw|ca|mt|ic|op)(?:-season[0-3])?-prop-(True|False)-(\d+)-(\d+)$/.exec(instance.model),match=/^(?:out-|in-)?prop-?(\d+)$/.exec(instance.model);if(!match&&!chapter)continue;
+      const chapter=/^(route|striaton|pw|ca|mt|ic|op|lg)(?:-season[0-3])?-prop-(True|False)-(\d+)-(\d+)$/.exec(instance.model),match=/^(?:out-|in-)?prop-?(\d+)$/.exec(instance.model);if(!match&&!chapter)continue;
       const id=+(match?.[1]??chapter[4]),indoor=instance.model.startsWith('in-')||chapter?.[2]==='False',scope=chapter&&assets.scopes?.[chapter[1]],scopedKey=chapter&&chapter.slice(2).join('-'),child=indoor?null:scope?.children[scopedKey]||assets.children[id],record=scope?.models[child?.modelKey||scopedKey]||assets.models[child?.model??id];if(!record||indoor!==(record.source.archive==='a/2/3/0'))continue;
       const [x,y,z]=child?.offset||[0,0,0],c=Math.cos(instance.rotation),s=Math.sin(instance.rotation);
       result.push({instance,record,child:!!child,x:instance.x+x*c+z*s,y:instance.y+y,z:instance.z-x*s+z*c,rotation:instance.rotation,key:instance.model+':'+instance.x+':'+instance.z});
@@ -49,7 +49,7 @@
       renderer.fieldModels=this;
     }
     async load(records=Object.values(this.assets.models)){const results=await Promise.allSettled(records.map(async record=>{if(this.loaded.has(record.key))return;const model=await root.StarterScene.loadGLB(record.model);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache=new Map();this.loaded.set(record.key,model);}));const failed=results.find(r=>r.status==='rejected');this.error=failed?.reason||null;this.failedRecords=this.error?[...records]:null;if(this.error){this.renderer.modelsRecovering=true;this.renderer.status?.('Alcuni modelli non sono disponibili. Riprova il caricamento.',()=>this.renderer.contextLost?this.renderer.restoreContext():this.retry(),{key:'models',valid:()=>!!this.error&&!this.renderer.gl?.isContextLost()});return false;}for(const done of this.waiters.splice(0))done();return true;}
-    async prepareScene(scene=this.renderer.scene){const records=[...new Set(this.records(scene,true).map(target=>target.record))];if(records.some(record=>!this.loaded.has(record.key)))this.ready=this.load(records);if(!await this.ready)throw this.error||Error('Modelli della scena non disponibili');this.renderer.modelsRecovering=false;this.renderer.recovery?.clear('models');return true;}
+    async prepareScene(scene=this.renderer.scene){const records=[...new Set(this.records(scene,true).map(target=>target.record))];if(records.some(record=>!this.loaded.has(record.key)))this.ready=this.load(records);if(!await this.ready)throw this.error||Error('Modelli della scena non disponibili');root.LeagueGates?.prepare(this,scene);this.renderer.modelsRecovering=false;this.renderer.recovery?.clear('models');return true;}
     async retry(){this.ready=this.load(this.failedRecords||Object.values(this.assets.models));const okay=await this.ready;if(okay){this.renderer.recovery?.clear('models');this.renderer.modelsRecovering=false;if(this.renderer.assetsReady&&!this.renderer.contextLost&&!this.renderer.resourceGates?.size){this.renderer.ready=true;document.getElementById('loading')?.remove();this.renderer.resumeSceneWaiters?.();}this.renderer.recovery?.refresh();}return okay;}
     restoreGraphics(){for(const model of this.loaded.values()){const gl=this.renderer.gl;for(const t of model.textures||[])if(gl?.isTexture?.(t.texture))gl.deleteTexture(t.texture);for(const groups of model.cache.values())for(const group of groups)if(gl?.isBuffer?.(group.buf))gl.deleteBuffer(group.buf);model.textures=(model.doc.textures||[]).map(tex=>this.renderer.upload(model.images[tex.source],false));model.cache.clear();}}
     records(scene=this.renderer.scene,refresh=false){
@@ -70,6 +70,10 @@
       const target=this.find(type,x,z);if(!target)throw Error(`Original field model unavailable: class ${type} at ${x},${z}`);
       const id=this.nextHandle++;this.handles.set(id,target);return id;
     }
+    hide(type,x,z){
+      const target=this.find(type,x,z);if(!target)return false;
+      target.resolve?.();target.playing=false;target.hidden=true;return true;
+    }
     async play(id,animation){
       await this.ready;if(this.error)await new Promise(resolve=>this.waiters.push(resolve));const target=this.handles.get(id);if(!target)throw Error('Unknown field model handle '+id);
       const spec=target.record.animations[animation];if(!spec)throw Error('Unknown original model animation '+animation);
@@ -79,7 +83,7 @@
     }
     wait(id){const target=this.handles.get(id);return target?.promise||Promise.resolve();}
     release(id){const target=this.handles.get(id);if(target){target.resolve?.();for(const key of ['animation','frame','elapsed','playing','promise','resolve'])delete target[key];}this.handles.delete(id);}
-    clear(){for(const id of [...this.handles.keys()])this.release(id);}
+    clear(){for(const id of [...this.handles.keys()])this.release(id);for(const target of this.records())delete target.hidden;}
     tick(dt){
       for(const target of this.records())if(target.playing){
         const spec=target.record.animations[target.animation];target.elapsed+=dt;
@@ -88,10 +92,11 @@
       }
       if(this.renderer.canvas)this.renderer.canvas.dataset.fieldModels=JSON.stringify(this.records().filter(t=>t.animation!==undefined).map(t=>({model:t.record.key,animation:t.animation,frame:t.frame,playing:t.playing})));
     }
-    replaces(instance){return this.records().some(t=>t.instance===instance&&!t.child&&t.animation!==undefined);}
+    replaces(instance){return this.records().some(t=>t.instance===instance&&!t.child&&(t.hidden||t.animation!==undefined));}
     draw(instance){
       const r=this.renderer,g=r.gl;
       for(const target of this.records().filter(t=>t.instance===instance)){
+        if(target.hidden)continue;
         // Bedroom smoke is event-controlled; its last BMA frame is transparent.
         if(!target.child&&target.animation===undefined)continue;
         const model=this.loaded.get(target.record.key);if(!model)continue;

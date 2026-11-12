@@ -35,6 +35,8 @@
  }
  function threshold(value){if(value>=255*ONE)return 65536;return Math.floor(divide(65536*ONE,sqrt(sqrt(divide(255*ONE,value))))/ONE)}
  function roll(mon,catchRate,random,caughtCount=0,ball=1,context={}){
+  // IRBI overlay93:021cba4a..56 returns before rate/status/critical/RNG.
+  if(context.ballId===1)return {caught:true,shakes:3,critical:false,guaranteed:true,rate:null,threshold:65536};
   const value=rate(mon,catchRate,ball,{...context,caughtCount}),ratio=caughtCount>600?10240:caughtCount>450?8192:caughtCount>300?6144:caughtCount>150?4096:caughtCount>30?2048:0;
   const critical=!!ratio&&random(256)<Math.floor(multiply(Math.min(value,255*ONE),ratio)/6/ONE),checks=critical?1:3;
   if(value>=255*ONE)return{caught:true,shakes:checks,critical,rate:value,threshold:65536};

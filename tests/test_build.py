@@ -16,6 +16,59 @@ spec.loader.exec_module(builder)
 
 
 class BuildTests(unittest.TestCase):
+    def test_geographic_seasons_produce_separate_complete_family_packs(self):
+        with builder.build_staging() as folder:
+            site = Path(folder)
+            (site / 'assets').mkdir()
+            (site / 'assets/body.png').write_bytes(b'pixels')
+            part = {'src': 'league-route10-assets.js', 'pack': 'assets/league-route10-pack.bin', 'zones': [355], 'seasons': {}}
+            (site / part['src']).write_text('window.LEAGUE_PART_ASSETS={"extraImages":["assets/body.png"]};', encoding='utf-8')
+            for season in range(4):
+                row = {'src': f'league-route10-season{season}-assets.js', 'pack': f'assets/league-route10-season{season}-pack.bin', 'season': season, 'zones': [355]}
+                part['seasons'][str(season)] = row
+                (site / row['src']).write_text('window.LEAGUE_PART_ASSETS={"extraImages":["assets/body.png"]};', encoding='utf-8')
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps({'families': {'route10': part}}) + ';', encoding='utf-8')
+            packs = builder.geographic_packs(site, 'league')
+            self.assertEqual(len(packs), 5)
+            self.assertTrue(all(row['images'] == 1 for row in packs.values()))
+            del part['seasons']['3']
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps({'families': {'route10': part}}) + ';', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'Incomplete geographic seasons'):
+                builder.geographic_packs(site, 'league')
+
+    def test_geographic_league_pack_keeps_direct_parent_images_and_explicit_material_patterns(self):
+        with builder.build_staging() as folder:
+            site = Path(folder)
+            (site / 'assets').mkdir()
+            for name, raw in [('gate.png', b'gate'), ('pressed.png', b'pressed')]:
+                (site / 'assets' / name).write_bytes(raw)
+            part = {'family': 'badgeGates', 'textures': {'gate': {'src': 'assets/gate.png'}}, 'extraImages': ['assets/pressed.png']}
+            (site / 'league-badgeGates-assets.js').write_text('window.LEAGUE_PART_ASSETS=' + json.dumps(part) + ';', encoding='utf-8')
+            manifest = {'families': {'badgeGates': {'src': 'league-badgeGates-assets.js', 'pack': 'assets/league-badgeGates-pack.bin'}}}
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps(manifest) + ';', encoding='utf-8')
+            packs = builder.geographic_packs(site, 'league')
+            self.assertEqual(packs['badgeGates']['images'], 2)
+            raw = (site / packs['badgeGates']['pack']).read_bytes()
+            count = struct.unpack_from('<I', raw, 4)[0]
+            entries = json.loads(raw[8:8 + count])
+            for name, (offset, size) in entries.items():
+                self.assertEqual(raw[8 + count + offset:8 + count + offset + size], (site / name).read_bytes())
+
+    def test_geographic_pack_rejects_manifest_escapes_and_missing_images(self):
+        with builder.build_staging() as folder:
+            site = Path(folder)
+            with self.assertRaisesRegex(ValueError, 'prefix'):
+                builder.geographic_packs(site, '../league')
+            (site / 'assets').mkdir()
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps({'families': {'bad': {'src': '../foreign.js', 'pack': 'assets/league-bad-pack.bin'}}}) + ';', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'path'):
+                builder.geographic_packs(site, 'league')
+            (site / 'league-parts.js').write_text('window.LEAGUE_PARTS=' + json.dumps({'families': {'bad': {'src': 'league-bad-assets.js', 'pack': 'assets/league-bad-pack.bin'}}}) + ';', encoding='utf-8')
+            (site / 'league-bad-assets.js').write_text('window.LEAGUE_PART_ASSETS={"extraImages":["assets/missing.png"]};', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'Missing pack image'):
+                builder.geographic_packs(site, 'league')
+            self.assertFalse((site / 'assets/league-bad-pack.bin').exists())
+
     def test_publish_renames_complete_tree_without_copying(self):
         with builder.build_staging() as folder:
             folder=Path(folder);site=folder/'staged';site.mkdir()

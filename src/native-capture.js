@@ -4,7 +4,7 @@
  const supported=new Set([46,47,48,49,50,69]);
  const compare=(x,op,y)=>[x===y,x!==y,x<y,x>y,x<=y,x>=y][op];
  function compile(data,spas,{shakes=3,caught=true,critical=false,side='p1',ball=4}={}){
-  ballItem=[2,3,4,6,8,9,10,12,13,14,15].includes(ball)?ball:4;
+  ballItem=[1,2,3,4,6,8,9,10,11,12,13,14,15].includes(ball)?ball:4;
   const variables={12:shakes,13:Number(caught),14:Number(critical),15:ballItem,19:side==='p2'?1:0,39:0};
   const byOffset=new Map(data.commands.map((c,i)=>[c.at,i])),commands=[];let yieldAfterCommand=true;
   const finishCommand=()=>{if(yieldAfterCommand)commands.push([57,[1]])};
@@ -45,12 +45,23 @@
   return [...states.values()].map(s=>{for(let [key,track]of Object.entries(s.tracks))s[key]=track.sample(f-track.start);s.cell=cellAt(data.sequences[s.sequence],f-s.sequenceStart);return s});
  }
  const images=new Map(),tints=new Map();
- async function preload(){if(root.RuntimeAssets?.image){const task=async()=>{const paths=[...(root.CAPTURE_DATA?.cells||[]),...(root.ROUTE2_BALL?.cells||[]),...(root.ROUTE3_BALL?.cells||[]),...(root.NIMBASA_BALL?.cells||[]),...(root.DRIFTVEIL_BALL?.cells||[]),...Object.values(root.MISTRALTON_BALL?.balls||{}).flatMap(b=>b.cells)];await Promise.all(paths.map(async src=>{if(images.get(src)?.naturalWidth)return;images.set(src,await root.RuntimeAssets.image(root.NativeTextLayout?.resource(src)||src));}));return true;};return typeof renderer!=='undefined'&&renderer.resourceGate?renderer.resourceGate('capture-ball-images',task):root.RuntimeAssets.retry?root.RuntimeAssets.retry(task):task();}return Promise.all([...(root.CAPTURE_DATA?.cells||[]),...(root.ROUTE2_BALL?.cells||[]),...(root.ROUTE3_BALL?.cells||[]),...(root.NIMBASA_BALL?.cells||[]),...(root.DRIFTVEIL_BALL?.cells||[]),...Object.values(root.MISTRALTON_BALL?.balls||{}).flatMap(b=>b.cells)].map(src=>new Promise(resolve=>{let im=images.get(src);if(im?.complete){resolve();return}if(!im){im=new Image();images.set(src,im);im.onload=im.onerror=resolve;im.src=src}else{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}})))}
+ function ballData(id){return root.MISTRALTON_BALL?.balls?.[id]||(id===9?root.DRIFTVEIL_BALL:id===2?root.NIMBASA_BALL:id===14?root.ROUTE3_BALL:id===3?root.ROUTE2_BALL:null)||root.CAPTURE_DATA;}
+ async function preload(id=ballItem){
+  if(id===1&&!root.MISTRALTON_BALL?.balls?.[1])throw Error('Grafica originale Master Ball non disponibile');
+  const paths=ballData(id)?.cells||[];
+  if(root.RuntimeAssets?.image){const task=async()=>{
+   if(paths.every(src=>images.get(src)?.naturalWidth))return true;
+   // One small binary transport; decode only the selected Ball's native cells.
+   if(root.RuntimeAssets.preloadImages)await Promise.resolve(root.RuntimeAssets.preloadImages(root.NativeTextLayout?.resource('assets/capture-pack.bin')||'assets/capture-pack.bin')).catch(()=>false);
+   await Promise.all(paths.map(async src=>{if(images.get(src)?.naturalWidth)return;images.set(src,await root.RuntimeAssets.image(root.NativeTextLayout?.resource(src)||src));}));return true;
+  };return typeof renderer!=='undefined'&&renderer.resourceGate?renderer.resourceGate('capture-ball-images:'+id,task):root.RuntimeAssets.retry?root.RuntimeAssets.retry(task):task();}
+  return Promise.all(paths.map(src=>new Promise(resolve=>{let im=images.get(src);if(im?.complete){resolve();return}if(!im){im=new Image();images.set(src,im);im.onload=im.onerror=resolve;im.src=src}else{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}})));
+ }
  function draw(c,events,f,W,H,point){
   const data=root.CAPTURE_DATA;if(!data)return;const scale=Math.min(W/1000,H/650),pixelScale=1.5*scale;
   // Object 1 is the script's flattened palette-tinted shadow, beneath object 0.
   for(let actor of actors(events,f,data).sort((a,b)=>b.id-a.id)){
-   if(!actor.visible)continue;let im=images.get((root.MISTRALTON_BALL?.balls?.[ballItem]?root.MISTRALTON_BALL.balls[ballItem].cells:ballItem===9?root.DRIFTVEIL_BALL?.cells||data.cells:ballItem===2?root.NIMBASA_BALL?.cells||data.cells:ballItem===14?root.ROUTE3_BALL?.cells||data.cells:ballItem===3?root.ROUTE2_BALL?.cells||data.cells:data.cells)[actor.cell]);if(!im?.complete||!im.naturalWidth)continue;
+   if(!actor.visible)continue;let im=images.get(ballData(ballItem).cells[actor.cell]);if(!im?.complete||!im.naturalWidth)continue;
    if(actor.tint>0){let key=ballItem+':'+actor.cell+':'+actor.color+':'+Math.round(actor.tint*16),tinted=tints.get(key);if(!tinted){tinted=document.createElement('canvas');tinted.width=im.width;tinted.height=im.height;let cx=tinted.getContext('2d');cx.drawImage(im,0,0);cx.globalCompositeOperation='source-atop';cx.fillStyle='rgba('+[(actor.color&31)*255/31,(actor.color>>5&31)*255/31,(actor.color>>10&31)*255/31].join(',')+','+actor.tint+')';cx.fillRect(0,0,im.width,im.height);tints.set(key,tinted)}im=tinted}
    const anchor=point(actor.target),x=anchor.x+actor.offset[0]*16*pixelScale+actor.position[0]*pixelScale,y=anchor.y-actor.offset[1]*16*pixelScale+actor.position[1]*pixelScale;
    c.save();c.imageSmoothingEnabled=false;c.translate(x,y);c.scale(actor.scale[0]*pixelScale,actor.scale[1]*pixelScale);c.drawImage(im,-data.origin[0],-data.origin[1]);c.restore();

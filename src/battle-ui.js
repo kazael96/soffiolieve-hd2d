@@ -41,22 +41,22 @@ function moveVisualContext(e,move,following,charge){let actor=visualBattleContex
 function syncVisualVolatiles(){for(let side of ['p1','p2']){let p=session.active(side),v=p.volatiles,state=visualState[side];state.hidden=!!(v.fly||v.dig||v.dive||v.shadowforce||v.skydrop);state.substitute=!!v.substitute;state.minimized=!!v.minimize}}
 
 async function throwStoryBall(ballId=4){
- if(![2,3,4,6,8,9,10,12,13,14,15].includes(ballId))ballId=4;
+ if(![1,2,3,4,6,8,9,10,11,12,13,14,15].includes(ballId))ballId=4;
  if(!session||busy||finished||storyBattle!=='wild'||!Journey.itemCount(ballId)||!Journey.canCapture())return;
  if(window.DoubleBattles&&!DoubleBattles.captureTarget()){log('Non puoi lanciare una Ball finché ci sono due Pokémon avversari!');return;}
- busy=true;Journey.consumeItem(ballId);updateBattle();const start=session.battle.log.length;captureVisualContext();
+ const captureSession=session;busy=true;Journey.consumeItem(ballId);updateBattle();const start=session.battle.log.length;captureVisualContext();
  try{
-  const target=session.active('p2'),result=CaptureRules.roll(target,OPENING_DATA[target.species.name].catchRate,n=>session.battle.random(n),Journey.state.dex.caught.length,CaptureRules.ballBonus(ballId,target,{caught:Journey.state.dex.caught.includes(TRAINING_DATA.progression[target.species.name]?.dexName||target.species.name),terrain:battleLocation?.terrain,elapsedTurns:Math.max(0,session.battle.turn-1)}),{darkGrass:['route3Dark','route5Dark'].includes(battleLocation?.id)}),caught=result.caught;
-  log('Alcide usa '+ORIGINAL_EVENTS.itemNames[ballId]+'!');await MoveFX.capture({...result,ball:ballId,cryIds:{p1:partner.spriteId,p2:enemy.spriteId}});
-  if(caught){capturedMon={...session.snapshot('p2'),ivs:{...target.set.ivs},evs:{...target.set.evs},nature:target.set.nature,gender:target.gender,form:target.nativeForm??target.set?.form??enemy.form,happiness:target.happiness};if(ballId===14){capturedMon.hp=capturedMon.max;capturedMon.status='';for(const m of capturedMon.moves)m.left=m.pp};session.battle.win('p1');visualState.p2.hidden=true;log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][65],[target.species.name]).join('\n'));}
+  const target=session.active('p2'),result=CaptureRules.roll(target,OPENING_DATA[target.species.name].catchRate,n=>session.battle.random(n),Journey.state.dex.caught.length,CaptureRules.ballBonus(ballId,target,{caught:Journey.state.dex.caught.includes(TRAINING_DATA.progression[target.species.name]?.dexName||target.species.name),terrain:battleLocation?.terrain,elapsedTurns:Math.max(0,session.battle.turn-1)}),{ballId,darkGrass:['route3Dark','route5Dark'].includes(battleLocation?.id)}),caught=result.caught;
+  log('Alcide usa '+ORIGINAL_EVENTS.itemNames[ballId]+'!');await MoveFX.capture({...result,ball:ballId,cryIds:{p1:partner.spriteId,p2:enemy.spriteId}});if(session!==captureSession||!battling)return;
+  if(caught){capturedMon={...session.snapshot('p2'),ballId,ivs:{...target.set.ivs},evs:{...target.set.evs},nature:target.set.nature,gender:target.gender,form:target.nativeForm??target.set?.form??enemy.form,happiness:target.happiness};if(ballId===14){capturedMon.hp=capturedMon.max;capturedMon.status='';for(const m of capturedMon.moves)m.left=m.pp};session.battle.win('p1');visualState.p2.hidden=true;log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][65],[target.species.name]).join('\n'));}
   else{
    log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][61+result.shakes],[]).join('\n'));
    const run=session.battle.runAction;session.battle.runAction=function(action){if(action.choice==='event'&&action.event==='DemoFlee')return;return run.call(this,action);};
    try{session.act('fleeAttempt');}finally{session.battle.runAction=run;}
    await playBattleEvents(session.battle.log.slice(start));
   }
-  snapshotPartner();session.cursor=session.battle.log.length;
- }finally{busy=false;updateBattle();}
+  if(session!==captureSession||!battling)return;snapshotPartner();session.cursor=session.battle.log.length;
+ }finally{if(session===captureSession&&battling){busy=false;updateBattle();}}
 }
 $('catchBall').onclick=throwStoryBall;
 async function playCatchingTutorial(){

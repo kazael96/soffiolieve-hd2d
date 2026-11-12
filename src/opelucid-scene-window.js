@@ -1,6 +1,8 @@
 /* Metadata survives eviction; geometry belongs to the current geographic window. */
 (function(root){
  const defaultNeighbors={113:[198,205,345],205:[113],345:[113],157:[62,326],348:[120],120:[348]};
+ const dimensions=g=>({width:(g.bytes?.[0]|g.bytes?.[1]<<8)||32,depth:(g.bytes?.[2]|g.bytes?.[3]<<8)||32});
+ const contains=(g,x,z)=>{const {width,depth}=dimensions(g);return x>=g.x-16&&x<g.x-16+width&&z>=g.z-16&&z<g.z-16+depth;};
  function create({metadata,parts,assets,loader,legacyDescriptor=()=>null,legacyScene=()=>null,legacyEnsure=async()=>{},neighbors=defaultNeighbors,surfaces=null,afterPrepare=async()=>{},variant=()=>null}){
   const owned=new Map(),zones=Object.keys(metadata).map(Number),globalZones=zones.filter(z=>metadata[z].sourceMatrix===0);let generation=0,loading=null;
   const descriptor=z=>variant(z)?.descriptor||metadata[z]||legacyDescriptor(z),members=z=>[z,...(neighbors[z]||[])],grids=z=>members(z).flatMap(id=>descriptor(id)?.permissionGrids||[]);
@@ -28,9 +30,9 @@
   }
   function register(){if(owned.size)return api;for(const zone of zones){const scene={...metadata[zone],zone,chapter051:true,verticalMap:true,permissionGrids:grids(zone),instances:[],assetsPending:true,ensureAssets:()=>prepare(zone)};owned.set(zone,scene);assets.scenes['zone'+zone]=scene;}return api;}
   function cancel(){generation++;loading=null;loader.cancel();}
-  function fieldAt(x,z){return [...new Set([...globalZones,...Object.values(neighbors).flat().filter(id=>descriptor(id)?.sourceMatrix===0)])].find(id=>descriptor(id)?.permissionGrids?.some(g=>x>=g.x-16&&x<g.x+16&&z>=g.z-16&&z<g.z+16))??null;}
+  function fieldAt(x,z){return [...new Set([...globalZones,...Object.values(neighbors).flat().filter(id=>descriptor(id)?.sourceMatrix===0)])].find(id=>descriptor(id)?.permissionGrids?.some(g=>contains(g,x,z)))??null;}
   function boundaryBlocked(zone,x,z){if(!globalZones.includes(zone))return false;const next=fieldAt(x,z);return next!==null&&!crosses(zone,next);}
-  function blockedAt(zone,x,z){if(boundaryBlocked(zone,x,z))return true;const grid=grids(zone).find(g=>x>=g.x-16&&x<g.x+16&&z>=g.z-16&&z<g.z+16);if(!grid)return true;const offset=8+((Math.floor(z-grid.z)+16)*32+Math.floor(x-grid.x)+16)*8;return !!(grid.bytes[offset+2]&1);}
+  function blockedAt(zone,x,z){if(boundaryBlocked(zone,x,z))return true;const grid=grids(zone).find(g=>contains(g,x,z));if(!grid)return true;const {width}=dimensions(grid),offset=8+((Math.floor(z-grid.z)+16)*width+Math.floor(x-grid.x)+16)*8;return offset+2>=grid.bytes.length||!!(grid.bytes[offset+2]&1);}
   function surfaceAt(zone,x,z,height=0){if(!owned.has(zone))return null;const selected=globalZones.includes(zone)?fieldAt(x,z)??zone:zone;return surfaces?.at(selected,x,z,height)||null;}
   const api={register,prepare,cancel,evict,members,grids,crosses,fieldAt,blockedAt,boundaryBlocked,surfaceAt,zones,globalZones,sameField:(a,b)=>a===b||members(a).includes(b),scene:zone=>owned.get(zone)||null};return api;
  }

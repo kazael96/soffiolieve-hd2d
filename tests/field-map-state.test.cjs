@@ -1,0 +1,4 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{FieldEventVM}=require('../src/field-event-vm.js');
+test('native map setup clears exactly the original transient work and flags, preserving story, badges and resources',()=>{
+ const state={flags:[0,1,98,99,100,136,143,501,2425],vars:{16383:7,16384:1,16414:8,16415:9,16416:180,16568:3,32768:42},badges:[0,1,2,3,4,5,6,7],extraItems:{1:1,409:1}};FieldEventVM.resetMapState(state);assert.deepEqual(state.flags,[100,136,143,501,2425]);assert.equal(state.vars[16384],undefined);assert.equal(state.vars[16414],undefined);assert.equal(state.vars[16415],9);assert.equal(state.vars[16416],180);assert.equal(state.vars[16568],3);assert.equal(state.vars[32768],42);assert.equal(state.vars[16383],7);assert.deepEqual(state.badges,[0,1,2,3,4,5,6,7]);assert.deepEqual(state.extraItems,{1:1,409:1});
+});

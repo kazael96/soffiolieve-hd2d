@@ -16,3 +16,9 @@ test('native naming limits ten character codes and preserves original special gl
  assert.equal(edit('AÉ','insert','⑭',allowed),'AÉ⑭');assert.equal(edit('AÉ⑭','delete'),'AÉ');
  assert.equal(edit('AAAAAAAAAA','insert','É',allowed),'AAAAAAAAAA');assert.equal(edit('A','insert','x',allowed),'A');
 });
+
+test('field shop labels preserve the native currency/dash glyphs and fit measured popup rows',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),c={};c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync('src/party-popup-assets.js','utf8'),c);const font=c.PARTY_POPUP_ASSETS.font,{glyph,fieldChoices}=require('../src/native-text-layout.js');
+ assert.equal(glyph('₽',font),font.glyphs.$);for(const mark of ['—','–','−'])assert.equal(glyph(mark,font),font.glyphs['-']);
+ const labels=['Superpozione — ₽700','Iperpozione — ₽1200','Pagina successiva','Una descrizione deliberatamente lunga che deve andare a capo senza perdere lettere'],plan=fieldChoices(labels,font);assert.ok(plan.width<=236&&plan.width>104);for(const [i,row]of plan.rows.entries()){assert.ok(row.lines.every(line=>width(line,font)<=plan.width-24));assert.equal(row.lines.join(' ').replace(/\s/g,''),labels[i].replace(/\s/g,''));assert.equal(row.height,24+(row.lines.length-1)*16);}assert.ok(plan.rows.at(-1).lines.length>1);
+});

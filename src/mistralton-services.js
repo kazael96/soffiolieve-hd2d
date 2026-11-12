@@ -1,6 +1,6 @@
 /* IRBI Center109 common shop871. Prices and stocks come from the native tables. */
 ((root)=>{
- const data=()=>root.OpelucidChapter?.zones.includes(root.NativeStory?.state.zone)?root.OPELUCID_DATA:root.IcirrusChapter?.zones.includes(root.NativeStory?.state.zone)?root.ICIRRUS_DATA:root.MISTRALTON_DATA;
+ const data=()=>root.LEAGUE_SCENES?.[root.NativeStory?.state.zone]?root.LEAGUE_DATA:root.OpelucidChapter?.zones.includes(root.NativeStory?.state.zone)?root.OPELUCID_DATA:root.IcirrusChapter?.zones.includes(root.NativeStory?.state.zone)?root.ICIRRUS_DATA:root.MISTRALTON_DATA;
  function stock(id,badges=[]){const m=data().market,index=id===255?m.badgeStock[Math.min(8,new Set(badges).size)]:m.fixedStocks[id];if(index===undefined||!m.stocks[index])throw Error('Inventario Market non supportato: '+id);return [...m.stocks[index]];}
  const machine=id=>data().itemPockets[id]===2;
  function purchase(j,id,count,shop=255){

@@ -42,6 +42,7 @@ def export(rom, output, apicula, work_dir, *, badge='quake'):
         'quake': ([(7, 'quakeBadgeM'), (46, 'quakeBadgeF')], 'Medaglia Sisma', 'MISTRALTON_BADGE_ASSETS', 'MistraltonBadgeAssets', 'mistralton-badge-assets.js'),
         'jet': ([(8, 'jetBadgeM'), (47, 'jetBadgeF')], 'Medaglia Jet', 'ICIRRUS_BADGE_ASSETS', 'IcirrusBadgeAssets', 'icirrus-badge-assets.js'),
         'freeze': ([(9, 'freezeBadgeM'), (48, 'freezeBadgeF')], 'Medaglia Stalattite', 'OPELUCID_BADGE_ASSETS', 'OpelucidBadgeAssets', 'opelucid-badge-assets.js'),
+        'legend': ([(10, 'legendBadgeM'), (49, 'legendBadgeF')], 'Medaglia Leggenda', 'LEAGUE_BADGE_ASSETS', 'LeagueBadgeAssets', 'league-badge-assets.js'),
     }
     effects, label, global_name, api_name, catalog_name = variants[badge]
     rom = ndspy.rom.NintendoDSRom.fromFile(rom)

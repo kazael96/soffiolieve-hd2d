@@ -1,7 +1,7 @@
 /* IRBI field-event host. Narrative and movement programs are extracted, not rewritten. */
 (() => {
   const journey=window.Journey,state=journey.state;
-  const centerZones=new Set([398,8,20,41,65,99,109,115,122]);
+  const centerZones=new Set([398,8,20,41,65,99,109,115,122,146]);
   if(window.ACCUMULA_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ACCUMULA_EVENTS[k]);OPENING_TRAINERS[64]=ACCUMULA_EVENTS.trainer;}
   if(window.ROUTE2_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ROUTE2_EVENTS[k]);Object.assign(OPENING_TRAINERS,ROUTE2_TRAINERS);Object.assign(ORIGINAL_EVENTS.itemNames,ROUTE2_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ROUTE2_DATA.itemDescriptions);}
   if(window.STRIATON_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],STRIATON_EVENTS[k]);Object.assign(OPENING_TRAINERS,STRIATON_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,STRIATON_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,STRIATON_DATA.itemDescriptions);}
@@ -13,6 +13,7 @@
   if(window.MISTRALTON_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],MISTRALTON_EVENTS[k]);Object.assign(OPENING_TRAINERS,MISTRALTON_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,MISTRALTON_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,MISTRALTON_DATA.itemDescriptions);}
   if(window.ICIRRUS_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],ICIRRUS_EVENTS[k]);Object.assign(OPENING_TRAINERS,ICIRRUS_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,ICIRRUS_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,ICIRRUS_DATA.itemDescriptions);}
   if(window.OPELUCID_EVENTS){for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],OPELUCID_EVENTS[k]);Object.assign(OPENING_TRAINERS,OPELUCID_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,OPELUCID_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,OPELUCID_DATA.itemDescriptions);}
+  if(window.LEAGUE_EVENTS){if(!window.LEAGUE_DATA)throw Error('Dati della tappa Lega non disponibili');for(const k of ['zones','scripts','texts'])Object.assign(ORIGINAL_EVENTS[k],LEAGUE_EVENTS[k]);Object.assign(OPENING_TRAINERS,LEAGUE_DATA.trainers);Object.assign(ORIGINAL_EVENTS.itemNames,LEAGUE_DATA.itemNames);if(window.MENU_ASSETS)Object.assign(MENU_ASSETS.itemDescriptions,LEAGUE_DATA.itemDescriptions);}
   const sceneZones={bedroom:391,home:390,bianca:392,biancaRoom:393,komorHome:394,komorRoom:395,lab:396,town:389};
   const zoneScenes=Object.fromEntries(Object.entries(sceneZones).map(([k,v])=>[v,k]));zoneScenes[317]='town';
   zoneScenes[6]='town';zoneScenes[8]='zone8';sceneZones.zone8=8;zoneScenes[397]='town';zoneScenes[319]='town';for(const zone of [398,399,400,401,402,403,404,405,320]){sceneZones['zone'+zone]=zone;zoneScenes[zone]='zone'+zone;}
@@ -37,6 +38,9 @@
   // IRBI common866 subroutine36..568 sets these hidden-actor flags. Apply
   // only on entry from an older chapter: clearing them later is plot state.
   if(window.OPELUCID_DATA&&!native.chapter051){native.chapter051=true;for(const flag of [577,578,587,588,589,603,604,605,606,607,613,659,688,838])if(!native.flags.includes(flag))native.flags.push(flag);}
+  // IRBI common866 starts these actors hidden. The chapter marker prevents
+  // reapplying initial visibility after their own native event clears a flag.
+  if(window.LEAGUE_DATA&&!native.chapter052){native.chapter052=true;const initial=[657,669,816];if(native.vars[16568]!==3)initial.push(594);if((native.vars[16591]??0)<1)initial.push(759);for(const flag of initial)if(!native.flags.includes(flag))native.flags.push(flag);}
   // IRBI common init866 sets662; only Skyla's gym program220 clears it.
   if(window.MISTRALTON_DATA&&!native.badges?.includes(5)&&!native.flags.includes(662))native.flags.push(662);
   const fieldModels=window.FIELD_MODEL_ASSETS?new FieldModels.Controller(renderer,FIELD_MODEL_ASSETS,id=>AudioEngine.playSound(id)):null;
@@ -47,13 +51,15 @@
   const dragonFlight=window.OpelucidDragonFlight?.create({zone:()=>native.zone,presented:n=>renderer.hasPresentedActor?.(n)===true,time:()=>typeof t==='number'?t:0,pose,path:(from,to)=>window.OpelucidContinuity.path(from,to,native.zone),sample:n=>renderer.actorVisibility?.(n),moving:n=>motions.some(task=>actor(task.id)===n)});
   let fieldCovered=false,fadeRevision=0,actorZone=native.zone,actorsInitialized=false,triadCoverMode=null;
   const departures=new FieldActorExits.Controller({blocked:(x,y)=>blocked(x,y),obstructed:(record,p)=>record.plan.destination==='center-interior'&&fieldActors().some(n=>{return n.name==='Aralia'&&Math.abs(n.x-p.x)<.65&&Math.abs(n.y-p.y)<.65;}),pose, sample:n=>renderer.actorVisibility?.(n)||null,portal:async record=>{if(record.plan.kind!=='door')return null;const p=record.plan.anchor;if(native.door?.open&&Math.hypot(native.door.x-origin()[0]-p.x,native.door.z-origin()[1]-p.y)<3)return null;if(!fieldModels?.find(1,p.x,p.y))return null;const id=fieldModels.create(1,p.x,p.y);await fieldModels.play(id,0);await fieldModels.wait(id);return id;},finishPortal:record=>{if(record.handle!=null&&fieldModels?.handles.has(record.handle))void fieldModels.play(record.handle,1).then(()=>fieldModels.wait(record.handle)).then(()=>fieldModels.release(record.handle));}});
-  window.MistraltonContinuity?.configure({native,departures,actors:()=>npcs,blockedAt:window.MistraltonChapter?.blockedAt,isCovered:()=>fieldCovered,recheck:()=>{lastTile='';},resourceGeneration:()=>renderer.resourceEpoch,prepareNpcFall,npcFallSound:id=>AudioEngine.playSound(id)});
+  window.MistraltonContinuity?.configure({native,departures,actors:()=>npcs,player:()=>player,fieldActors,blockedAt:window.MistraltonChapter?.blockedAt,isCovered:()=>fieldCovered,recheck:()=>{lastTile='';},resourceGeneration:()=>renderer.resourceEpoch,prepareNpcFall,npcFallSound:id=>AudioEngine.playSound(id),npcSlideError:(error,retry)=>{renderer.loadingError=error;renderer.ready=false;renderer.status?.('Non è stato possibile preparare la discesa.',()=>{void retry().then(ok=>{if(ok){renderer.loadingError=null;renderer.ready=true;}});});}});
   departures.restore(native.departures,native.zone,native);
   const warmedBanks=new Set();
   let tutorialWarm=null;
   function warmTutorial(){if(native.zone!==317||value(16508)>=1||tutorialWarm||!window.BattleEnvironment||!window.ROM_SPRITE_ANIM)return;tutorialWarm=Promise.all([window.BattleScreen?.prepare?.(),BattleEnvironment.prepare(Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass'})),ROM_SPRITE_ANIM.prepare([{id:572,back:true},{id:504,back:false}]),window.NativeCapture?.preload(),window.MoveFX?.preload(1),window.AudioEngine?.preloadMove(1,{p1:572,p2:504})]).catch(()=>{tutorialWarm=null;});}
   function warmBank(bank){if(warmedBanks.has(bank)||!AudioEngine.enabled)return;warmedBanks.add(bank);const code=Object.values(ORIGINAL_EVENTS.scripts[bank]?.code||{}),sounds=code.filter(c=>['SEPlay','MEPlay'].includes(c.name)&&c.args[0]<0x4000).map(c=>({kind:'sfx',id:c.args[0]}));void AudioEngine.preloadEvents?.(sounds).catch(()=>warmedBanks.delete(bank));}
   let eventRunning=false,surfService=false,pcService=false,queued=null,reservedLiftArrival=null,pendingCancel=null,cameraTask=null,fadeTask=Promise.resolve(),soundTask=Promise.resolve(),lastTile='',warpCooldown=0;
+  const scriptSounds=new Set();
+  function stopScriptSounds(){for(const id of scriptSounds)AudioEngine.stopSound?.(id);scriptSounds.clear();}
   const vm=new FieldEventVM(ORIGINAL_EVENTS,native,{
     playerName:()=>state.playerName||'Alcide',speciesName:id=>GEN5.species.find(s=>s.id===id)?.en||String(id),party:i=>state.party[i],command
   });
@@ -61,17 +67,25 @@
   const origin=()=>(window.OpelucidChapter?.globalZones.includes(native.zone)||window.IcirrusChapter?.globalZones.includes(native.zone)||window.MistraltonChapter?.globalZones.includes(native.zone))?[784,752]:[389,317,397,319,6,321,16,154,326,62,329,96].includes(native.zone)?[784,752]:[16,16];
   const world=(x,z)=>({x:x+.5-origin()[0],y:z+.5-origin()[1]});
   // City WB exits encode the corner and span, alongside rail-position unions.
-  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
+  const warpPoint=(w,zone=native.zone)=>({x:w.x/16+((window.LEAGUE_EVENTS?.zones[zone]||window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.width-1)/2:0),z:w.z/16+((window.LEAGUE_EVENTS?.zones[zone]||window.OPELUCID_EVENTS?.zones[zone]||window.ICIRRUS_EVENTS?.zones[zone]||window.MISTRALTON_EVENTS?.zones[zone]||window.CASTELIA_EVENTS?.zones[zone]||window.NIMBASA_EVENTS?.zones[zone]||window.DRIFTVEIL_EVENTS?.zones[zone])?(w.height-1)/2:0)});
   const grid=()=>({x:Math.floor(player.x+origin()[0]),z:Math.floor(player.y+origin()[1])});
   const has=flag=>native.flags.includes(flag),value=id=>vm.value(id);
   const actor=id=>id===255?player:npcs.find(n=>n.uid===id);
   const fieldMotion=window.IcirrusFieldMotion?.create({state:()=>native,actor,sound:id=>AudioEngine.playSound(id)});
   const fieldFall=window.OpelucidFieldFall?.create({state:()=>native,actor,ground:(x,y)=>renderer.groundHeight(x,y),sound:id=>AudioEngine.playSound(id)});
   const quicksand=window.OpelucidQuicksand?.create({state:()=>native,hero:()=>player,ground:(x,y)=>renderer.groundHeight(x,y)});
-  async function prepareNpcFall(body,ids){await warmFieldSounds(ids);if(native.zone!==body.fieldZone)return;const prepare=async()=>{const required=[...fieldActors(),body];await renderer.requireActors?.(required);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(required)))throw renderer.loadingError||Error('Grafica della discesa non pronta');};if(renderer.resourceGate)await renderer.resourceGate('npc-sand-'+body.name,prepare);else await prepare();}
+  const slide=window.LeagueSlide?.create({state:()=>native,pose,sound:id=>AudioEngine.playSound(id),stop:id=>AudioEngine.stopSound?.(id)});
+  const playerSlide=window.LeaguePlayerSlide?.create({state:()=>native,hero:()=>player,save:()=>journey.save(true),resetInput:()=>resetInput(),face:d=>{facing=d*3;},
+    canStart:()=>!eventRunning&&!sceneChanging&&!failed&&!vm.running&&!journey.processing&&!battling&&!menuOpen()&&!window.SurfField?.mounted()&&!window.Bicycle?.mounted(),
+    canLand:to=>!window.LeagueNpcSlides?.reserved(to.x,to.y,to.height)&&!fieldActors().some(a=>(!a.gimmick||a.collisionOnly)&&Math.abs((a.height||0)+(a.jumpLift||0)-to.height)<1.25&&NpcWalk.occupies(a,to.x,to.y)),
+    audio:()=>{const sound=window.FIELD_AUDIO?.[1773];return sound?AudioEngine.createCinematic?.(sound.src)||null:null;},
+    prepare:async(required,track)=>{const operation=async()=>{const actors=[...fieldActors(),{name:'Alcide'},...required];await renderer.requireActors?.(actors);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(actors)))throw renderer.loadingError||Error('Grafica della discesa non pronta');if(AudioEngine.enabled)await track?.prepare();};if(renderer.resourceGate)await renderer.resourceGate('player-victory-slide',operation);else await operation();},
+    onError:(error,retry)=>{renderer.loadingError=error;renderer.ready=false;renderer.status?.('Non è stato possibile preparare la discesa.',()=>{void retry().then(ok=>{if(ok){renderer.loadingError=null;renderer.ready=true;}});});}});
+  if(playerSlide)window.LeaguePlayerSlideMotion=playerSlide;
+  async function prepareNpcFall(body,ids){await warmFieldSounds(ids);if(native.zone!==body.fieldZone)return;const prepare=async()=>{const required=[...fieldActors(),body,...(native.zone===214?slide?.resources()||[]:[])];await renderer.requireActors?.(required);if(renderer.resourcePlan&&renderer.hasResources&&!renderer.hasResources(renderer.resourcePlan(required)))throw renderer.loadingError||Error('Grafica della discesa non pronta');};if(renderer.resourceGate)await renderer.resourceGate('npc-sand-'+body.name,prepare);else await prepare();}
   async function warmFieldSounds(ids){if(!AudioEngine.enabled)return;const tracks=[];try{const load=async()=>{for(const track of tracks)track.stop();tracks.length=0;for(const id of ids){const record=window.FIELD_AUDIO?.[id];if(!record)throw Error('Suono originale di campo mancante: '+id);const track=AudioEngine.createCinematic(record.src);tracks.push(track);await track.prepare();}};if(renderer.resourceGate)await renderer.resourceGate('native-field-sounds-'+ids.join('-'),load);else await load();}finally{for(const track of tracks)track.stop();}}
   function pose(n,dir,step=0){
-    if(!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
+    if(!n.nativeSlide&&!(n.fieldZone===213&&[211,213].includes(n.model))&&native.zone!==97&&n.fieldZone===native.zone&&((window.OpelucidChapter?.zones.includes(native.zone)||window.IcirrusChapter?.zones.includes(native.zone)||window.MistraltonChapter?.zones.includes(native.zone))||[389,317,397,319,6,321,16,7,152,324,17,18,19,154,155,250,251,252,249,28,41,62,63,64,91,329,253,96,99].includes(n.fieldZone))&&renderer.groundHeight)n.height=renderer.groundHeight(n.x,n.y,n.railHeight??((renderer.scene.chapter050||renderer.scene.chapter051)?n.height:undefined));
     n.height=window.MistraltonGym?.actorHeight(n,n.height)??n.height;
     n.direction=dir;const fieldFrame=window.MistraltonPuzzles?.actorFrame?.(n);if(fieldFrame!==null&&fieldFrame!==undefined){n.frame=fieldFrame;n.flip=false;return;}const count=OPENING_SPRITES[n.name]?.length||window.ROM_SPRITES?.[n.name]?.length;
     if(count===1){n.frame=0;n.flip=false;}
@@ -80,10 +94,17 @@
   }
   function face(id,dir){const n=actor(id);if(!n)return;if(id===255)facing=frames[dir];else pose(n,dir);}
   function putActor(record){
+    // The Lv67 rematch is postgame reference, outside the requested first
+    // ending. Old saves may lack native hidden flag816: apply the same guard
+    // to rebuilds and ActorAdd, without resetting flags or unrelated progress.
+    if(window.LEAGUE_DATA&&native.zone===228&&record.id===0&&record.model===7&&record.flag===816)return null;
+    const graphic=window.LeagueGraphics?.model(native.zone,record.model)??record.model;
+    if(graphic!==record.model)record={...record,model:graphic};
     if(native.zone===343&&record.model===162)record={...record,model:209};
     if(record.rail&&!record.railOriginal&&window.NativeRails?.has(native.zone))record=NativeRails.actor(native.zone,record);
-    const n={...world(record.x,record.z),...(record.railOriginal?{railOriginal:record.railOriginal,railHeight:record.y/65536}:{}),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:(record.y||0)/65536};
+    let n={...world(record.x,record.z),...(record.railOriginal?{railOriginal:record.railOriginal,railHeight:record.y/65536}:{}),fieldZone:native.zone,uid:record.id,model:record.model,name:names[record.model]||'Original'+record.model,script:record.script,direction:record.direction,frame:frames[record.direction],height:record.model===208?.5:(record.y||0)/65536};
     if(native.zone===199&&record.model<162)n.height=window.IcirrusChapter?.surfaceAt(native.zone,n.x,n.y,n.height)?.height??n.height;
+    n=window.LeagueJourneys?.adopt(n)||n;
     n.wander=NpcWalk.create(record,{x:n.x,y:n.y});if(([185,8198,8199].includes(record.model)||[29,114].includes(native.zone)&&record.model===0)){n.noShadow=true;n.gimmick=true;if(native.zone===114&&record.model===0)n.collisionOnly=true;}pose(n,record.direction);npcs.push(n);window.MistraltonContinuity?.introduced(n,npcs);renderer.requireActors?.(fieldActors());return n;
   }
   function syncActors(){
@@ -104,6 +125,7 @@
     }
     const saved=native.actors?.[native.zone]||[];
     for(const n of npcs){const previous=saved.find(p=>p.uid===n.uid),record=data().actors.find(p=>p.id===n.uid);if(previous&&(!record.flag||!(native.actorFlags?.[native.zone]||[]).includes(record.flag)))Object.assign(n,structuredClone(previous));}
+    slide?.adopt(previousActors,npcs);
     if(native.zone===199)for(const n of npcs)if(n.model<162)n.height=window.IcirrusChapter?.surfaceAt(native.zone,n.x,n.y,n.height)?.height??n.height;
 
     if(native.zone===389){
@@ -155,9 +177,9 @@
   function captureActors(){native.departures=departures.save();native.actors??={};native.actorFlags??={};native.actorFlags[native.zone]=[...native.flags];native.actors[native.zone]=structuredClone(npcs.filter(n=>!n.projection));}
   function delay(frames){return window.GameSpeed?.wait(Math.max(0,frames)*1000/30)||new Promise(resolve=>setTimeout(resolve,Math.max(0,frames)*1000/30));}
   function applyRoom(){if(state.scene==='bedroom')renderer.scene=OPENING_ASSETS.scenes[native.roomMess?'bedroomMess':'bedroom'];}
-  function cameraTo(target,frames){
+  function cameraTo(target,frames,view=null){
     const start=[...(renderer.storyCamera||renderer.center)];
-    let resolve;const promise=new Promise(r=>resolve=r);cameraTask={start,target,elapsed:0,duration:frames/30,promise,resolve};
+    let resolve;const promise=new Promise(r=>resolve=r);cameraTask={start,target,elapsed:0,duration:frames/30,promise,resolve,view};
   }
   function fade(to,frames=8,color='#000'){
     let cover=$('fieldFade');if(!cover){cover=document.createElement('div');cover.id='fieldFade';cover.style.cssText='position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0';document.body.append(cover);}
@@ -173,6 +195,7 @@
   }
   async function message(bank,index,machine=vm,options){
     const text=ORIGINAL_EVENTS.texts[bank]?.[index];if(text===undefined)throw Error(`Missing original message ${bank}:${index}`);
+    const leave=window.LeagueJourneys?.beforeMessage(bank,index);if(leave)await leave;
     $('dialogue').dataset.source=bank+':'+index;
     for(const page of messagePages(text,machine.words))await showPage(page,'',options);
   }
@@ -289,7 +312,7 @@
   }
   function fieldActors(){const actors=npcs.filter(n=>!n.hidden),visible=window.MistraltonContinuity?.visibleActors(actors)||actors;return departures.visible(visible,player).filter(n=>n.exitPlan?.chapter049||n.continuityPlan?.chapter049||window.MistraltonChapter?.zones.includes(n.fieldZone)||(window.IcirrusChapter?.zones.includes(n.fieldZone)||window.OpelucidChapter?.zones.includes(n.fieldZone))?(window.MistraltonContinuity?.sameField(n.fieldZone,native.zone)??n.fieldZone===native.zone):!(window.NimbasaChapter?.zones.includes(n.fieldZone)||window.DriftveilChapter?.zones.includes(n.fieldZone))||n.fieldZone===native.zone);}
   function sameFieldHeight(n){return !window.OpelucidChapter?.zones.includes(native.zone)||Math.abs((n.railHeight??n.height??0)-(native.zone===114?native.fieldHeight??0:native.railCurrent?.height??native.fieldHeight??0))<1.8;}
-  function occupied(x,y){return fieldActors().some(n=>sameFieldHeight(n)&&(!n.gimmick||n.collisionOnly)&&((window.OpelucidGym?.sameLevel(n)??true)&&(window.IcirrusGym?.sameLevel(n)??true)&&(window.MistraltonGym?.sameLevel(n)??true))&&((n.height||0)>=0||native.zone===97)&&(native.zone===114||!window.NativeRails?.has(native.zone)||Math.abs((n.railHeight??n.height??0)-(native.railCurrent?.height??native.fieldHeight??0))<1.8)&&NpcWalk.occupies(n,x,y));}
+  function occupied(x,y){if(window.LeagueNpcSlides?.reserved(x,y,native.railCurrent?.height??native.fieldHeight??0))return true;return fieldActors().some(n=>sameFieldHeight(n)&&(!n.gimmick||n.collisionOnly)&&((window.LeagueGym?.sameLevel(n)??true)&&(window.OpelucidGym?.sameLevel(n)??true)&&(window.IcirrusGym?.sameLevel(n)??true)&&(window.MistraltonGym?.sameLevel(n)??true))&&((n.height||0)>=0||native.zone===97)&&(native.zone===114||!window.NativeRails?.has(native.zone)||Math.abs((n.railHeight??n.height??0)-(native.railCurrent?.height??native.fieldHeight??0))<1.8)&&NpcWalk.occupies(n,x,y));}
   function ambientMoving(){const bodies=fieldActors();return npcs.some(n=>bodies.includes(n)&&!n.hidden&&n.wander?.phase===4);}
   function settleAmbient(){return ambientMoving()?new Promise(resolve=>settleWaiters.push(resolve)):Promise.resolve();}
   function tickAmbient(dt,start){
@@ -328,7 +351,7 @@
       queued=null;reservedLiftArrival=null;failed=error;console.error(error);$('world').dataset.eventError=error.message;
       // Keep the last complete scene on disk. A reload retries the interrupted event.
       state.checkpoint=before;await showPage('La scena originale non può proseguire: '+error.message);
-    }finally{eventRunning=false;if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
+    }finally{eventRunning=false;if(failed){slide?.reset();window.LeagueCamera?.reset(renderer);stopScriptSounds();}if(triadCoverMode&&!failed){triadCoverMode=null;await fade(0,4);}
     }
   }
   async function command(c,a,v,m){
@@ -338,6 +361,7 @@
       // that prepared pose before its continuous 55→50 or−5→0 arrival motion.
       await renderer.prepareScene?.();await fade(0,8);reservedLiftArrival=null;
     }
+    if(window.LeagueGym&&await LeagueGym.command(c.name,a,v,m))return true;
     if(window.OpelucidGym&&await OpelucidGym.command(c.name,a,v,m))return true;
     if(window.MistraltonGym&&await MistraltonGym.command(c.name,a,v,m))return true;
     if(window.MistraltonPuzzles&&await MistraltonPuzzles.command(c.name,a,v,m))return true;
@@ -434,7 +458,8 @@
       case 'GymCurtainSwitch':case 'GymCurtainFeedback':case 'GymCurtainReset':native.gymSwitch=v[0];break;
       case 'NativeOpcode386':native.libraryOpening=!!v[0];break;
       case 'NativeOpcode389':native.libraryOpening=true;break;
-      case 'NativeOpcode167':AudioEngine.setScene(data().music);break;
+      // IRBI021af16c stops the sound players owned by the field-script mask.
+      case 'NativeOpcode167':stopScriptSounds();break;
       case 'NativeOpcode490':native.libraryPatches??={};native.libraryPatches[v[1]+':'+v[3]]={kind:v[0],height:v[2]};break;
       case 'NativeOpcode182':m.set(a[2],journey.consumeItem(v[0],v[1])?1:0);break;
       case 'NativeOpcode258':m.set(a[0],0);break; // Egg predicate; the demo has no eggs or breeding service.
@@ -449,7 +474,7 @@
       case 'NativeOpcode283':{const p=GEN5.species.find(p=>p.en===state.party[v[2]]?.name);m.set(a[0],p?.types[0]??0);m.set(a[1],p?.types[1]??p?.types[0]??0);break;}
       case 'CGearScene':native.cgear=true;break;
       case 'CGearNotice':await showPage('Il C-Gear è stato attivato. Le funzioni wireless non sono disponibili nella demo.');break;
-      case 'NativeConstant21':m.set(a[0],21);break;
+      case 'NativeOpcode224':case 'NativeConstant21':m.set(a[0],21);break; // IRBI 0215a950: Black version discriminator.
       case 'NativeOpcode492':{const n=actor(v[0]);if(n){Object.assign(n,world(v[2],v[4]));pose(n,v[1]);}break;}
       case 'NativeOpcode475':native.route3Survey=v[0];break;
       case 'NativeOpcode139':break; // Native trainer intro is covered by the battle entry transition.
@@ -476,7 +501,7 @@
       case 'ActorSetGPos':{const n=actor(v[0]),before=n&&{...n},dragon=n&&dragonFlight?.isDragon(n);if(n){const target={...world(v[1],v[3]),...(dragon?{height:v[2]<<16>>16}:{})};if(dragon&&!fieldCovered&&dragonFlight.enabled(n))await dragonFlight.relocate(n,target);else Object.assign(n,target);}face(v[0],v[4]);if(n&&!dragon&&v[0]!==255&&renderer.hasPresentedActor?.(n))departures.preserve([before],[n],{covered:fieldCovered,sameField:true});break;}
       case 'ActorSetEyeToEye':{const n=actor(currentActor);if(n){const dx=player.x-n.x,dy=player.y-n.y;face(currentActor,Math.abs(dx)>Math.abs(dy)?dx>0?3:2:dy>0?1:0);}break;}
       case 'ActorAdd':{const record=data().actors.find(n=>n.id===v[0]);if(record&&!actor(v[0])){if(record.model===182&&triadCoverMode!=='reveal'){await fade(1,4);triadCoverMode='reveal';}const n=putActor(record),arriving=native.zone===329&&v[0]===14;if(arriving)Object.assign(n,{x:-404.5,y:-313.5,exitClip:[-1,0,0,-406.4]});await renderer.prepareScene?.();if(arriving){move(n.uid,[[10,17]]);await Promise.all(motions.filter(t=>t.id===n.uid).map(t=>t.promise));delete n.exitClip;}}if(m.bank===304&&v[0]===19)await fade(0,4,'#fff');break;}
-      case 'ActorDelete':{if(m.bank===304&&v[0]===17)await fade(1,4,'#fff');const n=actor(v[0]);if(n){if(native.zone===90)n.leavingGate=true;if(native.zone===62&&n.name==='Belle')native.flags=native.flags.filter(f=>f!==561);const flight=dragonFlight?.depart(n);if(flight)await flight;else departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;if(!flight)await departures.wait(n);const index=npcs.indexOf(n);if(index>=0)npcs.splice(index,1);}if(triadCoverMode==='hide'&&!npcs.some(n=>n.model===182)){await fade(0,4);triadCoverMode=null;}break;}
+      case 'ActorDelete':{if(m.bank===304&&v[0]===17)await fade(1,4,'#fff');let n=actor(v[0]);if(n){n=window.LeagueJourneys?.beforeDelete(n)||n;if(native.zone===90)n.leavingGate=true;if(native.zone===62&&n.name==='Belle')native.flags=native.flags.filter(f=>f!==561);const flight=dragonFlight?.depart(n);if(flight)await flight;else departures.depart(n,native.zone,{covered:fieldCovered});n.hidden=true;if(!flight)await departures.wait(n);const index=npcs.indexOf(n);if(index>=0)npcs.splice(index,1);}if(triadCoverMode==='hide'&&!npcs.some(n=>n.model===182)){await fade(0,4);triadCoverMode=null;}break;}
       case 'ActorNew':if(!actor(v[3])){
         const arriving=native.zone===62&&v[3]===251&&v[4]===134,n=putActor({id:v[3],model:v[4],x:v[0],z:v[1],direction:v[2],script:2000,...(arriving?{y:65536}:{})});
         // The HD-2D camera sees the DS spawn tile. Enter through the southern
@@ -513,16 +538,16 @@
       case 'ItemCheckSpace':m.set(a[2],journey.itemCount(v[0])+v[1]<=999?1:0);break;
       case 'ItemAdd':{
         const item=v[0],count=v[1];if(item===4)state.pokeballs+=count;else if(item===17)potions+=count;
-        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.OPELUCID_DATA?.itemNames[item]||window.ICIRRUS_DATA?.itemNames[item]||window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
+        else if(item===442)native.map=true;else if([621,626].includes(item))native.phone=true;else if(window.LEAGUE_DATA?.itemNames[item]||window.OPELUCID_DATA?.itemNames[item]||window.ICIRRUS_DATA?.itemNames[item]||window.MISTRALTON_DATA?.itemNames[item]||window.DRIFTVEIL_DATA?.itemNames[item]||window.NIMBASA_DATA?.itemNames[item]||window.CASTELIA_DATA?.itemNames[item]||window.PINWHEEL_DATA?.itemNames[item]||window.ROUTE3_DATA?.itemNames[item]||window.STRIATON_DATA?.itemNames[item])journey.addItem(item,count);else throw Error('Item outside opening '+item);
         m.set(a[2],1);journey.update();break;
       }
-      case 'ItemGetPocket':m.set(a[1],window.OPELUCID_DATA?.itemPockets?.[v[0]]??window.ICIRRUS_DATA?.itemPockets?.[v[0]]??window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
+      case 'ItemGetPocket':m.set(a[1],window.LEAGUE_DATA?.itemPockets?.[v[0]]??window.OPELUCID_DATA?.itemPockets?.[v[0]]??window.ICIRRUS_DATA?.itemPockets?.[v[0]]??window.MISTRALTON_DATA?.itemPockets?.[v[0]]??([442,621,626,437,471,579].includes(v[0])?4:[373,410,420,394,397,399,403,413,619].includes(v[0])?2:[150,155,188].includes(v[0])?3:[17,18,21,22,25,26,27,28,30,38,52,591].includes(v[0])?1:0));break;
       case 'WordSetItemName':case 'WordSetItemNameWithArticle':case 'WordSetItemNameEx':{
         const item=ORIGINAL_EVENTS.itemNames[v[1]];if(!item)throw Error('Item name '+v[1]);
         const plural=c.name==='WordSetItemNameEx'&&v[2]>1,article=c.name==='WordSetItemNameWithArticle'||c.name==='WordSetItemNameEx'&&v[3];
         m.words[a[0]]=plural?(v[1]===17?'Pozioni':item):article?(v[1]===621||v[1]===626?"un ":'una ')+item:item;break;
       }
-      case 'WordSetTMMoveName':{const id=({...window.NATIVE_MACHINE_TEXT?.moves,...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,...window.OPELUCID_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
+      case 'WordSetTMMoveName':{const id=({...window.NATIVE_MACHINE_TEXT?.moves,...window.PINWHEEL_DATA?.machines,...window.CASTELIA_DATA?.machines,...window.NIMBASA_DATA?.machines,...window.DRIFTVEIL_DATA?.machines,...window.MISTRALTON_DATA?.machines,...window.ICIRRUS_DATA?.machines,...window.OPELUCID_DATA?.machines,...window.LEAGUE_DATA?.machines,373:168,410:526,420:15})[v[1]];if(!id)throw Error('Machine outside chapter '+v[1]);m.words[a[0]]=GEN5.moves.find(move=>move.id===id).name;break;}
       case 'WordSetItemPocketName':m.words[a[0]]=ORIGINAL_EVENTS.pocketNames[v[1]];if(m.words[a[0]]===undefined)throw Error('Item pocket '+v[1]);break;
       case 'Random':m.set(a[0],Math.floor(Math.random()*v[1]));break;
       case 'MapChangeWarp':await changeZone(v[0],v[1],v[2]);break;
@@ -538,11 +563,13 @@
       case 'MapReplaceSetEvent':if(window.OPELUCID_MAP_VARIANTS&&v[0]===OPELUCID_MAP_VARIANTS.event){native.vars[OPELUCID_MAP_VARIANTS.work]=v[1]?OPELUCID_MAP_VARIANTS.value:0;}else if(m.bank===638){native.route2MapEvent=v[0];}else if(m.bank>=778){native.roomMess=true;applyRoom();}else native.mapEvents={...(native.mapEvents||{}),[native.zone]:v[0]};break;
       case 'EnableRunningShoes':native.runningShoes=true;break;
       case 'MapReplaceIsEventSet':m.set(a[1],native.roomMess?1:0);break;
-      case 'EVCameraInit':renderer.storyCamera=[...renderer.center];break;
-      case 'EVCameraEnd':case 'EVCameraRebind':renderer.storyCamera=null;break;
+      case 'EVCameraInit':window.LeagueCamera?.reset(renderer);renderer.storyCamera=[...renderer.center];break;
+      case 'EVCameraEnd':case 'EVCameraRebind':if(native.zone===214&&slide?.returnPromise)await slide.returnPromise;if(cameraTask?.view){cameraTask.resolve();cameraTask=null;}window.LeagueCamera?.reset(renderer);renderer.storyCamera=null;break;
       case 'EVCameraUnbind':renderer.storyCamera??=[...renderer.center];break;
-      case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6]);break;
-      case 'EVCameraMoveToDefault':case 'EVCameraReturn':cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0]);break;
+      case 'EVCameraMoveTo':cameraTo([v[3]/65536-origin()[0],v[5]/65536-origin()[1]],v[6],native.zone===214&&slide&&window.LeagueCamera?LeagueCamera.begin(renderer,{pitchTurn16:v[0],yawTurn16:v[1],targetFx:[v[3],v[4],v[5]],distanceFx:v[2]}):null);break;
+      case 'NativeOpcode122':{const body=actor(v[0]);if(!slide||native.zone!==214||!body)throw Error('Scivolata originale non disponibile');await prepareNpcFall(body,[1773]);if(native.zone===214&&actor(v[0])===body)await slide.start(body);break;}
+      case 'NativeOpcode326':{const preset=window.LEAGUE_CAMERA_PRESETS?.presets?.[v[0]];if(!preset||!window.LeagueCamera)throw Error('Camera originale del portale non disponibile');const [ox,oz]=origin();cameraTo([preset.targetFx[0]/65536-ox,preset.targetFx[2]/65536-oz],v[1],LeagueCamera.begin(renderer,preset));break;}
+      case 'EVCameraMoveToDefault':case 'EVCameraReturn':if(native.zone===214&&m.bank===428&&slide?.completedBody&&!slide.returnPromise)slide.returnToRole(slide.completedBody);cameraTo(SceneCamera.anchor(state.scene,renderer.scene,native.zone,player),v[0],window.LeagueCamera?.returning(renderer));break;
       case 'EVCameraWait':if(cameraTask)await cameraTask.promise;break;
       case 'FadeEx':fade(v[1]===0?1:0,v[3]*8,v[0]===3?'#fff':'#000');break;
       case 'FadeExWait':case 'CallLeagueLiftWarp':await fadeTask;break;
@@ -550,11 +577,14 @@
       case 'NativeOpcode438':case 'CMD_1ae':fade(1);break;
       case 'BGMPlay':native.music=v[0];AudioEngine.setScene(v[0]);break;
       case 'BGMChangeMap':native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);break;
-      case 'SEPlay':case 'MEPlay':soundTask=AudioEngine.playSound(v[0]);break;
+      case 'SEPlay':case 'MEPlay':scriptSounds.add(v[0]);soundTask=AudioEngine.playSound(v[0]);break;
       case 'SEWait':case 'MEWait':await soundTask;break;
       case 'PVPlay':soundTask=AudioEngine.cry(v[0]);break;
       case 'PVWait':await soundTask;break;
       case 'BMCreateHandleByGPos':{const [ox,oz]=origin();m.set(a[0],fieldModels?fieldModels.create(v[1],v[2]-ox,v[3]-oz):v[1]);native.door={x:v[2],z:v[3],type:v[1],open:false};break;}
+      // IRBI021b2b08 finds the loaded model and disables its two render modes.
+      // An absent match is an original no-op, not a missing-resource fallback.
+      case 'NativeOpcode299':{const [ox,oz]=origin();fieldModels?.hide(v[0],v[1]-ox,v[2]-oz);break;}
       case 'BMHndAudioVisualAnmPlay':native.door.open=v[1]===0;if(fieldModels)await fieldModels.play(v[0],v[1]);break;
       case 'BMHndAnmWait':if(fieldModels)await fieldModels.wait(v[0]);else await delay(8);break;
       case 'BMReleaseHandle':fieldModels?.release(v[0]);native.door=null;break;
@@ -603,13 +633,17 @@
     }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function changeZone(zone,x,z,entryHeight){
+    window.LeagueCamera?.reset(renderer);
+    slide?.reset();
     quicksand?.reset();
     fieldFall?.reset();
     dragonFlight?.reset();
     if(!zoneScenes[zone])throw Error('Zone outside opening '+zone);
+    const nextScene=zoneScenes[zone]==='town'?journey.outdoor:OPENING_ASSETS.scenes[zoneScenes[zone]];
+    if(!nextScene)throw Error('Scena della destinazione non disponibile: '+zone);
     const restoreField=!fieldCovered;if(restoreField)await fade(1,8);clearDepartures();fieldModels?.clear();
-    if(SceneCamera.tracks(OPENING_ASSETS.scenes[zoneScenes[zone]])){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
-    captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:!!OPENING_ASSETS.scenes[zoneScenes[zone]].outdoor,fromOutdoor:!!renderer.scene.outdoor,busy:[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.OpelucidChapter?.zones.includes(zone))await OpelucidChapter.ensure(zone);else if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.OpelucidGym?.enter(zone);window.DragonspiralJump?.enter();window.SurfField?.enter();syncActors();window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
+    if(SceneCamera.tracks(nextScene)){if(cameraTask){cameraTask.resolve();cameraTask=null;}renderer.storyCamera=null;}
+    captureActors();window.FieldSeason?.transition(native,{covered:fieldCovered,outdoor:zoneScenes[zone]==='town'||!!nextScene.outdoor,fromOutdoor:renderer.scene===journey.outdoor||!!renderer.scene.outdoor,busy:!!window.LeagueGym?.busy||[...departures.records.values()].some(r=>r.stage!=='resident'||['cedric-next-research','komor-twist-exit'].includes(r.plan.destination))});if(window.OpelucidChapter?.zones.includes(zone))await OpelucidChapter.ensure(zone);else if(window.IcirrusChapter?.zones.includes(zone))await IcirrusChapter.ensure();await window.IcirrusSeasons?.prepare(window.IcirrusChapter?.ready?199:zone,{images:false});native.zone=zone;FieldEventVM.resetMapState(native);if(native.railCurrent?.zone!==zone)delete native.railCurrent;if(window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))native.fieldHeight=Number.isFinite(entryHeight)?entryHeight:0;delete native.pendingZoneEntry;window.MistraltonGym?.enter(zone,native.clayHeight);window.MistraltonPuzzles?.enter(zone);native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);const p=world(x,z);journey.setScene(zoneScenes[zone],p.x,p.y);native.fieldHeight=renderer.groundHeight(p.x,p.y,native.fieldHeight);window.IcirrusGym?.enter(zone);window.OpelucidGym?.enter(zone);window.LeagueGym?.enter(zone);playerSlide?.enter();window.DragonspiralJump?.enter();window.SurfField?.enter();syncActors();if(native.playerSlideRecovered){toast('La posizione è stata recuperata all’ingresso della Via Vittoria.');delete native.playerSlideRecovered;}window.MistraltonContinuity?.enterZone(zone,{covered:fieldCovered});warpCooldown=.8;lastTile='';applyRoom();
     const initFlags=native.flags.join(',');for(const init of data().init||[]){if(init.entry>=10000){await command({name:'RTCallGlobal'},[init.entry+1],[init.entry+1],vm);continue;}const loader=new FieldEventVM(ORIGINAL_EVENTS,native,vm.host);await loader.run(data().script,init.entry);}
     if((window.OpelucidChapter?.zones.includes(zone)||window.IcirrusChapter?.zones.includes(zone))&&native.flags.join(',')!==initFlags)syncActors();
     if(zone===319)native.route2=true;if(zone===321)native.route3=true;if(zone===16)native.nacrene=true;if(zone===28)native.castelia=true;if(zone===326)native.route4=true;if(zone===62)native.nimbasa=true;if(zone===96)native.driftveil=true;if(zone===107)native.mistralton=true;if(zone===113)native.icirrus=true;derivePhase();
@@ -653,7 +687,7 @@
       else{p=warpPoint(dw,w.zone);const [x,z]=directions[warpDirections[dw.a]];out={x,z};delete native.railCurrent;}
       await changeZone(w.zone,p.x-.5,p.z-.5,dw.rail?p.height:(dw.y<<16>>16)/16);
       if(landing){player.x=landing.x;player.y=landing.z;}else{player.x-=out.x;player.y-=out.z;}const dir=Math.abs(out.x)>Math.abs(out.z)?out.x>0?2:3:out.z>0?0:1;face(255,dir);
-      if(dw.rail){const at=NativeRails.locate(w.zone,player.x,player.y,native.railCurrent);if(at)native.railCurrent={zone:w.zone,...at};}
+      if(dw.rail){const at=NativeRails.locate(w.zone,player.x,player.y,native.railCurrent);if(at){native.railCurrent={zone:w.zone,...at};native.fieldHeight=at.height;}}
       renderer.center=[player.x,player.y+1.5];renderer.elevation=renderer.scene.railZone?renderer.groundHeight(player.x,player.y):0;
       await fade(0,8);sceneChanging=false;warpCooldown=.8;derivePhase();captureActors();
       const next=data().onEnter?.find(e=>value(e.var)===e.value);
@@ -699,8 +733,18 @@
     if(window.IcirrusChapter?.globalZones.includes(native.zone)){const next=IcirrusChapter.fieldAt(x,z);if(next!==null&&next!==native.zone&&IcirrusChapter.crosses(native.zone,next)&&!IcirrusChapter.blockedAt(next,x,z))return enterFieldBoundary(next,x,z);}
     const visualNeighbor=window.IcirrusChapter?.visualFieldAt?.(native.zone,x,z);if(visualNeighbor!=null&&!ORIGINAL_EVENTS.zones[visualNeighbor]){warpCooldown=.8;return chapterBoundary();}
     if(window.NativeRails?.has(native.zone)){
-      for(const w of warps()){if(!w.rail)continue;const p=NativeRails.warp(native.zone,w);if(renderer.scene.chapter050){const at=NativeRails.locate(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0});if(!at||at.line!==p.line)continue;}const portal=p,cx=portal.x-origin()[0],cz=portal.z-origin()[1],before=(player.x-cx)*p.out.x+(player.y-cz)*p.out.z,after=(x-cx)*p.out.x+(z-cz)*p.out.z,lateral=Math.abs((player.x-cx)*p.out.z-(player.y-cz)*p.out.x),span=p.span??(w.b===2?w.width:w.height);
-        if(dx*p.out.x+dz*p.out.z>.1&&before>=-3.5&&before<.5&&lateral<span*.5+.15){if(!ORIGINAL_EVENTS.zones[w.zone]){if(after< -1.25)continue;warpCooldown=.8;return chapterBoundary();}const threshold=-(NativeRails.landing(native.zone,w).distance-.08);if(after<threshold)continue;return enterRailWarp(w);}
+      for(const w of warps()){if(!w.rail)continue;const p=NativeRails.warp(native.zone,w);if(renderer.scene.chapter050||native.zone===214){const at=NativeRails.locate(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0});if(!at||at.line!==p.line)continue;}const portal=p,cx=portal.x-origin()[0],cz=portal.z-origin()[1],before=(player.x-cx)*p.out.x+(player.y-cz)*p.out.z,after=(x-cx)*p.out.x+(z-cz)*p.out.z,lateral=Math.abs((player.x-cx)*p.out.z-(player.y-cz)*p.out.x),span=p.span??(w.b===2?w.width:w.height);
+        if(dx*p.out.x+dz*p.out.z>.1&&before>=-3.5&&before<.5&&lateral<span*.5+.15){
+          // IRBI214's final rail portal stores the native sentinel 65535,
+          // while the reciprocal League entrance is explicitly 136:0.
+          // Resolve only this documented pair; other sentinels remain chapter boundaries.
+          if(native.zone===214&&w.zone===65535&&w.warp===65535){
+            const reciprocal=warps(136)[0];
+            if(reciprocal?.zone!==214||reciprocal.warp!==10)throw Error('Varco reciproco della Lega non coerente');
+            const threshold=-(NativeRails.landing(native.zone,w).distance-.08);if(after<threshold)continue;
+            return enterRailWarp({...w,zone:136,warp:0});
+          }
+          if(!ORIGINAL_EVENTS.zones[w.zone]){if(after< -1.25)continue;warpCooldown=.8;return chapterBoundary();}const threshold=-(NativeRails.landing(native.zone,w).distance-.08);if(after<threshold)continue;return enterRailWarp(w);}
       }
     }
     if(!window.PINWHEEL_ASSETS&&native.zone===16&&dir===2&&x< -175.5&&player.x>=-175.5){warpCooldown=.8;return chapterBoundary();}
@@ -709,6 +753,14 @@
       if(native.zone===199&&window.IcirrusSeasons?.portalOpen(w)===false)continue;
       if(native.zone===90&&w.zone===62&&value(16578)===0)continue;
       if(native.zone===18&&w.zone===19&&value(16522)!==7)continue;
+      // IRBI121 upper return pad: transition5/a0 is entered from any side,
+      // unlike a directional door. Keep its native elevation so approaching
+      // the same X/Z on a lower deck cannot start a teleport through the floor.
+      if(native.zone===121&&w.a===0&&w.transition===5){
+        const point=warpPoint(w),[ox,oz]=origin(),cx=point.x-ox,cz=point.z-oz;
+        if(!(dx||dz)||Math.abs((native.fieldHeight??0)-(w.y<<16>>16)/16)>.25||Math.abs(x-cx)>.45||Math.abs(z-cz)>.45)continue;
+        return enterWarp(w);
+      }
       if(warpDirections[w.a]!==dir)continue;
       const point=warpPoint(w),cx=point.x-origin()[0],cz=point.z-origin()[1];
       const before=(player.x-cx)*ux+(player.y-cz)*uz,after=(x-cx)*ux+(z-cz)*uz,lateral=Math.abs((player.x-cx)*uz-(player.y-cz)*ux);
@@ -740,7 +792,7 @@
   }
   function target(){
     const p=grid(),[dx,dz]=directions[frames.indexOf(facing)],front={x:p.x+dx,z:p.z+dz};
-    const visible=fieldActors().filter(n=>n.fieldZone===native.zone&&sameFieldHeight(n)&&Number.isFinite(n.script)&&(window.OpelucidGym?.sameLevel(n)??true)&&(window.MistraltonGym?.sameLevel(n)??true));
+    const visible=fieldActors().filter(n=>n.fieldZone===native.zone&&sameFieldHeight(n)&&Number.isFinite(n.script)&&(window.LeagueGym?.sameLevel(n)??true)&&(window.OpelucidGym?.sameLevel(n)??true)&&(window.MistraltonGym?.sameLevel(n)??true));
     if(window.NativeRails?.has(native.zone)){
       const n=visible.filter(n=>!n.gimmick&&Math.abs((n.railHeight??n.height)-(native.zone===114?native.fieldHeight??0:native.railCurrent?.height??n.height))<1.8).map(n=>({n,along:(n.x-player.x)*dx+(n.y-player.y)*dz,lateral:Math.abs((n.x-player.x)*dz-(n.y-player.y)*dx)})).filter(p=>p.along>.1&&p.along<1.9&&p.lateral<.9).sort((a,b)=>a.along-b.along)[0]?.n;
       if(n)return {kind:'actor',n,script:n.script};
@@ -774,17 +826,17 @@
     }finally{surfService=false;eventRunning=false;resetInput();journey.save(true);}
   }
   async function neighborMessage(bank,index){if(eventRunning)return;eventRunning=true;resetInput();try{await message(bank,index);}finally{eventRunning=false;}}
-  function interact(){if(eventRunning||sceneChanging||vm.running||failed||window.DragonspiralJump?.busy||window.OpelucidGym?.busy||window.IcirrusGym?.busy||window.MistraltonPuzzles?.busy||window.MistraltonGym?.busy||window.DriftveilGym?.busy)return;if(window.MistraltonPuzzles?.interact())return;if(window.MistraltonGym?.interact())return;if(window.DriftveilGym?.interact())return;const t=target();if(!t&&window.SurfField?.canStart())return useSurf();if(t){currentActor=t.n?.uid;const status=window.OpelucidContinuity?.statusMessage(t.n);if(status)return neighborMessage(status.bank,status.message);if(native.zone===96&&t.n?.name==='Komor'&&t.n.uid===253&&t.script===2000){vm.words[0]=state.playerName||'Alcide';return neighborMessage(101,5);}if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if(([319,7,152,321,322,324,18,154,155,29,326,63,329,97,191,192,193,331,195,196,197,108,337,339,340,341,200,201,202,203,114].includes(native.zone)||window.OpelucidChapter?.zones.includes(native.zone))&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle'||native.zone===96&&t.n?.uid===28&&t.script===21)return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if(centerZones.has(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
+  function interact(){if(eventRunning||sceneChanging||vm.running||failed||playerSlide?.busy||window.DragonspiralJump?.busy||(window.LeagueGym?.busy||window.OpelucidGym?.busy)||window.IcirrusGym?.busy||window.MistraltonPuzzles?.busy||window.MistraltonGym?.busy||window.DriftveilGym?.busy)return;if(window.MistraltonPuzzles?.interact())return;if(window.MistraltonGym?.interact())return;if(window.DriftveilGym?.interact())return;const t=target();if(!t&&window.SurfField?.canStart())return useSurf();if(t){currentActor=t.n?.uid;const status=window.OpelucidContinuity?.statusMessage(t.n);if(status)return neighborMessage(status.bank,status.message);if(native.zone===96&&t.n?.name==='Komor'&&t.n.uid===253&&t.script===2000){vm.words[0]=state.playerName||'Alcide';return neighborMessage(101,5);}if(native.zone===397&&t.n?.name==='Komor'&&t.script===2000)return neighborMessage(436,value(16506)>=3?30:value(16507)<3?5:6);if(native.zone===6&&t.n?.name==='Belle'&&t.script===2000)return neighborMessage(351,10);if(native.zone===152&&t.n?.model===108)return cutTree(t.n);if(native.zone===319&&t.n?.model===108)return showPage('Questo albero può essere tagliato con la mossa Taglio.');if(([319,7,152,321,322,324,18,154,155,29,326,63,329,97,191,192,193,331,195,196,197,108,337,339,340,341,200,201,202,203,114].includes(native.zone)||window.OpelucidChapter?.zones.includes(native.zone))&&(t.script>=3000&&t.script<4000||t.script>=5000&&t.script<6000))return routeTrainer(t.n);if(native.zone===62&&t.n?.name==='Belle'||native.zone===96&&t.n?.uid===28&&t.script===21)return chapterBoundary();if(t.script<2000){if(!ORIGINAL_EVENTS.scripts[data().script]?.supportedEntries.includes(t.script-1))return showPage('Sei arrivato a Levantopoli. Le prossime sfide saranno disponibili nel capitolo successivo.');return run(t.script-1);}if(native.zone===323&&t.script===2201)return daycareService();if(centerZones.has(native.zone))return cityService(t.script);if(t.script>=7000&&t.script<8000)return routeItem(t.n);}}
   function step(dt,moved,distance=0){if(window.FieldMusicFade)AudioEngine.setFieldMusicVolume?.(FieldMusicFade.tick(native,dt));window.DriftveilGym?.tick(dt);if(native.zone===29)window.CasteliaGym?.tick(dt,player,moved);
     if(window.SpeciesStudioMode||failed)return;
-    if(window.NativeRails?.has(native.zone)){const hint=native.zone===114?{height:native.fieldHeight??0}:native.railCurrent?.zone===native.zone?native.railCurrent:(renderer.scene.chapter050||renderer.scene.chapter051)?{height:native.fieldHeight??0}:{},at=NativeRails.locate(native.zone,player.x,player.y,hint);if(at)native.railCurrent={zone:native.zone,...at};}
+    if(!playerSlide?.busy&&window.NativeRails?.has(native.zone)){const hint=native.zone===114?{height:native.fieldHeight??0}:native.railCurrent?.zone===native.zone?native.railCurrent:(renderer.scene.chapter050||renderer.scene.chapter051)?{height:native.fieldHeight??0}:{},at=NativeRails.locate(native.zone,player.x,player.y,hint);if(at)native.railCurrent={zone:native.zone,...at};else if(native.zone===121)delete native.railCurrent;}
     if(state.trainer&&!document.hidden)state.trainer.playSeconds=Math.min(3599999,state.trainer.playSeconds+dt);
-    if(renderer.scene.chapter050&&!window.IcirrusGym?.busy){const at=window.IcirrusChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);const rail=renderer.scene.railZone&&NativeRails.locate(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0});if(rail)native.fieldHeight=rail.height;else if(at)native.fieldHeight=at.height;}
-    if(renderer.scene.chapter051&&!window.OpelucidGym?.busy){const at=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(at)native.fieldHeight=at.height;}
+    if(renderer.scene.chapter050&&!window.IcirrusGym?.busy&&!playerSlide?.busy){const at=window.IcirrusChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);const rail=renderer.scene.railZone&&NativeRails.locate(native.zone,player.x,player.y,native.railCurrent?.zone===native.zone?native.railCurrent:{height:native.fieldHeight??0});if(rail)native.fieldHeight=rail.height;else if(at)native.fieldHeight=at.height;}
+    if(renderer.scene.chapter051&&!(playerSlide?.busy||window.LeagueGym?.busy||window.OpelucidGym?.busy)){const at=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(at)native.fieldHeight=at.height;}
     warmTutorial();warmBank(data().script);fieldModels?.tick(dt);
-    try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
-    window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);fieldMotion?.tick(dt);fieldFall?.tick(dt);quicksand?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
-    const held=!!window.DragonspiralJump?.busy||!!window.OpelucidGym?.busy||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
+    try{dragonFlight?.observe();departures.tick(dt);window.MistraltonContinuity?.tick(dt);advanceRoute4Friend();advanceDriftveilFriend();tickMotions(dt);slide?.tick(dt);dragonFlight?.tick(dt);if(cameraTask){const c=cameraTask;c.elapsed+=dt;const f=Math.min(1,c.elapsed/c.duration);renderer.storyCamera=c.start.map((n,i)=>n+(c.target[i]-n)*f);c.view?.(f);if(f===1){cameraTask=null;c.resolve();}}}catch(error){failed=error;console.error(error);showPage(error.message);}
+    playerSlide?.tick(dt);window.DragonspiralJump?.tick(dt);window.SurfField?.tick(dt);window.IcirrusGym?.tick(dt);window.OpelucidGym?.tick(dt,moved);window.LeagueGym?.tick(dt);fieldMotion?.tick(dt);fieldFall?.tick(dt);quicksand?.tick(dt);window.MistraltonGym?.tick(dt);window.MistraltonPuzzles?.tick(dt,moved);
+    const held=!!playerSlide?.busy||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.busy||window.OpelucidGym?.busy)||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||journey.processing||battling||menuOpen()||failed;
     tickAmbient(dt,!held&&native.intro);warpCooldown=Math.max(0,warpCooldown-dt);if(held)return;if(moved&&distance>0)journey.daycareSteps(distance);
     const deferred=window.OpelucidContinuity?.deferredEvent(native.zone);if(deferred&&window.OpelucidContinuity.prepareEvent(native.zone,deferred)){run(deferred-1);return;}
     if(!native.intro&&renderer.ready){run(4,782);return;}
@@ -801,7 +853,7 @@
     if(native.zone===397&&p.z>=672){native.zone=317;native.music=window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||data().music;AudioEngine.setScene(native.music);syncActors();journey.save(true);return;}
     // Native type6 uses the separate header-gated query2162780/2162830.
     // It is not an unconditional footstep script (Cold Storage contains2000).
-    for(const trigger of data().triggers)if(trigger.type!==6&&!(native.zone===114&&Math.abs((native.fieldHeight??0)-trigger.y/16)>.25)&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
+    for(const trigger of data().triggers)if(trigger.type!==6&&!((native.zone===114||native.zone===121&&!trigger.rail)&&Math.abs((native.fieldHeight??0)-trigger.y/16)>.25)&&!(native.zone===62&&[2,24].includes(trigger.script))&&value(trigger.var)===trigger.value&&(trigger.rail?NativeRails.trigger(native.zone,trigger,player.x,player.y,native.railCurrent):p.x>=trigger.x&&p.x<trigger.x+trigger.width&&p.z>=trigger.z&&p.z<trigger.z+trigger.height)){
       const surface=window.OpelucidChapter?.surfaceAt(native.zone,player.x,player.y,native.fieldHeight??0);if(window.OpelucidQuicksand?.trigger(native.zone,trigger,player,{behavior:surface?.behavior,running:!!keys.Shift,mounted:window.Bicycle?.mounted()})===false)continue;
       if(native.zone===6&&!ORIGINAL_EVENTS.scripts[data().script].supportedEntries.includes(trigger.script-1))return; // Next city chapter stays outside this arrival milestone.
       // The DS places friends instantly; our visible walk must finish first.
@@ -814,10 +866,10 @@
   }
   function battleDone(s,kind){native.won=s?.battle.winner==='Alcide';if(pendingBattle){const done=pendingBattle;pendingBattle=null;done();return true;}return false;}
   initialize();syncActors();applyRoom();
-  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>centerZones.has(native.healZone)?changeZone(native.healZone,7,13):changeZone(390,5,8),get music(){return window.SurfField?.music()||(window.Bicycle?.mounted()?1012:window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music);},get fieldCheckpointAllowed(){return (pcService||!!window.DragonspiralJump?.busy||!!window.OpelucidGym?.checkpointable||!!window.IcirrusGym?.busy||!!window.SurfField?.checkpointable)&&(!eventRunning||surfService||pcService)&&!sceneChanging&&!vm.running&&!failed&&!journey.processing;},get locked(){return !!window.DragonspiralJump?.busy||!!window.OpelucidGym?.busy||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
+  window.NativeStory={get libraryOffset(){return native.zone===18?Math.max(0,(actor(3)?.x??-4.5)+4.5):0;},curtainOffset:stage=>(actor(stage+3)?.x??-6.5)+6.5,departures,visualActors:fieldActors,visualEffects:()=>[...(slide?.visuals()||[]),...(playerSlide?.visuals()||[]),...(window.LeagueNpcSlides?.visuals()||[])],routeTrainer,showPage,choice,nickname,daycareService,vm,state:native,syncActors,battleDone,interact,captureActors,run,changeZone,tryWarp,occupied,blackout:()=>centerZones.has(native.healZone)?changeZone(native.healZone,7,13):changeZone(390,5,8),get music(){return window.SurfField?.music()||(window.Bicycle?.mounted()?1012:window.ICIRRUS_FIELD?.music?.(native.zone)||window.MISTRALTON_FIELD?.music?.(native.zone)||window.DRIFTVEIL_FIELD?.music?.(native.zone)||window.NIMBASA_FIELD?.music(native.zone)||native.music||data().music);},get fieldCheckpointAllowed(){return (pcService||!!playerSlide?.checkpointable||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.checkpointable||window.OpelucidGym?.checkpointable)||!!window.IcirrusGym?.busy||!!window.SurfField?.checkpointable)&&(!eventRunning||surfService||pcService)&&!sceneChanging&&!vm.running&&!failed&&!journey.processing;},get locked(){return !!playerSlide?.busy||!!window.DragonspiralJump?.busy||!!(window.LeagueGym?.busy||window.OpelucidGym?.busy)||!!window.SurfField?.busy||!!window.IcirrusGym?.busy||!!window.MistraltonPuzzles?.busy||!!window.MistraltonGym?.busy||!!window.DriftveilGym?.busy||eventRunning||sceneChanging||!!failed||journey.processing;}};
   NativeStory.useEscapeRope=useEscapeRope;
   NativeStory.useFly=useFly;NativeStory.useSurf=useSurf;
-  window.SurfField?.restore();window.IcirrusGym?.restore();window.OpelucidGym?.restore();window.DragonspiralJump?.restore();window.MistraltonGym?.restore();window.MistraltonPuzzles?.restore();window.MistraltonContinuity?.enterZone(native.zone,{covered:fieldCovered});
+  window.SurfField?.restore();window.IcirrusGym?.restore();window.OpelucidGym?.restore();window.LeagueGym?.restore();window.DragonspiralJump?.restore();window.MistraltonGym?.restore();window.MistraltonPuzzles?.restore();window.MistraltonContinuity?.enterZone(native.zone,{covered:fieldCovered});
   journey.interact=interact;journey.hint=()=>vm.running?'':target()?'E · Interagisci':'';journey.step=step;
   Object.defineProperty(journey,'locked',{get:()=>NativeStory.locked});
   $('dialogue').addEventListener('cancel',e=>{e.preventDefault();if(pendingMessage)pendingMessage();else pendingCancel?.();});

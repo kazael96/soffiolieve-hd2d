@@ -1,0 +1,7 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{create}=require('./qa-artifact-queue.js');
+test('artifact flush waits for acknowledged ordered writes and freezes each report before later cases mutate',async()=>{
+ const writes=[],gates=[],queue=create((kind,body)=>new Promise(resolve=>{writes.push({kind,body:JSON.parse(body)});gates.push(resolve);})),cases=[],first=queue.enqueue('report',{running:true,cases});cases.push({result:'PASS'});const second=queue.enqueue('snapshot',{image:'png'}),third=queue.enqueue('report',{running:false,cases});let flushed=false;const pending=queue.flush().then(()=>flushed=true);await Promise.resolve();assert.equal(writes.length,1);assert.deepEqual(writes[0].body.cases,[]);assert.equal(flushed,false);gates.shift()();await first;await Promise.resolve();assert.equal(writes.length,2);assert.equal(flushed,false);gates.shift()();await second;await Promise.resolve();assert.equal(writes.length,3);assert.equal(writes[2].body.running,false);assert.equal(writes[2].body.cases.length,1);assert.equal(flushed,false);gates.shift()();await third;await pending;assert.equal(flushed,true);
+});
+test('a failed artifact remains a failed audit even if subsequent writes succeed',async()=>{
+ const seen=[],queue=create(async kind=>{seen.push(kind);if(kind==='snapshot')throw Error('disk full');});await assert.rejects(queue.enqueue('snapshot',{}),/disk full/);await queue.enqueue('report',{result:'PASS'});await assert.rejects(queue.flush(),/disk full/);assert.deepEqual(seen,['snapshot','report']);
+});

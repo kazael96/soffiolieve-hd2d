@@ -18,3 +18,18 @@ test('the input health monitor is delivered before the QA driver and never inser
  assert.equal(fs.existsSync(path.join(f.site,'qa-input-health.js')),false);
  assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),f.html);
 });
+
+test('the explicit Gym052 preview stays inside the QA index, filters future areas, and installs audio after prior catalogs',t=>{
+ const f=fixture(t),out=path.join(f.dir,'qa'),preview=require('../scripts/gym-preview052.cjs');
+ const html=f.html.replace('</head>','<script src="opelucid-bootstrap.js?v=build"></script><script src="opelucid-audio.js?v=build"></script><script src="training-moves.js?v=build"></script><script src="opelucid-badge-assets.js?v=build"></script><script src="opelucid-battles.js?v=build"></script><script src="opelucid-menu.js?v=build"></script></head>');fs.writeFileSync(path.join(f.site,'index.html'),html);
+ const source=fs.readFileSync(path.join(__dirname,'../scripts/gym-preview052.cjs'),'utf8'),names=[...source.matchAll(/'(league-[a-z-]+|trainer-intro-music(?:-data)?)'/g)].map(m=>m[1]);
+ for(const name of new Set(names))fs.writeFileSync(path.join(f.site,name+'.js'),'/* isolated file fixture */');
+ build(f.site,out,{preview:'leagueGym'});const result=fs.readFileSync(path.join(out,'index.html'),'utf8');
+ assert.ok(result.indexOf('src="league-gym-install.js"')<result.indexOf('src="opelucid-bootstrap.js'));
+ assert.ok(result.indexOf('src="league-audio.js"')>result.indexOf('src="opelucid-audio.js'));
+ assert.ok(result.includes('LEAGUE_SCENES={121:LEAGUE_SCENES[121]}'));assert.ok(result.includes('zoneFamily:{121:"drayden"}'));
+ assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),html);
+ build(f.site,path.join(f.dir,'fields'),{preview:'leagueFields'});const fields=fs.readFileSync(path.join(f.dir,'fields/index.html'),'utf8');assert.ok(fields.includes('052 native field components'));assert.ok(!fields.includes('LEAGUE_SCENES={121:'));assert.ok(fields.includes('src="league-camera-data.js"'));assert.ok(fields.includes('src="league-camera.js"'));assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),html);
+ assert.throws(()=>build(f.site,path.join(f.dir,'bad'),{preview:'arbitrary'}),/Unsupported/);
+ fs.unlinkSync(path.join(f.site,'league-gym-install.js'));assert.throws(()=>preview.inject(html,f.site),/Missing Gym052/);
+});

@@ -1,6 +1,7 @@
 /* Pixel-based text layout shared by the original bitmap-font screens. */
 (function(root){
-  function width(text,font){return [...String(text)].reduce((n,c)=>n+(font.glyphs[c]||font.glyphs['?'])[3],0);}
+  function glyph(character,font){const alias={'₽':'$','—':'-','–':'-','−':'-'};return font.glyphs[character]||font.glyphs[alias[character]]||font.glyphs['?'];}
+  function width(text,font){return [...String(text)].reduce((n,c)=>n+glyph(c,font)[3],0);}
   function wrap(text,font,maxWidth){
     const lines=[];
     for(const paragraph of String(text).replaceAll('\\n','\n').split('\n')){
@@ -17,5 +18,6 @@
   }
   function format(text,words=[]){return String(text).replace(/\{(?:be[0-9a-f]+|ff00)(?::[^}]*)?\}/gi,'').replace(/\{[0-9a-f]{4}:(\d+)\}/gi,(_,n)=>words[+n]??'').replaceAll('\\n','\n');}
   function resource(path){if(/[?&]v=/.test(path))return path;const revision=typeof document!=='undefined'?document.documentElement?.dataset?.build:null;return path+(path.includes('?')?'&':'?')+'v='+encodeURIComponent(revision||'0.29-dev');}
-  const api={width,wrap,format,resource};root.NativeTextLayout=api;if(typeof module!=='undefined')module.exports=api;
+  function fieldChoices(labels,font){const natural=Math.max(0,...labels.map(label=>width(label,font))),size=Math.max(104,Math.min(236,natural+24));return {width:size,rows:labels.map(label=>{const lines=wrap(label,font,size-24);return {lines,height:24+Math.max(0,lines.length-1)*16};})};}
+  const api={width,wrap,format,resource,fieldChoices,glyph};root.NativeTextLayout=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

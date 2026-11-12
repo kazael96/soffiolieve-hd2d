@@ -107,6 +107,7 @@
  Object.assign(recipes,{258:'hailCall',241:'sunCall',240:'rainCall',201:'sandCall',216:'bodyRam',218:'bodyRam',219:'shellGuard'});
  Object.assign(recipes,{378:'squeeze',164:'shellGuard',457:'headRam',261:'spiritWind',57:'waterPulse',59:'iceWind',87:'electricWave',387:'bodyRam',400:'furySlash',289:'thief',421:'furySlash',94:'psybeam',528:'flameRush',444:'rockVolley',509:'throw',538:'shellGuard',492:'ambush',14:'swordDance',51:'sludgeJet',38:'bodyRam',276:'counterPalm',504:'shellGuard',356:'groundStamp',50:'seal',114:'smoke',506:'spiritWind',471:'psywave',470:'psywave',247:'psywave',283:'flail',237:'energyBall',220:'healingWave',532:'headRam',273:'restore',120:'fireRing',306:'furySlash',493:'psybeam',107:'curl',83:'fireRing',262:'focus',517:'fireRing',82:'flameJet',530:'doubleKick',337:'furySlash',349:'dance',181:'iceWind',556:'iceShard',420:'iceShard',159:'harden',62:'psybeam',426:'mud',340:'flyDive',325:'counterPalm',5:'counterPalm',222:'groundStamp'});
  Object.assign(recipes,window.OpelucidMotion?.recipes);
+ Object.assign(recipes,window.LeagueMotion?.recipes);
  const pairs={};
  for(const [name,row]of Object.entries(TRAINING_DATA.progression)){
   pairs[name]=Training.moves(name);
@@ -303,4 +304,5 @@
  };
  window.TrainingMoves={pairs,fitted,recipes,partMaps};
  window.OpelucidMotion?.install();
+ window.LeagueMotion?.install();
 })();
