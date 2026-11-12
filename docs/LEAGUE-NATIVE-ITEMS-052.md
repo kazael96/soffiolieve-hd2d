@@ -41,3 +41,12 @@ Build `48a5680a562e543e`: pacchetto cattura221celle/158620byte, confronto byte p
 I380file runtime della31 corrispondono agli hash congelati;307file del banco/generatori sono congelati separatamente. Restano le matrici grafiche delle573nuove coppie, la suite completa finale e il rilascio; nessun primo finale o pubblicazione052 è certificato da questi soli test.
 
 `browser-release31-core/report.json`:21/21 combinazioni PASS, sette casi nei tre formati. Tutti114PNG rivisti nei21contatti; Master Ball visibile sul terreno nel nuovo scatto, caricamento/registrazione/salvataggio completati. Renderer Chrome155 ANGLE SwiftShader, audio interno della fixture e uscita muta. Il primo avvio matrice31 non ha eseguito casi per un percorso Playwright scritto male: MODULE_NOT_FOUND preservato; ripetizione con percorso corretto in browser-release31-matrix-corrected. Nessuna modifica runtime fra i due tentativi.
+
+
+## Primo controllo remoto e portabilità del banco
+
+PR46 in bozza, commit52d6f03: GitHub Actions43187149876 ha eseguito tutte47fasi,45PASS e2FAIL. Il gruppo6 falliva il riferimento grezzo dei sorgenti della traversata della palestra: Git converte CRLF in LF senza alterare il programma. Il riferimento usa ora SHA256 sul testo UTF-8 con soltanto CRLF→LF; il generatore e il controllo usano la stessa funzione. Il checksum delle azioni del percorso è invariato e le modifiche effettive del testo rimangono rilevate; prova originale/migrazione in route-reference-eol-migration.json. Non sono stati aggiornati i dati nativi per aggirare la verifica.
+
+La fase Python falliva durante l'import del lettore delle animazioni perché il convertitore GLB opzionale importava NumPy. Il convertitore viene importato soltanto quando si esegue un'esportazione geometrica; parser e controlli delle tabelle non richiedono NumPy/Pillow. Una regressione avvia Python con -S e riproduce l'errore prima della correzione. Dopo la correzione:1test dipendenze,8test geometria,1test portabilità e1riferimento percorso PASS. Il rapporto CI fallito e i log completi sono conservati in ci-43187149876-reports; non sostituiti da un PASS mirato. Occorre ripetere la suite completa remota e locale.
+
+Queste modifiche riguardano soltanto strumenti e banco: nessuno dei380file runtime della candidata31 cambia. Le prove grafiche in corso mantengono la propria fixture congelata, il proprio hash e lo stesso sito generato.

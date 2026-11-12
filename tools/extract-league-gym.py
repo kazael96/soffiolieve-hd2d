@@ -10,7 +10,6 @@ import subprocess
 import sys
 
 from irbi_reader import NintendoDSRom, NARC
-from nitro_geometry import flatten_glb
 
 OVERLAY_SHA = '3ebd5f85a5d2564762a988cd7889da4ffb4f53bbbc49c55e9d87b6af01592244'
 
@@ -158,6 +157,9 @@ def quiet_run(command, **kwargs):
 
 
 def main():
+    # Parsing native tables/tracks needs only the standard library. The GLB
+    # converter's optional NumPy/Pillow dependencies belong to actual export.
+    from nitro_geometry import flatten_glb
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('rom', type=Path)
     parser.add_argument('output', type=Path)

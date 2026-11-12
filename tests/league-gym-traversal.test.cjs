@@ -13,7 +13,7 @@ test('the Gym interior background matches its dark native geometry instead of ex
 });
 
 test('the retained input route still refers to the reviewed original map, surfaces, rails and puzzle',()=>{
- const fs=require('node:fs'),crypto=require('node:crypto');for(const [file,hash]of Object.entries(reference.sources))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../src',file))).digest('hex'),hash,file);
+ const fs=require('node:fs'),{sourceHash}=require('../tools/plan-league-gym-route.cjs');assert.equal(reference.sourceHashFormat,'sha256:utf8-lf');for(const [file,hash]of Object.entries(reference.sources))assert.equal(sourceHash(fs.readFileSync(path.join(__dirname,'../src',file))),hash,file);
 });
 
 test('actual game.frame traverses the Gym and automatically runs all five button events at x1/x2/x4',async()=>{

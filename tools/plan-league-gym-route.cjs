@@ -1,5 +1,6 @@
 /* Bounded search on actual WB/ribbon permissions. This is not an input replay. */
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
+const sourceHash=bytes=>crypto.createHash('sha256').update(bytes.toString('utf8').replace(/\r\n/g,'\n')).digest('hex');
 async function plan(c,{maxRegions=256,gridStep=.25,footRadius=.18}={}){
  const n=c.NativeStory.state,initial=structuredClone(n.draydenPuzzle),start={x:c.player.x,z:c.player.y,height:n.fieldHeight},triggers=c.ORIGINAL_EVENTS.zones[121].triggers.filter(t=>!t.rail&&t.script>=3&&t.script<=8),goal={x:11.5,z:-12.5,height:12};
  const poseKey=pose=>pose.dragons.map(d=>d.neck+':'+d.arms.join('')).join('/'),nodeKey=p=>p.rail?[p.rail.mode,p.rail.line,Math.round(p.rail.front*16),Math.round(p.x*16),Math.round(p.z*16)].join(','):[Math.round(p.x*16),Math.round(p.z*16),Math.round(p.height*32)].join(','),memberships=new Map(),regions=[];
@@ -56,7 +57,7 @@ async function plan(c,{maxRegions=256,gridStep=.25,footRadius=.18}={}){
 }
 async function main(){
  if(process.argv[2])process.env.SOFFIOLIEVE_TEST_SITE=path.resolve(process.argv[2]);const c=await require('../tests/helpers/league-field-host.cjs').setup(),report=await plan(c);
- report.sources=Object.fromEntries(['league-events.js','league-rails.js','league-surface-data.js','league-gym-data.js'].map(file=>[file,crypto.createHash('sha256').update(fs.readFileSync(path.resolve(__dirname,'../src',file))).digest('hex')]));
+ report.sourceHashFormat='sha256:utf8-lf';report.sources=Object.fromEntries(['league-events.js','league-rails.js','league-surface-data.js','league-gym-data.js'].map(file=>[file,sourceHash(fs.readFileSync(path.resolve(__dirname,'../src',file)))]));
  const out=path.resolve(process.argv[3]||path.join(__dirname,'../../../outputs/chapter052/gym-route-search.json'));fs.writeFileSync(out,JSON.stringify(report,null,2));console.log(report.result,'regions',Array.isArray(report.regions)?report.regions.length:report.regions,'nodes',report.nodes||report.totalNodes,'actions',report.actions?.length);if(report.result!=='PASS')process.exitCode=1;
 }
-if(require.main===module)main().catch(e=>{console.error(e);process.exitCode=1;});module.exports={plan};
+if(require.main===module)main().catch(e=>{console.error(e);process.exitCode=1;});module.exports={plan,sourceHash};
