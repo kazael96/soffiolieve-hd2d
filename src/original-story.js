@@ -649,7 +649,17 @@
       case 'BGMTrackGet':m.set(a[0],native.musicTracks?.[v[1]]?1:0);break;
       case 'BGMTrackEnable':native.musicTracks??={};native.musicTracks[v[0]]=true;AudioEngine.setMusicTrack?.(v[0],true);break;
       case 'UnknownBW017E':await showPage('Quattroventi ← → Percorso 2');break;
-      case 'MapReplaceSetEvent':if(window.FinaleMapVariants?.set(native,v[0],v[1])){}else if(window.OPELUCID_MAP_VARIANTS&&v[0]===OPELUCID_MAP_VARIANTS.event){native.vars[OPELUCID_MAP_VARIANTS.work]=v[1]?OPELUCID_MAP_VARIANTS.value:0;}else if(m.bank===638){native.route2MapEvent=v[0];}else if(m.bank>=778){native.roomMess=true;applyRoom();}else native.mapEvents={...(native.mapEvents||{}),[native.zone]:v[0]};break;
+      case 'MapReplaceSetEvent':{
+        let geographic=false;
+        if(window.FinaleMapVariants?.set(native,v[0],v[1]))geographic=true;
+        else if(window.OPELUCID_MAP_VARIANTS&&v[0]===OPELUCID_MAP_VARIANTS.event){native.vars[OPELUCID_MAP_VARIANTS.work]=v[1]?OPELUCID_MAP_VARIANTS.value:0;geographic=true;}
+        else if(m.bank===638)native.route2MapEvent=v[0];
+        else if(m.bank>=778){native.roomMess=true;applyRoom();}
+        else native.mapEvents={...(native.mapEvents||{}),[native.zone]:v[0]};
+        // Warm textures do not prove that the requested geometry is installed.
+        // FieldOpen/renderer preparation must refresh the same scene handle.
+        if(geographic){const scene=window.OpelucidChapter?.scene(native.zone);if(scene)scene.assetsPending=true;}
+        break;}
       case 'EnableRunningShoes':native.runningShoes=true;break;
       case 'MapReplaceIsEventSet':m.set(a[1],native.roomMess?1:0);break;
       case 'EVCameraInit':window.FinaleElite?.suspendCamera();window.LeagueCamera?.reset(renderer);renderer.storyCamera=[...renderer.center];break;

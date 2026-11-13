@@ -1,4 +1,14 @@
 const test=require('node:test'),assert=require('node:assert/strict'),{setup,drain}=require('./helpers/finale-field-host.cjs');
+test('a warm renderer still installs and reverts the requested Castle wall before reopening the field',async()=>{
+ const c=await setup(),n=c.NativeStory.state,m=c.NativeStory.vm;
+ await drain(c,c.NativeStory.changeZone(278,1,1));const scene=c.OpelucidChapter.scene(278);assert.equal(scene.sourceMatrix,172);
+ require('node:vm').runInContext(require('node:fs').readFileSync('src/world3d.js','utf8')+';window.VariantRenderer=VillageRenderer;',c);
+ const r=c.renderer;let loads=0;Object.assign(r,{ready:true,scene,resourcePlan:()=>({}),hasResources:()=>!scene.assetsPending,queueAssets:async()=>{loads++;await scene.ensureAssets();r.ready=true;},prepareScene:c.VariantRenderer.prototype.prepareScene});
+ for(const [enabled,matrix,expectedLoads]of [[1,212,1],[0,172,2]]){
+  await drain(c,m.host.command({name:'MapReplaceSetEvent'},[3,enabled,1],[3,enabled,1],m));
+  await r.prepareScene();assert.equal(scene.sourceMatrix,matrix,'Warm textures must not bypass the new map geometry');assert.equal(loads,expectedLoads);assert.equal(scene.assetsPending,false);
+ }
+});
 test('actual map-event host replaces Champion stairs and throne wall with native geometry, collision and height data',async()=>{
  const c=await setup(),n=c.NativeStory.state,vm=c.NativeStory.vm;
  for(const [zone,event,work,value,base,matrix,member]of [[144,1,16434,548,125,218,617],[278,3,16436,4617,172,212,608]]){

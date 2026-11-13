@@ -4,11 +4,11 @@ Obiettivo autorizzato: Superquattro, Castello di N, Reshiram, N e Ghecis, primo 
 
 ## Stato attuale del collaudo
 
-La candidata privata17 (`5e07edc74c9b59a1`) integra il primo finale nell’avvio
-normale della0.53. Il replay reale desktop ha completato cattura di Reshiram,
-N, Ghecis, crediti, salvataggio e FINE, con primi piani e Poké Ball originali
-osservati durante l’evento. Gli otto PNG esportati sono stati rivisti. La suite
-completa e i nuovi replay telefono sono ancora necessari per il rilascio.
+La candidata privata18 (`8f90f07adbc35fe2`) corregge la geometria con cache
+calda e collega le icone native dei nuovi Pokémon. La17 ha superato tutte
+le49 fasi CLI e il vero finale nei tre formati; la18 supera la sequenza del
+Castello nei tre formati, con tutti i57 PNG rivisti. I nuovi controlli completi
+e i replay pertinenti della18 sono in corso prima del rilascio.
 Lo stato corrente, le prove e i limiti sono in [QA-053.md](QA-053.md);
 i checkpoint precedenti sotto restano documentazione storica, non un elenco
 aggiornato dei componenti mancanti. La pubblica resta0.52 fino alla verifica
