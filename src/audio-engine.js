@@ -1,7 +1,7 @@
 /* ROM audio: original SWAV cries, DS SSEQ/banks rendered by DualRip. */
 (()=>{
  const catalog=window.ROM_AUDIO_CATALOG,data=window.ROM_AUDIO;
- let ctx,master,musicBus,sfxBus,cryBus,analyser,cryAnalyser,musicVoice,scene='town',generation=0,duckCount=0,fieldMusicVolume=127;
+ let ctx,master,musicBus,sfxBus,cryBus,analyser,cryAnalyser,musicVoice,scene='town',generation=0,duckCount=0,fieldMusicVolume=127,cinematicMusicDepth=0;
  let enabled=false,levels={music:.45,sfx:.7,cry:.8},errors=[],voices=new Set(),cache=new Map(),effectGroup=null;
  let audioEpoch=0;const fieldSounds=new Map(),audioWaiters=new Set();
  const cryId=id=>window.PokemonVisuals?.speciesId(id)||Object.values(window.ROM_FORM_SPRITES||{}).find(f=>f.graphic===+id)?.species||+id;
@@ -27,12 +27,12 @@
  function trimCache(){let samples=[...cache.values()].reduce((s,x)=>s+(x.buffer?x.buffer.length*x.buffer.numberOfChannels:0),0);for(let [key,item] of cache){if(cache.size<=64&&samples<32000000)break;if(!item.buffer||item.buffer===musicVoice?.source.buffer||cinematicBuffers.has(item.buffer))continue;samples-=item.buffer.length*item.buffer.numberOfChannels;cache.delete(key)}}
  async function load(src){if(cache.has(src)){let entry=cache.get(src);cache.delete(src);cache.set(src,entry);return entry.promise}let entry={};entry.promise=readAudio(src).then(b=>ctx.decodeAudioData(b)).then(buffer=>{entry.buffer=buffer;trimCache();return buffer}).catch(e=>{cache.delete(src);throw e});cache.set(src,entry);return entry.promise;}
  function fadeStop(voice,seconds=.04){if(!voice||voice.stopped)return;voice.stopped=true;let now=ctx.currentTime;voice.gain.gain.cancelScheduledValues(now);voice.gain.gain.setValueAtTime(voice.gain.gain.value,now);voice.gain.gain.linearRampToValueAtTime(0,now+seconds);try{voice.source.stop(now+seconds+.01)}catch{};}
- function voice(buffer,bus,options={}){let source=ctx.createBufferSource(),gain=ctx.createGain(),pan=ctx.createStereoPanner();source.buffer=buffer;source.playbackRate.value=options.rate??1;gain.gain.value=options.gain??1;pan.pan.value=options.pan||0;source.connect(gain);gain.connect(pan);pan.connect(bus);if(options.loop){source.loop=true;source.loopStart=options.loop[0];source.loopEnd=Math.min(buffer.duration,options.loop[1])}let item={source,gain,pan,kind:options.kind||'sfx',stopped:false};const cleanup=()=>{voices.delete(item);source.disconnect();gain.disconnect();pan.disconnect();};item.done=window.AudioPlayback?AudioPlayback.ended(source,ctx,cleanup,{loop:!!options.loop}):new Promise(resolve=>{source.onended=()=>{cleanup();resolve();}});voices.add(item);const offset=Number.isFinite(options.offset)?Math.max(0,Math.min(Math.max(0,buffer.duration-1/(buffer.sampleRate||32768)),options.offset)):0;source.start(options.when??ctx.currentTime,offset);return item;}
- function applyMusicLevel(immediate=false){if(!musicBus)return;const value=levels.music*(duckCount ? .38 : 1)*fieldMusicVolume/127;if(immediate){musicBus.gain.cancelScheduledValues(ctx.currentTime);musicBus.gain.setValueAtTime(value,ctx.currentTime);}else musicBus.gain.setTargetAtTime(value,ctx.currentTime,.09)}
+ function voice(buffer,bus,options={}){let source=ctx.createBufferSource(),gain=ctx.createGain(),pan=ctx.createStereoPanner();source.buffer=buffer;source.playbackRate.value=options.rate??1;gain.gain.value=options.gain??1;pan.pan.value=options.pan||0;source.connect(gain);gain.connect(pan);pan.connect(bus);if(options.loop){source.loop=true;source.loopStart=options.loop[0];source.loopEnd=Math.min(buffer.duration,options.loop[1])}let item={source,gain,pan,kind:options.kind||'sfx',stopped:false};const cleanup=()=>{voices.delete(item);source.disconnect();gain.disconnect();pan.disconnect();};item.done=window.AudioPlayback?AudioPlayback.ended(source,ctx,cleanup,{loop:!!options.loop}):new Promise(resolve=>{source.onended=()=>{cleanup();resolve();}});voices.add(item);const offset=Number.isFinite(options.offset)?Math.max(0,Math.min(Math.max(0,buffer.duration-1/(buffer.sampleRate||32768)),options.offset)):0;item.startedAt=options.when??ctx.currentTime;source.start(item.startedAt,offset);return item;}
+ function applyMusicLevel(immediate=false){if(!musicBus)return;const value=cinematicMusicDepth?0:levels.music*(duckCount ? .38 : 1)*fieldMusicVolume/127;if(immediate){musicBus.gain.cancelScheduledValues(ctx.currentTime);musicBus.gain.setValueAtTime(value,ctx.currentTime);}else musicBus.gain.setTargetAtTime(value,ctx.currentTime,.09)}
  function setFieldMusicVolume(value){if(!Number.isInteger(value)||value<0||value>127)throw Error('Volume musica nativo non valido');if(value===fieldMusicVolume)return;fieldMusicVolume=value;applyMusicLevel(true);}
  function setMusicTrack(flag,on=true){if(!musicVoice?.layers||!ctx)return;const item=musicVoice.layers.find(v=>v.flag===flag);if(!item)return;const now=ctx.currentTime;item.gain.gain.cancelScheduledValues(now);item.gain.gain.setValueAtTime(item.gain.gain.value,now);item.gain.gain.linearRampToValueAtTime(on?1:0,now+(musicVoice.fadeFrames||60)/60);}
  async function setScene(next){scene=next;if(!enabled||!ctx)return;let token=++generation,id=typeof next==='number'?next:catalog.music[next],record=window.FIELD_AUDIO?.[id]||data.sounds[id];
-  if(id===1001){/* IRBI SEQ_BGM_SILENCE_FIELD: intentional silence, no sample request. */const old=musicVoice;musicVoice=null;for(const layer of old?.layers||[])fadeStop(layer,.25);fadeStop(old,.25);el('audioControls').dataset.music='1001';status('Musica sospesa');return;}
+  if(id===1001||id===1002||record?.nativeSilence===true){/* Explicit original rest-only sequences require no PCM request. */const old=musicVoice;musicVoice=null;for(const layer of old?.layers||[])fadeStop(layer,.25);fadeStop(old,.25);el('audioControls').dataset.music=String(id);status('Musica sospesa');return;}
   if(!record){problem(Error('Musica non trovata: '+next));return}if(musicVoice?.id===id)return;
   const old=musicVoice;musicVoice=null;for(const layer of old?.layers||[])fadeStop(layer,.25);fadeStop(old,.25);status('Caricamento: '+(labels[next]||record?.name||next)+'…');
   try{const buffers=await Promise.all([load(record.src),...(record.layers||[]).map(layer=>load(layer.src))]);if(token!==generation||!enabled)return;
@@ -54,22 +54,23 @@
   void (async()=>{try{const buffer=await load(record.src);if(request.cancelled||request.epoch!==audioEpoch||!enabled||fieldSounds.get(id)!==request)return;request.voice=voice(buffer,sfxBus,{kind:'field',rate:window.GameSpeed?.rate||1,offset});request.voice.fieldId=id;await request.voice.done;}catch(e){if(!request.cancelled&&request.epoch===audioEpoch&&enabled)problem(e);}finally{request.finish();}})();return request.promise;
  }
  function setMono(mono){if(master){master.channelCount=mono?1:2;master.channelCountMode='explicit';}}
- function createCinematic(src){
-  let active=true,buffer=null,pending=null,current=null,origin=null,serial=0,failed=false,lastEpoch=audioEpoch;
-  const stopVoice=()=>{if(current)fadeStop(current,.005);current=null;origin=null;};
+ function createCinematic(src,{ownsMusic=false}={}){
+  let active=true,buffer=null,pending=null,current=null,origin=null,serial=0,failed=false,lastEpoch=audioEpoch,lastSync=null,musicClaimed=false;
+  const stopVoice=()=>{if(current)fadeStop(current,.005);current=null;origin=null;lastSync=null;};
   async function prepare(){if(!active||!enabled||!ctx)return null;if(buffer)return buffer;if(pending)return pending;const token=++serial,epoch=audioEpoch;failed=false;
-   pending=load(window.NativeTextLayout?.resource(src)||src).then(value=>{if(!active||token!==serial||epoch!==audioEpoch||!enabled)return null;buffer=value;cinematicBuffers.add(value);return value;}).catch(error=>{if(!active||epoch!==audioEpoch||!enabled)return null;failed=true;throw error;}).finally(()=>{pending=null;});return pending;
+   pending=load(window.NativeTextLayout?.resource(src)||src).then(value=>{if(!active||token!==serial||epoch!==audioEpoch||!enabled)return null;buffer=value;cinematicBuffers.add(value);if(ownsMusic&&!musicClaimed){musicClaimed=true;cinematicMusicDepth++;applyMusicLevel(true);}return value;}).catch(error=>{if(!active||epoch!==audioEpoch||!enabled)return null;failed=true;throw error;}).finally(()=>{pending=null;});return pending;
   }
   function sync(frame,speed=window.GameSpeed?.rate||1){
    if(!active)return;if(!Number.isFinite(frame)||frame<0||!Number.isFinite(speed)||speed<=0||speed>8)throw Error('Tempo della sequenza audio non valido');
    if(lastEpoch!==audioEpoch){failed=false;lastEpoch=audioEpoch;}if(!enabled||!ctx||document.hidden||ctx.state!=='running'){stopVoice();return;}
    if(!buffer){if(!pending&&!failed)void prepare().catch(problem);return;}const offset=frame/30,now=ctx.currentTime;if(offset>=buffer.duration){stopVoice();return;}
    const predicted=origin?origin.offset+(now-origin.time)*origin.speed:0;if(current?.stopped||origin&&Math.abs(predicted-offset)>.08)stopVoice();
-   if(!current){const item=voice(buffer,sfxBus,{kind:'cinematic',rate:speed,offset});current=item;origin={offset,time:now,speed};void item.done.then(()=>{if(current===item){current=null;origin=null;}});}
+   if(!current){const item=voice(buffer,sfxBus,{kind:'cinematic',rate:speed,offset});current=item;origin={offset,time:item.startedAt,speed};void item.done.then(()=>{if(current===item){current=null;origin=null;}});}
    else if(speed!==origin.speed){current.source.playbackRate.setValueAtTime(speed,now);origin={offset,time:now,speed};}
+   lastSync={time:Math.max(now,origin?.time??now),offset,speed};
   }
-  function stop(){if(!active)return;active=false;serial++;stopVoice();if(buffer)cinematicBuffers.delete(buffer);buffer=null;trimCache();}
-  return {prepare,sync,pause:stopVoice,stop,get status(){return {ready:!!buffer,active:active&&!!current&&!current.stopped,offset:origin?origin.offset+(ctx.currentTime-origin.time)*origin.speed:null,rate:origin?.speed??null};}};
+  function stop(){if(!active)return;active=false;serial++;stopVoice();if(buffer)cinematicBuffers.delete(buffer);buffer=null;if(musicClaimed){musicClaimed=false;cinematicMusicDepth--;applyMusicLevel(true);}trimCache();}
+  return {prepare,sync,pause:stopVoice,stop,get status(){const sampledAt=ctx?.currentTime??null;return {ready:!!buffer,active:active&&!!current&&!current.stopped,offset:origin?origin.offset+(sampledAt-origin.time)*origin.speed:null,rate:origin?.speed??null,sampledAt,syncedAt:lastSync?.time??null,visualOffset:lastSync?.offset??null,visualRate:lastSync?.speed??null};}};
  }
  function cryWaveform(target){target.fill(0);if(enabled&&cryAnalyser)cryAnalyser.getFloatTimeDomainData(target);return target;}
  const resume=()=>{if(enabled&&ctx&&ctx.state!=='running'&&ctx.state!=='closed')void ctx.resume().catch(problem);};document.addEventListener('pointerdown',resume,{passive:true});document.addEventListener('keydown',resume);

@@ -1,0 +1,5 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+test('every finale species can register with original Pokedex text, types and footprint',()=>{
+ const c={window:{}};for(const file of ['pokedex-assets','finale-data'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/'+file+'.js'),'utf8'),c);const dex=c.window.POKEDEX_ASSETS,data=c.window.FINALE_DATA;
+ for(const [name,p]of Object.entries(data.progression)){const entry=dex.species[p.dexName||name];assert.ok(entry,'Missing registration for '+name);assert.equal(entry.id,p.id);for(const key of ['category','height','weight','description'])assert.ok(typeof entry[key]==='string'&&entry[key].length>0,name+'/'+key);assert.ok(fs.existsSync(path.join(__dirname,'../src/assets/pokedex/foot-'+entry.id+'.png')),name+' footprint');for(const type of entry.types)assert.ok(fs.existsSync(path.join(__dirname,'../src/assets/pokedex/type-'+type+'.png')),name+' type');}
+});

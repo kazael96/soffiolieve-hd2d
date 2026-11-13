@@ -6,7 +6,7 @@
  function followFactor(seconds){const dt=Number.isFinite(seconds)?Math.max(0,Math.min(1,seconds)):0;return 1-Math.exp(-2.1*dt);}
  // Only the Castle's native shell uses a foreground cutaway. The black cap
  // shares its sand material with the floor, so the shader also tests colour.
- function cutawayKind(scene,texture=''){if(!scene?.chapter051||![160,161,162,163,164,165].includes(scene.zone)||!/^op-map-/.test(texture))return 0;if(/in10_kabe/.test(texture))return 1;return /in10_suna01$/.test(texture)?2:0;}
+ function cutawayKind(scene,texture='',height=0){if(scene?.zone===146&&/^lg-map-517-/.test(texture))return height>=-.125?3:0;if(!scene?.chapter051||![160,161,162,163,164,165].includes(scene.zone)||!/^op-map-/.test(texture))return 0;if(/in10_kabe/.test(texture))return 1;return /in10_suna01$/.test(texture)?2:0;}
  function applyFieldView(renderer,hero){
   let current=fieldViews.get(renderer);
   const restore=()=>{if(current){renderer.cameraPitch=current.base;fieldViews.delete(renderer);current=null;}};
@@ -18,5 +18,8 @@
   // smoothly to the ordinary low camera before the open bridge.
   renderer.cameraPitch=[Math.sin(angle),Math.cos(angle)];return restore;
  }
- const api={tracks,anchor,followFactor,applyFieldView,cutawayKind};root.SceneCamera=api;if(typeof module!=='undefined')module.exports=api;
+ // At the native raised bed the camera-facing card leans into the mattress.
+ // Keep its feet and apparent height while using an upright card in this room.
+ function spritePlane(scene,w,h,pitch){if(scene?.zone!==143)return null;const cos=Math.abs(pitch?.[1]??.906);if(cos<.2)return null;return [[-w/2,0,0],[w/2,0,0],[-w/2,h/cos,0],[w/2,h/cos,0]];}
+ const api={tracks,anchor,followFactor,applyFieldView,cutawayKind,spritePlane};root.SceneCamera=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

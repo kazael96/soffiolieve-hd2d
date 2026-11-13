@@ -3,13 +3,13 @@ const fs=require('fs'),path=require('path');
 function build(input,output,{preview}={}){const site=path.resolve(input),out=path.resolve(output);
 if(site===out||out.startsWith(site+path.sep))throw Error('QA output must be outside the published site');
 let html=fs.readFileSync(path.join(site,'index.html'),'utf8');
-if(preview!==undefined&&!['leagueGym','leagueFields'].includes(preview))throw Error('Unsupported isolated preview');
-if(preview)html=require('./gym-preview052.cjs').inject(html,site,{fields:preview==='leagueFields'});
+if(preview!==undefined&&!['leagueGym','leagueFields','finaleFields'].includes(preview))throw Error('Unsupported isolated preview');
+if(preview)html=preview==='finaleFields'?require('./finale-preview053.cjs').inject(html,site):require('./gym-preview052.cjs').inject(html,site,{fields:preview==='leagueFields'});
 // The release uses the valid optional-head syntax. Install hooks there too.
 if(!/<head\b/i.test(html))html=html.replace(/(<html\b[^>]*>)/i,'$1\n<head>').replace(/(<body\b)/i,'</head>\n$1');
 const brycenInput=fs.readFileSync(path.join(__dirname,'../tests/fixtures/brycen-input-route.json'),'utf8');JSON.parse(brycenInput);
 const draydenInput=fs.readFileSync(path.join(__dirname,'../tests/fixtures/drayden-field-input.json'),'utf8');JSON.parse(draydenInput);
-const fixture=require('crypto').createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../tests/browser-qa.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/ambient-audit.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/qa-input-health.js'))).update(brycenInput).update(draydenInput).update(fs.readFileSync(path.join(__dirname,'../tests/qa-artifact-queue.js'))).update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname,'gym-preview052.cjs'))).update(preview||'release').digest('hex').slice(0,16);
+const fixture=require('crypto').createHash('sha256').update(fs.readFileSync(path.join(__dirname,'../tests/browser-qa.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/ambient-audit.js'))).update(fs.readFileSync(path.join(__dirname,'../tests/qa-input-health.js'))).update(brycenInput).update(draydenInput).update(fs.readFileSync(path.join(__dirname,'../tests/qa-artifact-queue.js'))).update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname,'gym-preview052.cjs'))).update(fs.readFileSync(path.join(__dirname,'finale-preview053.cjs'))).update(preview||'release').digest('hex').slice(0,16);
 html=html.replace(/<title>[^<]*<\/title>/,'<title>Collaudo approfondito · 0.52</title>').replace('<html ', '<html data-qa-fixture="'+fixture+'" ');
 html=html.replace('<head>','<head><base href="/"><script>window.DeepQAEarlyErrors=[];addEventListener("error",e=>DeepQAEarlyErrors.push(e.message));addEventListener("unhandledrejection",e=>DeepQAEarlyErrors.push(String(e.reason)));</script>').replace(/window.SpeciesStudioMode=\[[^;]+;/,'window.SpeciesStudioMode=true;');
 if(!html.includes('window.SpeciesStudioMode=true;'))throw Error('Save isolation could not be installed');

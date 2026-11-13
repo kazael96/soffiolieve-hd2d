@@ -41,6 +41,7 @@
             case 'WorkCmpConst':this.comparison=[v[0],v[1]];break;
             case 'FlagSet':if(!this.state.flags.includes(v[0]))this.state.flags.push(v[0]);break;
             case 'FlagReset':this.state.flags=this.state.flags.filter(f=>f!==v[0]);break;
+            case 'NativeOpcode37':this.set(a[1],this.state.flags.includes(v[0])?1:0);break; // IRBI02159678 →020142e8: read only.
             case 'WordSetPlayerName':this.words[a[0]]=this.host.playerName();break;
             case 'WordSetPokeSpecies':this.words[a[0]]=this.host.speciesName(v[1]);break;
             case 'WordSetNumber':this.words[a[0]]=String(v[1]);break;

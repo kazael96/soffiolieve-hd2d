@@ -8,6 +8,16 @@ function context(zone,graphics=true){
  vm.runInContext(source.slice(start,end),c);return {c,required};
 }
 const record=()=>({id:4,model:162,rail:0,x:27,z:2,y:786432,script:1,direction:1});
+
+test('the League Center front closure hides below-floor pieces while leaving standing actors and furniture above the native edge',()=>{
+ const c={};c.window=c;vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/league-graphics.js'),'utf8'),c);const vertices=c.LeagueGraphics.frontClosure({zone:146});assert.equal(vertices.length,66);
+ const positions=Array.from({length:6},(_,i)=>Array.from(vertices.slice(i*11,i*11+3))),min=a=>Math.min(...positions.map(p=>p[a])),max=a=>Math.max(...positions.map(p=>p[a]));
+ assert.equal(min(0),-16.25);assert.equal(max(0),-.75);assert.equal(max(1),-.125);assert.equal(min(2),3);assert.equal(max(2),3);
+ const eye=[-8.5,27,57],atEdge=p=>{const f=(3-eye[2])/(p[2]-eye[2]);return eye.map((n,i)=>n+(p[i]-n)*f);},covers=p=>{const q=atEdge(p);return q[0]>=min(0)&&q[0]<=max(0)&&q[1]>=min(1)&&q[1]<=max(1);};
+ assert.equal(covers([-3.75,-1.875,1.5]),true,'the native basement fragment must be behind the room front');assert.equal(covers([-5.5,.75,2]),false,'the cashier must remain above the closure');
+ assert.equal(c.LeagueGraphics.frontClosure({zone:140}),null);assert.equal(c.LeagueGraphics.frontClosure({zone:272}),null);
+ assert.equal(c.LeagueGraphics.frontClosure({zone:146},-1.875),null,'a player actually below the main floor must retain the lower stair view');
+});
 test('the real actor constructor prepares the graphic selected by the native Black Gym initializer, including stale house variables',async()=>{
  const state={vars:{},flags:[]},machine=new FieldEventVM(data,state,{command:async(c,args,raw,m)=>{
   if(c.name==='NativeOpcode406')return true; // Puzzle initialization is a separate integration test.

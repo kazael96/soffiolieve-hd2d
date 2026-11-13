@@ -1,4 +1,21 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{fixture}=require('./helpers/audio-engine-fixture.cjs');
+test('a movie with its own native BGM masks field music while preserving effects and the latest field volume',async()=>{
+ const f=fixture();await f.api.enable();const first=f.api.createCinematic('movie.flac',{ownsMusic:true}),second=f.api.createCinematic('movie2.flac',{ownsMusic:true});await first.prepare();await second.prepare();assert.equal(f.gains[1].gain.value,0,'No town music under the movie soundtrack');assert.equal(f.gains[2].gain.value,.7,'Movie effects remain audible');f.api.setFieldMusicVolume(64);assert.equal(f.gains[1].gain.value,0);first.stop();first.stop();assert.equal(f.gains[1].gain.value,0,'Second owner still masks field music');second.stop();assert.equal(f.gains[1].gain.value,.45*64/127);
+});
+test('failed movie audio preparation never masks the field music',async()=>{
+ const f=fixture();await f.api.enable();const held=f.hold('bad.flac'),movie=f.api.createCinematic('bad.flac',{ownsMusic:true}),failed=assert.rejects(movie.prepare(),/offline/);held.reject(Error('offline'));await failed;assert.equal(f.gains[1].gain.value,.45);movie.stop();assert.equal(f.gains[1].gain.value,.45);
+});
+test('native rest-only BGM1002 stops music without inventing a missing PCM resource',async()=>{
+ const f=fixture();await f.api.enable();await f.api.setScene(1002);assert.equal(f.api.errors.length,0);assert.equal(f.api.scene,1002);assert.ok(f.starts[0].source.stopCalls.length);assert.ok(!f.reads.some(s=>s.includes('1002')));
+});
+test('cinematic origin uses actual source start when allocating audio nodes advances the context clock',async()=>{
+ const f=fixture();await f.api.enable();const audio=f.api.createCinematic('movie.flac');await audio.prepare();const ctx=f.contexts[0],create=ctx.createBufferSource.bind(ctx);ctx.createBufferSource=()=>{ctx.currentTime+=.03;return create();};
+ audio.sync(30,4);const start=f.fieldStarts().at(-1);assert.equal(start.offset,1);assert.equal(audio.status.offset,1,'Source just started at this offset; allocation delay is not played audio');audio.stop();
+});
+test('a delayed cinematic observation compares visual and audio offsets at the same sampled clock',async()=>{
+ const f=fixture();await f.api.enable();const audio=f.api.createCinematic('movie.flac');await audio.prepare();audio.sync(30,4);const ctx=f.contexts[0];ctx.currentTime+=.03;
+ const state=audio.status;assert.ok(Math.abs(state.offset-1)>.1,'A later live observation alone produces the old false failure at4x');assert.ok(Number.isFinite(state.sampledAt)&&Number.isFinite(state.syncedAt));assert.ok(Math.abs(state.offset-(state.visualOffset+(state.sampledAt-state.syncedAt)*state.visualRate))<1e-9);audio.stop();
+});
 test('cinematic playback follows native seconds and x1/x2/x4 without duplicating a current voice',async()=>{
  const f=fixture();await f.api.enable();const audio=f.api.createCinematic('movie.flac');await audio.prepare();assert.equal(f.fieldStarts().length,0);audio.sync(30,1);assert.equal(f.fieldStarts().length,1);assert.equal(f.fieldStarts()[0].offset,1);
  const ctx=f.contexts[0];ctx.currentTime+=.1;audio.sync(33,2);assert.equal(f.fieldStarts().length,1);assert.equal(f.fieldStarts()[0].source.playbackRate.value,2);ctx.currentTime+=.1;audio.sync(39,4);assert.equal(f.fieldStarts().length,1);assert.equal(f.fieldStarts()[0].source.playbackRate.value,4);audio.stop();assert.equal(f.fieldStarts()[0].source.stopCalls.length,1);

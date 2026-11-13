@@ -9,7 +9,7 @@ function options(argv){
  const cases=(flags.has('cases')?flags.get('cases'):'qaSubmerged051,qaNpcFalls051,qaQuicksand051').split(',');if(cases.some(id=>!/^qa[A-Za-z0-9]+$/.test(id))||new Set(cases).size!==cases.length)throw Error('Invalid or repeated case ID');
  const timeout=Number(flags.get('timeout')||300000);if(!Number.isInteger(timeout)||timeout<1000||timeout>900000)throw Error('Invalid case budget');
  const renderer=flags.get('renderer')||'auto';if(!['auto','software'].includes(renderer))throw Error('Invalid renderer');
- const preview=flags.get('preview');if(preview!==undefined&&!['leagueGym','leagueFields'].includes(preview))throw Error('Invalid isolated preview');
+ const preview=flags.get('preview');if(preview!==undefined&&!['leagueGym','leagueFields','finaleFields'].includes(preview))throw Error('Invalid isolated preview');
  if(flags.has('fail-fast')&&!['true','false'].includes(flags.get('fail-fast')))throw Error('Invalid fail-fast option');
  const selected=flags.has('viewports')?flags.get('viewports').split(','):viewports.map(v=>v[0]);if(new Set(selected).size!==selected.length||selected.some(name=>!viewports.some(v=>v[0]===name)))throw Error('Invalid or repeated viewport');
  return {site,out,cases,timeout,renderer,preview,viewports:selected.map(name=>viewports.find(v=>v[0]===name)),failFast:flags.get('fail-fast')==='true',python:flags.get('python')||'python',playwright:flags.get('playwright')||'playwright',browser:flags.get('browser')};

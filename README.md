@@ -1,16 +1,41 @@
-# Soffiolieve HD-2D — demo 0.48
+# Soffiolieve HD-2D — 0.53
 
-Una demo amatoriale dell’inizio di **Pokémon Nero** con resa HD-2D.
-Il percorso collegato è **Soffiolieve → Quattroventi → Levantopoli → Zefiropoli → Bosco Girandola → Ponte Freccialuce → Austropoli → Percorso 4 → Sciroccopoli**.
-Comprende le prime tre palestre, gli eventi del Team Plasma e la storia principale di Austropoli fino alla sfida con Belle al varco nord, poi il Percorso 4 e l’arrivo a Sciroccopoli con Team Plasma e Bicicletta. Il limite di allenamento è 25; i livelli e l’esperienza già superiori dei vecchi salvataggi vengono conservati. Stato della distribuzione e limiti nelle note di collaudo del capitolo.
+Un progetto amatoriale di **Pokémon Nero** per browser, con ambienti HD-2D e
+risorse originali convertite dalla ROM fornita per lo sviluppo.
+
+I sorgenti **0.53** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
+cattura di Reshiram e le lotte con N e Ghecis. Non comprende il postgame.
+L'[accettazione locale](docs/QA-053-FINAL.md) distingue i controlli superati dalla
+distribuzione. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
+indica la versione effettivamente servita da Pages.
+
+Il percorso comprende Soffiolieve, Quattroventi, Levantopoli, Zefiropoli,
+Austropoli, Sciroccopoli, Libecciopoli, Ponentopoli, Mistralopoli e Boreduopoli,
+con gli itinerari e gli eventi principali che conducono alla Lega e al Castello
+di N. Il limite cresce con le sfide native: 50 per i Superquattro, 52 per N e
+54 per Ghecis. I livelli e l’esperienza già superiori nei vecchi salvataggi
+vengono conservati.
 
 [Gioca alla demo](https://kazael96.github.io/soffiolieve-hd2d/)
 
 ## Regole permanenti di sviluppo
 
-Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La copertura iniziale entro il livello 10 è stata ampliata alle mosse della demo e del roster preparato fino al 25: [646 coppie su 49 specie e forme](docs/SPECIES-MOVES-047.md), con ottenibilità e limiti distinti. Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
+Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La candidata del primo finale estende la copertura numerica a 4.365 coppie Pokémon–mossa su 147 record di specie/forme, comprese le specie degli avversari. Ottenibilità, livelli ed evoluzioni conservano vincoli distinti; la presenza di un avversario non rende automaticamente catturabile la sua specie. [Inventario del primo finale](docs/FIRST-ENDING-053.md) e [prove e limiti](docs/QA-053.md). Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
-## Questa versione
+## Primo finale
+
+La0.53 comprende i quattro Superquattro, il Castello, il risveglio e
+la cattura di Reshiram, N, Ghecis, crediti originali, salvataggio e FINE in
+italiano. Mantiene sfondi legati al luogo, animazioni dei due lati della lotta,
+audio originale, menu, velocità ×1/×2/×4 e riavvio con conferma. Le prove devono
+riferirsi alla candidata effettiva prima della pubblicazione; i risultati di
+componenti separati non certificano da soli tutta la campagna.
+
+Le animazioni delle MN personalizzate nel mondo, per ciascun Pokémon
+compatibile, sono l’estensione successiva richiesta. Il cut-in di Volo e le
+animazioni di battaglia già presenti non ne rappresentano il completamento.
+
+## Storico delle prime versioni
 
 La 0.48 prosegue fino all’arrivo a Libecciopoli: N e ruota panoramica, palestra di Camelia con carrelli e scambi, Medaglia Volt/MT72, Percorso 5 con Nardo e lotta in coppia, ponte mobile e confronto con Rafan. Limite di allenamento 30, con conservazione dei livelli superiori nei salvataggi precedenti. Nuovi incontri, sette contesti di lotta e coreografie sui due lati; 849 coppie su 58 specie/forme predisposte. Inventario, adattamenti e attività escluse in [NIMBASA-DRIFTVEIL-048.md](docs/NIMBASA-DRIFTVEIL-048.md), matrice in [SPECIES-MOVES-048.md](docs/SPECIES-MOVES-048.md), prove in [QA-048.md](docs/QA-048.md).
 

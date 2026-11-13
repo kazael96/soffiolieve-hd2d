@@ -10,8 +10,9 @@
  }
  function open(screen,{assets,notice:baseNotice,confirm:baseConfirm}){
   const pc=Journey.storage,data=pc.enter(),texts=POKEMON_STORAGE_ASSETS.texts,t=texts.pc.messages,m=texts.messages.messages;
-  let mode='move',selected=null,holding=null,closed=false;
+  let mode='move',selected=null,holding=null,closed=false,mailBusy=false;
   return new Promise(resolve=>{
+   const owner=Journey.state,ownerZone=owner.original?.zone,ownerScene=owner.scene,mailContext=()=>!closed&&Journey.state===owner&&owner.original?.zone===ownerZone&&owner.scene===ownerScene&&!(typeof battling!=='undefined'&&battling),abandon=()=>{closed=true;resolve(false);};
    const text=(c,s,x,y,white=false)=>NativeText.draw(c,screen.font,String(s),x,y,white);
    const close=()=>{if(closed)return;closed=true;screen.close();Journey.displayPartner();Journey.save(true);resolve(true);};
    const notice=(...args)=>{baseNotice(...args);screen.exit=close;},confirm=(...args)=>{baseConfirm(...args);screen.exit=close;};
@@ -31,7 +32,22 @@
    function release(){const p=selected&&pc.get(selected);if(!p)return;const name=identity(p);confirm(m[2],()=>{const result=pc.release(selected);if(!result.ok)return fail(result.reason);selected=null;save();notice(NativeTextLayout.format(m[3],[name]),()=>notice(NativeTextLayout.format(m[4],[name]),draw));},draw);}
    function menu(){
     holding=null;selected=null;const rows=[[t[14],'deposit'],[t[15],'withdraw'],[t[16],'move'],[t[18],null]];
-    screen.show(t[13].replace(/\{[^}]*\}/g,''),c=>{c.drawImage(images.sub,0,192,256,192,0,0,256,192);text(c,t[13].replace(/\{[^}]*\}/g,''),8,5);rows.forEach(([label],i)=>text(c,label,16,44+i*32));},rows.map(([label,value],i)=>button(label,8,36+i*32,240,30,()=>{if(value){mode=value;draw();}else close();})),close,{exit:close});
+    const hasMail=root.MistraltonMail?.mailbox?.().some(Boolean),buttons=rows.map(([label,value],i)=>button(label,8,36+i*32,240,30,()=>{if(value){mode=value;draw();}else close();}));if(hasMail)buttons.push(button(t[27],144,166,104,24,()=>mailMenu()));
+    screen.show(t[13].replace(/\{[^}]*\}/g,''),c=>{c.drawImage(images.sub,0,192,256,192,0,0,256,192);text(c,t[13].replace(/\{[^}]*\}/g,''),8,5);rows.forEach(([label],i)=>text(c,label,16,44+i*32));if(hasMail)text(c,t[27],152,170);},buttons,close,{exit:close});
+   }
+   function mailMenu(page=0){
+    if(!mailContext())return abandon();const service=root.MistraltonMail,rows=service.mailbox().map((r,i)=>r?{record:r,slot:i}:null).filter(Boolean),pages=Math.max(1,Math.ceil(rows.length/5));page=Math.max(0,Math.min(pages-1,page));const visible=rows.slice(page*5,page*5+5),buttons=visible.map((r,i)=>button((r.record.letter?.author||'Messaggio')+' - '+(i+page*5+1),8,34+i*24,240,22,()=>mailActions(r.slot,page)));
+    buttons.push(button('Prima',8,164,64,24,()=>mailMenu(page-1),page===0),button('Dopo',76,164,64,24,()=>mailMenu(page+1),page+1>=pages),button('Indietro',148,164,100,24,menu));
+    screen.show(t[27],c=>{c.drawImage(images.sub,0,192,256,192,0,0,256,192);text(c,t[27]+' '+rows.length+'/20',8,5);if(!visible.length)text(c,'Non ci sono Messaggi.',12,56);visible.forEach((r,i)=>text(c,(r.record.letter?.author||'Messaggio')+' - '+(i+page*5+1),16,38+i*24));text(c,'Prima',12,169);text(c,'Dopo',80,169);text(c,'Indietro',152,169);},buttons,menu,{exit:close});
+   }
+   function mailActions(slot,page){
+    if(!mailContext())return abandon();const service=root.MistraltonMail,r=service.mailbox()[slot];if(!r)return mailMenu(page);
+    const single=operation=>async()=>{if(mailBusy||closed)return;if(!mailContext())return abandon();mailBusy=true;try{return await operation();}finally{mailBusy=false;}};
+    const read=single(async()=>{try{await service.readStored(slot);}catch(error){console.error(error);}if(!mailContext())return abandon();mailActions(slot,page);});
+    const give=single(async()=>{screen.close();try{const index=await root.NativeUI.chooseParty();if(!mailContext())return abandon();if(index!==null&&!service.giveStored(slot,index))return notice('Scegli un Pokémon che non tenga uno strumento.',()=>mailActions(slot,page));}catch(error){console.error(error);if(!mailContext())return abandon();return notice('Il Messaggio non è stato spostato.',()=>mailActions(slot,page));}if(!mailContext())return abandon();save();mailMenu(page);});
+    const take=()=>{if(!mailContext())return abandon();confirm(root.MISTRALTON_MAIL_DATA?.labels?.mail?.[10]||'Il contenuto del Messaggio andrà perso. Vuoi continuare?',()=>{if(!mailContext())return abandon();if(service.mailbox()[slot]!==r)return mailMenu(page);if(!service.takeStored(slot,{erase:true}))return notice('La Borsa non può contenere il Messaggio.',()=>mailActions(slot,page));save();mailMenu(page);},()=>mailActions(slot,page));};
+    const buttons=[button('Leggi',8,40,240,28,read),button('Dai',8,72,240,28,give),button('Riprendi nella Borsa',8,104,240,28,take),button('Indietro',8,152,240,28,()=>mailMenu(page))];
+    screen.show(t[27],c=>{c.drawImage(images.sub,0,192,256,192,0,0,256,192);text(c,r.letter?'Da: '+r.letter.author:'Messaggio non compilato',8,5);buttons.forEach(b=>text(c,b.label,b.x+8,b.y+5));},buttons,()=>mailMenu(page),{exit:close});
    }
    function draw(){
     if(closed)return;const rows=[],current=data.current,p=selected&&pc.get(selected),title=t[mode==='deposit'?14:mode==='withdraw'?15:16];

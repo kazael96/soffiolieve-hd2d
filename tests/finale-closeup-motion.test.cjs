@@ -1,0 +1,10 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{create}=require('../src/finale-closeup-motion.js');
+test('native blinking advances the five original cells every three ticks and waits80..99 ticks before restarting',()=>{
+ for(const [random,delay]of [[()=>0,80],[()=>.99999,99]]){const motion=create({random}),observed=[];for(let i=1;i<=delay+2;i++){motion.tick();if([1,4,7,10,13,delay+2].includes(i))observed.push([i,motion.snapshot.eyes,motion.snapshot.blink]);}assert.deepEqual(observed.slice(0,5).map(v=>v[1]),[0,1,2,1,0]);assert.equal(observed[0][2],delay);assert.equal(observed.at(-1)[2],delay);}
+});
+test('native speech follows printer progress at three text speeds, then finishes its current cycle with a closed mouth',()=>{
+ for(const speed of [1,2,3]){const motion=create({speed,random:()=>0}),printer={done:false};motion.restart();motion.message(printer);const interval=5-speed,poses=[];for(let frame=1;frame<=interval*4;frame++){motion.tick();if((frame-1)%interval===0)poses.push(motion.snapshot.mouth);}assert.deepEqual(poses,[1,2,1,0]);motion.tick();assert.equal(motion.snapshot.mouth,1);printer.done=true;for(let i=0;i<interval*5;i++)motion.tick();assert.equal(motion.snapshot.mouth,0);assert.equal(motion.snapshot.mouthCycleComplete,true);assert.equal(motion.snapshot.speaking,false);for(let i=0;i<30;i++)motion.tick();assert.equal(motion.snapshot.mouth,0);}
+});
+test('469 restarts the speech flag without rewinding an unfinished pose or animating an instant-complete line',()=>{
+ const motion=create({speed:3,random:()=>0});motion.message({done:false});motion.tick();motion.tick();motion.tick();assert.equal(motion.snapshot.mouth,2);motion.restart();assert.equal(motion.snapshot.mouth,2);motion.message({done:true});for(let i=0;i<15;i++)motion.tick();assert.equal(motion.snapshot.mouth,0);const next={done:false};motion.restart();motion.message(next);for(let i=0;i<3;i++)motion.tick();assert.equal(motion.snapshot.speaking,true);assert.notEqual(motion.snapshot.mouth,0);assert.throws(()=>create({speed:0}),/non valida/);
+});

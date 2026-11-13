@@ -71,7 +71,7 @@ def startup_pack(site, sources=None, filename='assets/field-pack.bin', strict=Fa
 
 def geographic_packs(site, prefix='opelucid'):
     """Keep native geographic transport separated by area, including dynamic images."""
-    if prefix not in ['opelucid', 'league']:raise ValueError('Invalid geographic pack prefix')
+    if prefix not in ['opelucid', 'league', 'finale']:raise ValueError('Invalid geographic pack prefix')
     file=site/(prefix+'-parts.js')
     if not file.exists():return {}
     text=file.read_text(encoding='utf8')
@@ -157,6 +157,7 @@ def build(archive, target):
         capture_pack = startup_pack(site,['capture-data.js','route2-ball.js','route3-ball.js','nimbasa-ball.js','driftveil-ball.js','mistralton-ball.js'],'assets/capture-pack.bin')
         opelucid_packs = geographic_packs(site)
         league_packs = geographic_packs(site, 'league')
+        finale_packs = geographic_packs(site, 'finale')
         for season in range(4):
             for prefix in ['field','opelucid']:
                 if (site / f'{prefix}-season-{season}-assets.js').exists():
@@ -173,7 +174,7 @@ def build(archive, target):
                 if pack.exists():
                     asset_hashes[pack.relative_to(site).as_posix()] = hashlib.sha256(pack.read_bytes()).hexdigest()
         asset_hashes['assets/icirrus-pack.bin'] = hashlib.sha256((site/'assets/icirrus-pack.bin').read_bytes()).hexdigest()
-        for part in [*opelucid_packs.values(), *league_packs.values()]:
+        for part in [*opelucid_packs.values(), *league_packs.values(), *finale_packs.values()]:
             asset_hashes[part['pack']] = hashlib.sha256((site/part['pack']).read_bytes()).hexdigest()
         asset_hashes['assets/mistralton-pack.bin'] = hashlib.sha256((site/'assets/mistralton-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/driftveil-pack.bin'] = hashlib.sha256((site/'assets/driftveil-pack.bin').read_bytes()).hexdigest()
@@ -190,11 +191,11 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.52', 'revision': revision, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
-            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs},
+            'version': '0.53', 'revision': revision, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
+            'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs, 'finale': finale_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         publish_staging(site, target)
-    print(f"Built Soffiolieve 0.52 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.53 ({revision}) in {target}")
 
 
 if __name__ == '__main__':

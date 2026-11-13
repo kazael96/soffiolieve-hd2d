@@ -1,9 +1,11 @@
 """Export native Tower films13/14, models, animation sets and recorded cameras."""
-import argparse,hashlib,json,math,shutil,struct,subprocess,sys
+import argparse,hashlib,importlib.util,json,math,shutil,struct,subprocess,sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'audio-tools/python-packages'))
 from irbi_reader import NintendoDSRom,NARC
 from nitro_geometry import flatten_glb
+projection_spec=importlib.util.spec_from_file_location('tower_native_projection',Path(__file__).with_name('native-film-projection.py'))
+projection_module=importlib.util.module_from_spec(projection_spec);projection_spec.loader.exec_module(projection_module)
 p=argparse.ArgumentParser(description=__doc__)
 for key in ['rom','output','work','apicula']:p.add_argument('--'+key,type=Path,required=True)
 a=p.parse_args();a.work.mkdir(parents=True,exist_ok=True);r=NintendoDSRom.fromFile(a.rom);assert r.idCode==b'IRBI';files=NARC(r.getFileByName('a/1/6/0')).files;overlay=r.loadArm9Overlays([203])[203]
@@ -46,7 +48,7 @@ result={'source':{'rom':'IRBI','archive':'a/1/6/0','registry':'203:021c175c','ov
 for id,expected in [(13,[[198,200,199,196,197],[202,201]]),(14,[[206,208,207,204,205],[210,209]])]:
  row=words(0x21c175c+id*20,5);assert row[4]==2;camera_id=struct.unpack_from('<H',overlay.data,row[0]-overlay.ramAddress)[0];assert camera_id==({13:203,14:211}[id]);raw=files[camera_id];frames,kind=struct.unpack_from('<2I',raw);assert kind==0x10100 and len(raw)==8+frames*24
  camera=[list(struct.unpack_from('<6f',raw,8+frame*24))for frame in range(frames)];assert all(math.isfinite(value)for frame in camera for value in frame)
- descriptor=words(row[0],7);angle=descriptor[4]*math.tau/65536;film={'models':{},'camera':camera,'frames':frames,'perspective':{'sin':math.sin(angle),'cos':math.cos(angle),'near':descriptor[5]/4096,'far':descriptor[6]/4096},'source':{'cameraMember':camera_id,'cameraSha256':hashlib.sha256(raw).hexdigest(),'modelMembers':[]}}
+ descriptor=list(words(row[0],9));film={'models':{},'camera':camera,'frames':frames,'perspective':projection_module.projection(r,descriptor),'source':{'cameraMember':camera_id,'cameraSha256':hashlib.sha256(raw).hexdigest(),'modelMembers':[]}}
  # Native203:021c3c00 dispatch[10] ->021bee84, screen brightness task.
  assert words(0x21c3c00+10*4,1)[0]==0x21bee85
  events=[];at=row[1]

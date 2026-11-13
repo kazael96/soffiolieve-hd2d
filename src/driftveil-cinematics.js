@@ -1,6 +1,6 @@
 /* Original model/joint sequences, framed for the HD-2D browser presentation. */
 (()=>{
- async function play(id){if([13,14].includes(id))return window.OpelucidCinematics.play(id);if(![3,15].includes(id))throw Error('Sequenza narrativa non disponibile: '+id);
+ async function play(id){if(window.FinaleCinematics?.ids.includes(id))return window.FinaleCinematics.play(id);if([13,14].includes(id))return window.OpelucidCinematics.play(id);if(![3,15].includes(id))throw Error('Sequenza narrativa non disponibile: '+id);
   const wheel=id===3,names=wheel?['wheelSky','wheelField','wheelFrame','wheel']:['bridgeSky','bridge'],models=Object.fromEntries(names.map(n=>[n,DRIFTVEIL_CINEMATICS.models[n].url]));
   const panel=document.createElement('section'),canvas=document.createElement('canvas');panel.id='chapterCinematic';panel.setAttribute('aria-label',wheel?'Ruota panoramica con N':'Apertura del Ponte Libecciopoli');Object.assign(panel.style,{position:'fixed',inset:'0',zIndex:'80',background:'#182d35',display:'grid',placeItems:'center'});Object.assign(canvas.style,{width:'100%',height:'100%',objectFit:'contain'});canvas.width=960;canvas.height=640;panel.append(canvas);document.body.append(panel);
   let scene,raf,last,elapsed=0,stopped=false,renderError;
