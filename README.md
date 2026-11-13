@@ -1,12 +1,13 @@
-# Soffiolieve HD-2D — candidata 0.53
+# Soffiolieve HD-2D — 0.53
 
 Un progetto amatoriale di **Pokémon Nero** per browser, con ambienti HD-2D e
 risorse originali convertite dalla ROM fornita per lo sviluppo.
 
-La versione pubblica rimane **0.52**. La candidata **0.53**, ancora in collaudo,
-collega il percorso fino alla Lega e al primo finale della storia, comprese la
+I sorgenti **0.53** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
 cattura di Reshiram e le lotte con N e Ghecis. Non comprende il postgame.
-Lo stato delle verifiche è in [QA-053.md](docs/QA-053.md).
+L'[accettazione locale](docs/QA-053-FINAL.md) distingue i controlli superati dalla
+distribuzione. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
+indica la versione effettivamente servita da Pages.
 
 Il percorso comprende Soffiolieve, Quattroventi, Levantopoli, Zefiropoli,
 Austropoli, Sciroccopoli, Libecciopoli, Ponentopoli, Mistralopoli e Boreduopoli,
@@ -21,9 +22,9 @@ vengono conservati.
 
 Demo e versione completa seguono gli [standard vincolanti A–H](docs/DEVELOPMENT-RULES.md): continuità degli NPC fino al prossimo evento, fedeltà HD-2D, sfondi e presenze ambientali, animazioni Pokémon–mossa e reazioni su entrambi i lati, audio sincronizzato, comandi/menu, salvataggi e regressioni. La candidata del primo finale estende la copertura numerica a 4.365 coppie Pokémon–mossa su 147 record di specie/forme, comprese le specie degli avversari. Ottenibilità, livelli ed evoluzioni conservano vincoli distinti; la presenza di un avversario non rende automaticamente catturabile la sua specie. [Inventario del primo finale](docs/FIRST-ENDING-053.md) e [prove e limiti](docs/QA-053.md). Le istruzioni operative sono in [AGENTS.md](AGENTS.md); ogni PR usa la [checklist di consegna](.github/PULL_REQUEST_TEMPLATE.md).
 
-## Primo finale in collaudo
+## Primo finale
 
-La candidata 0.53 comprende i quattro Superquattro, il Castello, il risveglio e
+La0.53 comprende i quattro Superquattro, il Castello, il risveglio e
 la cattura di Reshiram, N, Ghecis, crediti originali, salvataggio e FINE in
 italiano. Mantiene sfondi legati al luogo, animazioni dei due lati della lotta,
 audio originale, menu, velocità ×1/×2/×4 e riavvio con conferma. Le prove devono

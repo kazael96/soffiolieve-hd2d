@@ -1,18 +1,20 @@
-# Primo finale053 in lavorazione
+# Primo finale053
 
 Obiettivo autorizzato: Superquattro, Castello di N, Reshiram, N e Ghecis, primo finale; poi MN sul campo personalizzate per specie/forma. Nessun postgame sbloccato automaticamente. Non fermarsi a ogni componente, non usare CUA o il browser personale e non chiedere di nuovo le autorizzazioni Git già concesse.
 
 ## Stato attuale del collaudo
 
 La candidata privata18 (`8f90f07adbc35fe2`) corregge la geometria con cache
-calda e collega le icone native dei nuovi Pokémon. La17 ha superato tutte
-le49 fasi CLI e il vero finale nei tre formati; la18 supera la sequenza del
-Castello nei tre formati, con tutti i57 PNG rivisti. I nuovi controlli completi
-e i replay pertinenti della18 sono in corso prima del rilascio.
-Lo stato corrente, le prove e i limiti sono in [QA-053.md](QA-053.md);
+calda e collega le icone native dei nuovi Pokémon. Supera tutte le49 fasi CLI
+e il vero finale nei tre formati, con tutti i24 PNG rivisti; passano anche
+la sequenza del Castello, le378 nuove coppie Pokémon–mossa e i servizi
+Messaggi/Pokédex, con tutti i rispettivi57/243/33 PNG rivisti. La ripetizione
+dei Superquattro passa nei tre formati, con tutti i45 PNG rivisti.
+Accettazione, prove e limiti sono in [QA-053-FINAL.md](QA-053-FINAL.md);
+la [cronologia](QA-053.md) conserva anche i tentativi precedenti.
 i checkpoint precedenti sotto restano documentazione storica, non un elenco
-aggiornato dei componenti mancanti. La pubblica resta0.52 fino alla verifica
-effettiva di una nuova distribuzione.
+aggiornato dei componenti mancanti. La distribuzione richiede anche CI e
+verifica effettiva della versione servita da Pages.
 
 ## Base pubblicata
 
