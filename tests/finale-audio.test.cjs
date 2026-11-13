@@ -1,8 +1,8 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto');
 function catalog(file,key){const c={};c.window=c;vm.runInNewContext(fs.readFileSync('src/'+file+'.js','utf8'),c);return c[key];}
-test('finale native catalog owns16 sounding music tracks25 effects and10 preserved cries plus explicit silence',()=>{
+test('finale native catalog owns16 sounding music tracks30 effects and10 preserved cries plus explicit silence',()=>{
  const d=catalog('finale-audio','FINALE_AUDIO');assert.equal(d.sdatSha256,'062073d5e29bc953979d75f1ba4f5f26d53cb3fd41130660fe1bca6041189e13');
- assert.equal(Object.keys(d.music).length,17);assert.equal(Object.keys(d.sounds).length,25);assert.equal(Object.keys(d.cries).length,10);
+ assert.equal(Object.keys(d.music).length,17);assert.equal(Object.keys(d.sounds).length,30);assert.equal(Object.keys(d.cries).length,10);for(const id of [1368,1382,1656,1840,1841])assert.ok(d.sounds[id],'Verified original save/Ball/emote effect '+id);
  for(const [id,record]of Object.entries({...d.music,...d.sounds})){
   if(id==='1017'){assert.equal(record.nativeSilence,true);assert.equal(record.src,undefined);continue;}
   assert.ok(!record.nativeSilence);assert.match(record.src,/^assets\/field-audio\/\d+\.flac$/);

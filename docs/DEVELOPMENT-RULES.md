@@ -207,3 +207,8 @@ Il solo host Node riusa la compilazione dei sorgenti tramite tests/helpers/compi
 
 
 Il runner delle fasi ora usa spawn asincrono e scrive entrambi i flussi nel log mentre il processo lavora, invece di trattenerli fino alla fine di spawnSync. Conservare180s per fase e8MiB di output: timeout, uscita nonzero, errore di avvio, errore del log o superamento del limite restano FAIL, con evidenza parziale. Non sostituire i test con un semplice avvio. Regressioni specifiche verificano log prima del completamento e chiusura prima della lettura del rapporto. I timeout precedenti con output vuoto restano evidenze fallite; il PASS isolato non ne dimostra la causa. Cambiare trasporto dei log non autorizza ad attribuire un successo alla suite prima della conclusione di tutte le fasi.
+
+
+### Aggiornamento del banco · primo finale0.53
+
+Il primo gruppo su sei della candidata privata053/15 ha superato180s; conservare il rapporto fallito in `outputs/chapter053-preparation/deep-field15`. Il raggruppamento predefinito passa a otto processi sequenziali, con lo stesso inventario completo e deterministico, ogni file una volta, nessun gruppo vuoto e budget180s invariato. Le regressioni verificano inventario e confini. Questa variazione non certifica un PASS né una riduzione del tempo totale: occorre rieseguire tutte le fasi. I test dei portali devono fornire le dimensioni del canvas effettivo, richieste dal nuovo controllo della proiezione; l’inventario audio comprende anche i cinque effetti verificati1368/1382/1656/1840/1841. Conservare le verifiche SHA e di provenienza, senza limitarsi a cambiare un conteggio.

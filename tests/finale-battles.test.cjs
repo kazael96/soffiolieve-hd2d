@@ -12,3 +12,11 @@ test('four Elite rooms and the throne acquire distinct immutable native battle c
  }
  assert.equal(ids.size,5);for(const zone of [136,137,138,139,144,146,264,272,277])assert.equal(c.FINALE_FIELD.context(zone),null,'Noncombat or postgame place '+zone);
 });
+test('broken throne battle freezes the native replacement geometry even when the field returns to its base variant',async()=>{
+ const c=await setup();for(const file of ['pinwheel-battles','opelucid-battles','finale-battles','battle-location'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',file+'.js'),'utf8'),c);
+ const n=c.NativeStory.state;n.zone=278;n.vars[16436]=4617;const location=c.BattleLocation.capture(c.Journey.state,n,{x:.5,y:26.5});assert.equal(location.id,'castleThroneBroken');assert.equal(location.variant,'brokenWall');assert.equal(location.sourceMatrix,212);
+ await c.OpelucidBattles.prepare(location.id);const broken=c.OpelucidChapter.geometryScene(278,'brokenWall');assert.ok(broken.instances.some(i=>i.model.includes('609')));
+ n.vars[16436]=0;await c.OpelucidChapter.ensure(278);assert.equal(c.OpelucidChapter.scene(278).sourceMatrix,172);
+ const rows=c.PinwheelBattles.instances(location.id);assert.ok(rows.some(i=>i.model.includes('609')));assert.ok(!rows.some(i=>i.model.endsWith('map-585')));assert.equal(c.OPENING_ASSETS.models[rows.at(-1).model].groups[0].texture,'fn-variant-map-609-n_yuka5');assert.equal(c.PinwheelBattles.ambient(location.id).length,0);
+ const base=c.BattleLocation.capture(c.Journey.state,n,{x:.5,y:26.5});assert.equal(base.id,'castleThrone');assert.equal(location.id,'castleThroneBroken');
+});

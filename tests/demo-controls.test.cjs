@@ -4,15 +4,16 @@ test('failed storage deletion never reloads or reports a successful restart',()=
 test('direct speed cycle publishes x1/x2/x4 including queued changes during a move',()=>{const c={performance:{now:()=>100},setTimeout,clearTimeout,localStorage:{getItem:()=>null,setItem(){}},MoveFX:{active:null}};c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync(require.resolve('../src/game-speed.js'),'utf8'),c);const G=c.GameSpeed,events=[];const unsubscribe=G.subscribe(()=>events.push([G.rate,G.pending]));G.cycle();assert.equal(G.rate,2);G.cycle();assert.equal(G.rate,4);G.cycle();assert.equal(G.rate,1);c.MoveFX.active={preview:false};G.cycle();assert.equal(G.rate,1);assert.equal(G.pending,2);G.cycle();assert.equal(G.pending,4);c.MoveFX.active=null;G.flush();assert.equal(G.rate,4);assert.equal(G.pending,null);assert.equal(events.length,6);unsubscribe();G.set(1);assert.equal(events.length,6);});
 
 test('demo controls follow battle and dialogs without repeated hidden mutations',()=>{
- const source=fs.readFileSync(require.resolve('../src/demo-controls.js'),'utf8'),start=source.indexOf(' function sync(){'),end=source.indexOf('\n new MutationObserver',start);assert.ok(start>=0&&end>start);
- let writes=0,active=null;
+ const source=fs.readFileSync(process.env.SOFFIOLIEVE_DEMO_CONTROLS_SOURCE||require.resolve('../src/demo-controls.js'),'utf8'),start=source.indexOf(' function sync(){'),end=source.indexOf('\n new MutationObserver',start);assert.ok(start>=0&&end>start);
+ let writes=0,active=null,ending=null;
  const element=()=>{let hidden=false;return {dataset:{},parentNode:null,get hidden(){return hidden;},set hidden(v){hidden=v;writes++;},append(child){child.parentNode=this;}};};
  const home=element(),bar=element(),restart=element(),battle=element();battle.hidden=true;bar.parentNode=home;
- const c={home,bar,restart,window:{SpeciesStudioMode:false},document:{querySelectorAll:()=>active?[active]:[],getElementById:()=>battle}};
+ const c={home,bar,restart,window:{SpeciesStudioMode:false},document:{querySelectorAll:()=>active?[active]:[],getElementById:id=>id==='battle'?battle:id==='mainStoryComplete'?ending:null}};
  vm.runInNewContext(source.slice(start,end)+';this.runSync=sync;',c);c.runSync();assert.equal(bar.dataset.battle,'false');writes=0;c.runSync();c.runSync();assert.equal(writes,0,'Unchanged hidden attributes must not feed the MutationObserver');
  battle.hidden=false;c.runSync();assert.equal(bar.dataset.battle,'true');battle.hidden=true;c.runSync();assert.equal(bar.dataset.battle,'false');
  active=element();active.id='party';c.runSync();assert.equal(bar.parentNode,active);assert.equal(bar.hidden,true);writes=0;c.runSync();assert.equal(writes,0);
  active.id='dialogue';c.runSync();assert.equal(bar.hidden,false);c.window.SpeciesStudioMode=true;c.runSync();assert.equal(restart.hidden,true);writes=0;c.runSync();assert.equal(writes,0);
  active=null;c.window.SpeciesStudioMode=false;c.runSync();assert.equal(bar.parentNode,home);assert.equal(restart.hidden,false);
+ ending=element();ending.id='mainStoryComplete';c.runSync();assert.equal(bar.parentNode,ending,'Restart must be above the opaque final screen');assert.equal(bar.hidden,false);active=element();active.id='demoRestartConfirm';c.runSync();assert.equal(bar.parentNode,active);assert.equal(bar.hidden,true);active=null;c.runSync();assert.equal(bar.parentNode,ending);assert.equal(bar.hidden,false);ending=null;c.runSync();assert.equal(bar.parentNode,home);
  assert.match(source,/attributeFilter:\['open','hidden'\]/,'Battle visibility must trigger synchronization');
 });

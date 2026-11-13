@@ -23,5 +23,6 @@
   const size=catalog.metrics[actor.model];
   return {frame,flip:false,worldWidth:size.width/16,worldHeight:size.height/16};
  }
- root.FinaleActorMotion={model,visual};
+ const isDragon=actor=>actor?.fieldZone===278&&Object.hasOwn(catalog.programs,actor.model);
+ root.FinaleActorMotion={model,visual,isDragon};
 })(typeof window==='undefined'?globalThis:window);

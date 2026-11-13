@@ -59,6 +59,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ['work', 'output', 'report-dir']:
         parser.add_argument('--'+key, type=Path, required=True)
+    parser.add_argument('--stone',action='store_true',help='Render native overlay64 task575 rather than overlay203 movies')
     args = parser.parse_args()
     work = args.work.resolve()
     sys.path[:0] = [str(work/'audio-tools/python-packages'),str(work/'audio-tools/DualRip-2.2.1'),str(work/'native-driver')]
@@ -66,14 +67,18 @@ def main():
     import soundfile as sf
     from dualrip.formats.sdat import SdatFile
     from automated_sseq import AutomatedRenderer, BankResolver
-    file = args.output/'finale-cinematics-data.js'
+    file = args.output/('finale-stone-data.js' if args.stone else 'finale-cinematics-data.js')
     data = json.loads(file.read_text(encoding='utf-8').split('=',1)[1].strip().rstrip(';'))
+    films=data['films'] if not args.stone else {'stone':data}
+    if args.stone:
+        data['timeline']=[{'frame':cue['frame'],'kind':1,'args':[cue['id'],127,0,0,0]}for cue in data['sounds']]
     sdat_path = work/'audio/wb_sound_data.sdat'
     sdat, rate = SdatFile(str(sdat_path)), 32768
     source_sha = hashlib.sha256(sdat_path.read_bytes()).hexdigest()
     args.report_dir.mkdir(parents=True,exist_ok=True)
     report = {'source':'IRBI overlay203 021beac8/021bed04/021bed1c; SDK sequence-player replacement and original retained DS driver','sdatSHA256':source_sha,'rate':rate,'movieHz':30,'audibleComparison':False,'films':{}}
-    for identifier, film in data['films'].items():
+    if args.stone:report['source']='IRBI overlay64:021f372c task575 stop/replacement cues at0/108/131/250; original retained DS driver'
+    for identifier, film in films.items():
         total = round(film['frames']*rate/30)
         mixed = np.zeros((total,2),dtype=np.int64)
         cues = []
@@ -112,7 +117,7 @@ def main():
         pcm = np.clip(mixed,-32768,32767).astype(np.int16)
         if not np.any(pcm):
             raise ValueError('Empty native movie mix')
-        target = args.output/'assets/finale/cinematics'/identifier/'audio.flac'
+        target = args.output/'assets/finale/stone/audio.flac' if args.stone else args.output/'assets/finale/cinematics'/identifier/'audio.flac'
         sf.write(target,pcm,rate,format='FLAC',subtype='PCM_16')
         decoded, sample_rate = sf.read(target,dtype='int16',always_2d=True)
         if sample_rate != rate or not np.array_equal(decoded,pcm):
@@ -120,9 +125,9 @@ def main():
         record = {'src':target.relative_to(args.output).as_posix(),'rate':rate,'duration':len(pcm)/rate,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'nativePitchAndVolumeBaked':True,'nativeHandleReplacement':True}
         film['audio'] = record
         report['films'][identifier] = {**record,'cues':cues,'clippedSamples':int(np.count_nonzero(np.abs(mixed)>32767))}
-        file.write_text('window.FINALE_CINEMATICS='+json.dumps(data,separators=(',',':'))+';\n',encoding='utf-8')
+        file.write_text(('window.FINALE_STONE=' if args.stone else 'window.FINALE_CINEMATICS=')+json.dumps(data,separators=(',',':'))+';\n',encoding='utf-8')
         (args.report_dir/'report.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
-    print('Five native movie soundtracks complete; numerical verification only',flush=True)
+    print(('Native Light Stone soundtrack' if args.stone else 'Five native movie soundtracks')+' complete; numerical verification only',flush=True)
 
 
 if __name__ == '__main__':

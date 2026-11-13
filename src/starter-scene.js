@@ -20,7 +20,15 @@
     const rx=trs(undefined,[Math.sin(pitch/2),0,0,Math.cos(pitch/2)]),ry=trs(undefined,[0,Math.sin(yaw/2),0,Math.cos(yaw/2)]),rz=trs(undefined,[0,0,Math.sin(roll/2),Math.cos(roll/2)]),rotation=mul(rz,mul(ry,rx));
     const view=[rotation[0],rotation[4],rotation[8],0,rotation[1],rotation[5],rotation[9],0,rotation[2],rotation[6],rotation[10],0,0,0,0,1];
     for(let r=0;r<3;r++)view[12+r]=-view[r]*v[3]-view[4+r]*v[4]-view[8+r]*v[5];
-    const p=perspective,f=p.cos/p.sin,n=p.near,z=p.far;
+    const p=perspective;
+    if(p.nativeFrustumQ12){
+      const q=p.nativeFrustumQ12,keys=['left','right','bottom','top','near','far','wScale'];
+      if(!keys.every(k=>Number.isInteger(q[k]))||q.left>=q.right||q.bottom>=q.top||q.near<=0||q.far<=q.near||q.wScale<=0)throw Error('Frustum originale non valido');
+      if(p.nativeMatrixQ12){const matrix=p.nativeMatrixQ12;if(!Array.isArray(matrix)||matrix.length!==16||!matrix.every(Number.isInteger)||matrix[0]<=0||matrix[5]<=0||matrix[11]>=0||matrix[15]!==0)throw Error('Matrice originale non valida');return mul(matrix.map(v=>v/4096),view);}
+      const [l,r,b,t,n,z,s]=keys.map(k=>q[k]/4096),projection=[2*n/(r-l),0,0,0,0,2*n/(t-b),0,0,(r+l)/(r-l),(t+b)/(t-b),(z+n)/(n-z),-1,0,0,2*z*n/(n-z),0].map(v=>v*s);
+      return mul(projection,view);
+    }
+    const f=p.cos/p.sin,n=p.near,z=p.far;
     return mul([f/aspect,0,0,0,0,f,0,0,0,0,(z+n)/(n-z),-1,0,0,2*z*n/(n-z),0],view);
   }
   async function loadGLB(url){
@@ -59,12 +67,13 @@
         const matrix=group.uvTrack?.frames[Math.max(0,Math.min(group.uvTrack.frames.length-1,Math.floor(frame)))]||[1,0,0,0,1,0,0,0,1];if(matrix.length!==9||!matrix.every(Number.isFinite))throw Error('Matrice texture originale non valida');gl.uniformMatrix3fv(this.locations.textureMatrix,false,new Float32Array(matrix));gl.uniform2fv(this.locations.texOffset,group.uvTrack?[0,0]:properties[`/materials/${group.material}/pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform/offset`]||[0,0]);let texture=m.textures[group.texture];if(group.textureTrack){let key=group.textureTrack[0];for(const next of group.textureTrack){if(next.frame>frame)break;key=next;}texture=m.patternTextures.get(key.url);}gl.bindTexture(gl.TEXTURE_2D,texture);gl.drawArrays(gl.TRIANGLES,0,group.count);
       }
     }
-    draw(name,frame,{cameraFrame=frame,selected=-1,ballFrame=0,extra=[]}={}){
+    draw(name,frame,{cameraFrame=frame,selected=-1,ballFrame=0,extra=[],projection=null}={}){
       // Recorded native movies contain hard camera cuts and equivalent Euler
       // representations on opposite sides of ±180. Keep camera, joints and
       // materials on one source frame rather than inventing an in-between shot.
       if(this.assets.frameSampling==='native'){frame=Math.floor(frame);cameraFrame=Math.floor(cameraFrame);}
-      const gl=this.gl,w=this.canvas.width,h=this.canvas.height;gl.viewport(0,0,w,h);const clear=this.assets.transparent?0:1;const brightness=this.assets.brightness?.[Math.max(0,Math.min(this.assets.brightness.length-1,Math.floor(frame)))]||0,base=this.assets.clearColor||[clear,clear,clear],shade=base.map(v=>brightness>=0?v+(1-v)*brightness/16:v*(1+brightness/16));gl.clearColor(...shade,clear);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);gl.uniform1i(this.locations.image,0);gl.uniform1f(this.locations.brightness,brightness);gl.uniformMatrix4fv(this.locations.camera,false,new Float32Array(camera(this.assets.curves[name],cameraFrame,w/h,this.assets.perspective)));for(const blend of [false,true]){gl.depthMask(!blend);this.drawModel(name,frame,[0,0,0],blend);for(const other of extra)this.drawModel(other,frame,[0,0,0],blend);if(name==='selection')for(let i=0;i<3;i++)this.drawModel('ball',i===selected?ballFrame:0,this.assets.ballPositions[i],blend);}gl.depthMask(true);
+      if(projection!==null&&(projection.length!==16||!Array.from(projection).every(Number.isFinite)))throw Error('Proiezione del modello di campo non valida');
+      const gl=this.gl,w=this.canvas.width,h=this.canvas.height;gl.viewport(0,0,w,h);const clear=this.assets.transparent?0:1;const brightness=this.assets.brightness?.[Math.max(0,Math.min(this.assets.brightness.length-1,Math.floor(frame)))]||0,base=this.assets.clearColor||[clear,clear,clear],shade=base.map(v=>brightness>=0?v+(1-v)*brightness/16:v*(1+brightness/16));gl.clearColor(...shade,clear);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);gl.uniform1i(this.locations.image,0);gl.uniform1f(this.locations.brightness,brightness);gl.uniformMatrix4fv(this.locations.camera,false,new Float32Array(projection??camera(this.assets.curves[name],cameraFrame,w/h,this.assets.perspective)));for(const blend of [false,true]){gl.depthMask(!blend);this.drawModel(name,frame,[0,0,0],blend);for(const other of extra)this.drawModel(other,frame,[0,0,0],blend);if(name==='selection')for(let i=0;i<3;i++)this.drawModel('ball',i===selected?ballFrame:0,this.assets.ballPositions[i],blend);}gl.depthMask(true);
     }
     destroy(){if(this.destroyed)return;this.destroyed=true;const gl=this.gl;for(const m of Object.values(this.models)){for(const t of [...(m.textures||[]),...(m.patternTextures?.values()||[])])gl.deleteTexture(t);for(const g of m.groups||[])gl.deleteBuffer(g.buffer);}this.models={};gl.deleteProgram(this.program);}
   }

@@ -8,6 +8,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--rom', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--skip-data', action='store_true', help='Continue after undecodable bytes; mixed code/data still requires manual interpretation')
     p.add_argument('ranges', nargs='+', help='arm9|overlayNUMBER:thumb|arm:START:END')
     a = p.parse_args()
     rom = NintendoDSRom.fromFile(a.rom)
@@ -29,7 +30,9 @@ def main():
             raise ValueError('Range outside '+owner)
         mode = {'thumb': CS_MODE_THUMB, 'arm': CS_MODE_ARM}[isa]
         lines.append(f'RANGE {spec} SOURCE {base:#x} SHA256 {hashlib.sha256(data).hexdigest()}')
-        for i in Cs(CS_ARCH_ARM, mode).disasm(data[start-base:end-base], start):
+        decoder = Cs(CS_ARCH_ARM, mode)
+        decoder.skipdata = a.skip_data
+        for i in decoder.disasm(data[start-base:end-base], start):
             note = ''
             if i.mnemonic == 'ldr' and '[pc' in i.op_str:
                 offset = int(i.op_str.split('#')[-1].split(']')[0], 0) if '#' in i.op_str else 0

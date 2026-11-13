@@ -191,11 +191,11 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.52', 'revision': revision, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
+            'version': '0.53', 'revision': revision, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs, 'finale': finale_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         publish_staging(site, target)
-    print(f"Built Soffiolieve 0.52 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.53 ({revision}) in {target}")
 
 
 if __name__ == '__main__':

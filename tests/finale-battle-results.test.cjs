@@ -9,6 +9,7 @@ test('native379/380 distinguish caught, KO, loss and escape rather than treating
   assert.equal(c.NativeStory.battleDone({battle:{winner}},'wild',receipt),false);
   await drain(c,vm.run(bank,0));assert.equal(n.battleResult,result);assert.equal(n.vars[0x8010],proceed);assert.equal(n.vars[0x8011],capture);
  }
+ c.NativeStory.battleDone({battle:{winner:'',ended:true}},'wild');await drain(c,vm.run(bank,0));assert.equal(n.battleResult,6);assert.equal(n.vars[0x8010],0);assert.equal(n.vars[0x8011],0);
 });
 test('capture registration and Box transfer deliver the catch result to the native host after storage succeeds',async()=>{
  const c=await setup(),n=c.NativeStory.state;

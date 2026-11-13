@@ -7,7 +7,7 @@ from pathlib import Path
 from irbi_reader import NintendoDSRom
 
 
-def inspect(rom):
+def inspect(rom, identifiers=None):
     if rom.idCode != b'IRBI':
         raise ValueError('Expected Italian Black ROM')
     overlay = rom.loadArm9Overlays([203])[203]
@@ -30,9 +30,9 @@ def inspect(rom):
         return list(struct.unpack_from('<' + str(count) + 'H', data, at))
 
     result = {'owner': 'overlay203', 'base': hex(base), 'sha256': hashlib.sha256(data).hexdigest(), 'registry': '021c175c', 'films': {}}
-    for identifier in [6, 9, 10, 11, 12, 13, 14]:
+    for identifier in identifiers if identifiers is not None else [6, 9, 10, 11, 12, 13, 14]:
         row = words(0x21c175c + identifier * 20, 5)
-        descriptor = words(row[0], 7)
+        descriptor = words(row[0], 9)
         models = []
         for index in range(row[4]):
             pointer, count = words(row[3] + index * 8, 2)

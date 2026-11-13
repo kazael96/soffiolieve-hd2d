@@ -22,6 +22,7 @@ patterns = helper('film_patterns', 'finale-field-patterns.py')
 srt = helper('film_srt', 'native-texture-srt.py')
 from irbi_reader import NintendoDSRom, NARC
 inspect = helper('film_source', 'inspect-finale-films.py').inspect
+native_projection = helper('film_projection', 'native-film-projection.py').projection
 
 
 def material_tracks(raw):
@@ -73,14 +74,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ['rom', 'output', 'work', 'apicula']:
         parser.add_argument('--' + key, type=Path, required=True)
+    parser.add_argument('--films', type=int, nargs='+', choices=[6,7,8,9,10,11,12], default=[6,9,10,11,12])
     args = parser.parse_args()
+    if len(set(args.films)) != len(args.films):
+        raise ValueError('Repeated native movie identifier')
     args.output.mkdir(parents=True, exist_ok=True)
     args.work.mkdir(parents=True, exist_ok=True)
     rom = NintendoDSRom.fromFile(args.rom)
-    source = inspect(rom)
+    source = inspect(rom, sorted(set([6, 9, 10, 11, 12, 13, 14] + args.films)))
     files = NARC(rom.getFileByName('a/1/6/0')).files
     result = {'source': source, 'films': {}}
-    for identifier in [6, 9, 10, 11, 12]:
+    for identifier in args.films:
         record = source['films'][identifier]
         camera_id = record['descriptor'][0] & 65535
         raw = files[camera_id]
@@ -90,8 +94,7 @@ def main():
         camera = [list(struct.unpack_from('<6f', raw, 8 + frame * 24)) for frame in range(frames)]
         if not all(math.isfinite(v) for row in camera for v in row):
             raise ValueError('Nonfinite native camera')
-        angle = record['descriptor'][4] * math.tau / 65536
-        film = {'frames': frames, 'camera': camera, 'perspective': {'sin': math.sin(angle), 'cos': math.cos(angle), 'near': record['descriptor'][5] / 4096, 'far': record['descriptor'][6] / 4096}, 'models': {}, 'materialAlpha': {}, 'materialColor': {}, 'materialTextures': {}, 'materialUV': {}, 'timeline': record['events'], 'sourceCameraSHA256': hashlib.sha256(raw).hexdigest()}
+        film = {'frames': frames, 'camera': camera, 'perspective': native_projection(rom,record['descriptor']), 'models': {}, 'materialAlpha': {}, 'materialColor': {}, 'materialTextures': {}, 'materialUV': {}, 'timeline': record['events'], 'sourceCameraSHA256': hashlib.sha256(raw).hexdigest()}
         film['brightness'] = brightness(frames, record['events'])
         for index, members in enumerate(record['models']):
             key = 'part' + str(index)
@@ -138,7 +141,7 @@ def main():
             print(identifier, key, 'native members', members, 'bound recovered UV', len(film['materialUV'][key]), flush=True)
         result['films'][identifier] = film
     (args.output / 'finale-cinematics-data.js').write_text('window.FINALE_CINEMATICS=' + json.dumps(result, separators=(',', ':')) + ';\n', encoding='utf-8')
-    print('Exported five original films; audio and runtime validation remain separate')
+    print('Exported '+str(len(args.films))+' original films; audio and runtime validation remain separate')
 
 
 if __name__ == '__main__':

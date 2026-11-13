@@ -41,7 +41,7 @@ def main():
     previous = json.JSONDecoder().raw_decode(existing_path.read_text(encoding='utf8').split('=', 1)[1])[0] if existing_path.exists() else {}
     scope = {'__name__': 'finale_audio_export', '__file__': str(Path(__file__).with_name('render-mistralton-audio.py'))}
     exec(compile(build_source(), scope['__file__'], 'exec'), scope)
-    handlers={value: ['IRBI overlay21:021bb65c native object-emote kind'+str({1656:0,1840:1,1841:2}[value]) if value in [1656,1840,1841] else 'IRBI finale native programs or overlay56:021f4284 sound table; selection follows the invoking task'] for value in args.sounds}
+    handlers={value: ['IRBI overlay21:021bb65c native object-emote kind'+str({1656:0,1840:1,1841:2}[value]) if value in [1656,1840,1841] else 'IRBI overlay64:021f3872 native597 ball trajectory' if value==1382 else 'IRBI finale native programs or overlay56:021f4284 sound table; selection follows the invoking task'] for value in args.sounds}
     report = {'status': 'PASS', 'music': [], 'sounds': [], 'failures': []}
     args.report_dir.mkdir(parents=True, exist_ok=True)
     silent_source = Path(__file__).parent.parent/'src/finale-silent-audio.js'

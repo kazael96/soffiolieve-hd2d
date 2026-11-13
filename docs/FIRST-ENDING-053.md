@@ -2,6 +2,18 @@
 
 Obiettivo autorizzato: Superquattro, Castello di N, Reshiram, N e Ghecis, primo finale; poi MN sul campo personalizzate per specie/forma. Nessun postgame sbloccato automaticamente. Non fermarsi a ogni componente, non usare CUA o il browser personale e non chiedere di nuovo le autorizzazioni Git già concesse.
 
+## Stato attuale del collaudo
+
+La candidata privata17 (`5e07edc74c9b59a1`) integra il primo finale nell’avvio
+normale della0.53. Il replay reale desktop ha completato cattura di Reshiram,
+N, Ghecis, crediti, salvataggio e FINE, con primi piani e Poké Ball originali
+osservati durante l’evento. Gli otto PNG esportati sono stati rivisti. La suite
+completa e i nuovi replay telefono sono ancora necessari per il rilascio.
+Lo stato corrente, le prove e i limiti sono in [QA-053.md](QA-053.md);
+i checkpoint precedenti sotto restano documentazione storica, non un elenco
+aggiornato dei componenti mancanti. La pubblica resta0.52 fino alla verifica
+effettiva di una nuova distribuzione.
+
 ## Base pubblicata
 
 La052 è stata integrata con PR46, merge `ad822e5f906b8cbace5f9a1bb2150f5821ae39ec`. CI del runtime e del successivo commit documentale47/47PASS; Pages43195972359PASS. Verifica effettiva del sito: versione0.52, revisioneLinux `702cbedf672e3d81`; trasporto app.js, dieci altri file critici/pacchetto catture e HTML confrontati con candidata31. Rapporto esterno `outputs/chapter052/public052-verification.json`. Prove locali complete in [QA-052-FINAL.md](QA-052-FINAL.md). H.8 conserva051utile al confronto e052verificata; componente18 rimosso con manifesto e tutte le prove esterne preservate.

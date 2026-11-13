@@ -23,7 +23,7 @@
      if(!data?.instances)throw Error('Geometria della mappa adiacente incompleta: '+id);return data.instances;
     });
     // Preserve the descriptor handle used by the renderer, itineraries and collisions.
-    Object.assign(scene,current,{instances,permissionGrids:grids(zone),assetsPending:true});
+    Object.assign(scene,descriptor(zone),current,{instances,permissionGrids:grids(zone),assetsPending:true});
     await afterPrepare(zone,scene);if(token!==generation||assets.scenes['zone'+zone]!==scene)return false;
     scene.assetsPending=false;return true;
    }).finally(()=>{if(loading?.token===token)loading=null;});loading={zone,token,promise};return promise;
@@ -34,7 +34,8 @@
   function boundaryBlocked(zone,x,z){if(!globalZones.includes(zone))return false;const next=fieldAt(x,z);return next!==null&&!crosses(zone,next);}
   function blockedAt(zone,x,z){if(boundaryBlocked(zone,x,z))return true;const grid=grids(zone).find(g=>contains(g,x,z));if(!grid)return true;const {width}=dimensions(grid),offset=8+((Math.floor(z-grid.z)+16)*width+Math.floor(x-grid.x)+16)*8;return offset+2>=grid.bytes.length||!!(grid.bytes[offset+2]&1);}
   function surfaceAt(zone,x,z,height=0){if(!owned.has(zone))return null;const selected=globalZones.includes(zone)?fieldAt(x,z)??zone:zone;return surfaces?.at(selected,x,z,height)||null;}
-  const api={register,prepare,cancel,evict,members,grids,crosses,fieldAt,blockedAt,boundaryBlocked,surfaceAt,zones,globalZones,sameField:(a,b)=>a===b||members(a).includes(b),scene:zone=>owned.get(zone)||null};return api;
+  function geometryScene(zone,key=null){const data=loader.get(parts.zoneFamily[zone]),scene=key===null?data?.scenes?.[zone]:data?.variantScenes?.[zone]?.[key];if(!scene)throw Error('Geometria richiesta non disponibile: '+zone+'/'+key);return scene;}
+  const api={geometryScene,register,prepare,cancel,evict,members,grids,crosses,fieldAt,blockedAt,boundaryBlocked,surfaceAt,zones,globalZones,sameField:(a,b)=>a===b||members(a).includes(b),scene:zone=>owned.get(zone)||null};return api;
  }
  const api={create};root.OpelucidSceneWindow=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);

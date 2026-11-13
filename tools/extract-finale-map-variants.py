@@ -56,7 +56,10 @@ def main():
         surface_zone=zone*10+1;surfaces['scenes'][str(surface_zone)]=surface
         variants[str(zone)]=dict(event=event,work=work,value=value,key=key,surfaceZone=surface_zone,scene={'permissionGrids':scene['permissionGrids']},source=dict(replacementRow=index,condition=list(condition),baseMatrix=base,matrix=matrix,matrixSHA256=hashlib.sha256(raw_matrix).hexdigest(),lands=proof))
     for family,data in families.items():
-        data['models'].update(models);data['textures'].update(textures);write('finale-'+family+'-assets.js','FINALE_PART_ASSETS',data)
+        used={instance['model'] for variants_for_zone in data.get('variantScenes',{}).values() for variant in variants_for_zone.values() for instance in variant['instances']}
+        added={key:model for key,model in models.items() if key in used}
+        images={group['texture'] for model in added.values() for group in model.get('groups',[]) if group.get('texture')}
+        data['models'].update(added);data['textures'].update({key:texture for key,texture in textures.items() if key in images});write('finale-'+family+'-assets.js','FINALE_PART_ASSETS',data)
     write('finale-map-variants-data.js','FINALE_MAP_VARIANTS',variants);write('finale-surface-data.js','FINALE_SURFACE_DATA',surfaces)
     print('Exported2 native field variants with original geometry, permission grids and height planes into '+str(a.output))
 
