@@ -22,7 +22,7 @@ class QAServerTests(unittest.TestCase):
             site.mkdir()
             overlay.mkdir()
             qa_server.args = types.SimpleNamespace(qa=overlay, site=site, port=0)
-            server = qa_server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
+            server = qa_server.QAServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
             worker = threading.Thread(target=server.serve_forever, daemon=True)
             worker.start()
             payload = b'x' * 65536
@@ -52,7 +52,7 @@ class QAServerTests(unittest.TestCase):
             (site / 'app.js').write_bytes(payload)
             (overlay / 'index.html').write_bytes(b'<html>isolated QA</html>')
             qa_server.args = types.SimpleNamespace(qa=overlay, site=site, port=0)
-            server = qa_server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
+            server = qa_server.QAServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
             worker = threading.Thread(target=server.serve_forever, daemon=True)
             worker.start()
             connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=10)

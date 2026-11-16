@@ -8,7 +8,7 @@ const source=fs.readFileSync(path.join(__dirname,'../src/game.js'),'utf8');
 const code=source.slice(source.indexOf('function frame(now)'),source.indexOf('}refresh();requestAnimationFrame(frame)')+1);
 function frame(keys,{battling=false,modal=false,blocked=()=>false,zone=389,yaw=0}={}){
   const state={Math,last:0,t:0,cooldown:0,moving:false,facing:3,keys:{},controls:{state:()=>keys},
-    player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,document:{querySelector:()=>modal?{}:null},renderer:{ready:true,scene:{zone}},NativeRails:{cameraYaw:()=>yaw},worldDraws:0,drawWorld(){state.worldDraws++;},drawArena(){},
+    player:{x:-2,y:0},steps:0,battling,menuOpen:()=>modal,blocked,document:{querySelector:()=>modal?{}:null},renderer:{ready:true,scene:{zone},gl:{isContextLost:()=>false}},NativeRails:{cameraYaw:()=>yaw},worldDraws:0,drawWorld(){state.worldDraws++;},drawArena(){},
     window:{Journey:{step(dt,moved,distance){state.travel=distance;}}},requestAnimationFrame(){},startBattle(){throw Error('unexpected battle')}};
   vm.runInNewContext(code+';frame(40)',state);return state;
 }
