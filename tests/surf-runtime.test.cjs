@@ -40,7 +40,7 @@ test('later chapter ownership of Icirrus fields cannot bypass swimming collision
 });
 
 test('all currently teachable native HM species/forms have a world profile, including female and blue-striped graphics',async()=>{
- const c=await setup({finale:true}),fs=require('node:fs'),vm=require('node:vm');vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/field-hm-profiles.js'),'utf8'),c);
+ const c=await setup({finale:true}),fs=require('node:fs'),vm=require('node:vm');for(const file of ['field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',file),'utf8'),c);
  const expected=new Set();for(const [name,items]of Object.entries(c.TRAINING_DATA.compatibility))for(const [item,move]of [[420,15],[421,19],[422,57]])if(items.includes(item)){
   const id=c.TRAINING_DATA.progression[name]?.id;assert.ok(id,'Native species '+name);const mon={id,name};if(name==='Basculin-Blue-Striped')mon.id=699;
   const profile=c.FieldHMProfiles.profile(mon,move);assert.ok(profile,'Missing '+name+':'+move);expected.add(profile.graphic+':'+move);

@@ -1,4 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),os=require('os'),path=require('path'),build=require('../scripts/build-browser-qa.cjs');
+const vm=require('node:vm');
 function fixture(t){const parent=path.resolve(os.tmpdir()),dir=fs.mkdtempSync(path.join(parent,'soffiolieve-qa-'));t.after(()=>{assert.equal(path.dirname(path.resolve(dir)),parent);assert.ok(path.basename(dir).startsWith('soffiolieve-qa-'));fs.rmSync(dir,{recursive:true,force:true});});const site=path.join(dir,'site');fs.mkdirSync(site);const html='<html lang="it"><head><script>window.SpeciesStudioMode=["snivy"].some(x=>false);</script></head><body></body></html>';fs.writeFileSync(path.join(site,'index.html'),html);return {dir,site,html};}
 test('browser QA detaches save storage before app initialization and preserves the published index',t=>{const f=fixture(t),out=path.join(f.dir,'qa');build(f.site,out);const html=fs.readFileSync(path.join(out,'index.html'),'utf8');assert.ok(html.includes('window.SpeciesStudioMode=true;'));assert.ok(html.indexOf('DeepQAEarlyErrors')<html.indexOf('window.SpeciesStudioMode'));assert.ok(html.includes('/__qa/browser-qa.js'));assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),f.html);assert.ok(fs.existsSync(path.join(out,'browser-qa.js')));});
 test('browser QA refuses to write test controls into the published site',t=>{const f=fixture(t);assert.throws(()=>build(f.site,path.join(f.site,'qa')),/outside/);assert.equal(fs.readdirSync(f.site).length,1);});
@@ -32,4 +33,54 @@ test('the explicit Gym052 preview stays inside the QA index, filters future area
  build(f.site,path.join(f.dir,'fields'),{preview:'leagueFields'});const fields=fs.readFileSync(path.join(f.dir,'fields/index.html'),'utf8');assert.ok(fields.includes('052 native field components'));assert.ok(!fields.includes('LEAGUE_SCENES={121:'));assert.ok(fields.includes('src="league-camera-data.js"'));assert.ok(fields.includes('src="league-camera.js"'));assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),html);
  assert.throws(()=>build(f.site,path.join(f.dir,'bad'),{preview:'arbitrary'}),/Unsupported/);
  fs.unlinkSync(path.join(f.site,'league-gym-install.js'));assert.throws(()=>preview.inject(html,f.site),/Missing Gym052/);
+});
+
+function cutCaptureFixture055({contactProgress=.56,contactActor=true,bitmapFailure=false,encodeFailure=false,eventFailure=false}={}){
+ const script=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),start=script.indexOf(' function fieldHMFrameSnapshots055('),end=script.indexOf(' if(window.FieldHMWorld)for(const speed',start);
+ assert.ok(start>=0&&end>start,'Execute the real Cut QA capture, including its renderer observer');
+ const shots=[],speeds=[],snapshots=[],closed=[],tree={model:108,hidden:false},actor={fieldHM:true,texture:{},x:4,z:7,height:2};let forcedDraws=0,marker='initial',actorEnabled=true;
+ const field={active:null,retained:{},present(){return actorEnabled?[actor]:[];}},renderer={canvas:{},gl:{getError:()=>0},draw(){field.present(renderer);this.canvas.marker=marker;}};
+ const originalDraw=renderer.draw,originalPresent=field.present;
+ const story={state:{dreamyardTreeCut:false},interact(){
+  field.active={move:15,phase:'cut',elapsed:.33*2.4,duration:2.4,committed:false};marker='normal-preparation';renderer.draw();
+  field.active.elapsed=contactProgress*2.4;field.active.committed=true;tree.hidden=true;actorEnabled=contactActor;marker='normal-contact';renderer.draw();
+  story.state.dreamyardTreeCut=true;field.active=eventFailure?field.active:null;marker='recalled';return eventFailure?Promise.reject(Error('native event failed')):Promise.resolve();
+ }};
+ const context={renderer,FieldHMWorld:field,NativeStory:story,npcs:[tree],facing:0,performance,createImageBitmap(canvas){const snap={width:1280,height:720,marker:canvas.marker,close:()=>closed.push(snap.marker)};snapshots.push(snap);return new Promise((resolve,reject)=>queueMicrotask(()=>bitmapFailure&&snap.marker==='normal-contact'?reject(Error('bitmap snapshot failed')):resolve(snap)));},document:{createElement:()=>{const canvas={};canvas.getContext=()=>({drawImage:bitmap=>{canvas.marker=bitmap.marker;}});return canvas;}},GameSpeed:{set:v=>speeds.push(v)},OPENING_DATA:{Servine:{growth:{35:0}}},Journey:{state:{},pack:mon=>mon,displayPartner(){},addItem:()=>true,teachMachine:()=>Promise.resolve()},makeMon:()=>({pp:[10,20,30]}),seed049:async()=>{},fieldHMAudio054:async()=>{},enter049:async()=>{},auto049:async task=>await task,check:(ok,message)=>assert.ok(ok,message),shot:(label,canvas)=>{if(label.includes('prepara')||label.includes('contatto')){assert.equal(field.active,null,'Encoding must not run in the native action or its draw');if(encodeFailure)throw Error('PNG encoding failed');}shots.push({label,marker:canvas.marker});},drawWorld(){forcedDraws++;renderer.canvas.marker='forced-'+marker;}};
+ vm.runInNewContext(script.slice(start,end)+'\nglobalThis.runCutCapture055=cutAction054;',context,{filename:'browser-qa.js:Cut-render-capture'});
+ return {run:()=>context.runCutCapture055(4),shots,speeds,snapshots,closed,field,renderer,originalDraw,originalPresent,get forcedDraws(){return forcedDraws;}};
+}
+
+test('Cut QA captures preparation/contact before a completed native event can recall its actor',async()=>{
+ const f=cutCaptureFixture055(),result=await f.run();
+ assert.equal(result.captures.preparation.progress,.33);assert.equal(result.captures.contact.progress,.56);
+ assert.equal(result.captures.contact.committed,true);assert.equal(result.captures.contact.treeHidden,true);assert.equal(result.captures.contact.actualRendererFrame,true);assert.equal(result.captures.contact.fieldHMActor,true);
+ assert.equal(f.shots.find(s=>s.label.includes('prepara')).marker,'normal-preparation');assert.equal(f.shots.find(s=>s.label.includes('contatto')).marker,'normal-contact');
+ assert.deepEqual(f.snapshots.map(s=>s.marker),['normal-preparation','normal-contact']);assert.deepEqual(f.closed,['normal-preparation','normal-contact']);assert.equal(result.captures.contact.snapshot.deferredEncoding,true);assert.equal(result.captures.contact.snapshot.encodedAfterAction,true);assert.ok(result.captures.contact.snapshot.requestMs>=0&&result.captures.contact.snapshot.encodeMs>=0);
+ assert.equal(f.forcedDraws,2,'Only the before/outcome pictures may force a draw');assert.deepEqual(f.speeds,[4]);
+ assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);
+});
+
+test('Cut QA fails when normal rendering skips the contact window and restores its observers',async()=>{
+ const f=cutCaptureFixture055({contactProgress:.68});await assert.rejects(f.run(),/missed preparation\/contact windows/);
+ assert.equal(f.shots.some(s=>s.label.includes('contatto')),false);assert.equal(f.forcedDraws,1);assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);assert.deepEqual(f.speeds,[4]);
+ assert.deepEqual(f.closed,['normal-preparation']);
+});
+
+test('Cut QA cannot reuse a previous field actor when the contact draw has none',async()=>{
+ const f=cutCaptureFixture055({contactActor:false});await assert.rejects(f.run(),/missed preparation\/contact windows/);
+ assert.equal(f.shots.some(s=>s.label.includes('contatto')),false);assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);
+ assert.deepEqual(f.closed,['normal-preparation']);
+});
+
+test('Cut QA reports asynchronous bitmap failure and closes the snapshots that did resolve',async()=>{
+ const f=cutCaptureFixture055({bitmapFailure:true});await assert.rejects(f.run(),/bitmap snapshot failed/);assert.deepEqual(f.closed,['normal-preparation']);assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);
+});
+
+test('Cut QA closes every frozen frame even if deferred PNG encoding fails',async()=>{
+ const f=cutCaptureFixture055({encodeFailure:true});await assert.rejects(f.run(),/PNG encoding failed/);assert.deepEqual(f.closed,['normal-preparation','normal-contact']);assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);
+});
+
+test('Cut QA disposes captured frames without encoding when its native event fails',async()=>{
+ const f=cutCaptureFixture055({eventFailure:true});await assert.rejects(f.run(),/native event failed/);assert.deepEqual(f.closed,['normal-preparation','normal-contact']);assert.equal(f.shots.some(s=>s.label.includes('prepara')||s.label.includes('contatto')),false);assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);
 });

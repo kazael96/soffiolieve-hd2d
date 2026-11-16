@@ -37,3 +37,10 @@ Distinguere sempre sorgenti implementati, prove grafiche/automatiche e pubblicaz
 - Un errore di risorsa deve propagarsi al chiamante e consentire un nuovo tentativo, senza risolvere una promessa con un'interfaccia incompleta o rieseguire l'evento. La fixture deve installare i controlli anche con head HTML implicito e verificare che un guasto richiesto sia stato davvero iniettato.
 
 La cronologia operativa precedente è preservata fuori dalle build e nella storia Git. Per le modifiche future seguire gli standard A–H e gli inventari correnti, senza riattivare limiti o istruzioni di perimetro superati.
+
+## Coreografie MN esclusive · 16 novembre 2026
+
+Richiesta esplicita permanente: ciascuna delle 105 coppie specie/forma–MN sul campo già offerte (60 Taglio, 16 Volo, 29 Surf) deve avere una coreografia completamente esclusiva, con ordine di gesti, enfasi anatomica, traiettoria e recupero riconoscibili. Rinominare una famiglia o cambiarne soltanto grafica, velocità, dimensioni o ampiezza non soddisfa il requisito. Sono condivisibili effetti e codice; l'esclusività deve risultare dalle parti realmente renderizzabili in entrambe le viste e dalle prove grafiche, distinguendo sempre dati implementati, comandi effettivamente collaudati e pubblicazione. Applicare [FIELD-HMS-055.md](docs/FIELD-HMS-055.md) e [QA-055.md](docs/QA-055.md). Un PASS su riferimenti a pose fornite dalla fixture non certifica il comando effettivo o il rilascio; ogni correzione successiva del runtime richiede una nuova candidata e prove del suo codice esatto. I PASS di candidate precedenti restano storici e non si trasferiscono al runtime modificato.
+
+
+Il banco di compilazione delle fixture usa 256 voci / 96 MiB dopo la regressione reale del finale227 script: applicare il nuovo paragrafo di DEVELOPMENT-RULES, conservare baseline e isolamento dei contesti. Questo aggiornamento del banco non cambia il runtime del gioco né trasferisce un PASS alle49 fasi prima della loro conclusione.

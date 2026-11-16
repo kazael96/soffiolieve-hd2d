@@ -1,11 +1,11 @@
-# Soffiolieve HD-2D — 0.54
+# Soffiolieve HD-2D — 0.55
 
 Un progetto amatoriale di **Pokémon Nero** per browser, con ambienti HD-2D e
 risorse originali convertite dalla ROM fornita per lo sviluppo.
 
-I sorgenti **0.54** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
+I sorgenti **0.55** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
 cattura di Reshiram e le lotte con N e Ghecis. Non comprende il postgame.
-L'[accettazione locale](docs/QA-054.md) distingue i controlli superati dalla
+L'[accettazione locale](docs/QA-055.md) distingue i controlli superati dalla
 distribuzione. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
 indica la versione effettivamente servita da Pages.
 
@@ -36,6 +36,14 @@ La0.54 aggiunge il Pokémon che compie le MN nel mondo:60 profili di Taglio,
 salita/discesa, contatto, nuoto, decollo, atterraggio e richiamo; conserva
 permessi, PP, coste e undici destinazioni native della storia principale.
 [Matrice e origine delle animazioni](docs/FIELD-HMS-054.md).
+
+La 0.55 sostituisce i gesti condivisi con 105 sequenze esclusive per coppia
+Pokémon/forma–MN: preparazione, azione e recupero con ordine dei gesti distinto.
+Le parti originali sono articolate mediante mappe specifiche del campo,
+verificate sulle due viste native. [Matrice delle coreografie](docs/FIELD-HMS-055.md)
+e [prove della candidata](docs/QA-055.md) distinguono implementazione, verifica
+grafica e distribuzione effettiva.
+
 
 ## Storico delle prime versioni
 

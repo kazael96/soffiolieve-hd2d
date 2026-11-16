@@ -689,15 +689,15 @@
   async function click(label){await until(()=>document.getElementById('nativeMenu')?.open&&find(label),'Native Fly party button '+label,12000);find(label).click();await wait(0);assert049();}
   async function mapFromParty(){await NativeUI.team();await click('Unfezant');await click('VOLO');await until(()=>document.getElementById('townMap')?.open,'Native Fly map opens',12000);await until(()=>{const canvas=document.querySelector('#townMap .townmap-map');return canvas&&pixels(canvas).filter((v,i)=>i%4===3&&v>64).length>100;},'Native Fly map first painted frame',12000);}
   function back(id){const d=document.getElementById(id);check(d?.open,'Fly B target closed '+id);d.dispatchEvent(new KeyboardEvent('keydown',{key:'b',bubbles:true,cancelable:true}));d.dispatchEvent(new KeyboardEvent('keyup',{key:'b',bubbles:true,cancelable:true}));}
-  const before={zone:n.state.zone,player:{...player},pp:JSON.stringify(j.state.party[0].pp)},layouts=[],worldFrames=[],worldDraw=renderer.draw;let portrait;
-   if(window.FieldHMWorld)renderer.draw=function(...args){const result=worldDraw.apply(this,args),a=FieldHMWorld.active;if(a&&a.move===19){const samples=[['boarding','depart',.45,'054 Volo Unfezant sale sul campo'],['takeoff','depart',.85,'054 Volo Unfezant decollo'],['landing','arrive',1.5,'054 Volo Unfezant atterraggio']];for(const [key,phase,elapsed,label]of samples)if(a.phase===phase&&a.elapsed>=elapsed&&!worldFrames.some(f=>f.key===key)){check(!document.querySelector('#nativeMenu[open],#townMap[open]'),'Fly world frame covered by a native menu');worldFrames.push({key,phase,elapsed:a.elapsed,zone:n.state.zone,nativeMenuClosed:true,actualRendererFrame:true});flyShot(label,renderer.canvas);}}return result;};
+  const before={zone:n.state.zone,player:{...player},pp:JSON.stringify(j.state.party[0].pp)},layouts=[],worldFrames=[],worldFrameTrail=[],worldSnapshots=fieldHMFrameSnapshots055(flyShot);let portrait;
+  const stopWorldFrames=window.FieldHMWorld?observeFieldHMDraw055(({action:a,actor,progress,sequence})=>{if(a.move!==19)return;worldFrameTrail.push({phase:a.phase,progress,actor:!!actor});if(worldFrameTrail.length>32)worldFrameTrail.shift();const samples=[['boarding','depart',[.15,.35],'054 Volo Unfezant sale sul campo'],['takeoff','depart',[.35,.43],'054 Volo Unfezant decollo'],['landing','arrive',[.65,.75],'054 Volo Unfezant atterraggio']];for(const [key,phase,window,label]of samples){const windowMatches=(key==='takeoff'?progress>window[0]:progress>=window[0])&&progress<=window[1];if(a.phase===phase&&windowMatches&&actor&&!worldFrames.some(f=>f.key===key)){check(!document.querySelector('#nativeMenu[open],#townMap[open]'),'Fly world frame covered by a native menu');const frame={key,phase,elapsed:a.elapsed,duration:a.duration,progress,sequence,zone:n.state.zone,fieldHMActor:true,nativeMenuClosed:true,actualRendererFrame:true,captureWindow:window,...(key==='takeoff'?{captureLowerExclusive:true}:{}),actorPosition:{x:actor.x,z:actor.z,height:actor.height}};worldFrames.push(frame);worldSnapshots.capture(label,frame);}}}):()=>{};
   try{await mapFromParty();flyShot('049 Volo mappa originale',document.querySelector('#townMap .townmap-map'));back('townMap');await until(()=>!document.getElementById('townMap')&&document.getElementById('nativeMenu')?.open,'B returns from Fly map to party',12000);check(n.state.zone===before.zone&&Math.hypot(player.x-before.player.x,player.y-before.player.y)<1e-8,'Cancelled Fly changed field position');check(JSON.stringify(j.state.party[0].pp)===before.pp,'Cancelled Fly consumed PP');
    await click('Unfezant');await click('VOLO');await until(()=>document.getElementById('townMap')?.open,'Second native Fly map opens',12000);const map=document.getElementById('townMap'),select=map.querySelector('select');select.value='113';select.dispatchEvent(new Event('change',{bubbles:true}));check(map.querySelector('.townmap-fly').disabled,'Future city allowed Fly');select.value='28';select.dispatchEvent(new Event('change',{bubbles:true}));check(!map.querySelector('.townmap-fly').disabled,'Visited Castelia refused Fly');map.querySelector('.townmap-fly').click();
    await until(()=>{portrait=document.getElementById('nativeFlyCutIn');return portrait&&pixels(portrait).some((v,i)=>i%4===3&&v>64);},'Native female Fly cut-in rendered its first frame',12000);const rect=portrait.getBoundingClientRect();check(Math.abs(rect.width/rect.height-2)<.02,'Fly canvas aspect deformed');check(rect.width<=innerWidth+.5&&rect.height<=innerHeight+.5,'Fly canvas exceeds viewport');layouts.push({viewport:[innerWidth,innerHeight],canvas:[rect.width,rect.height],aspect:rect.width/rect.height});colorCheck(pixels(portrait));flyShot('049 Volo femmina Unfezant',portrait);
-   if(window.FieldHMWorld)await until(()=>worldFrames.length===3,'Fly boarding, takeoff and landing actually rendered');
-   await until(()=>n.state.zone===28&&!n.locked&&!document.getElementById('nativeFlyCutIn')&&document.getElementById('nativeMenu')?.open,'Fly returns control at Castelia',30000);const p=NativeRails.position(28,3,8,1);check(Math.hypot(player.x-p.x+16,player.y-p.z+16)<1e-7,'Fly Castelia native rail landing differs');check(n.state.railCurrent?.line===3,'Fly lost Castelia rail line');check(!blocked(player.x,player.y),'Fly destination blocked');check(JSON.stringify(j.state.party[0].pp)===before.pp,'Fly consumed battle PP');check(j.state.party[0].gender==='F','Fly lost actual female metadata');back('nativeMenu');await until(()=>document.getElementById('nativeMenu')?.open&&document.getElementById('nativeMenu').getAttribute('aria-label')==='Menu','Fly B returns from party to main menu');await wait(25);back('nativeMenu');await until(()=>!menuOpen(),'Second independent Fly B closes main menu');const scene=await scene049(speed===1?'049 Volo approdo Austropoli':'054 x'+speed+' 049 Volo approdo Austropoli',renderer.groundHeight(player.x,player.y));
+   if(window.FieldHMWorld){await until(()=>worldFrames.length===3||n.state.zone===28&&!n.locked&&!FieldHMWorld.active,'Fly normal-renderer frames or completed native arrival');check(worldFrames.length===3,'Fly normal renderer missed a required world frame, landing window .65-.75: '+JSON.stringify({worldFrames,trail:worldFrameTrail}));}
+   await until(()=>n.state.zone===28&&!n.locked&&!document.getElementById('nativeFlyCutIn')&&document.getElementById('nativeMenu')?.open,'Fly returns control at Castelia',30000);await worldSnapshots.flush();const p=NativeRails.position(28,3,8,1);check(Math.hypot(player.x-p.x+16,player.y-p.z+16)<1e-7,'Fly Castelia native rail landing differs');check(n.state.railCurrent?.line===3,'Fly lost Castelia rail line');check(!blocked(player.x,player.y),'Fly destination blocked');check(JSON.stringify(j.state.party[0].pp)===before.pp,'Fly consumed battle PP');check(j.state.party[0].gender==='F','Fly lost actual female metadata');back('nativeMenu');await until(()=>document.getElementById('nativeMenu')?.open&&document.getElementById('nativeMenu').getAttribute('aria-label')==='Menu','Fly B returns from party to main menu');await wait(25);back('nativeMenu');await until(()=>!menuOpen(),'Second independent Fly B closes main menu');const scene=await scene049(speed===1?'049 Volo approdo Austropoli':'054 x'+speed+' 049 Volo approdo Austropoli',renderer.groundHeight(player.x,player.y));
    return {fixture:'Seeded visited flags and a legal level35 female Unfezant; actual party buttons, native map and live field transition. No direct useFly call.',cancelReturnsToParty:true,cancelPreservesField:true,partyBackReturnsToMain:true,secondBackClosesMain:true,futureDestinationDisabled:true,selectedDestination:28,rail:{...n.state.railCurrent},ppPreserved:true,layouts,worldFrames,scene};
-  }finally{renderer.draw=worldDraw;if(document.getElementById('townMap')?.open)document.getElementById('townMap').querySelector('.townmap-close').click();for(let i=0;i<4&&document.getElementById('nativeMenu')?.open;i++){back('nativeMenu');await wait(20);}release049();GameSpeed.set(1);}
+  }finally{stopWorldFrames();try{await worldSnapshots.flush({encode:false});}finally{if(document.getElementById('townMap')?.open)document.getElementById('townMap').querySelector('.townmap-close').click();for(let i=0;i<4&&document.getElementById('nativeMenu')?.open;i++){back('nativeMenu');await wait(20);}release049();GameSpeed.set(1);}}
   }
  case049('qaFly049','Volo049: Squadra, mappa, B e approdo nativo','mistralton049-real-party-Fly-townmap-cancel-and-native-landing',()=>flyAction049());
  if(window.FieldHMWorld)for(const speed of [2,4])case049('qaFly054x'+speed,'Volo054 x'+speed+': Squadra e approdo nativo','field054-Fly-x'+speed+'-actual-menu-and-world-transition',()=>flyAction049(speed));
@@ -1595,21 +1595,86 @@
   return {before,castle,originalProgram:292,originalOpcode:191,actualA:true,dialogueChoices:true,storageRoundtrip:true,pageReload:false,cap:Training.limit(n),audioErrors:AudioEngine.errors.length-beforeErrors};
  });
 
+ // Freeze the real canvas now; encode/read back only after the native event.
+ // PNG encoding inside renderer.draw can stall RAF enough to skip x4 contact.
+ function fieldHMFrameSnapshots055(encodeShot){
+  const pending=[];
+  return {capture(label,metadata){const start=performance.now();let bitmap;try{bitmap=Promise.resolve(createImageBitmap(renderer.canvas)).then(value=>({value}),error=>({error}));}catch(error){bitmap=Promise.resolve({error});}metadata.snapshot={method:'createImageBitmap',requestMs:performance.now()-start,deferredEncoding:true};pending.push({label,metadata,bitmap});},async flush({encode=true}={}){let failure;for(const entry of pending.splice(0)){const {value,error}=await entry.bitmap;if(error){failure??=error;continue;}try{if(encode&&!failure){check(!FieldHMWorld.active||FieldHMWorld.active.done,'Encode HM frame only after its native action');const start=performance.now(),canvas=document.createElement('canvas');canvas.width=value.width;canvas.height=value.height;canvas.getContext('2d').drawImage(value,0,0);encodeShot(entry.label,canvas);Object.assign(entry.metadata.snapshot,{encodeMs:performance.now()-start,encodedAfterAction:true});}}catch(error){failure??=error;}finally{value.close();}}if(failure)throw failure;}};
+ }
+ // Observe only frames the existing renderer actually draws. The compositor
+ // must return the field actor in that same draw; a previous card cannot pass.
+ function observeFieldHMDraw055(onFrame){
+  const draw=renderer.draw,present=FieldHMWorld.present;let frame=null,sequence=0;
+  FieldHMWorld.present=function(...args){const actors=present.apply(this,args);if(frame&&args[0]===renderer)frame.actor=actors.find(a=>a.fieldHM&&a.texture)||null;return actors;};
+  renderer.draw=function(...args){const previous=frame,current={actor:null,sequence:++sequence};frame=current;try{const result=draw.apply(this,args),action=FieldHMWorld.active;if(action&&!action.done)onFrame({action,actor:current.actor,progress:action.elapsed/action.duration,sequence:current.sequence});return result;}finally{frame=previous;}};
+  return ()=>{renderer.draw=draw;FieldHMWorld.present=present;};
+ }
  async function cutAction054(speed=1){  await seed049({16532:5},[575,576,579,658,676,678,780]);NativeStory.state.dreamyardTreeCut=false;GameSpeed.set(speed);await fieldHMAudio054({silent:speed===4});
   const cutShot=(label,canvas)=>shot(speed===1?label:"054 x"+speed+" "+label,canvas);
   Journey.state.party=[Journey.pack(makeMon('Servine',35),OPENING_DATA.Servine.growth[35])];Journey.state.party[0].pp.pop();Journey.displayPartner();check(Journey.addItem(420,1),'Prepare native HM01');await auto049(Journey.teachMachine(420,0));
   await enter049(152,23,27);facing=0;const tree=npcs.find(n=>n.model===108&&!n.hidden);check(tree,'Native Cut tree missing');const beforePP=JSON.stringify(Journey.state.party[0].pp);drawWorld(true);cutShot('054 Taglio albero prima di A',renderer.canvas);
-  const event=auto049(NativeStory.interact());await until(()=>FieldHMWorld.active?.move===15,'World Cut action');await until(()=>FieldHMWorld.active?.elapsed>.75,'World Cut approach');drawWorld(true);cutShot('054 Taglio Servine prepara la lama',renderer.canvas);
-  await until(()=>tree.hidden,'World Cut contact commits native tree');drawWorld(true);cutShot('054 Taglio contatto e albero reciso',renderer.canvas);await event;
+  const renderedFrames=[],captures={},snapshots=fieldHMFrameSnapshots055(cutShot),stopFrames=observeFieldHMDraw055(({action:a,actor,progress,sequence})=>{
+   if(a.move!==15||a.phase!=='cut')return;renderedFrames.push({progress,committed:!!a.committed,treeHidden:!!tree.hidden,actor:!!actor});if(renderedFrames.length>32)renderedFrames.shift();if(!actor)return;
+   const stage=!a.committed&&!tree.hidden&&progress>=.30&&progress<=.45?'preparation':a.committed&&tree.hidden&&progress>=.52&&progress<=.61?'contact':null;if(!stage||captures[stage])return;
+   check(renderer.gl.getError()===0,'Cut normal-renderer WebGL '+stage);captures[stage]={phase:a.phase,progress,elapsed:a.elapsed,duration:a.duration,sequence,committed:!!a.committed,treeHidden:!!tree.hidden,fieldHMActor:true,actualRendererFrame:true,captureWindow:stage==='preparation'?[.30,.45]:[.52,.61],actorPosition:{x:actor.x,z:actor.z,height:actor.height}};snapshots.capture(stage==='preparation'?'054 Taglio Servine prepara la lama':'054 Taglio contatto e albero reciso',captures[stage]);
+  });
+  try{await auto049(NativeStory.interact());stopFrames();await snapshots.flush();}finally{stopFrames();await snapshots.flush({encode:false});}
+  check(captures.preparation&&captures.contact,'Cut normal renderer missed preparation/contact windows: '+JSON.stringify({captures,renderedFrames}));
   check(NativeStory.state.dreamyardTreeCut&&tree.hidden,'Native Cut flag was not committed');check(!FieldHMWorld.active,'Cut left a world action owner');check(JSON.stringify(Journey.state.party[0].pp)===beforePP,'Cut consumed battle PP');check(renderer.gl.getError()===0,'World Cut WebGL error');drawWorld(true);cutShot('054 Taglio richiamo e controllo restituito',renderer.canvas);
-  return {actualA:true,nativeHM:420,move:15,selectedPokemon:'Servine',worldBody:true,contactCommitsTree:true,ppPreserved:true,preparedProgression:'Munna event complete, native Cut tree restored only for this isolated test',retained:FieldHMWorld.retained};
+  return {actualA:true,nativeHM:420,move:15,selectedPokemon:'Servine',worldBody:true,contactCommitsTree:true,ppPreserved:true,captures,normalRendererCapture:true,suppliedFrames:false,preparedProgression:'Munna event complete, native Cut tree restored only for this isolated test',retained:FieldHMWorld.retained};
   }
  if(window.FieldHMWorld)for(const speed of [1,2,4])case049(speed===1?'qaCut054':'qaCut054x'+speed,'Taglio054 x'+speed+': corpo, contatto e richiamo','field054-actual-Cut-x'+speed+'-tree-interaction-and-world-body',()=>cutAction054(speed));
 
- async function worldHMMatrix054({offset=0,count=105,diagnosticPitch=null}={}){
+ // Score reference only: physical action time stays fully materialized while
+ // the actual world compositor receives each supplied phase/time/view pose.
+ // Real A/B commands, transfer timing and speed replays remain separate cases.
+ async function exclusiveHMProfile055(p,species){
+  const phases=p.move===15?['cut']:p.move===19?['depart','arrive','cruise']:['board','swim','idle','land'],times=[0,.12,.25,.38,.52,.67,.82,1],directions=[1,0];
+  const montage=document.createElement('canvas');montage.width=1600;montage.height=phases.length*2*200;const g=montage.getContext('2d');g.fillStyle='#cbdce0';g.fillRect(0,0,montage.width,montage.height);g.imageSmoothingEnabled=false;
+  const previous={sample:FieldHMProfiles.sample,facing,moving,pitch:renderer.cameraPitch},samples=[];let reference=null,supplied=null,rendered=0;
+  FieldHMProfiles.sample=function(profile,time,options={}){
+   if(!reference)return previous.sample.call(this,profile,time,options);
+   check(profile.graphic===p.graphic&&profile.move===p.move,'Exclusive055 compositor selected another profile '+p.graphic+':'+p.move);
+   supplied=previous.sample.call(this,profile,0,{...options,...reference});return supplied;
+  };
+  try{
+   check(typeof FieldHMWorld.inspectCard==='function'&&typeof FieldHMWorld.copyCard==='function','Exclusive055 native card inspection unavailable');
+   for(const [phaseIndex,phase]of phases.entries())for(const [viewIndex,direction]of directions.entries()){
+    const view=direction===0?'back':'front',row=phaseIndex*2+viewIndex;
+    for(const [column,progress]of times.entries()){
+     reference={phase,progress,cycle:progress,direction,moving:phase!=='idle'};supplied=null;facing=direction*3;moving=false;
+     const action=FieldHMWorld.active,physicalProgress=p.move===15?.52:p.move===19?.4:null;
+     if(action){const vector=[[0,-1],[0,1],[-1,0],[1,0]][direction];action.direction=direction;action.target={x:player.x+vector[0],y:player.y+vector[1]};action.phase=p.move===19?'depart':'cut';action.elapsed=action.duration*physicalProgress;action.canRetreat=false;}
+     else check(p.move===57&&SurfField.mounted()&&!NativeStory.state.surfMotion,'Exclusive055 Surf reference must be statically mounted');
+     renderer.center=SceneCamera.anchor(Journey.state.scene,renderer.scene,NativeStory.state.zone,player);renderer.elevation=NativeStory.state.fieldHeight||0;
+     drawWorld(true);check(renderer.ready&&renderer.gl.getError()===renderer.gl.NO_ERROR,'Exclusive055 WebGL '+p.graphic+':'+p.move+'/'+phase+'/'+view+'/'+progress);
+     const card=FieldHMWorld.inspectCard(renderer),label=p.graphic+':'+p.move+'/'+phase+'/'+view+'/'+progress;
+     check(card&&String(card.graphic)===String(p.graphic)&&card.move===p.move&&supplied,'Exclusive055 native composite missing or stale '+label);
+     if(card.riderUpperPixels>0)check(card.riderUpperVisibleFraction>=.95,'Exclusive055 rider head/torso obscured '+label+' '+card.riderUpperVisible+'/'+card.riderUpperPixels);
+     check(card.phase===phase&&card.choreography===p.choreography.id,'Exclusive055 wrong score/phase '+label);
+     check(Number.isFinite(card.bodyScaleX)&&card.bodyScaleX>0&&Number.isFinite(card.bodyScaleY)&&card.bodyScaleY>0,'Exclusive055 invalid body scale '+label);
+     check(Number.isFinite(card.seat)&&card.seat>0&&Math.abs(card.seat-p.height*p.seat*card.bodyScaleY)<1e-8,'Exclusive055 invalid scaled rider contact '+label);
+     check(supplied.back===(direction===0)&&supplied.direction===direction,'Exclusive055 wrong native view '+label);
+     const bounds=card.alphaBounds;check(bounds?.length===4&&bounds.every(Number.isFinite)&&bounds[2]>bounds[0]&&bounds[3]>bounds[1],'Exclusive055 empty native pixels '+label);
+     const margin=Math.min(bounds[0],bounds[1],512-bounds[2],512-bounds[3]);check(margin>=1,'Exclusive055 native card clips at its border '+label+' '+JSON.stringify(bounds));
+     const x=column*200,y=row*200;check(FieldHMWorld.copyCard(renderer,g,0,0,512,512,x+14,y+28,172,172),'Exclusive055 native composite copy failed '+label);
+     g.fillStyle='#172431';g.font='12px sans-serif';g.fillText(p.graphic+' '+species.en+' MN'+p.move,x+4,y+12,192);g.font='11px sans-serif';g.fillText(phase+' '+view+' t='+progress.toFixed(2),x+4,y+25,192);
+     samples.push({phase,view,direction,progress,cycle:progress,physicalProgress,graphic:card.graphic,choreography:card.choreography,bodyScaleX:card.bodyScaleX,bodyScaleY:card.bodyScaleY,seat:card.seat,alphaBounds:[...bounds],cardMargin:margin,riderUpperPixels:card.riderUpperPixels,riderUpperVisible:card.riderUpperVisible,riderUpperVisibleFraction:card.riderUpperVisibleFraction,riderRasterTolerancePx:card.riderRasterTolerancePx,riderUpperExactVisible:card.riderUpperExactVisible,riderUpperExactVisibleFraction:card.riderUpperExactVisibleFraction,glError:0});rendered++;
+    }
+    await wait(0);
+   }
+   check(rendered===phases.length*directions.length*times.length,'Exclusive055 incomplete profile timeline '+p.graphic+':'+p.move);
+   const snapshot='055-exclusive-'+p.move+'-'+p.graphic;shot(snapshot,montage);
+   return {phases,views:['front','back'],times,samples,snapshot,renderedWorldFrames:rendered,profilePhaseCount:phases.length,viewPhaseRows:phases.length*2,fixtureSuppliedPoses:true,actualHMCommand:false,gameplayOutcomesSupplied:false};
+  }finally{FieldHMProfiles.sample=previous.sample;facing=previous.facing;moving=previous.moving;renderer.cameraPitch=previous.pitch;}
+ }
+
+ async function worldHMMatrix054({offset=0,count=105,diagnosticPitch=null,exclusive=false,moveFilter=null}={}){
   await seed049({16532:5,16535:2},[575,576,579,658,676,678,780]);await IcirrusChapter.ensure();Journey.step=()=>{};AudioEngine.disable();panel.style.visibility='';
-  const profiles=[...FieldHMProfiles.profiles.values()].sort((a,b)=>a.move-b.move||String(a.graphic).localeCompare(String(b.graphic))).slice(offset,offset+count),records=[];let currentMove=null,shore=null,sheet=null,g=null,page=0,row=0;
+  const profiles=[...FieldHMProfiles.profiles.values()].sort((a,b)=>a.move-b.move||String(a.graphic).localeCompare(String(b.graphic))).slice(offset,offset+count).filter(p=>moveFilter===null||p.move===moveFilter),records=[];let currentMove=null,shore=null,sheet=null,g=null,page=0,row=0;
   function flush(){if(!sheet)return;shot('054 MN matrice '+String(++page).padStart(3,'0'),sheet);sheet=null;row=0;}
+  try{
+  check(profiles.length===count,'World HM matrix requested profile range/filter differs from inventory');
   for(const p of profiles){const started=performance.now();panel.dataset.hmProgress=JSON.stringify({completed:records.length,expected:profiles.length,graphic:p.graphic,move:p.move,loading:true});
    if(p.move!==currentMove){FieldHMWorld.clear();NativeStory.state.surf=false;delete NativeStory.state.surfMotion;delete NativeStory.state.surfUserIndex;currentMove=p.move;
     if(p.move===15){NativeStory.state.dreamyardTreeCut=true;await enter049(152,23,27);}
@@ -1620,6 +1685,13 @@
    }
    const species=GEN5.species.find(s=>s.id===p.species),mon={id:typeof p.graphic==='number'?p.graphic:p.species,name:p.graphic===699?'Basculin-Blue-Striped':species.en,gender:typeof p.graphic==='string'?'F':'M',level:35,pp:[{id:p.move,left:0}]};Journey.state.party=[mon];
    await FieldHMWorld.prepare(mon,p.move);const task=p.move===57?null:await FieldHMWorld.start(mon,p.move,{phase:p.move===19?'depart':'cut',direction:1,target:{x:player.x,y:player.y-1},height:NativeStory.state.fieldHeight||0,duration:2});
+   if(exclusive){
+    // clear() rejects unfinished actions on a failed reference assertion.
+    // Attach the rejection handler before any supplied pose can fail.
+    task?.finished.catch(()=>{});
+    const detail=await exclusiveHMProfile055(p,species);if(task){FieldHMWorld.tick(3);await task.finished;}
+    records.push({graphic:p.graphic,move:p.move,choreography:p.choreography.id,...detail,durationMs:Math.round(performance.now()-started)});panel.dataset.hmProgress=JSON.stringify({completed:records.length,expected:profiles.length,graphic:p.graphic,move:p.move,loading:false,exclusive:true});continue;
+   }
    if(!sheet){sheet=document.createElement('canvas');sheet.width=1152;sheet.height=1200;g=sheet.getContext('2d');g.fillStyle='#20353c';g.fillRect(0,0,1152,1200);}
    const samples=[];for(let column=0;column<4;column++){
     facing=column*3;if(FieldHMWorld.active){FieldHMWorld.active.direction=column;FieldHMWorld.active.canRetreat=undefined;const vector=[[0,-1],[0,1],[-1,0],[1,0]][column];FieldHMWorld.active.target={x:player.x+vector[0],y:player.y+vector[1]};FieldHMWorld.active.phase=p.move===19&&column===3?'arrive':p.move===19?'depart':'cut';FieldHMWorld.active.elapsed=2*(p.move===19?[.14,.25,.4,.8][column]:[.2,.46,.58,.9][column]);}
@@ -1628,9 +1700,25 @@
    }
    if(task){FieldHMWorld.tick(3);await task.finished;}records.push({graphic:p.graphic,move:p.move,samples,durationMs:Math.round(performance.now()-started)});panel.dataset.hmProgress=JSON.stringify({completed:records.length,expected:profiles.length,graphic:p.graphic,move:p.move,loading:false});row++;if(row===5)flush();
   }
-  flush();NativeStory.state.surf=false;delete NativeStory.state.surfUserIndex;FieldHMWorld.clear();check(records.length===count,'World HM matrix count');return {records,offset,profiles:count,renderedWorldFrames:count*4,actualGPU:true,diagnosticPitch,fixtureSuppliedPoses:true,gameplayOutcomesSupplied:false,scope:'Pose matrix uses explicit reference species including enemy-only graphics; actual HM interaction/timing is tested separately. Camera starts at the production anchor; cropped world frames use the actual projection.'};
+  check(records.length===count,'World HM matrix count');
+  if(exclusive)return {records,offset,profiles:count,moveFilter,renderedWorldFrames:records.reduce((sum,r)=>sum+r.renderedWorldFrames,0),profilePhaseCount:records.reduce((sum,r)=>sum+r.profilePhaseCount,0),viewPhaseRows:records.reduce((sum,r)=>sum+r.viewPhaseRows,0),snapshots:records.length,actualGPU:true,compositor:'FieldHMWorld with native sprite parts; original512-square card copied after drawWorld',fixtureSuppliedPoses:true,gameplayOutcomesSupplied:false,actualHMCommand:false,contactCheck:'Finite positive body scales and scaled seat; visual rider alignment requires PNG review',scope:'055 anatomy/timeline reference proof for every selected species/form-HM phase, both native views and eight normalized times. Physical Cut/Fly action time is held materialized; Surf is statically mounted. Actual HM commands, transfers, A/B controls, speed replays, gameplay outcomes and audible comparison are separate.'};
+  flush();return {records,offset,profiles:count,renderedWorldFrames:count*4,actualGPU:true,diagnosticPitch,fixtureSuppliedPoses:true,gameplayOutcomesSupplied:false,scope:'Pose matrix uses explicit reference species including enemy-only graphics; actual HM interaction/timing is tested separately. Camera starts at the production anchor; cropped world frames use the actual projection.'};
+  }finally{NativeStory.state.surf=false;delete NativeStory.state.surfMotion;delete NativeStory.state.surfUserIndex;FieldHMWorld.clear();}
  }
  if(window.FieldHMWorld){case049('qaWorldHMFly054','Volo054: tutte le16 anatomie da una riva libera','field054-all16-Fly-world-poses-unoccluded-reference',()=>worldHMMatrix054({offset:60,count:16}));case049('qaWorldHMMatrix054','MN054: tutte le105 anatomie nel renderer del mondo','field054-all105-species-form-HM-world-rendered-poses',()=>worldHMMatrix054());case049('qaWorldHMMatrixQuick054','MN054: prova15 anatomie e costo del collaudo','field054-first15-world-pose-matrix-budget-probe',()=>worldHMMatrix054({count:15}));case049('qaWorldHMCamera054','Diagnostica054: camera Taglio a62gradi','field054-Cut-high-camera-diagnostic-only',()=>worldHMMatrix054({count:15,diagnosticPitch:62}));}
+ if(window.FieldHMWorld){
+  for(const [id,label,offset,count,move]of [
+   ['qaHMExclusive055Cut','Taglio055:60 coreografie esclusive',0,60,15],
+   ['qaHMExclusive055Fly','Volo055:16 coreografie esclusive',60,16,19],
+   ['qaHMExclusive055Surf','Surf055:29 coreografie esclusive',76,29,57],
+   // Bounded alternatives cover the identical inventory without duplicate
+   // exports when the runner selects A+B instead of the corresponding full case.
+   ['qaHMExclusive055CutA','Taglio055: prima metà delle pose',0,30,15],
+   ['qaHMExclusive055CutB','Taglio055: seconda metà delle pose',30,30,15],
+   ['qaHMExclusive055SurfA','Surf055: prime15 coreografie',76,15,57],
+   ['qaHMExclusive055SurfB','Surf055: ultime14 coreografie',91,14,57]
+  ])case049(id,label,'field055-exclusive-reference-'+move+'-profiles-'+offset+'-'+count,()=>worldHMMatrix054({offset,count,exclusive:true,moveFilter:move}));
+ }
 
  if(window.FieldHMWorld)case049('qaFlyDockDiagnostic054','Diagnostica054: facciata davanti all’approdo di Volo','field054-Castelia-native-Fly-foreground-diagnostic-only',async()=>{
   await seed049({},[2480,2481,2482,2483,2484,2485,2486,2487]);Journey.step=()=>{};panel.style.visibility='';const destination=MISTRALTON_FLY_DATA.destinations.find(d=>d.zone===28),point=NativeRails.position(28,...destination.fly);NativeStory.state.railCurrent={zone:28,line:destination.fly[0],height:point.height};await enter049(28,point.x-.5,point.z-.5);facing=3;renderer.center=[player.x,player.y+1.5];renderer.elevation=renderer.groundHeight(player.x,player.y);drawWorld(true);shot('054 Diagnostica approdo Austropoli originale',renderer.canvas);
