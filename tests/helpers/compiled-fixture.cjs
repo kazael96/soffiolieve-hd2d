@@ -1,7 +1,7 @@
 /* Cache compilation only. Every invocation executes in its caller's fresh VM.
  * Exact source equality also covers edited files with unchanged timestamps. */
 const vm=require('node:vm');
-function create({maxEntries=192,maxBytes=96*1024*1024}={}){
+function create({maxEntries=256,maxBytes=96*1024*1024}={}){
  if(!Number.isInteger(maxEntries)||maxEntries<1||!Number.isInteger(maxBytes)||maxBytes<1)throw Error('Invalid fixture compilation budget');
  const cache=new Map();let bytes=0,compilations=0,hits=0;
  function run(source,context,{filename='fixture.js'}={}){

@@ -18,3 +18,14 @@ test('the actual field host reuses compilation without sharing party, native sta
  a.NativeStory.state.vars[16527]=99;a.NativeStory.state.flags.push(2421);a.NativeStory.state.extraItems={1:99};a.Journey.state.party.push({name:'fixture-only'});a.MISTRALTON_EVENTS.zones[97].actors[0].model=9999;
  const b=environment(options),after=cache.stats();assert.equal(after.compilations,before.compilations);assert.ok(after.hits-before.hits>70);assert.notEqual(b.NativeStory.state.vars[16527],99);assert.ok(!b.NativeStory.state.flags.includes(2421));assert.notEqual(b.NativeStory.state.extraItems?.[1],99);assert.ok(!b.Journey.state.party.some(p=>p.name==='fixture-only'));assert.notEqual(b.MISTRALTON_EVENTS.zones[97].actors[0].model,9999);
 });
+test('the actual finale host retains its complete compilation working set while isolating both contexts',t=>{
+ const path=require('node:path'),old=process.argv[2];process.argv[2]=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site');const {environment}=require('./check-story-runtime.cjs');process.argv[2]=old;
+ const cache=require('./helpers/compiled-fixture.cjs'),options={finale:true,finaleComponents:true,sourceRoot:path.resolve(__dirname,'../src')},initial=cache.stats(),start=performance.now(),a=environment(options),firstMs=performance.now()-start,before=cache.stats();
+ a.NativeStory.state.vars[16527]=99;a.NativeStory.state.flags.push(65432);a.NativeStory.state.extraItems={1:99};a.Journey.state.party.push({name:'finale-fixture-only'});a.MISTRALTON_EVENTS.zones[97].actors[0].model=9999;a.fixtureOnly={value:1};
+ const secondStart=performance.now(),b=environment(options),secondMs=performance.now()-secondStart,after=cache.stats();
+ t.diagnostic(JSON.stringify({firstMs,secondMs,first:{compilations:before.compilations-initial.compilations,hits:before.hits-initial.hits,entries:before.entries,sourceBytes:before.sourceBytes},second:{compilations:after.compilations-before.compilations,hits:after.hits-before.hits,entries:after.entries,sourceBytes:after.sourceBytes}}));
+ assert.notEqual(a,b);assert.notEqual(a.NativeStory.state,b.NativeStory.state);assert.notEqual(a.Journey.state.party,b.Journey.state.party);assert.notEqual(a.NativeStory.state.flags,b.NativeStory.state.flags);assert.equal(b.fixtureOnly,undefined);
+ assert.notEqual(b.NativeStory.state.vars[16527],99);assert.ok(!b.NativeStory.state.flags.includes(65432));assert.notEqual(b.NativeStory.state.extraItems?.[1],99);assert.ok(!b.Journey.state.party.some(p=>p.name==='finale-fixture-only'));assert.notEqual(b.MISTRALTON_EVENTS.zones[97].actors[0].model,9999);
+ assert.ok(before.entries<=256);assert.ok(after.entries<=256);assert.ok(before.sourceBytes<=96*1024*1024);assert.ok(after.sourceBytes<=96*1024*1024);
+ assert.equal(after.compilations,before.compilations,'A second complete finale fixture must not recompile evicted scripts');assert.ok(after.hits-before.hits>192,'Exercise the finale working set beyond the former entry limit');
+});

@@ -23,16 +23,20 @@
  rows(15,'hornCut',[[586,2.35,.6,1.8,.38],[704,2.35,.6,1.8,.38],[705,2.35,.6,1.8,.38],[706,2.35,.6,1.8,.38],[610,1.55,.6,2.4,.27],[611,2.05,.6,2,.34],[612,2.6,.6,1.7,.42],[624,1.65,.6,2.5,.3],[625,2.35,.6,2,.4],[626,2.35,.6,1.6,.38]]);
  rows(15,'beakCut',[[629,1.8,.6,2.5,.26],[630,2.3,.6,2,.34]]);
  function profile(mon,move){const graphic=root.PokemonVisuals?.graphic(mon)??mon.graphic??mon.id;return profiles.get(graphic+':'+move)||null;}
- function sample(p,time,{phase='cruise',progress=0,direction=1,moving=true}={}){
+ for(const [key,p]of profiles)profiles.set(key,Object.freeze({...p,choreography:root.FieldHMChoreography.get(p.graphic,p.move)}));
+ function fit(p,out){out.bodyScaleX=1+out.stretch+out.crouch*.32;out.bodyScaleY=1+out.squash-out.crouch;out.seat=out.height*p.seat*out.bodyScaleY;return out;}
+ function sample(p,time,{phase='cruise',progress=0,direction=1,moving=true,cycle=null}={}){
   if(!p)throw Error('Profilo MN sul campo mancante');
-  const t=clamp(progress),beat=Math.sin(time*Math.PI*2*p.cadence),active=moving?1:.25;
-  const out={graphic:p.graphic,species:p.species,direction,back:direction===0,flip:direction===3,height:p.height,seat:p.height*p.seat,bob:0,lean:0,arms:0,feet:0,tail:0,head:0,reach:0,scale:1,jets:0,phase};
-  if(p.move===57){out.bob=.025*beat-p.height*p.immersion;out.arms=(p.kind==='bellSwim'?.55:.65)*beat*active;out.feet=p.kind==='paddle'||p.kind==='waterBird'?.6*beat*active:0;out.tail=(p.kind==='tailSwim'?1.3:.3)*beat*active;out.lean=(p.kind==='tailSwim'?.045:.015)*beat*active;if(p.kind==='bellSwim')out.height*=1+.025*beat;}
-  if(p.move===19){out.arms=p.kind==='rocketFlight'?.1:1.9*beat;out.feet=-.2;out.tail=.45*beat;out.bob=.05*beat;out.lean=.035*beat;if(p.kind==='rocketFlight'){out.jets=phase==='depart'?ease((t-.25)/.15):phase==='arrive'?1-ease((t-.65)/.15):1;out.feet-=.9*out.jets;}}
-  if(p.move===15){const swing=Math.sin(Math.PI*clamp((t-.18)/.64)),wind=ease(t/.24)*(1-ease((t-.72)/.28));out.reach=p.reach*swing;out.lean=-.12*swing;out.head=['mandibleCut','hornCut','beakCut'].includes(p.kind)?-.9*swing:-.15*wind;out.arms=['clawCut','shellCut','leafCut'].includes(p.kind)?1.8*swing:.2*wind;out.tail=p.kind==='finCut'?1.5*swing:.3*wind;out.feet=.18*Math.sin(t*Math.PI*4)*wind;out.contact=t>=.47&&t<=.61;}
-  if(p.kind==='levitateSwim')out.bob+=.25;
-  if(p.move===15&&p.kind==='finCut')out.bob+=.12*Math.sin(Math.PI*clamp((t-.18)/.64));
-  out.seat=out.height*p.seat;return out;
+  const t=clamp(progress),u=cycle===null?((time*p.cadence)%1+1)%1:clamp(cycle);
+  const actualPhase=p.move===15?'cut':p.move===19?(['depart','arrive'].includes(phase)?phase:'cruise'):['board','land','idle','swim'].includes(phase)?phase:moving?'swim':'idle';
+  const pose=root.FieldHMChoreography.sample(p.choreography,actualPhase,['cruise','swim','idle'].includes(actualPhase)?u:t);
+  if(p.move===19&&actualPhase!=='cruise'){const airborne=actualPhase==='depart'?ease(clamp((t-.35)/.15)):1-ease(clamp((t-.5)/.15)),weight=.65*airborne,cruise=root.FieldHMChoreography.sample(p.choreography,'cruise',u);for(const key of ['arms','wings','tail','sideHeads'])pose[key]=pose[key]*(1-weight)+cruise[key]*weight;}
+  const out={graphic:p.graphic,species:p.species,direction,back:direction===0,flip:direction===3,height:p.height,seat:p.height*p.seat,bob:0,reach:0,scale:1,phase:actualPhase,...pose};
+  fit(p,out);
+  if(p.move===57){out.bob=-p.height*p.immersion+.015*Math.sin(u*Math.PI*2);if(p.kind==='levitateSwim')out.bob+=.25;}
+  out.seat=out.height*p.seat*out.bodyScaleY;
+  if(p.move===15){out.reach=p.reach*Math.sin(Math.PI*t);out.contact=t>=.47&&t<=.61;}
+  out.choreography=p.choreography.id;return out;
  }
- const api={profiles,profile,sample};root.FieldHMProfiles=api;if(typeof module!=='undefined')module.exports=api;
+ const api={profiles,profile,sample,fit};root.FieldHMProfiles=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);
