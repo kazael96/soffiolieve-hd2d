@@ -1,6 +1,6 @@
-# MN sul campo · candidata 0.54
+# MN sul campo · 0.54
 
-La storia principale è consegnata nella 0.53: PR47 integrata, controlli automatici e Pages superati, codice pubblico verificato e avvio a freddo provato nel browser isolato. Rapporto di accettazione: [QA-053-FINAL.md](QA-053-FINAL.md). La 0.54 è una candidata privata; le prove grafiche disponibili e i controlli ancora necessari sono distinti sotto.
+La storia principale è consegnata nella0.53: [QA-053-FINAL.md](QA-053-FINAL.md). La0.54 aggiunge le MN personalizzate nel mondo; prove della candidata08 `e5adb3a82063de78` in [QA-054.md](QA-054.md). Distribuzione effettiva identificata dal [manifest Pages](https://kazael96.github.io/soffiolieve-hd2d/build.json).
 
 ## Perimetro e origine
 
@@ -16,21 +16,19 @@ I fogli originali dei Pokémon e del protagonista vengono composti nel renderer 
 
 Le risorse trattengono un solo banco Pokémon fissato e una texture dinamica riutilizzabile di 1 MiB per renderer. Il ripristino del contesto elimina la texture precedente. Una preparazione sostituita non può cambiare la specie attiva. I fallimenti delle risorse non applicano gli esiti delle azioni.
 
-## Regressioni e stato delle prove
+## Regressioni e prove
 
-La candidata07 ha completato tutti i49 stadi automatici (1300.846s), ma una nuova regressione indipendente ha trovato la sparizione temporanea del nuotatore durante il caricamento della forma evoluta. La correzione08 conserva una copia dell’identità grafica già pronta e riusa la stessa texture finché il nuovo banco è completo;68 controlli mirati passati. Questa modifica richiede nuova build e replay grafici prima della consegna. I rapporti07 sotto restano prove storiche, senza certificare la08.
+La candidata08 ha superato68 controlli mirati. Le regressioni hanno riprodotto identità del nuotatore persa, cambio della squadra durante la preparazione, migrazione dei salvataggi, permesso di camminare sull'acqua aggirato dalla proprietà successiva della scena e perdita GPU prima della notifica DOM. Sono conservati i relativi FAIL precedenti; il controllo effettivo WebGL rimane nel runtime e nei simulatori completi.
 
-Tre nuovi test hanno riprodotto l'assenza dell'identità del nuotatore, la sostituzione della squadra durante il caricamento e la migrazione dei vecchi salvataggi; fallivano prima della correzione. È stato inoltre riprodotto un problema precedente: la proprietà successiva delle mappe di Mistralopoli aggirava il controllo dell'acqua. Il nuovo test falliva camminando sull'acqua; la correzione dà precedenza ai permessi di Surf per il giocatore, conservando i percorsi degli NPC.
+La forma evoluta mantiene visibile il banco della forma precedente fino alla preparazione di entrambe le viste nuove, poi lo sostituisce usando la stessa texture. Il replay esegue realmente Dewott35→Samurott36 durante Surf, con risorsa503-back ritardata, PP0, controllo dell'assenza del supporto generico e roundtrip del salvataggio isolato. È passato nei tre formati.
 
-Il confronto numerico comprende tutte le105 coppie. Sono passati67 controlli mirati, incluse immersione, orientamento est indipendente del protagonista, quote di richiamo, due orientamenti preparati, migrazioni e gestione delle risorse. Sono passati anche i due controlli Python del server locale.
+Il rapporto `browser-field08-all-world-second` ha superato16 casi per formato,48 in totale: menu a freddo con errore e recupero, Borsa, Interpoké, Taglio/Volo/Surf a×1/×2/×4, Surf→Volo, evoluzione e matrice105×4 pose. Esaminati tutti i258 PNG. Le16 coppie di Volo usano una riva nativa leggibile; le occlusioni fisiche del mulino restano presenti. Le catture di salita, decollo e atterraggio provengono dai fotogrammi realmente disegnati, senza un disegno forzato dalla fixture. Il precedente timeout del polling a×4 resta conservato.
 
-La candidata07 `9c67100e2cd06ff6` ha renderizzato105×4 pose in ciascuno dei tre formati. Sono stati esaminati tutti i66 PNG; le pose al suolo di Volo nel riferimento cittadino erano parzialmente nascoste dagli edifici, quindi non sono state accettate come prova completa dell'anatomia. Le16 coppie di Volo sono state ripetute sulla stessa candidata da una riva nativa:64 pose per formato, tutte superate,15 PNG esaminati. La copertura delle105 coppie combina Taglio60 e Surf29 della prima matrice con Volo16 della seconda. Si tratta di fotogrammi rappresentativi delle fasi, non di ogni fotogramma di ogni possibile luogo di partenza.
+Il rapporto `browser-field08-real-finale` ha ripetuto vera cattura di Reshiram, lotte contro N e Ghecis e FINE nei tre formati;24 PNG esaminati. Prerequisiti e limiti sono dichiarati in QA-054. I rapporti07 restano storici: il loro PASS non sostituisce le nuove prove08.
 
-I replay effettivi07 nei tre formati hanno superato Taglio, Volo e Surf a×1/×2/×4, comprese due vere perdite/riprese GPU durante ogni prova di Surf×2. Il cambio dal Dewott nuotatore a Unfezant con Volo è passato anche senza scendere prima a riva. Il primo tentativo06 aveva riprodotto una condizione di gara: il contesto GPU era già perso prima della relativa notifica DOM e il caricamento della texture MN generava un errore permanente. La regressione fallisce sulla06 e passa sulla07: presentazione e ciclo del gioco controllano lo stato effettivo del contesto prima di caricare. Lo stato di prova di Volo è isolato dalle visite lasciate dalla precedente prova di Surf; la migrazione del gioco non è stata indebolita.
+Volo comprende undici destinazioni della storia principale. Le tre aggiunte sono ricavate dalla ROM: Mistralopoli113, Boreduopoli120 e Lega136. I427 header e le prime otto destinazioni restano identici. La migrazione richiede prove della visita; otto medaglie da sole non sbloccano la Lega.
 
-Volo comprende undici destinazioni della storia principale. Le tre aggiunte sono ricavate dalla ROM: Mistralopoli113, Boreduopoli120 e Lega136; non sono gli header degli interni dei Centri Pokémon. I427 header e le prime otto destinazioni rimangono identici. La migrazione richiede prove della visita, senza sbloccare la Lega per il solo possesso di otto medaglie.
-
-Matrice e replay effettivi di Taglio, Volo e Surf hanno superato i tre formati, comprese velocità×1/×2/×4 e due riprese GPU di Surf×2. Il cambio diretto dal Dewott nuotatore a Unfezant con Volo è passato nei tre formati. Sono stati esaminati tutti i PNG dei rapporti accettati; i tentativi falliti restano conservati. Restano necessari regressione del finale, suite completa, CI e verifica del codice pubblico. I rapporti falliti sono preservati. Le candidate01–06 sono archiviate integralmente mediante base e delta verificati e rimosse secondo H.8. Restano la0.52 per confronti, la0.53 verificata e la candidata07. Rapporti e PNG sono conservati in `outputs/chapter054-preparation`, fuori dalle build. Il browser è headless con rendering software e salvataggi isolati; non certifica una GPU Android fisica né un confronto udibile con la cartuccia.
+Suite completa di49 stadi, CI del commit esatto e verifica Pages restano criteri obbligatori di consegna. I rapporti sono conservati fuori dalle build in `outputs/chapter054-preparation`. Le candidate01–07 sono state preservate integralmente con base+delta e inventari SHA256 verificati prima della rimozione H.8. Nessun archivio, sorgente, ROM o rapporto viene rimosso con le copie generate obsolete.
 
 ## Matrice dei105 profili verificati su fotogrammi rappresentativi
 
