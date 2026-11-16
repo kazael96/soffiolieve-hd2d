@@ -5,8 +5,16 @@ test('live stage evidence appears before completion and a nonzero exit retains b
  let early='';for(let i=0;i<50;i++){await new Promise(done=>setTimeout(done,20));try{early=fs.readFileSync(path.join(out,'live.log'),'utf8');}catch{}if(early.includes('started'))break;}
  assert.match(early,/started/);assert.doesNotMatch(early,/finished/);const result=await pending;assert.equal(result.result,'FAIL');assert.equal(result.exitCode,7);assert.match(fs.readFileSync(path.join(out,result.log),'utf8'),/started[\s\S]*finished/);
 }));
-test('stalled processes keep partial evidence and fail at the original explicit budget',async()=>fixture(async out=>{
- const r=await run('timeout',process.execPath,['-e','console.log("before stall");setInterval(()=>{},1000)'],{out,timeout:500});assert.equal(r.result,'FAIL');assert.match(r.error,/exceeded 500ms/);assert.match(fs.readFileSync(path.join(out,r.log),'utf8'),/before stall[\s\S]*exceeded 500ms/);
+test('a stalled native process fails at the original explicit budget including startup',async()=>fixture(async out=>{
+ const r=await run('timeout',process.execPath,['-e','console.log("before stall");setInterval(()=>{},1000)'],{out,timeout:500});assert.equal(r.result,'FAIL');assert.match(r.error,/exceeded 500ms/);assert.match(fs.readFileSync(path.join(out,r.log),'utf8'),/exceeded 500ms/);
+}));
+test('output already emitted by a stalled child is retained before timeout and flushed after close',async()=>fixture(async out=>{
+ // Inject only the OS process port: startup latency cannot determine whether this
+ // test has emitted evidence. The real-child test above still budgets startup.
+ const {EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),vm=require('node:vm'),child=new EventEmitter();child.stdout=new PassThrough();child.stderr=new PassThrough();let killed=0,closed=false,spawned=0;
+ child.kill=()=>{killed++;queueMicrotask(()=>{child.stdout.end();child.stderr.end();closed=true;child.emit('close',null);});return true;};
+ const module={exports:{}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../scripts/stage-runner.cjs'),'utf8'),{module,process,Date,setTimeout,clearTimeout,require:id=>id==='node:child_process'?{spawn(){spawned++;queueMicrotask(()=>child.stdout.write('before stall\n'));return child;}}:require(id)});
+ const r=await module.exports('emitted-timeout','fixture-child',[],{out,timeout:500});assert.equal(spawned,1);assert.equal(killed,1);assert.equal(closed,true);assert.equal(r.result,'FAIL');assert.match(r.error,/exceeded 500ms/);assert.match(fs.readFileSync(path.join(out,r.log),'utf8'),/before stall[\s\S]*exceeded 500ms/);
 }));
 test('spawn failure and excess output cannot become a passing stage; successful stages flush all evidence',async()=>fixture(async out=>{
  const missing=await run('missing',path.join(out,'absent.exe'),[],{out,timeout:1000});assert.equal(missing.result,'FAIL');assert.match(missing.error,/process failed/);
