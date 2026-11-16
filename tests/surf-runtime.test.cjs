@@ -1,7 +1,7 @@
 /* Native map/controller integration; browser rendering is a separate proof. */
 const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
 const old=process.argv[2];process.argv[2]=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site');const {environment,drain}=require('./check-story-runtime.cjs');process.argv[2]=old;
-async function setup(){const c=environment({icirrus:true,sourceRoot:path.resolve(__dirname,'../src')});await c.IcirrusChapter.ensure();const n=c.NativeStory.state,j=c.Journey;Object.assign(n,{intro:true,initialized:true,badges:[0,1,2,3,4,5],flags:[575,576,579,658,676,678,780]});n.vars[16535]=2;j.state.starter='Snivy';j.state.phase='icirrus';j.state.party=['Servine','Dewott'].map(name=>j.pack(c.makeMon(name,35),c.OPENING_DATA[name].growth[35]));j.state.party[1].pp[0]={id:57,left:0};j.displayPartner();return c;}
+async function setup({finale=false}={}){const c=environment({icirrus:true,finale,sourceRoot:path.resolve(__dirname,'../src')});await c.IcirrusChapter.ensure();const n=c.NativeStory.state,j=c.Journey;Object.assign(n,{intro:true,initialized:true,badges:[0,1,2,3,4,5],flags:[575,576,579,658,676,678,780]});n.vars[16535]=2;j.state.starter='Snivy';j.state.phase='icirrus';j.state.party=['Servine','Dewott'].map(name=>j.pack(c.makeMon(name,35),c.OPENING_DATA[name].growth[35]));j.state.party[1].pp[0]={id:57,left:0};j.displayPartner();return c;}
 function shore(c,z=113){for(const g of c.ICIRRUS_SCENES[z].permissionGrids)for(let y=0;y<32;y++)for(let x=0;x<32;x++){
  const px=g.x+x-15.5,py=g.z+y-15.5,land=c.IcirrusChapter.surfaceAt(z,px,py,0);if(!land||(land.flags&3))continue;
  for(const[dir,[dx,dy]]of [[0,[0,-1]],[1,[0,1]],[2,[-1,0]],[3,[1,0]]]){const front=c.IcirrusChapter.surfaceAt(z,px+dx,py+dy,land.height),cells=[65,68].includes(front?.behavior)?2:1,at=c.IcirrusChapter.surfaceAt(z,px+dx*cells,py+dy*cells,land.height);if(at&&(at.flags&3)===2)return {x:px,y:py,height:land.height,dir,cells,water:{x:px+dx*cells,y:py+dy*cells,height:at.height}};}
@@ -22,9 +22,40 @@ test('Surf native tables do not fall back to land encounters on water without en
 test('old saves stay compatible and malformed shoreline tasks do not invalidate the party',async()=>{
  const c=await setup();c.NativeStory.state.surfMotion={zone:999,from:{x:NaN},phase:'move'};c.Journey.save(true);const loaded=c.StoryState.read(c.localStorage);assert.equal(loaded.party.length,2);assert.equal(loaded.original.surfMotion,undefined);
 });
+
+test('party swaps keep the actual selected Surf Pokémon and its sex/form across save loading',async()=>{
+ const c=await setup(),n=c.NativeStory.state,selected=c.Journey.state.party[1];n.surf=true;n.surfUserIndex=1;
+ assert.equal(c.Journey.moveParty(0,1),true);assert.equal(n.surfUserIndex,0);assert.equal(c.Journey.state.party[n.surfUserIndex],selected);
+ assert.ok(c.Journey.save(true));const loaded=c.StoryState.read(c.localStorage);assert.equal(loaded.original.surfUserIndex,0);assert.equal(loaded.party[0].name,'Dewott');
+ assert.equal(c.Journey.moveParty(0,1),true);assert.equal(n.surfUserIndex,1);assert.equal(c.Journey.state.party[n.surfUserIndex],selected);
+});
+
+test('later chapter ownership of Icirrus fields cannot bypass swimming collision permissions',async()=>{
+ const c=await setup({finale:true}),p=shore(c);await drain(c,c.NativeStory.changeZone(113,p.x+783.5,p.y+751.5,p.height));c.facing=p.dir*3;
+ assert.equal(c.renderer.scene.chapter051,true,'Exercise the later shared-map owner');
+ assert.equal(c.blocked(p.water.x,p.water.y,{surf:true}),true,'Walking must not bypass the native water flag');
+ c.NativeStory.state.surf=true;c.NativeStory.state.surfUserIndex=1;Object.assign(c.player,p.water);c.NativeStory.state.fieldHeight=p.water.height;
+ assert.equal(c.blocked(p.water.x,p.water.y,{surf:true}),false,'The native water tile supports swimming');
+ assert.equal(c.blocked(p.x,p.y,{surf:true}),true,'Only a shore transition can dismount onto land');assert.equal(c.blocked(p.x,p.y),false,'NPC land paths remain unchanged');
+});
+
+test('all currently teachable native HM species/forms have a world profile, including female and blue-striped graphics',async()=>{
+ const c=await setup({finale:true}),fs=require('node:fs'),vm=require('node:vm');vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/field-hm-profiles.js'),'utf8'),c);
+ const expected=new Set();for(const [name,items]of Object.entries(c.TRAINING_DATA.compatibility))for(const [item,move]of [[420,15],[421,19],[422,57]])if(items.includes(item)){
+  const id=c.TRAINING_DATA.progression[name]?.id;assert.ok(id,'Native species '+name);const mon={id,name};if(name==='Basculin-Blue-Striped')mon.id=699;
+  const profile=c.FieldHMProfiles.profile(mon,move);assert.ok(profile,'Missing '+name+':'+move);expected.add(profile.graphic+':'+move);
+  if([521,592,593].includes(id)){const female=c.FieldHMProfiles.profile({...mon,gender:'F'},move);assert.ok(female,'Missing female '+name+':'+move);expected.add(female.graphic+':'+move);}
+ }
+ assert.equal(expected.size,105);assert.deepEqual([...c.FieldHMProfiles.profiles.keys()].sort(),[...expected].sort());
+});
 module.exports={setup,shore};
 
 test('all original Surf directions put the visible feet on the native support surface',async()=>{
  const c=await setup();await c.SurfField.prepareAssets();c.NativeStory.state.surf=true;c.NativeStory.state.fieldHeight=-1.5;
  for(const [direction,padding]of [[0,.1875],[1,.25],[2,.25],[3,.25]]){const pose=c.SurfField.actor(direction*3);assert.ok(Math.abs(pose.height+padding-(-1.5+.08792))<1e-6,'Original sprite/model contact '+direction);}
+});
+
+test('Fly rider preparation loads only the native sprite catalog, deferring Surf geometry',async()=>{
+ const c=await setup();let chapterLoads=0,modelLoads=0;const ensure=c.IcirrusChapter.ensure,load=c.StarterScene.loadGLB;c.IcirrusChapter.ensure=async(...args)=>{chapterLoads++;return ensure(...args);};c.StarterScene.loadGLB=async(...args)=>{modelLoads++;return load(...args);};
+ await c.SurfField.prepareRiderAssets();assert.ok(c.SURF_FIELD_ASSETS.sprites.AlcideSurf.length>=12);assert.equal(chapterLoads,0);assert.equal(modelLoads,0);await c.SurfField.prepareAssets();assert.equal(chapterLoads,1);assert.equal(modelLoads,2);await c.SurfField.prepareAssets();assert.equal(modelLoads,2,'Warm rider preparation must not reload the water models');
 });

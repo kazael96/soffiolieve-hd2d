@@ -30,3 +30,31 @@ test('saving halfway through a shoreline crossing resumes without jumping',async
 test('a foreign-map or malformed shoreline task is rejected',async()=>{
  const {task,n}=setup();await task.start();n.surfMotion.travel=NaN;assert.equal(task.restore(),false);assert.equal(n.surfMotion,undefined);
 });
+
+test('Surf remembers the selected swimmer across a saved crossing and clears it on landing',async()=>{
+ const a=setup();a.party.push({name:'Second swimmer',pp:[{id:57,left:0}]});
+ assert.ok(await a.task.start(1));assert.equal(a.n.surfUserIndex,1);
+ const b=setup();b.party.push(a.party[1]);Object.assign(b.n,JSON.parse(JSON.stringify(a.n)));assert.ok(b.task.restore());assert.equal(b.n.surfUserIndex,1);
+ for(let i=0;i<100&&b.task.busy;i++)b.task.tick(1/60);
+ assert.ok(b.task.tryLanding(-1,0));for(let i=0;i<100&&b.task.busy;i++)b.task.tick(1/60);
+ assert.equal(b.n.surf,false);assert.equal(b.n.surfUserIndex,undefined);
+});
+
+test('a party replacement during resource preparation cannot silently change the swimmer',async()=>{
+ let ready,prepared;const a=setup({prepare:mon=>{prepared=mon;return new Promise(resolve=>ready=resolve);}}),chosen=a.party[0],pending=a.task.start(0);
+ assert.equal(prepared,chosen);a.party[0]={pp:[{id:57,left:0}]};ready();assert.equal(await pending,false);assert.notEqual(a.n.surf,true);assert.equal(a.n.surfUserIndex,undefined);
+});
+
+test('old mounted saves choose a swimmer without adding HP, PP or badge restrictions',()=>{
+ const a=setup();a.p.x=1.5;a.n.surf=true;assert.ok(a.task.restore());assert.equal(a.n.surfUserIndex,0);
+ a.n.surfUserIndex=99;assert.ok(a.task.restore());assert.equal(a.n.surfUserIndex,0);
+ a.n.surf=false;a.task.restore();assert.equal(a.n.surfUserIndex,undefined);
+});
+
+test('shore landing keeps the swimmer through recall and resumes that visual phase after saving',async()=>{
+ const a=setup();await a.task.start();while(a.task.busy)a.task.tick(1/60);a.task.tryLanding(-1,0);
+ while(a.n.surfMotion.phase!=='recall')a.task.tick(1/60);
+ assert.equal(a.p.x,.5);assert.equal(a.n.surf,true);assert.equal(a.n.surfUserIndex,0);a.task.tick(4/60);
+ const b=setup();Object.assign(b.n,JSON.parse(JSON.stringify(a.n)));Object.assign(b.p,a.p);assert.ok(b.task.restore());assert.equal(b.n.surfMotion.phase,'recall');
+ while(b.task.busy)b.task.tick(1/60);assert.equal(b.n.surf,false);assert.equal(b.n.surfUserIndex,undefined);assert.equal(b.p.x,.5);
+});

@@ -14,6 +14,12 @@ parser.add_argument('qa', type=Path)
 parser.add_argument('--port', type=int, default=4182)
 args = None
 
+class QAServer(ThreadingHTTPServer):
+    # Cold pages issue parallel script, chapter and artifact requests. Keep the
+    # local accept queue from rejecting bursts before a handler thread starts.
+    request_queue_size = 128
+
+
 class Handler(SimpleHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     def do_POST(self):
@@ -86,6 +92,6 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    server = ThreadingHTTPServer(('127.0.0.1', args.port), partial(Handler, directory=str(args.site.resolve())))
+    server = QAServer(('127.0.0.1', args.port), partial(Handler, directory=str(args.site.resolve())))
     print(f'QA http://127.0.0.1:{server.server_port}/qa-browser.html', flush=True)
     server.serve_forever()
