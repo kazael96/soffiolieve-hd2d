@@ -1,12 +1,12 @@
 # MN sul campo · 0.54
 
-La storia principale è consegnata nella0.53: [QA-053-FINAL.md](QA-053-FINAL.md). La0.54 aggiunge le MN personalizzate nel mondo; prove della candidata08 `e5adb3a82063de78` in [QA-054.md](QA-054.md). Distribuzione effettiva identificata dal [manifest Pages](https://kazael96.github.io/soffiolieve-hd2d/build.json).
+La storia principale è consegnata nella 0.53: [QA-053-FINAL.md](QA-053-FINAL.md). La 0.54 aggiunge le MN personalizzate nel mondo; prove della candidata 08 `e5adb3a82063de78` in [QA-054.md](QA-054.md). Distribuzione effettiva identificata dal [manifest Pages](https://kazael96.github.io/soffiolieve-hd2d/build.json).
 
 ## Perimetro e origine
 
 Sono predisposti 105 profili grafica–MN: 60 Taglio, 16 Volo e 29 Surf. Comprendono Basculin a strisce blu, le stagioni di Sawsbuck e le grafiche femminili di Unfezant, Frillish e Jellicent. Il test confronta l'intero inventario con le compatibilità delle MN attualmente insegnabili nei cataloghi estratti. Compatibilità e ottenibilità sono concetti distinti: un profilo per una specie nemica non la rende catturabile. Non vengono aggiunti strumenti, permessi o accessi dopo il finale; Forza, Cascata e Sub non sono attualmente offerte e non rientrano in questa consegna.
 
-I fogli originali dei Pokémon e del protagonista vengono composti nel renderer del mondo. I contatti, le dimensioni dei billboard e le coreografie sono adattamenti HD-2D, non nuove animazioni estratte dal gioco DS. Rimangono nativi permessi, destinazioni, coste, altezze, incontri e musica già estratti. Le MN sul campo non consumano PP e non ricevono nuovi vincoli su PS o medaglie.
+I fogli originali dei Pokémon e del protagonista vengono composti nel renderer del mondo. I contatti, le dimensioni dei billboard e le coreografie sono adattamenti HD-2 D, non nuove animazioni estratte dal gioco DS. Rimangono nativi permessi, destinazioni, coste, altezze, incontri e musica già estratti. Le MN sul campo non consumano PP e non ricevono nuovi vincoli su PS o medaglie.
 
 ## Integrazione predisposta
 
@@ -18,21 +18,21 @@ Le risorse trattengono un solo banco Pokémon fissato e una texture dinamica riu
 
 ## Regressioni e prove
 
-La candidata08 ha superato68 controlli mirati. Le regressioni hanno riprodotto identità del nuotatore persa, cambio della squadra durante la preparazione, migrazione dei salvataggi, permesso di camminare sull'acqua aggirato dalla proprietà successiva della scena e perdita GPU prima della notifica DOM. Sono conservati i relativi FAIL precedenti; il controllo effettivo WebGL rimane nel runtime e nei simulatori completi.
+La candidata 08 ha superato 68 controlli mirati. Le regressioni hanno riprodotto identità del nuotatore persa, cambio della squadra durante la preparazione, migrazione dei salvataggi, permesso di camminare sull'acqua aggirato dalla proprietà successiva della scena e perdita GPU prima della notifica DOM. Sono conservati i relativi FAIL precedenti; il controllo effettivo WebGL rimane nel runtime e nei simulatori completi.
 
-La forma evoluta mantiene visibile il banco della forma precedente fino alla preparazione di entrambe le viste nuove, poi lo sostituisce usando la stessa texture. Il replay esegue realmente Dewott35→Samurott36 durante Surf, con risorsa503-back ritardata, PP0, controllo dell'assenza del supporto generico e roundtrip del salvataggio isolato. È passato nei tre formati.
+La forma evoluta mantiene visibile il banco della forma precedente fino alla preparazione di entrambe le viste nuove, poi lo sostituisce usando la stessa texture. Il replay esegue realmente Dewott 35→Samurott 36 durante Surf, con risorsa 503-back ritardata, PP0, controllo dell'assenza del supporto generico e roundtrip del salvataggio isolato. È passato nei tre formati.
 
-Il rapporto `browser-field08-all-world-second` ha superato16 casi per formato,48 in totale: menu a freddo con errore e recupero, Borsa, Interpoké, Taglio/Volo/Surf a×1/×2/×4, Surf→Volo, evoluzione e matrice105×4 pose. Esaminati tutti i258 PNG. Le16 coppie di Volo usano una riva nativa leggibile; le occlusioni fisiche del mulino restano presenti. Le catture di salita, decollo e atterraggio provengono dai fotogrammi realmente disegnati, senza un disegno forzato dalla fixture. Il precedente timeout del polling a×4 resta conservato.
+Il rapporto `browser-field08-all-world-second` ha superato 16 casi per formato,48 in totale: menu a freddo con errore e recupero, Borsa, Interpoké, Taglio/Volo/Surf a×1/×2/×4, Surf→Volo, evoluzione e matrice 105 ×4 pose. Esaminati tutti i 258 PNG. Le 16 coppie di Volo usano una riva nativa leggibile; le occlusioni fisiche del mulino restano presenti. Le catture di salita, decollo e atterraggio provengono dai fotogrammi realmente disegnati, senza un disegno forzato dalla fixture. Il precedente timeout del polling a×4 resta conservato.
 
-Il rapporto `browser-field08-real-finale` ha ripetuto vera cattura di Reshiram, lotte contro N e Ghecis e FINE nei tre formati;24 PNG esaminati. Prerequisiti e limiti sono dichiarati in QA-054. I rapporti07 restano storici: il loro PASS non sostituisce le nuove prove08.
+Il rapporto `browser-field08-real-finale` ha ripetuto vera cattura di Reshiram, lotte contro N e Ghecis e FINE nei tre formati;24 PNG esaminati. Prerequisiti e limiti sono dichiarati in QA-054. I rapporti 07 restano storici: il loro PASS non sostituisce le nuove prove 08.
 
-Volo comprende undici destinazioni della storia principale. Le tre aggiunte sono ricavate dalla ROM: Mistralopoli113, Boreduopoli120 e Lega136. I427 header e le prime otto destinazioni restano identici. La migrazione richiede prove della visita; otto medaglie da sole non sbloccano la Lega.
+Volo comprende undici destinazioni della storia principale. Le tre aggiunte sono ricavate dalla ROM: Mistralopoli 113, Boreduopoli 120 e Lega 136. I427 header e le prime otto destinazioni restano identici. La migrazione richiede prove della visita; otto medaglie da sole non sbloccano la Lega.
 
-Suite completa di49 stadi, CI del commit esatto e verifica Pages restano criteri obbligatori di consegna. I rapporti sono conservati fuori dalle build in `outputs/chapter054-preparation`. Le candidate01–07 sono state preservate integralmente con base+delta e inventari SHA256 verificati prima della rimozione H.8. Nessun archivio, sorgente, ROM o rapporto viene rimosso con le copie generate obsolete.
+Suite completa di 49 stadi, CI del commit esatto e verifica Pages restano criteri obbligatori di consegna. I rapporti sono conservati fuori dalle build in `outputs/chapter054-preparation`. Le candidate 01–07 sono state preservate integralmente con base+delta e inventari SHA256 verificati prima della rimozione H.8. Nessun archivio, sorgente, ROM o rapporto viene rimosso con le copie generate obsolete.
 
-## Matrice dei105 profili verificati su fotogrammi rappresentativi
+## Matrice dei 105 profili verificati su fotogrammi rappresentativi
 
-Ogni riga indica un profilo nel mondo. Sono passati il confronto delle compatibilità native e i fotogrammi rappresentativi nei tre formati, con la combinazione dei rapporti indicata sopra. I replay dei comandi effettivi usano Servine, Unfezant e Dewott: non affermano105 campagne complete o l'uso concreto di ciascuna specie in ogni mappa.
+Ogni riga indica un profilo nel mondo. Sono passati il confronto delle compatibilità native e i fotogrammi rappresentativi nei tre formati, con la combinazione dei rapporti indicata sopra. I replay dei comandi effettivi usano Servine, Unfezant e Dewott: non affermano 105 campagne complete o l'uso concreto di ciascuna specie in ogni mappa.
 
 | Grafica | Pokémon / forma | MN | Gesto |
 |---|---|---|---|
