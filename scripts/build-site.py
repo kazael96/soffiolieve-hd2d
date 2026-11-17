@@ -71,6 +71,16 @@ def battle_ui_pack(site):
         if not match:raise ValueError(f'Invalid pack catalogue: {filename}')
         data=json.JSONDecoder().raw_decode(text[match.end():])[0]
         visit([row['cells'][0]['src'] for row in data['pokemonIcons'].values()] if filename=='menu-assets.js' else data['font'])
+    # Every chapter extends the same live registry before the battle UI loads.
+    # Include those first icon cells too; reading only the original catalog
+    # otherwise leaves the later species making individual HTTP requests.
+    for file in sorted(site.glob('*-menu.js')):
+        text=file.read_text(encoding='utf8')
+        if 'Object.assign(MENU_ASSETS.pokemonIcons' not in text:continue
+        match=re.search(r'window\.[A-Z][A-Z0-9_]*\s*=\s*',text)
+        if not match:raise ValueError(f'Invalid icon catalogue: {file.name}')
+        data=json.JSONDecoder().raw_decode(text[match.end():])[0]
+        visit([row['cells'][0]['src'] for row in data['icons'].values()])
     return image_pack(site,paths,'assets/battle-ui-pack.bin',strict=True)
 
 
