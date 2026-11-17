@@ -1863,6 +1863,7 @@
  }
  case049('qaBattleClearings057','Radure057: Percorsi1/2 e Cantiere','battle057-real-renderer-native-clearings-ground-and-ambient',()=>earlyBattleClearings057(false));
  case049('qaBattleDoubles057','Radure057: regressione quattro combattenti','battle057-real-renderer-native-clearings-double-combatants',()=>earlyBattleClearings057(true));
- window.FieldRegression057?.install({case049,seed049,enter049,auto049,hold049,release049,until,check,shot,wait});
+ if(!window.FieldRegression057)throw Error('Field regression script was not loaded');
+ window.FieldRegression057.install({case049,seed049,enter049,auto049,hold049,release049,until,check,shot,wait});
  status.textContent='Pronto. Esegui prima i controlli, poi il ripristino GPU.';publish();
 })();

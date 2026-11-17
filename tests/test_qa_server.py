@@ -51,6 +51,8 @@ class QAServerTests(unittest.TestCase):
             payload = bytes(range(256)) * 8193 + b'COMPLETE TAIL'
             (site / 'app.js').write_bytes(payload)
             (overlay / 'index.html').write_bytes(b'<html>isolated QA</html>')
+            field_script = b'window.FieldRegression057={install(){}};'
+            (overlay / 'field-regression057.js').write_bytes(field_script)
             qa_server.args = types.SimpleNamespace(qa=overlay, site=site, port=0)
             server = qa_server.QAServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
             worker = threading.Thread(target=server.serve_forever, daemon=True)
@@ -68,6 +70,11 @@ class QAServerTests(unittest.TestCase):
                 connection.request('GET', '/qa-browser.html')
                 response = connection.getresponse()
                 self.assertEqual(response.read(), b'<html>isolated QA</html>')
+                self.assertIs(connection.sock, original_socket)
+                connection.request('GET', '/__qa/field-regression057.js?v=frozen')
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.read(), field_script)
                 self.assertIs(connection.sock, original_socket)
                 connection.request('GET', '/app.js?v=two')
                 self.assertEqual(connection.getresponse().read(), payload)
