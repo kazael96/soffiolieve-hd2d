@@ -25,6 +25,13 @@ test('player naming stops at seven glyphs while Pokemon nicknames retain ten',()
  assert.equal(edit('AAAAAAÉ','insert','A',allowed),'AAAAAAÉA');
 });
 
+test('compact landscape naming preserves the original question and ten-character nickname prompts within two native lines',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),c={};c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync('src/naming-assets.js','utf8'),c);const data=c.NAMING_ASSETS;
+ for(const text of [data.labels[0],...['Ferrothorn','Krookodile','ABCDEFGHIJ','WWWWWWWWWW'].map(name=>format(data.labels[1],[name]))]){
+  const lines=wrap(text,data.font,112);assert.ok(lines.length<=2,'Native prompt must not lose a third line: '+text);assert.ok(lines.every(line=>width(line,data.font)<=112));assert.equal(lines.join(' ').replace(/\s/g,''),text.replace(/\s/g,''));
+ }
+});
+
 test('field shop labels preserve the native currency/dash glyphs and fit measured popup rows',()=>{
  const fs=require('node:fs'),vm=require('node:vm'),c={};c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync('src/party-popup-assets.js','utf8'),c);const font=c.PARTY_POPUP_ASSETS.font,{glyph,fieldChoices}=require('../src/native-text-layout.js');
  assert.equal(glyph('₽',font),font.glyphs.$);for(const mark of ['—','–','−'])assert.equal(glyph(mark,font),font.glyphs['-']);

@@ -12,6 +12,12 @@
 .native-dual-panels{position:relative;display:flex;flex-direction:column;gap:4px;width:min(512px,96vw,calc(46dvh * 4 / 3))}
 .native-dual-panels>canvas,.native-dual-panels>.native-stage{width:100%;height:auto;aspect-ratio:4/3;image-rendering:pixelated}
 .native-name-input{position:absolute;left:25%;top:53%;width:70%;height:6%;opacity:0;cursor:text;caret-color:transparent}
+@media(max-height:500px) and (min-width:601px){
+ #nativeNaming.native-touch-controls .native-dual-panels{flex-direction:row;align-items:flex-start;gap:6px;width:min(calc(100vw - 272px),calc((100dvh - 24px)*4/3/.74 + 6px))}
+ #nativeNaming.native-touch-controls .native-dual-panels>canvas{flex:none;width:calc((100% - 6px)*.26);aspect-ratio:auto}
+ #nativeNaming.native-touch-controls .native-dual-panels>.native-stage{flex:none;width:calc((100% - 6px)*.74)}
+ #nativeNaming.native-touch-controls .native-name-input{left:calc(44.5% + 3.33px);top:4%;width:calc(51.8% - 3.108px);height:12%}
+}
 .native-dual-screen::backdrop{background:#000b;backdrop-filter:none}
 .native-field-ready #dialogue{inset:auto 0 16px;width:min(768px,96vw);padding:0;min-height:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible}
 .native-field-window{display:block;width:100%;height:auto;image-rendering:pixelated}

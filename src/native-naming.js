@@ -52,10 +52,15 @@
       buttons[selected]?.element.focus();draw();
     }
     function draw(){
-      a.clearRect(0,0,256,192);a.drawImage(resources.upperBackground,0,0,256,192,0,0,256,192);
-      a.drawImage(promptFrame,0,144);
+      const compact=root.innerWidth>600&&root.innerHeight<=500,width=compact?128:256,height=compact?64:192,frameY=compact?16:144;
+      if(top.width!==width||top.height!==height){top.width=width;top.height=height;a.imageSmoothingEnabled=false;}
+      a.clearRect(0,0,width,height);a.drawImage(resources.upperBackground,0,0,width,height,0,0,width,height);
+      // A landscape phone gives the keyboard most of the width. Recompose the
+      // original prompt at native text size instead of shrinking a whole DS.
+      if(compact){const edge=8,h=promptFrame.height;a.drawImage(promptFrame,0,0,edge,h,0,frameY,edge,h);a.drawImage(promptFrame,edge,0,promptFrame.width-edge*2,h,edge,frameY,width-edge*2,h);a.drawImage(promptFrame,promptFrame.width-edge,0,edge,h,width-edge,frameY,edge,h);}
+      else a.drawImage(promptFrame,0,frameY);
       const message=prompt||NativeTextLayout.format(data.labels[1],[pokemon.nickname||pokemon.name]);
-      NativeTextLayout.wrap(message,metrics,240).slice(0,2).forEach((line,i)=>put(a,line,8,152+i*16));
+      NativeTextLayout.wrap(message,metrics,width-16).slice(0,2).forEach((line,i)=>put(a,line,8,frameY+8+i*16));
       top.setAttribute('aria-label',message);
       b.clearRect(0,0,256,192);b.drawImage(resources.nameHeader,0,0,256,192,0,0,256,192);b.drawImage(resources.buttons,0,0,256,192,0,0,256,192);b.drawImage(resources[page>=3?'qwertyKeys':'alphabetKeys'],0,0,256,192,0,0,256,192);
       if(player){const iconScale=Math.min(1,36/sprite.height,48/sprite.width);b.drawImage(sprite,30-Math.floor(sprite.width*iconScale/2),24-Math.floor(sprite.height*iconScale/2),sprite.width*iconScale,sprite.height*iconScale);}else b.drawImage(sprite,30-Math.floor(sprite.width/2),20-Math.floor(sprite.height/2));
