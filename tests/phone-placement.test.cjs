@@ -36,6 +36,26 @@ test('Interpoke refits on modal placement changes without a resize and disconnec
  await drain(c,task);assert.equal(observer.disconnected,true,'A completed call cannot retain its position observer');
 });
 
+test('Interpoke reserves the visible speed and restart bar, then refits all call rows after rotation',async()=>{
+ for(const [width,height,dialogueTop,barBottom]of [[1280,720,560,62],[390,844,615,54],[844,390,200,70]]){
+  const c=environment({sourceRoot:process.env.QA_PHONE_SOURCE_ROOT||path.resolve(__dirname,'../src')}),observers=[];let panel;
+  const controls=c.$('demoControls');controls.hidden=false;controls.getBoundingClientRect=()=>({left:width-180,right:width-10,top:10,bottom:barBottom,width:170,height:barBottom-10});
+  c.$('dialogue').getBoundingClientRect=()=>({top:dialogueTop});
+  c.getComputedStyle=node=>node===controls?{display:controls.hidden?'none':'flex',visibility:'visible'}:{paddingTop:panel?.style.paddingTop||'8',rowGap:'4'};
+  c.ResizeObserver=class{constructor(callback){this.callback=callback;this.targets=[];observers.push(this);}observe(target){this.targets.push(target);}disconnect(){this.disconnected=true;}};
+  c.document.body.append=node=>{if(node.id==='phoneScene')panel=node;};
+  const task=c.NativeStory.vm.host.command({name:'CallXTransceiver'},[1],[1],c.NativeStory.vm);
+  for(let i=0;i<200&&!c.$('dialogue').open;i++)await Promise.resolve();
+  assert.ok(panel);const top=parseFloat(panel.style.paddingTop),row=Number(/minmax\(0,([\d.]+)px/.exec(panel.style.gridTemplateRows)?.[1]);
+  assert.ok(top>=barBottom+8,`${width}x${height}: participant names must start below the complete toolbar`);
+  assert.ok(top+2*row+4<=dialogueTop-8,`${width}x${height}: both participant rows must fit above the message`);
+  const observer=observers.find(o=>o.targets.includes(controls));assert.ok(observer,'Toolbar size changes require an observed layout update');
+  controls.getBoundingClientRect=()=>({top:10,bottom:92,width:190,height:82});observer.callback();assert.ok(parseFloat(panel.style.paddingTop)>=100,'Rotation can grow the toolbar without changing the message size');
+  controls.hidden=true;observer.callback();assert.equal(panel.style.paddingTop,'','A hidden toolbar cannot leave stale reserved space');
+  await drain(c,task);assert.ok(observers.every(o=>o.disconnected),'Every call layout observer must disconnect');
+ }
+});
+
 test('Route7 call6 uses the native mother portrait, bank197 text and clean modal teardown',async()=>{
  const fs=require('node:fs'),vm=require('node:vm'),root=path.resolve(__dirname,'../src'),c=environment({sourceRoot:root});
  vm.runInContext(fs.readFileSync(path.join(root,'icirrus-phone.js'),'utf8'),c);

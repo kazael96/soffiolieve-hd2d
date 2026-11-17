@@ -45,6 +45,10 @@ Richiesta esplicita permanente: ciascuna delle 105 coppie specie/forma–MN sul 
 
 Il banco di compilazione delle fixture usa 256 voci / 96 MiB dopo la regressione reale del finale227 script: applicare il nuovo paragrafo di DEVELOPMENT-RULES, conservare baseline e isolamento dei contesti. Questo aggiornamento del banco non cambia il runtime del gioco né trasferisce un PASS alle49 fasi prima della loro conclusione.
 
+## Regressioni telefono · 17 novembre2026
+
+Applicare [BUGFIXES-057.md](docs/BUGFIXES-057.md): il target della camera esterna segue la posizione effettiva del protagonista, senza scalare coordinate assolute. I varchi interni dichiarano il pavimento nativo quando un soffitto sovrasta celle percorribili. Le radure di lotta devono mantenere liberi appoggi e corsie anche nelle doppie, con osservatori lontani e non tagliati. I ritratti Interpoké richiedono associazione comprovata tra corpo, volto e palette; i controlli browser non devono coprire i nomi. Misurare i caricamenti freddi e il riuso separatamente: un pacchetto di trasporto non autorizza a saltare immagini o recuperi dagli errori. Queste regressioni si aggiungono agli standard A–H.
+
 ## Introduzione e presentazione MN · 16 novembre2026
 
 L'utente richiede di correggere i limiti documentati della0.55 e aggiungere l'introduzione con scelta del sesso e del nome. Applicare [INTRODUCTION-056.md](docs/INTRODUCTION-056.md), [FIELD-PRESENTATION-056.md](docs/FIELD-PRESENTATION-056.md) e lo stato effettivo delle prove in [QA-056.md](docs/QA-056.md). L'identità deve restare coerente in campo, bicicletta, MN, chiamate, scheda e salvataggi; conservare i nomi legacy e non riproporre l'introduzione alle partite precedenti. Le conferme di fotogramma delle MN appartengono al disegno concluso, non alla sola composizione della carta. A FPS insufficienti preservare i gesti e il loro ordine, senza certificare la durata nominale di×4.

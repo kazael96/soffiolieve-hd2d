@@ -11,6 +11,7 @@
   let loading=null;
   function prepare(){if(ready)return Promise.resolve(true);if(loading)return loading;stage.dataset.resources='loading';delete stage.dataset.resourceError;loading=(RuntimeAssets.retry?RuntimeAssets.retry(initialize):initialize()).then(()=>{stage.dataset.resources='ready';stage.setAttribute('aria-label','Comandi di lotta');return true;},error=>{ready=false;loading=null;stage.dataset.resources='error';stage.dataset.resourceError=error.message;stage.setAttribute('aria-label',error.message);throw error;});return loading;}
   async function initialize(){
+    await RuntimeAssets.preloadImages?.(NativeTextLayout.resource('assets/battle-ui-pack.bin'));
     metadata=await RuntimeAssets.json(NativeTextLayout.resource('assets/battle-ui/provenance.json'));fontMetrics=metadata.fonts['2'];moveMetrics=metadata.fonts['0'];
     [font,smallFont,battleFont]=await Promise.all([NativeText.load(),load(fontMetrics.hpPalette162.path),load(moveMetrics.battlePalette13.path)]);
     const paths=['command-view-105.png','command-source-105.png','cell-115-117-0.png','cell-115-117-2.png','cell-165-166-0.png','cell-168-169-0.png','hp-atlas-164.png','moves-layer-111.png'];

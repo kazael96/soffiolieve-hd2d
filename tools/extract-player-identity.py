@@ -116,15 +116,15 @@ def extract(rom_path,output,baseline,work,apicula):
   proof.append({"role":name,"actor":actor,"archive":"a/0/4/9","member":member,"sha256":hashlib.sha256(graphics[member]).hexdigest(),
                 "existingPathsPreserved":True,"frames":len(sprites[name])})
  phone=[lz10(raw) if raw[:1]==b"\x10" else raw for raw in narc("a/1/3/1")]
- male=phone_frames(phone,2,2);male_equal=[]
+ male=phone_frames(phone,2,3);male_equal=[]
  for i,image in enumerate(male):
   path=source_file("assets/phone/Alcide-"+str(i//3)+"-"+str(i%3)+".png")
   old=Image.open(path).convert("RGBA");assert image.size==old.size and image.tobytes()==old.tobytes(), "Native phone decoder differs from shipped male frame"
   male_equal.append({"path":str(path),"sha256":sha(path),"pixelIdentical":True})
- female=phone_frames(phone,1,1);female_paths=[]
+ female=phone_frames(phone,1,2);female_paths=[]
  for i,image in enumerate(female):
   path=dest/("Anita-phone-"+str(i//3)+"-"+str(i%3)+".png");image.save(path)
-  female_paths.append(record(path,"Anita phone",{"archive":"a/1/3/1","portrait":1,"faceCell":1,"baseChar":26,"basePalette":19,"facePalette":43,"faceChar":44,"faceCells":45,"blink":i//3,"mouth":i%3}))
+  female_paths.append(record(path,"Anita phone",{"archive":"a/1/3/1","portrait":1,"faceCell":2,"baseChar":26,"basePalette":19,"facePalette":47,"faceChar":48,"faceCells":49,"blink":i//3,"mouth":i%3}))
  portraits={"Alcide":["assets/phone/Alcide-"+str(i//3)+"-"+str(i%3)+".png" for i in range(9)],"Anita":female_paths}
  friends=Image.new("RGBA",(256,192));friend_sources=[]
  for name,x in [("Komor",0),("Belle",128)]:

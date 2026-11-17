@@ -718,12 +718,20 @@
     });
     if(window.RuntimeAssets)await Promise.all([...new Set(pictures.flatMap(p=>p.frames))].map(src=>RuntimeAssets.image(src)));
     panel.dataset.participants=String(pictures.length);document.body.append(panel);$('world').dataset.phone=String(id);await fade(0);
-    // Reserve the actual message window, including touch controls and rotation.
-    const fitPortraits=()=>{const dialog=$('dialogue');if(!dialog.open)return;const css=getComputedStyle(panel),rows=Math.ceil(pictures.length/2),space=dialog.getBoundingClientRect().top-parseFloat(css.paddingTop)-8-(rows-1)*parseFloat(css.rowGap);panel.style.gridTemplateRows=`repeat(${rows},minmax(0,${Math.max(0,Math.min(192,space/rows))}px))`;};
+    // Reserve both the actual message window and the complete browser toolbar.
+    // Clear the previous inline offset before measuring the responsive/safe-area
+    // CSS again, so a hidden or shorter toolbar releases its previous space.
+    const controls=$('demoControls');
+    const fitPortraits=()=>{const dialog=$('dialogue');if(!dialog.open)return;panel.style.paddingTop='';const css=getComputedStyle(panel);let top=parseFloat(css.paddingTop)||0;
+      if(controls&&!controls.hidden){const bar=getComputedStyle(controls),rect=controls.getBoundingClientRect();if(bar.display!=='none'&&bar.visibility!=='hidden'&&rect.width>0&&rect.height>0)top=Math.max(top,rect.bottom+8);}
+      if(top>(parseFloat(css.paddingTop)||0))panel.style.paddingTop=top+'px';
+      const rows=Math.ceil(pictures.length/2),space=dialog.getBoundingClientRect().top-top-8-(rows-1)*(parseFloat(css.rowGap)||0);panel.style.gridTemplateRows=`repeat(${rows},minmax(0,${Math.max(0,Math.min(192,space/rows))}px))`;};
     phoneLayout=fitPortraits;const layoutObserver=new ResizeObserver(fitPortraits);layoutObserver.observe($('dialogue'));
+    if(controls)layoutObserver.observe(controls);
     // Moving the touch controls into a modal changes its bottom/class without
     // resizing the message canvas. Refit before paint on those changes too.
-    const placementObserver=new MutationObserver(fitPortraits);placementObserver.observe($('dialogue'),{attributes:true,attributeFilter:['class','style','open']});addEventListener('resize',fitPortraits);
+    const placementObserver=new MutationObserver(fitPortraits);placementObserver.observe($('dialogue'),{attributes:true,attributeFilter:['class','style','open']});
+    const controlsObserver=new MutationObserver(fitPortraits);if(controls)controlsObserver.observe(controls,{attributes:true,attributeFilter:['class','style','hidden','data-battle']});addEventListener('resize',fitPortraits);
     let talker=-1,frame=0;const clock=setInterval(()=>{frame++;pictures.forEach((p,i)=>{const blink=frame%28===26?1:frame%28===27?2:0;const mouth=i===talker?[0,1,2,1][frame%4]:0;p.image.src=p.frames[blink*3+mouth];p.tile.classList.toggle('speaking',i===talker);});},1000/15);
     try{
       for(const [op,face,param] of call.commands){
@@ -731,7 +739,7 @@
         if(op===1){talker=face;for(const page of messagePages(texts[param],m.words))await showPage(page,pictures[face].name);}
         else if(op===2)await delay(param);else if(op===3)soundTask=AudioEngine.playSound(param);else if(op===4)await soundTask;else throw Error('Unknown phone command '+op);
       }
-    }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
+    }finally{phoneLayout=null;clearInterval(clock);layoutObserver.disconnect();placementObserver.disconnect();controlsObserver.disconnect();removeEventListener('resize',fitPortraits);panel.remove();delete $('world').dataset.phone;}
   }
   async function returnAfterBlackout(legacy=false){
     const point=window.NativeReturnLocation?.respawn?.(native);
