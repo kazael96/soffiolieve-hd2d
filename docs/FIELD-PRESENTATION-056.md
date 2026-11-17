@@ -1,6 +1,6 @@
 # Leggibilità e tempi delle MN · 0.56
 
-La0.55 documentava due limiti: edifici in primo piano che nascondevano parte della salita su Volo e pose saltate a×4 con pochi fotogrammi al secondo. Stato corrente: correzioni implementate, accettazione finale ancora da completare.
+La0.55 documentava due limiti: edifici in primo piano che nascondevano parte della salita su Volo e pose saltate a×4 con pochi fotogrammi al secondo. Le correzioni sono implementate; [QA-056.md](QA-056.md) distingue riscontro grafico, regressioni e accettazione del rilascio.
 
 Durante Volo la camera sale temporaneamente ad almeno62°, prima della salita del protagonista; resta alta durante la partenza e ritorna alla visuale precedente durante il richiamo dopo l'atterraggio. La proiezione del sedile segue lo stesso pitch della scena. Edifici, tetti, alberi, quote native e coordinate di destinazione restano fisici; non viene esclusa la loro profondità per mostrare il Pokémon attraverso gli ostacoli. Zoom e camera esterni all'azione vengono ripristinati.
 

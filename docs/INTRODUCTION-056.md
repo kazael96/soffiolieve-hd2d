@@ -1,6 +1,6 @@
 # Introduzione e identità del protagonista · 0.56
 
-Richiesta del16 novembre2026: aggiungere l'inizio del gioco con scelta del sesso e del nome dopo le correzioni dei limiti della0.55. Stato: implementazione e collaudo in corso; questo inventario non certifica la pubblicazione.
+Richiesta del16 novembre2026: aggiungere l'inizio del gioco con scelta del sesso e del nome dopo le correzioni dei limiti della0.55. Questo inventario descrive i sorgenti; [QA-056.md](QA-056.md) e le ricevute della candidata distinguono collaudo e pubblicazione.
 
 La nuova partita presenta Aralia e un Pokémon, permette di scegliere ragazzo/ragazza, confermare la scelta, inserire il nome con la tastiera italiana e confermarlo prima dell'arrivo nella camera. Il nome nuovo ha sette caratteri; un campo vuoto propone il nome originale Alcide/Anita. La tastiera conserva dieci caratteri per i soprannomi dei Pokémon. Un errore nel caricamento mantiene l'introduzione aperta con un nuovo tentativo, senza avviare la storia.
 
