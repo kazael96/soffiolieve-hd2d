@@ -1,4 +1,16 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+
+test('rotated cameras preserve the bicycle pedal pose while selecting the new four-frame direction',()=>{
+ const c={window:null,innerWidth:1280,innerHeight:720,OPENING_SPRITES:{AlcideBike:Array(16),AnitaBike:Array(16)},ROM_SPRITES:{},NativeRails:{screenDirection:()=>0}};c.window=c;vm.createContext(c);
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/world3d.js'),'utf8')+';window.Renderer=VillageRenderer;',c);
+ const gl=new Proxy({getAttribLocation:()=>0},{get:(target,key)=>target[key]??(()=>{})}),drawn=[];
+ const renderer=Object.assign(Object.create(c.Renderer.prototype),{gl,canvas:{width:1280,height:720},scene:{instances:[]},center:[0,0],zoom:1,scale:1,ready:true,storyCameraYaw:1,loc:{},attrs:[],models:{},cache:{},images:{},white:{},shadow:{},resourcePlan:()=>({}),hasResources:()=>true,resize(){},indoor:()=>false,plane(...args){drawn.push(args[5].index);}});
+ for(const name of ['AlcideBike','AnitaBike'])for(let i=0;i<16;i++)renderer.images[name+'-'+i]={index:i};
+ for(const name of ['AlcideBike','AnitaBike'])for(let original=0;original<4;original++)for(let direction=0;direction<4;direction++)for(let step=0;step<4;step++){
+  c.NativeRails.screenDirection=()=>direction;drawn.length=0;renderer.draw(0,[{name,hero:true,direction:original,frame:original*4+step,x:0,z:0,noShadow:true}]);
+  assert.deepEqual(drawn,[direction*4+step],name+'/'+original+'→'+direction+'/'+step);
+ }
+});
 test('native Tower cloud blend material is preserved separately from its opaque lower cloud floor',()=>{
  const c={window:{}};vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/icirrus-assets.js'),'utf8'),c);
  const groups=c.window.ICIRRUS_ASSETS.models['ic-map-391'].groups;

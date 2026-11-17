@@ -1,5 +1,20 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'../src');
+
+test('the player identity catalog references every new native bitmap with its exact content revision',()=>{
+ const scope={};scope.window=scope;vm.runInNewContext(fs.readFileSync(path.join(root,'player-assets.js'),'utf8'),scope);
+ const seen=new Set(),crypto=require('node:crypto');
+ function visit(value){
+  if(typeof value==='string'&&value.startsWith('assets/player-identity/')&&/\.png(?:\?|$)/.test(value)){
+   const [name,query]=value.split('?'),file=path.join(root,name),bytes=fs.readFileSync(file);assert.equal(bytes.subarray(1,4).toString(),'PNG',name);assert.ok(bytes.readUInt32BE(16)>0&&bytes.readUInt32BE(20)>0,name);
+   assert.equal(new URLSearchParams(query).get('v'),crypto.createHash('sha256').update(bytes).digest('hex').slice(0,12),name);seen.add(name);
+  }else if(value&&typeof value==='object')for(const child of Object.values(value))visit(child);
+ }
+ visit({sprites:scope.PLAYER_ASSETS.sprites,portraits:scope.PLAYER_ASSETS.portraits,intro:scope.PLAYER_ASSETS.intro});
+ const actual=fs.readdirSync(path.join(root,'assets/player-identity')).filter(name=>name.endsWith('.png')).map(name=>'assets/player-identity/'+name).sort();
+ assert.equal(actual.length,58);assert.deepEqual([...seen].sort(),actual);
+ assert.ok(scope.PLAYER_ASSETS.texts.bank44.length>=27);assert.ok(scope.PLAYER_ASSETS.texts.bank44[26].includes('Pokémon'));
+});
 test('every new native interface bitmap exists and retains its exported dimensions',()=>{
  const catalogs=['naming-assets.js','options-assets.js','trainer-card-assets.js','party-detail-assets.js','party-popup-assets.js','summary-detail-assets.js','dex-browser-assets.js','dex-modes-assets.js','dex-search-assets.js','common-dialogue-assets.js'];
  let checked=0;

@@ -1,7 +1,7 @@
 /* IRBI shore gates and persistent travel; continuous timing is an HD-2D adaptation. */
 (function(root){
  const dirs=[[0,-1],[0,1],[-1,0],[1,0]],special=row=>row&&[65,68].includes(row.behavior),water=row=>!!row&&!(row.flags&1)&&!!(row.flags&2),land=row=>!!row&&!(row.flags&3)&&row.behavior!==255;
- function create({state,hero,surface,party,occupied=()=>false,save=()=>{},music=()=>{},prepare=async()=>{},direction=()=>0}){
+ function create({state,hero,surface,party,occupied=()=>false,save=()=>{},music=()=>{},prepare=async()=>{},direction=()=>0,presentation=null}){
   let preparing=false,generation=0;
   const known=p=>!!p&&!p.egg&&p.pp?.some(m=>m.id===57);
   const mounted=()=>state().surf===true;
@@ -29,10 +29,17 @@
   }
   function tick(dt){const n=state(),r=n.surfMotion;if(!r)return;
    if(r.zone!==n.zone){delete n.surfMotion;delete n.surfUserIndex;n.surf=false;music();return;}
-   if(r.phase==='wait'){r.wait+=dt*60;if(r.wait<16)return;r.phase='move';save();return;}
-   if(r.phase==='recall'){r.wait+=dt*60;if(r.wait<16)return;n.surf=false;delete n.surfUserIndex;delete n.surfMotion;music();save();return;}
-   r.travel=Math.min(1,r.travel+dt*4/Math.max(1,r.cells));const p=hero();p.x=r.from.x+(r.to.x-r.from.x)*r.travel;p.y=r.from.y+(r.to.y-r.from.y)*r.travel;n.fieldHeight=r.from.height+(r.to.height-r.from.height)*r.travel;
-   if(r.travel===1){n.fieldHeight=r.to.height;if(r.landing){r.phase='recall';r.wait=0;}else delete n.surfMotion;music();save();}
+   if(!Number.isFinite(dt)||dt<=0)return;
+   // The world compositor owns this ephemeral budget. No renderer, promise or
+   // acknowledgement is written into the native/saveable shoreline record.
+   // Pure controller hosts can omit it; production supplies real-frame gates.
+   const gate=presentation?.(r,dt);let step=dt;
+   if(gate!==null&&gate!==undefined){if(!Number.isFinite(gate.dt)||gate.dt<0||typeof gate.complete!=='boolean')throw Error('Budget di presentazione Surf non valido');step=Math.min(dt,gate.dt);if(step===0&&!gate.complete)return;}
+   const endpoint=(value,end)=>value>=end-1e-9?end:Math.min(end,value);
+   if(r.phase==='wait'){r.wait=endpoint(r.wait+step*60,16);if(r.wait<16)return;r.phase='move';save();return;}
+   if(r.phase==='recall'){r.wait=endpoint(r.wait+step*60,16);if(r.wait<16||gate&&!gate.complete)return;n.surf=false;delete n.surfUserIndex;delete n.surfMotion;music();save();return;}
+   r.travel=endpoint(r.travel+step*4/Math.max(1,r.cells),1);const p=hero();p.x=r.from.x+(r.to.x-r.from.x)*r.travel;p.y=r.from.y+(r.to.y-r.from.y)*r.travel;n.fieldHeight=r.from.height+(r.to.height-r.from.height)*r.travel;
+   if(r.travel===1){n.fieldHeight=r.to.height;if(r.landing){r.phase='recall';r.wait=0;}else{if(gate&&!gate.complete)return;delete n.surfMotion;}music();save();}
   }
   function blocked(x,y){const n=state(),at=surface(n.zone,x,y,n.fieldHeight??0);if(!at)return null;if(at.flags&1||at.behavior===255)return true;return mounted()?!water(at):!!(at.flags&2);}
   function cancel(){generation++;preparing=false;const n=state(),r=n.surfMotion;if(r&&r.zone===n.zone){Object.assign(hero(),{x:r.from.x,y:r.from.y});n.fieldHeight=r.from.height;n.surf=!!r.landing;}delete n.surfMotion;if(!n.surf)delete n.surfUserIndex;music();}

@@ -1,0 +1,12 @@
+.native-introduction{width:min(640px,96vw,calc((100dvh - 150px)*1.03));color:#24343d;background:#f8f8f0;overflow:visible;max-height:calc(100dvh - 140px);padding:0;border:2px solid #263b42;border-radius:0}
+.native-introduction>canvas{width:100%;height:auto;display:block;image-rendering:pixelated}
+#gameIntroduction::backdrop{background:#000;backdrop-filter:none;visibility:visible}
+.native-introduction.intro-naming{visibility:hidden}
+.intro-choices{display:flex;gap:4px;padding:6px;background:#20343b}
+.intro-choices button{flex:1;border:2px solid #afc5c6;border-radius:0;background:#f8f8f0;color:#24343d;min-height:42px;padding:8px 6px}
+.intro-choices button:focus{outline:2px solid #e56470;outline-offset:-5px;background:#e7f4eb}
+.intro-choices button canvas{display:block;margin:auto;max-width:100%;height:auto;image-rendering:pixelated}
+.native-introduction #touch button{color:#fff9e9}
+.intro-accessible{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
+.native-introduction.native-touch-controls{position:fixed;inset:8px 0 auto;margin:0 auto}
+@media(max-height:500px) and (min-width:601px){.native-introduction.native-touch-controls{width:calc((100dvh - 40px)*1.03);max-width:calc(100vw - 300px);max-height:calc(100dvh - 20px)}}

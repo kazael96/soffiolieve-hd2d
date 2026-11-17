@@ -59,3 +59,40 @@ test('Fly rider preparation loads only the native sprite catalog, deferring Surf
  const c=await setup();let chapterLoads=0,modelLoads=0;const ensure=c.IcirrusChapter.ensure,load=c.StarterScene.loadGLB;c.IcirrusChapter.ensure=async(...args)=>{chapterLoads++;return ensure(...args);};c.StarterScene.loadGLB=async(...args)=>{modelLoads++;return load(...args);};
  await c.SurfField.prepareRiderAssets();assert.ok(c.SURF_FIELD_ASSETS.sprites.AlcideSurf.length>=12);assert.equal(chapterLoads,0);assert.equal(modelLoads,0);await c.SurfField.prepareAssets();assert.equal(chapterLoads,1);assert.equal(modelLoads,2);await c.SurfField.prepareAssets();assert.equal(modelLoads,2,'Warm rider preparation must not reload the water models');
 });
+
+test('busy Surf checkpoint repairs a released swimmer bank before acknowledging further motion',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),selected={name:'Dewott',gender:'M',pp:[{id:57,left:0}]},party=[{name:'Servine'},selected];
+ const plan={zone:113,direction:3,cells:1,landing:false,phase:'move',wait:16,travel:.3,from:{x:1.5,y:2.5,height:2},to:{x:2.5,y:2.5,height:2.25}};
+ const native={zone:113,surf:true,surfUserIndex:1,fieldHeight:2.075,surfMotion:structuredClone(plan)},hero={x:1.8,y:2.5};
+ let ready=true,drawn=false,releaseAssets,gateCalls=0,prepareCalls=0,cutIns=0,starts=0,saves=0;
+ const assets=new Promise(resolve=>{releaseAssets=resolve;}),preparations=[],savePositions=[];
+ const world={active:null,swimmer:()=>party[native.surfUserIndex],surfReady:()=>ready,
+  present(){if(!native.surf){ready=false;drawn=false;}},
+  surfBudget:(motion,dt)=>({dt:ready&&drawn?dt:0,complete:ready&&drawn}),
+  prepare:async(mon,move)=>{prepareCalls++;preparations.push([mon,move]);await assets;ready=true;},
+  acknowledgeDraw(){assert.equal(ready,true);drawn=true;}};
+ const c={console,TextDecoder,player:hero,facing:9,FieldHMWorld:world,
+  Journey:{state:{party,original:native,playerGender:'F',playerName:'Anita'},save(){saves++;savePositions.push({...hero,height:native.fieldHeight});return true;}},
+  NativeStory:{state:native,music:1013,occupied:()=>false,visualActors:()=>[]},AudioEngine:{setScene(){}},
+  OPENING_ASSETS:{models:{},textures:{}},OPENING_SPRITES:{},SURF_FIELD_ASSETS:{models:{},textures:{},sprites:{},urls:{sea_ride:'native-ride',shibuki01:'native-spray'}},
+  IcirrusChapter:{ensure:async()=>{},surfaceAt:(zone,x,y,height)=>({flags:2,height:x===plan.to.x?plan.to.height:99})},
+  StarterScene:{loadGLB:async()=>({})},renderer:{groundHeight:()=>2,resourceGate(key,operation){assert.equal(key,'surf-pokemon');gateCalls++;return operation();}},
+  ROM_SPRITE_ANIM:{prepare:async()=>{cutIns++;}}};
+ c.window=c;vm.createContext(c);for(const file of ['surf-field-motion.js','surf-field.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',file),'utf8'),c,{filename:file});
+ c.SurfField.play=async()=>{cutIns++;};const start=c.SurfField.start;c.SurfField.start=(...args)=>{starts++;return start(...args);};
+ // This is the checkpoint window from the actual controller: cancel briefly
+ // unmounts the rider, present releases its bank, then a valid save returns.
+ const checkpoint={native:structuredClone(native),hero:{...hero}};c.SurfField.motion.cancel();world.present();assert.equal(ready,false);
+ Object.assign(native,structuredClone(checkpoint.native));Object.assign(hero,checkpoint.hero);assert.equal(c.SurfField.motion.restore(),true);assert.equal(c.SurfField.busy,true);
+ const waiting=JSON.stringify({native,hero}),flush=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
+ for(let i=0;i<5;i++)c.SurfField.tick(1/30);await flush();
+ assert.equal(gateCalls,1,'A restored busy motion must queue its missing swimmer through the existing resource gate');assert.equal(prepareCalls,1);assert.equal(preparations[0][0],selected);assert.equal(preparations[0][1],57);
+ assert.equal(JSON.stringify({native,hero}),waiting,'No motion or terrain resync may change the saved pose while its bank is absent');
+ for(let i=0;i<5;i++)c.SurfField.tick(1/30);await flush();assert.equal(gateCalls,1,'Repeated ticks share one pending repair');
+ releaseAssets();await flush();assert.equal(ready,true);assert.equal(c.SurfField.busy,true);c.SurfField.tick(1/30);
+ assert.equal(JSON.stringify({native,hero}),waiting,'Prepared assets alone do not acknowledge a displayed swimmer pose');
+ world.acknowledgeDraw();c.SurfField.tick(1/30);assert.ok(native.surfMotion.travel>.3);assert.ok(hero.x>checkpoint.hero.x);
+ for(let i=0;i<20&&c.SurfField.busy;i++)c.SurfField.tick(1/30);
+ assert.equal(c.SurfField.busy,false);assert.equal(native.surf,true);assert.equal(native.surfUserIndex,1);assert.equal(party[1],selected);assert.equal(c.Journey.state.playerGender,'F');assert.equal(c.Journey.state.playerName,'Anita');
+ assert.deepEqual(hero,{x:plan.to.x,y:plan.to.y});assert.equal(native.fieldHeight,plan.to.height);assert.equal(gateCalls,1);assert.equal(prepareCalls,1);assert.equal(cutIns,0);assert.equal(starts,0);assert.equal(saves,1);assert.deepEqual(savePositions,[{x:plan.to.x,y:plan.to.y,height:plan.to.height}]);
+});

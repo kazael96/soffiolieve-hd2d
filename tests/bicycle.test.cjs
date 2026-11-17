@@ -5,3 +5,11 @@ test('scene changes and missing ownership cannot mount a late bicycle',async()=>
 test('failed bicycle resources release input and leave a usable subsequent attempt',async()=>{const c=setup();c.NimbasaChapter.ensure=async()=>{throw Error('temporary image failure');};assert.equal(await c.Bicycle.toggle(),false);assert.equal(c.Bicycle.preparing,false);assert.equal(c.Bicycle.mounted(),false);c.NimbasaChapter.ensure=async()=>{};assert.equal(await c.Bicycle.toggle(),true);});
 test('the scene readiness barrier is awaited after releasing the bicycle resource gate',async()=>{const c=setup();let gated=false;c.renderer.resourceGate=async(key,task)=>{gated=true;try{return await task();}finally{gated=false;}};c.renderer.prepareScene=async()=>{assert.equal(gated,false,'Waiting for scene readiness inside its own resource gate deadlocks');};assert.equal(await c.Bicycle.toggle(),true);assert.equal(c.Bicycle.preparing,false);});
 test('cycling covers all four directions and never selects a frame outside the original atlas',async()=>{const c=setup();await c.Bicycle.toggle();for(const frame of [0,3,6,9])for(let t=0;t<5;t+=.013){const actor=c.Bicycle.actor(frame,t,true);assert.equal(actor.name,'AlcideBike');assert.equal(actor.hero,true);assert.ok(actor.frame>=0&&actor.frame<16);assert.equal(Math.floor(actor.frame/4),frame/3);}c.renderer.scene={};assert.equal(c.Bicycle.actor(3,1,true).name,'Alcide');});
+
+test('the bicycle rests on the native idle pose and returns through the middle pedal pose in each direction',async()=>{
+ const c=setup();await c.Bicycle.toggle();
+ for(let direction=0;direction<4;direction++){
+  assert.equal(c.Bicycle.actor(direction*3,0,false).frame,direction*4);
+  assert.deepEqual([0,1,2,3,4].map(t=>c.Bicycle.actor(direction*3,(t+.01)/12,true).frame-direction*4),[1,2,3,2,1]);
+ }
+});

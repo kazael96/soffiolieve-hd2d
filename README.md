@@ -1,11 +1,11 @@
-# Soffiolieve HD-2D — 0.55
+# Soffiolieve HD-2D — 0.56
 
 Un progetto amatoriale di **Pokémon Nero** per browser, con ambienti HD-2D e
 risorse originali convertite dalla ROM fornita per lo sviluppo.
 
-I sorgenti **0.55** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
+I sorgenti **0.56** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
 cattura di Reshiram e le lotte con N e Ghecis. Non comprende il postgame.
-L'[accettazione locale](docs/QA-055.md) distingue i controlli superati dalla
+L'[accettazione locale](docs/QA-056.md) distingue i controlli superati dalla
 distribuzione. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
 indica la versione effettivamente servita da Pages.
 
@@ -43,6 +43,17 @@ Le parti originali sono articolate mediante mappe specifiche del campo,
 verificate sulle due viste native. [Matrice delle coreografie](docs/FIELD-HMS-055.md)
 e [prove della candidata](docs/QA-055.md) distinguono implementazione, verifica
 grafica e distribuzione effettiva.
+
+La0.56 aggiunge l'introduzione con Aralia, scelta ragazzo/ragazza e nome con
+tastiera italiana. L'identità segue il protagonista in campo, bicicletta,
+MN, Interpoké e scheda Allenatore; le partite precedenti conservano nome e
+progressi. Per rivedere l'introduzione usare Ricomincia, dopo la conferma.
+Volo alza temporaneamente la camera per mostrare la salita anche vicino ai
+tetti; Taglio, Volo e Surf conservano le pose anche a×4 con FPS bassi.
+Sono corretti il recupero delle transizioni Surf e le tracce native di
+visibilità/texture delle medaglie. [Introduzione e adattamenti](docs/INTRODUCTION-056.md),
+[presentazione delle MN](docs/FIELD-PRESENTATION-056.md) e
+[prove della candidata](docs/QA-056.md) precisano perimetro e verifiche.
 
 
 ## Storico delle prime versioni

@@ -2,19 +2,51 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 function setup(){
  const calls={pins:0,releases:0},n={zone:152},party=[{id:501,name:'Oshawott',pp:[{id:57}]}];
- const image={width:32,height:32},context={drawImage(){},getImageData(){return {data:new Uint8Array(4096)};}};
- const c={console,Promise,Map,WeakMap,document:{hidden:false,createElement:()=>({getContext:()=>context})},NativeStory:{state:n},Journey:{state:{party,original:n}},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},SURF_FIELD_ASSETS:{sprites:{AlcideSurf:Array(12).fill('surf')}},RuntimeAssets:{image:async()=>image},ROM_SPRITE_ANIM:{pin(){calls.pins++;return ()=>calls.releases++;},prepare:async()=>{},alphaBounds:()=>[0,0,32,32]}};
+ const image={width:32,height:32},context=new Proxy({drawImage(){},getImageData(){return {data:new Uint8Array(4096)};}},{get:(target,key)=>key in target?target[key]:()=>{}});
+ const c={console,Promise,Map,WeakMap,document:{hidden:false,createElement:()=>({getContext:()=>context})},NativeStory:{state:n},Journey:{state:{party,original:n}},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},SURF_FIELD_ASSETS:{sprites:{AlcideSurf:Array(12).fill('surf')}},RuntimeAssets:{image:async()=>image},ROM_SPRITE_ANIM:{pin(){calls.pins++;return ()=>calls.releases++;},prepare:async()=>{},draw:()=>true,alphaBounds:()=>[0,0,32,32]}};
  c.window=c;vm.createContext(c);for(const f of ['pokemon-visuals.js','field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js','field-hm-world.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',f),'utf8'),c,{filename:f});return {c,n,party,calls,world:c.FieldHMWorld};
 }
-async function flyFrame({height=7,yaw=0,direction=1,elapsed=1.94,graphic=519,pitch=[0,1]}={}){
+test('changing player sex rebuilds the native rider bank for the same Pokemon without leaking pins',async()=>{
+ const {c,world,calls}=setup(),loaded=[];c.PLAYER_ASSETS={sprites:{Anita:Array(12).fill('female-standing'),AnitaSurf:Array(12).fill('female-sitting')}};
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/player-identity.js'),'utf8'),c);
+ c.RuntimeAssets.image=async src=>{loaded.push(src);return {width:32,height:32};};
+ await world.prepare({id:501},57);assert.ok(loaded.includes('hero'));assert.ok(loaded.includes('surf'));
+ c.Journey.state.playerGender='F';loaded.length=0;await world.prepare({id:501},57);
+ assert.deepEqual([...new Set(loaded)].sort(),['female-sitting','female-standing']);assert.equal(calls.pins,2);assert.equal(calls.releases,1);
+ world.clear();assert.equal(calls.releases,2);
+});
+test('an unavailable female rider is a recoverable error and never loads male art',async()=>{
+ const {c,world,calls}=setup(),loaded=[];c.Journey.state.playerGender='F';c.PLAYER_ASSETS={sprites:{Anita:Array(12).fill('female-standing')}};
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/player-identity.js'),'utf8'),c);
+ c.RuntimeAssets.image=async src=>{loaded.push(src);return {width:32,height:32};};
+ await assert.rejects(world.prepare({id:501},57),/protagonista MN/);assert.deepEqual(loaded,[]);assert.equal(calls.pins,calls.releases);
+ c.PLAYER_ASSETS.sprites.AnitaSurf=Array(12).fill('female-sitting');await world.prepare({id:501},57);assert.ok(loaded.includes('female-sitting'));world.clear();assert.equal(calls.pins,calls.releases);
+});
+/* CPU contract only: compose the real card, then acknowledge a completed draw.
+ * A present() call or a skipped/failed draw is deliberately not an acknowledgement. */
+function fieldPresenter(world,c,renderer={},actors=()=>[{name:'Alcide',hero:true,x:1,z:2,height:.04,frame:3}]){
+ renderer.gl??={};for(const [key,value]of Object.entries({isContextLost:()=>false,isTexture:()=>true,bindTexture(){},texSubImage2D(){},deleteTexture(){}}))renderer.gl[key]??=value;
+ renderer.cameraPitch??=[.423,.906];renderer.yaw??=0;renderer.groundHeight??=()=>0;renderer.upload??=()=>({texture:{}});renderer.scene??={zone:c.NativeStory.state.zone};c.renderer=renderer;
+ let time=0;const frames=[];
+ return {renderer,frames,tick(dt){time+=dt;world.tick(dt);},draw({ack=true}={}){
+  if(c.document.hidden||renderer.contextLost||renderer.gl.isContextLost())return actors();
+  const action=world.active,presented=world.present(renderer,time,actors());
+  if(action&&presented.some(actor=>actor.fieldHM))frames.push({action,progress:action.elapsed/action.duration,phase:action.phase,committed:!!action.committed});
+  // Optional only to replay the old source as a failing baseline. Assertions
+  // still require every actual pose and reject progress without acknowledgements.
+  if(ack)world.rendered?.(renderer);return presented;
+ }};
+}
+function finishField(world,c,renderer){const f=fieldPresenter(world,c,renderer);let frames=0;while(world.active&&!world.active.done&&frames++<1000){f.tick(.04);f.draw();}assert.ok(!world.active||world.active.done,'A drawable field action did not complete within 1000 acknowledged frames');return f.frames;}
+async function flyFrame({height=7,yaw=0,direction=1,elapsed=1.94,graphic=519,pitch=[0,1],phase=elapsed>1.5?'arrive':'depart'}={}){
  const a=setup(),{c,n,world}=a,draws=[],images=[];n.zone=28;n.fieldHeight=height;
  c.OPENING_SPRITES.Alcide=Array.from({length:12},(_,i)=>'hero-'+i);c.SURF_FIELD_ASSETS.sprites.AlcideSurf=Array.from({length:12},(_,i)=>'surf-'+i);c.RuntimeAssets.image=async src=>({width:32,height:32,src});
  let mirrored=false;const stack=[];const context=new Proxy({}, {get:(_,key)=>key==='getImageData'?(()=>({data:new Uint8Array(4096)})):key==='drawImage'?((...args)=>images.push({...args[0],mirrored,drawArgs:args.slice(1)})):key==='save'?(()=>stack.push(mirrored)):key==='restore'?(()=>{mirrored=stack.pop()??false;}):key==='scale'?((x)=>{if(x<0)mirrored=!mirrored;}):()=>{}});c.document.createElement=()=>({width:512,height:512,getContext:()=>context});
  c.ROM_SPRITE_ANIM.draw=(...args)=>{draws.push(Object.assign(args,{mirrored}));return true;};c.SpeciesMoves={select:()=>({frames:10}),sample:()=>({})};
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/native-rails.js'),'utf8'),c);
  const renderer={scene:{zone:28},cameraPitch:pitch,yaw,groundHeight:()=>7,upload:()=>({texture:{},w:512,h:512}),gl:{isTexture:()=>true,bindTexture(){},texSubImage2D(){}}};
- const task=await world.start({id:graphic},19,{phase:elapsed>1.5?'arrive':'depart',duration:2,direction,height:7});world.active.elapsed=elapsed;
- const actors=world.present(renderer,.5,[{name:'Alcide',hero:true,x:1,z:2,height:7.04,frame:3}]);world.tick(3);await task.finished;world.clear();return {actors,draws,images};
+ const task=await world.start({id:graphic},19,{phase,duration:2,direction,height:7});world.active.elapsed=elapsed;
+ const actors=world.present(renderer,.5,[{name:'Alcide',hero:true,x:1,z:2,height:7.04,frame:3}]);world.clear();await assert.rejects(task.finished,/annullata/);return {actors,draws,images};
 }
 test('the standing rider reaches the exact composite seat before Fly attaches it, including lean, squash and camera pitch',async()=>{
  const pitch=[Math.sin(.44),Math.cos(.44)],yaw=.6,epsilon=1e-8;
@@ -24,6 +56,14 @@ test('the standing rider reaches the exact composite seat before Fly attaches it
   assert.ok(Math.hypot(hero.x-seat.x,hero.z-seat.z,hero.height-seat.height)<1e-5,`Fly attachment jumps at ${graphic}/${direction}: hero=${JSON.stringify(hero)} seat=${JSON.stringify(seat)}`);
  }
 });
+test('Fly landing releases the rider at the exact composite seat with the raised view, yaw, lean and squash',async()=>{
+ const pitch=[Math.sin(62*Math.PI/180),Math.cos(62*Math.PI/180)],yaw=-.6,epsilon=1e-8;
+ for(const graphic of [519,567,623,635])for(const direction of [0,1,2,3]){
+  const before=await flyFrame({graphic,direction,pitch,yaw,phase:'arrive',elapsed:2*(.65-epsilon)}),after=await flyFrame({graphic,direction,pitch,yaw,phase:'arrive',elapsed:2*(.65+epsilon)}),hero=after.actors.find(a=>!a.fieldHM&&a.hero),card=before.actors.find(a=>a.fieldHM),image=before.images.filter(i=>i.drawArgs.length===8).at(-1);assert.ok(hero&&card&&image);
+  const d=image.drawArgs,sx=(d[4]+d[6]/2-256)/64,sy=(384-d[5]-d[7])/64,base={x:card.x-2*pitch[0]*Math.sin(yaw),z:card.z-2*pitch[0]*Math.cos(yaw),height:card.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};
+  assert.ok(Math.hypot(hero.x-seat.x,hero.z-seat.z,hero.height-seat.height)<1e-5,`Fly landing detached discontinuously at ${graphic}/${direction}`);
+ }
+});
 test('rider visibility diagnostics preserve the live backend and allocate no mask during ordinary frames',async()=>{
  const {c,world}=setup(),contexts=[];let reads=0,uploads=0;
  c.document.createElement=()=>{const canvas={width:0,height:0};const context=new Proxy({},{get:(_,key)=>key==='getImageData'?(()=>{reads++;return {data:new Uint8Array(canvas.width*canvas.height*4)};}):()=>{}});canvas.getContext=(kind,options)=>{contexts.push({canvas,kind,options});return context;};return canvas;};
@@ -31,7 +71,7 @@ test('rider visibility diagnostics preserve the live backend and allocate no mas
  const actors=()=>[{name:'Alcide',hero:true,x:0,z:0,height:.04,frame:3}],before=reads;world.present(renderer,0,actors());assert.equal(reads,before,'Ordinary paint read pixels');
  const first=contexts.filter(r=>r.canvas.width===512&&r.canvas.height===512);assert.equal(first.length,1,'Ordinary paint allocated a rider mask');assert.equal(first[0].options,undefined,'QA must not move ordinary card rendering onto a different backend');world.inspectCard(renderer);
  const inspected=contexts.filter(r=>r.canvas.width===512&&r.canvas.height===512);assert.equal(inspected.length,2);assert.equal(inspected[1].options.willReadFrequently,true,'Only the diagnostic mask requests readback-oriented rasterization');
- world.inspectCard(renderer);assert.equal(contexts.filter(r=>r.canvas.width===512&&r.canvas.height===512).length,2,'Rider mask was not reused');const afterInspect=reads;world.present(renderer,0,actors());assert.equal(reads,afterInspect,'Ordinary paint read the retained QA mask');assert.equal(uploads,1);world.tick(3);await task.finished;world.clear();
+ world.inspectCard(renderer);assert.equal(contexts.filter(r=>r.canvas.width===512&&r.canvas.height===512).length,2,'Rider mask was not reused');const afterInspect=reads;world.present(renderer,0,actors());assert.equal(reads,afterInspect,'Ordinary paint read the retained QA mask');assert.equal(uploads,1);world.clear();await assert.rejects(task.finished,/annullata/);
 });
 test('rider RGB diagnostics tolerate one raster pixel while retaining exact counts and detecting a concealed upper body',async()=>{
  for(const concealed of [false,true]){
@@ -39,7 +79,7 @@ test('rider RGB diagnostics tolerate one raster pixel while retaining exact coun
   for(let x=250;x<254;x++){const rgba=[40+(x-250)*10,80+(x-250)*15,120+(x-250)*20,255];expected.set(rgba,(250*512+x)*4);if(!concealed)actual.set(rgba,(250*512+x+1)*4);}expected.set([255,255,255,249],(250*512+270)*4);
   c.document.createElement=()=>{const canvas={width:0,height:0};let mask=false;const context=new Proxy({},{get:(_,key)=>key==='getImageData'?(()=>({data:canvas.width===512?(mask?expected:actual):new Uint8Array(4096)})):()=>{}});canvas.getContext=()=>{if(canvas.width===512)mask=++cardContexts>1;return context;};return canvas;};c.ROM_SPRITE_ANIM.draw=()=>true;
   const renderer={cameraPitch:[.423,.906],gl:{isTexture:()=>true,bindTexture(){},texSubImage2D(){}},upload:()=>({texture:{}})},task=await world.start({id:519},19,{duration:2});world.active.elapsed=.8;world.present(renderer,0,[{name:'Alcide',hero:true,x:0,z:0,height:.04,frame:3}]);const measured=world.inspectCard(renderer);
-  assert.equal(measured.riderUpperPixels,4,'Antialiased alpha249 must not enter the denominator');assert.equal(measured.riderUpperExactVisible,0);assert.equal(measured.riderUpperExactVisibleFraction,0);assert.equal(measured.riderRasterTolerancePx,1);assert.equal(measured.riderUpperVisible,concealed?0:4);assert.equal(measured.riderUpperVisibleFraction,concealed?0:1);world.tick(3);await task.finished;world.clear();
+  assert.equal(measured.riderUpperPixels,4,'Antialiased alpha249 must not enter the denominator');assert.equal(measured.riderUpperExactVisible,0);assert.equal(measured.riderUpperExactVisibleFraction,0);assert.equal(measured.riderRasterTolerancePx,1);assert.equal(measured.riderUpperVisible,concealed?0:4);assert.equal(measured.riderUpperVisibleFraction,concealed?0:1);world.clear();await assert.rejects(task.finished,/annullata/);
  }
 });
 test('entering a native Surf landing retains the previous swimming joint pose before blending to the landing score',async()=>{
@@ -92,20 +132,20 @@ test('the opaque sprite foot, rather than the transparent card edge, coincides w
  }
 });
 test('Cut temporarily clears foreground trees with a smooth camera and restores the owned base view every frame',async()=>{
- const {world}=setup(),base=[Math.sin(.44),Math.cos(.44)],renderer={cameraPitch:base,zoom:1.8};const task=await world.start({id:501},15,{duration:2});
- assert.ok(Math.abs(Math.atan2(...world.cameraFor(base))-.44)<1e-10);world.tick(.6);
+ const {world,c}=setup(),base=[Math.sin(.44),Math.cos(.44)],renderer={cameraPitch:base,zoom:1.8},f=fieldPresenter(world,c,renderer);const task=await world.start({id:501},15,{duration:2,target:{x:1,y:1}});
+ assert.ok(Math.abs(Math.atan2(...world.cameraFor(base))-.44)<1e-10);while(world.active.elapsed/2<.3){f.tick(.04);f.draw();}
  for(let i=0;i<5;i++){const restore=world.applyCamera(renderer);assert.ok(Math.abs(Math.atan2(...renderer.cameraPitch)-62*Math.PI/180)<1e-10);restore();assert.equal(renderer.cameraPitch,base);assert.equal(renderer.zoom,1.8);}
- world.tick(1.4);await task.finished;assert.equal(world.cameraFor(base),base);
- const steep=[Math.sin(1.2),Math.cos(1.2)],other=await world.start({id:501},15,{duration:2});world.tick(.6);assert.ok(Math.abs(Math.atan2(...world.cameraFor(steep))-1.2)<1e-10);world.tick(2);await other.finished;
+ finishField(world,c,renderer);await task.finished;assert.equal(world.cameraFor(base),base);
+ const steep=[Math.sin(1.2),Math.cos(1.2)],other=await world.start({id:501},15,{duration:2,target:{x:1,y:1}});f.tick(.6);f.draw();assert.ok(Math.abs(Math.atan2(...world.cameraFor(steep))-1.2)<1e-10);finishField(world,c,renderer);await other.finished;
 });
 test('Cut commits once at contact; a hidden tab advances neither pose nor native tree flag',async()=>{
- const {world,c}=setup();let commits=0;const task=await world.start({id:501},15,{onContact:()=>commits++,duration:2});world.tick(.9);assert.equal(commits,0);
- c.document.hidden=true;world.tick(20);assert.equal(commits,0);assert.equal(world.active.elapsed,.9);
- c.document.hidden=false;world.tick(.2);assert.equal(commits,1);world.tick(20);await task.finished;assert.equal(commits,1);assert.equal(world.active,null);
+ const {world,c}=setup(),f=fieldPresenter(world,c);let commits=0;const task=await world.start({id:501},15,{onContact:()=>commits++,duration:2,target:{x:1,y:1}});while(world.active.elapsed/2<.4){f.tick(.04);f.draw();}assert.equal(commits,0);const before=world.active.elapsed;
+ c.document.hidden=true;f.tick(20);assert.equal(commits,0);assert.equal(world.active.elapsed,before);
+ c.document.hidden=false;finishField(world,c,f.renderer);await task.finished;assert.equal(commits,1);assert.equal(world.active,null);
 });
 test('Fly holds its fully departed pose across a covered transfer and runs a separate arrival',async()=>{
- const {world,n}=setup(),mon={id:519};const departure=await world.start(mon,19,{phase:'depart',duration:1,transfer:true,retain:true});world.tick(1);await departure.finished;assert.equal(world.active.done,true);
- n.zone=16;world.tick(2);assert.equal(world.active.phase,'depart');const arrival=await world.start(mon,19,{phase:'arrive',duration:1,transfer:true});world.tick(1);await arrival.finished;assert.equal(world.active,null);
+ const {world,n,c}=setup(),mon={id:519};const departure=await world.start(mon,19,{phase:'depart',duration:1,transfer:true,retain:true});finishField(world,c);await departure.finished;assert.equal(world.active.done,true);
+ n.zone=16;world.tick(2);assert.equal(world.active.phase,'depart');const arrival=await world.start(mon,19,{phase:'arrive',duration:1,transfer:true});finishField(world,c);await arrival.finished;assert.equal(world.active,null);
 });
 test('unrelated scene replacement cancels Cut without applying its gameplay outcome',async()=>{
  const {world,n}=setup();let commits=0;const task=await world.start({id:501},15,{onContact:()=>commits++});n.zone=16;world.tick(.1);await assert.rejects(task.finished,/Scena MN sostituita/);assert.equal(commits,0);assert.equal(world.active,null);
@@ -131,13 +171,77 @@ test('Surf swimmers immerse their lower body while keeping the rider support abo
 });
 
 test('context loss before its DOM event cannot turn a field card upload into a fatal render error',async()=>{
- const {world}=setup();const task=await world.start({id:519},19,{duration:2});const actors=[{name:'Alcide',hero:true,x:1,z:2,height:0,frame:3}],renderer={gl:{isContextLost:()=>true},upload(){throw Error('Contesto grafico interrotto');}};assert.equal(world.present(renderer,0,actors),actors,'Keep the owned action while the renderer restores its context');assert.ok(world.active);world.tick(2);await task.finished;
+ const {world,c}=setup();const task=await world.start({id:519},19,{duration:2});const actors=[{name:'Alcide',hero:true,x:1,z:2,height:0,frame:3}],renderer={gl:{isContextLost:()=>true},upload(){throw Error('Contesto grafico interrotto');}};assert.equal(world.present(renderer,0,actors),actors,'Keep the owned action while the renderer restores its context');assert.ok(world.active);let finished=false;task.finished.then(()=>finished=true);world.tick(2);await Promise.resolve();assert.equal(finished,false,'A lost context must not complete an undrawn action');renderer.gl.isContextLost=()=>false;renderer.upload=()=>({texture:{}});finishField(world,c,renderer);await task.finished;
 });
 
 test('Surf keeps the last visible species during evolution loading and swaps atomically on the same GPU card',async()=>{
  const {c,n,party,calls,world}=setup(),ctx=new Proxy({},{get:(_,key)=>key==='getImageData'?(()=>({data:new Uint8Array(4096)})):()=>{}});c.document.createElement=()=>({getContext:()=>ctx});c.SpeciesMoves={select:()=>({frames:10}),sample:()=>({})};const graphics=[];c.ROM_SPRITE_ANIM.draw=(_ctx,g)=>{graphics.push(g);return true;};n.surf=true;n.surfUserIndex=0;c.SurfField={mounted:()=>true};let uploads=0;const renderer={cameraPitch:[0,1],gl:{isContextLost:()=>false,isTexture:()=>true,bindTexture(){},texSubImage2D(){},deleteTexture(){}},upload:()=>{uploads++;return {texture:{}};}};
  await world.prepare(party[0],57);party[0].id=502;party[0].name='Dewott';let resume;c.ROM_SPRITE_ANIM.prepare=()=>new Promise(resolve=>resume=resolve);const pending=world.prepare(party[0],57),actors=[{name:'AlcideSurf',hero:true,x:1,z:2,height:0,frame:3}];const old=world.present(renderer,0,actors).find(a=>a.fieldHM);assert.ok(old,'The swimmer must remain visible while the evolved bank loads');assert.equal(graphics.at(-1),501);assert.equal(world.surfReady(),false);assert.equal(world.surfRenderable(),true);
  resume();await pending;const next=world.present(renderer,0,actors).find(a=>a.fieldHM);assert.equal(graphics.at(-1),502);assert.equal(next.texture,old.texture);assert.equal(uploads,1);assert.equal(calls.releases,1);world.clear();world.dispose(renderer);assert.equal(calls.pins,calls.releases);
+});
+
+test('low-FPS speed chunks render every authored Cut and Fly key before completion at ×1/×2/×4',async t=>{
+ for(const speed of [1,2,4]){const {world,c}=setup();t.after(()=>world.clear());const profiles=[...c.FieldHMProfiles.profiles.values()].filter(p=>p.move===15||p.move===19);assert.equal(profiles.length,76);
+ for(const profile of profiles)for(const phase of profile.move===15?['cut']:['depart','arrive']){
+  const f=fieldPresenter(world,c),id=profile.graphic,move=profile.move,duration=move===15?2.4:2.2,mon={id};let commits=0;
+  const task=await world.start(mon,move,{phase,duration,target:{x:1,y:1},onContact:move===15?()=>{commits++;assert.ok(Math.abs(world.active.elapsed/duration-.52)<1e-9,'Native contact must occur at its authored .52 boundary');}:null});task.finished.catch(()=>{});
+  let frames=0;while(world.active&&!world.active.done&&frames++<200){let rest=.25*speed;while(rest>1e-8){const dt=Math.min(.04,rest);f.tick(dt);rest-=dt;}f.draw();}
+  assert.ok(!world.active||world.active.done,'Render acknowledgement must eventually release control');await task.finished;
+  const actual=f.frames.map(frame=>frame.progress),required=c.FieldHMProfiles.profile(mon,move).choreography[phase].map(row=>row[0]).filter(progress=>progress>0);
+  for(const progress of required)assert.ok(actual.some(value=>Math.abs(value-progress)<1e-9),`${id}:${phase}:×${speed} omitted authored rendered key ${progress}: ${actual.join(',')}`);
+  for(let i=1;i<actual.length;i++){assert.ok(actual[i]>=actual[i-1],'Visible action progress went backwards');assert.ok(actual[i]-actual[i-1]<=.080000001,'One rendered frame crossed an entire gesture interval');}
+  assert.equal(commits,move===15?1:0);if(move===15){assert.ok(f.frames.some(frame=>frame.progress>=.30&&frame.progress<=.45&&!frame.committed),'Preparation never reached the renderer before native contact');assert.ok(f.frames.some(frame=>frame.progress>=.52&&frame.progress<=.61&&frame.committed),'Committed contact never reached the renderer');}
+ }}
+});
+
+test('the documented .278 to .583 Cut overshoot cannot skip preparation or commit before it is drawn',async t=>{
+ const {world,c}=setup(),f=fieldPresenter(world,c);let commits=0;const task=await world.start({id:496},15,{duration:2.4,target:{x:1,y:1},onContact:()=>commits++});task.finished.catch(()=>{});t.after(()=>world.clear());
+ // The source runtime supplies normal .04 chunks; rendering stays independent.
+ while(world.active.elapsed/2.4<.278){f.tick(.04);f.draw();}
+ f.tick((.583-.278)*2.4);f.draw();
+ assert.equal(commits,0,'Low FPS committed the tree before showing the preparation');
+ finishField(world,c,f.renderer);await task.finished;assert.equal(commits,1);
+ assert.ok(f.frames.every(frame=>frame.progress<.52||frame.committed),'Contact was visible without its native tree outcome');
+});
+
+test('many physics chunks and card composition cannot acknowledge an undrawn field action',async t=>{
+ const {world,c}=setup(),f=fieldPresenter(world,c);let commits=0;const task=await world.start({id:496},15,{duration:2.4,target:{x:1,y:1},onContact:()=>commits++});task.finished.catch(()=>{});t.after(()=>world.clear());
+ f.tick(1);const held=world.active.elapsed;for(let i=0;i<25;i++)f.tick(.04);assert.equal(world.active.elapsed,held,'Physics crossed a key before any draw');
+ f.draw({ack:false});for(let i=0;i<25;i++)f.tick(.04);assert.equal(world.active.elapsed,held,'Painting an offscreen card counted as a completed world draw');assert.equal(commits,0);
+ world.rendered?.(f.renderer);world.rendered?.(f.renderer);f.tick(.04);assert.ok(world.active.elapsed>held,'A successful frame did not release its key');
+ const next=world.active.elapsed;for(let i=0;i<25;i++)f.tick(.04);assert.equal(world.active.elapsed,next,'One acknowledged frame released more than one render boundary');finishField(world,c,f.renderer);await task.finished;assert.equal(commits,1);
+});
+
+test('hidden tabs, lost contexts and frames without the hero cannot release a held pose',async t=>{
+ const {world,c}=setup(),f=fieldPresenter(world,c);const task=await world.start({id:519},19,{phase:'depart',duration:2.2});task.finished.catch(()=>{});t.after(()=>world.clear());
+ f.tick(1);const held=world.active.elapsed;f.draw({ack:false});c.document.hidden=true;world.rendered?.(f.renderer);f.tick(100);assert.equal(world.active.elapsed,held);
+ c.document.hidden=false;f.renderer.gl.isContextLost=()=>true;f.draw();world.rendered?.(f.renderer);f.tick(100);assert.equal(world.active.elapsed,held,'Lost context acknowledged an undrawn key');
+ f.renderer.gl.isContextLost=()=>false;world.present(f.renderer,0,[]);world.rendered?.(f.renderer);f.tick(100);assert.equal(world.active.elapsed,held,'A frame without the hero acknowledged the Pokémon');
+ f.draw();f.tick(.04);assert.ok(world.active.elapsed>held);finishField(world,c,f.renderer);await task.finished;
+});
+
+test('cancelled action frames cannot acknowledge a replacement and scene replacement still rejects before contact',async t=>{
+ const {world,c,n}=setup(),f=fieldPresenter(world,c);let commits=0;const first=await world.start({id:496},15,{target:{x:1,y:1},onContact:()=>commits++});f.tick(1);f.draw({ack:false});const rejected=assert.rejects(first.finished,/annullata/);world.clear();await rejected;
+ const second=await world.start({id:496},15,{target:{x:1,y:1},onContact:()=>commits++});second.finished.catch(()=>{});t.after(()=>world.clear());f.tick(1);const held=world.active.elapsed;world.rendered?.(f.renderer);f.tick(1);assert.equal(world.active.elapsed,held,'An old action frame released the replacement');
+ n.zone=16;f.tick(.04);await assert.rejects(second.finished,/Scena MN sostituita/);assert.equal(world.active,null);assert.equal(commits,0);
+});
+
+test('field actions resolve only after the final world frame has been acknowledged',async t=>{
+ const {world,c}=setup(),f=fieldPresenter(world,c);const task=await world.start({id:519},19,{phase:'arrive',duration:2.2});task.finished.catch(()=>{});t.after(()=>world.clear());let finished=false;task.finished.then(()=>finished=true);
+ let frames=0;while(world.active&&world.active.elapsed<2.2&&frames++<200){f.tick(1);if(world.active?.elapsed>=2.2){f.draw({ack:false});break;}f.draw();}
+ assert.ok(world.active,'Action resolved before its final draw acknowledgement');assert.equal(world.active.elapsed,2.2);await Promise.resolve();assert.equal(finished,false,'Tick/card preparation resolved the command before presentation');
+ f.tick(1);assert.equal(world.active.elapsed,2.2);world.rendered?.(f.renderer);await task.finished;assert.equal(world.active,null);
+});
+
+test('Fly camera opens above roofs before boarding and restores the exact base after every draw',async()=>{
+ for(const phase of ['depart','arrive']){
+  const {world}=setup(),base=[Math.sin(.44),Math.cos(.44)],steep=[Math.sin(1.2),Math.cos(1.2)],center=[7,-4],renderer={cameraPitch:base,zoom:1.8,center,yaw:.6};const task=await world.start({id:519},19,{phase,duration:2.2});
+  for(const progress of [0,.06,.12,.15,.35,.65,.85,.925,1]){world.active.elapsed=progress*2.2;const target=62*Math.PI/180,expected=phase==='depart'?(progress===0?.44:progress>=.12?target:(.44+target)/2):progress<=.85?target:progress===1?.44:(.44+target)/2;
+   for(let draw=0;draw<5;draw++){const restore=world.applyCamera(renderer);assert.ok(Math.abs(Math.atan2(...renderer.cameraPitch)-expected)<1e-9,phase+' camera at '+progress);assert.equal(renderer.zoom,1.8);assert.equal(renderer.center,center);assert.deepEqual(center,[7,-4]);assert.equal(renderer.yaw,.6);restore();assert.equal(renderer.cameraPitch,base,'The owned base pitch array was replaced');}
+   assert.ok(Math.abs(Math.atan2(...world.cameraFor(steep))-1.2)<1e-9,'Fly lowered an already steeper camera');
+  }
+  world.clear();await assert.rejects(task.finished,/annullata/);assert.equal(world.cameraFor(base),base);
+ }
 });
 
 {

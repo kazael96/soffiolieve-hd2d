@@ -1,5 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),os=require('os'),path=require('path'),build=require('../scripts/build-browser-qa.cjs');
 const vm=require('node:vm');
+const {restartSaveSnapshot,assertRestartCancellation}=require('../scripts/test-introduction-headless.cjs');
+test('restart cancellation comparison permits only natural clock progress and actor serialization order',()=>{
+ const saved={playerName:'Luca',playerGender:'M',player:{x:1,y:2},trainer:{playSeconds:10,id:7},party:[{id:1,hp:20},{id:2,hp:30}],original:{flags:[1,2],vars:{5:6},actors:{391:[{uid:0,x:1,y:1,extra:{b:2,a:1}},{uid:1,x:2,y:1}]}}},after=structuredClone(saved);after.trainer.playSeconds=11;after.original.actors[391].reverse();after.original.actors[391][1].extra={a:1,b:2};
+ const snapshot=state=>({raw:JSON.stringify(state),rawBeforeSave:JSON.stringify(state),name:'Luca',gender:'M',position:{x:1,y:2},rate:1,atMs:1000}),before=snapshot(saved),next={...snapshot(after),atMs:2000};assert.equal(assertRestartCancellation(before,next).semanticEqual,true);assert.equal(saved.trainer.playSeconds,10,'Comparison must not mutate its input');assert.equal(restartSaveSnapshot(next.raw).playSeconds,11);assert.throws(()=>assertRestartCancellation(before,{...next,rawBeforeSave:null}),/storage/);const corrupt=structuredClone(after);corrupt.party[0].hp--;assert.throws(()=>assertRestartCancellation(before,{...next,rawBeforeSave:JSON.stringify(corrupt)}),/persisted/);
+ for(const mutate of [s=>s.player.x++,s=>s.original.actors[391][0].x++,s=>s.party[0].hp--,s=>s.playerName='Other',s=>s.playerGender='F',s=>s.party.reverse(),s=>s.original.flags.reverse(),s=>s.original.vars[5]++,s=>s.original.actors[391].push(structuredClone(s.original.actors[391][0])),s=>s.original.actors[391][0].extra={changed:true},s=>s.trainer.id++,s=>s.original.playSeconds=99]){const bad=structuredClone(after);mutate(bad);assert.throws(()=>assertRestartCancellation(before,{...snapshot(bad),atMs:2000}));}
+ assert.throws(()=>assertRestartCancellation(before,{...next,position:{x:2,y:2}}));assert.throws(()=>assertRestartCancellation(before,{...next,name:'Other'}));assert.throws(()=>assertRestartCancellation(before,{...next,gender:'F'}));assert.throws(()=>assertRestartCancellation(before,{...next,rate:4}));const reset=structuredClone(after);reset.trainer.playSeconds=9;assert.throws(()=>assertRestartCancellation(before,{...snapshot(reset),atMs:2000}),/reset/);const jump=structuredClone(after);jump.trainer.playSeconds=100;assert.throws(()=>assertRestartCancellation(before,{...snapshot(jump),atMs:2000}),/elapsed/);
+});
 function fixture(t){const parent=path.resolve(os.tmpdir()),dir=fs.mkdtempSync(path.join(parent,'soffiolieve-qa-'));t.after(()=>{assert.equal(path.dirname(path.resolve(dir)),parent);assert.ok(path.basename(dir).startsWith('soffiolieve-qa-'));fs.rmSync(dir,{recursive:true,force:true});});const site=path.join(dir,'site');fs.mkdirSync(site);const html='<html lang="it"><head><script>window.SpeciesStudioMode=["snivy"].some(x=>false);</script></head><body></body></html>';fs.writeFileSync(path.join(site,'index.html'),html);return {dir,site,html};}
 test('browser QA detaches save storage before app initialization and preserves the published index',t=>{const f=fixture(t),out=path.join(f.dir,'qa');build(f.site,out);const html=fs.readFileSync(path.join(out,'index.html'),'utf8');assert.ok(html.includes('window.SpeciesStudioMode=true;'));assert.ok(html.indexOf('DeepQAEarlyErrors')<html.indexOf('window.SpeciesStudioMode'));assert.ok(html.includes('/__qa/browser-qa.js'));assert.equal(fs.readFileSync(path.join(f.site,'index.html'),'utf8'),f.html);assert.ok(fs.existsSync(path.join(out,'browser-qa.js')));});
 test('browser QA refuses to write test controls into the published site',t=>{const f=fixture(t);assert.throws(()=>build(f.site,path.join(f.site,'qa')),/outside/);assert.equal(fs.readdirSync(f.site).length,1);});
@@ -83,4 +90,34 @@ test('Cut QA closes every frozen frame even if deferred PNG encoding fails',asyn
 
 test('Cut QA disposes captured frames without encoding when its native event fails',async()=>{
  const f=cutCaptureFixture055({eventFailure:true});await assert.rejects(f.run(),/native event failed/);assert.deepEqual(f.closed,['normal-preparation','normal-contact']);assert.equal(f.shots.some(s=>s.label.includes('prepara')||s.label.includes('contatto')),false);assert.equal(f.renderer.draw,f.originalDraw);assert.equal(f.field.present,f.originalPresent);
+});
+
+function referenceCleanup056(world){
+ const text=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),start=text.indexOf(' async function clearSuppliedHMReference056('),end=text.indexOf(' async function worldHMMatrix054(',start),context={FieldHMWorld:world,check:(ok,message)=>assert.ok(ok,message)};
+ assert.ok(start>=0&&end>start);vm.runInNewContext(text.slice(start,end)+'\nglobalThis.cancelReference=clearSuppliedHMReference056;',context);return context.cancelReference;
+}
+test('supplied HM pose cleanup cancels its unfinished action without ticking or acknowledging a render',async()=>{
+ let reject;const calls=[],finished=new Promise((resolve,failure)=>reject=failure),clear=referenceCleanup056({clear(){calls.push('clear');reject(Error('Azione MN annullata'));},tick(){throw Error('Reference cleanup must not advance physics');},rendered(){throw Error('Reference cleanup must not supply a frame');}});
+ await clear({finished});assert.deepEqual(calls,['clear']);
+});
+test('supplied HM pose cleanup rejects unexpected failure and cannot certify an actual completed outcome',async()=>{
+ let reject;const finished=new Promise((resolve,failure)=>reject=failure),clear=referenceCleanup056({clear(){reject(Error('sprite resource failed'));}});await assert.rejects(clear({finished}),/sprite resource failed/);
+ await assert.rejects(referenceCleanup056({clear(){}})({finished:Promise.resolve()}),/must cancel without certifying an outcome/);
+});
+
+function femaleHMFixture056({resourceFailure=false}={}){
+ const text=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),start=text.indexOf(' async function prepareHMIdentity056('),end=text.indexOf(' if(window.FieldHMWorld&&window.PlayerIdentity)',start),calls=[],state={playerGender:'M',playerName:'Legacy',introductionComplete:false};
+ const context={console,Journey:{state},PLAYER_ASSETS:{sprites:{Alcide:Array.from({length:12},(_,i)=>'male-'+i),AlcideSurf:Array.from({length:12},(_,i)=>'male-surf-'+i),Anita:Array.from({length:12},(_,i)=>'female-'+i),AnitaSurf:Array.from({length:12},(_,i)=>'female-surf-'+i)}},NativeStory:{visualActors:()=>[]},FieldHMWorld:{active:null,clear(){calls.push('clear');}},RuntimeAssets:{image:async source=>({source})},AudioEngine:{disable(){calls.push('audio-disabled');}},check:(ok,message)=>assert.ok(ok,message)};context.window=context;
+ context.renderer={images:{},async requireActors(){calls.push('prepare-'+state.playerGender);if(resourceFailure&&state.playerGender==='F')throw Error('female resource failed');this.images[state.playerGender==='F'?'Anita-0':'Alcide-0']={};},async prepareScene(){calls.push('scene-'+state.playerGender);},hasResources:()=>true,resourcePlan:()=>({})};
+ vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/player-identity.js'),'utf8'),context);assert.ok(start>=0&&end>start);vm.runInContext(text.slice(start,end)+'\nglobalThis.prepareFemale=prepareHMIdentity056;globalThis.runFemale=femaleHM056;',context);return {context,calls,state,image:context.RuntimeAssets.image};
+}
+test('female HM QA prepares identity/resources before the native command and restores prior identity afterward',async()=>{
+ const f=femaleHMFixture056(),result=await f.context.runFemale(19,async identity=>{await f.context.prepareFemale(identity);assert.equal(f.state.playerGender,'F');assert.equal(f.state.playerName,'Élisa');assert.ok(f.calls.includes('scene-F'));await f.context.RuntimeAssets.image('female-0');await f.context.RuntimeAssets.image('female-surf-0');return {actualA:true};});
+ assert.equal(result.actualA,true);assert.equal(result.playerIdentity.actualIntroductionReplayed,false);assert.equal(result.playerIdentity.standingSprite,'Anita');assert.equal(result.playerIdentity.sittingSprite,'AnitaSurf');assert.deepEqual(f.state,{playerGender:'M',playerName:'Legacy',introductionComplete:false});assert.equal(f.context.RuntimeAssets.image,f.image);assert.ok(f.calls.includes('scene-M'));
+});
+test('female HM QA propagates a missing native resource and restores its loader and identity',async()=>{
+ const f=femaleHMFixture056({resourceFailure:true});await assert.rejects(f.context.runFemale(19,identity=>f.context.prepareFemale(identity)),/female resource failed/);assert.deepEqual(f.state,{playerGender:'M',playerName:'Legacy',introductionComplete:false});assert.equal(f.context.RuntimeAssets.image,f.image);assert.ok(f.calls.includes('scene-M'));
+});
+test('female HM QA does not cancel another active native command to prepare its fixture',async()=>{
+ const f=femaleHMFixture056();f.context.FieldHMWorld.active={move:19};await assert.rejects(f.context.runFemale(19,()=>{throw Error('must not start');}),/requires an idle field/);assert.deepEqual(f.calls,[]);assert.equal(f.context.RuntimeAssets.image,f.image);
 });

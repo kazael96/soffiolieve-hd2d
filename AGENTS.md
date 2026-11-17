@@ -44,3 +44,7 @@ Richiesta esplicita permanente: ciascuna delle 105 coppie specie/forma–MN sul 
 
 
 Il banco di compilazione delle fixture usa 256 voci / 96 MiB dopo la regressione reale del finale227 script: applicare il nuovo paragrafo di DEVELOPMENT-RULES, conservare baseline e isolamento dei contesti. Questo aggiornamento del banco non cambia il runtime del gioco né trasferisce un PASS alle49 fasi prima della loro conclusione.
+
+## Introduzione e presentazione MN · 16 novembre2026
+
+L'utente richiede di correggere i limiti documentati della0.55 e aggiungere l'introduzione con scelta del sesso e del nome. Applicare [INTRODUCTION-056.md](docs/INTRODUCTION-056.md), [FIELD-PRESENTATION-056.md](docs/FIELD-PRESENTATION-056.md) e lo stato effettivo delle prove in [QA-056.md](docs/QA-056.md). L'identità deve restare coerente in campo, bicicletta, MN, chiamate, scheda e salvataggi; conservare i nomi legacy e non riproporre l'introduzione alle partite precedenti. Le conferme di fotogramma delle MN appartengono al disegno concluso, non alla sola composizione della carta. A FPS insufficienti preservare i gesti e il loro ordine, senza certificare la durata nominale di×4.

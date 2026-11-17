@@ -39,6 +39,7 @@ INSTALLER = """;
 
 def export(rom, output, apicula, work_dir, *, badge='quake'):
     variants = {
+        'trio-female': ([(42, 'trioBadgeF')], 'Medaglia Tris', 'TRIO_BADGE_ASSETS', 'TrioBadgeAssets', 'trio-badge-assets.js'),
         'quake': ([(7, 'quakeBadgeM'), (46, 'quakeBadgeF')], 'Medaglia Sisma', 'MISTRALTON_BADGE_ASSETS', 'MistraltonBadgeAssets', 'mistralton-badge-assets.js'),
         'jet': ([(8, 'jetBadgeM'), (47, 'jetBadgeF')], 'Medaglia Jet', 'ICIRRUS_BADGE_ASSETS', 'IcirrusBadgeAssets', 'icirrus-badge-assets.js'),
         'freeze': ([(9, 'freezeBadgeM'), (48, 'freezeBadgeF')], 'Medaglia Stalattite', 'OPELUCID_BADGE_ASSETS', 'OpelucidBadgeAssets', 'opelucid-badge-assets.js'),

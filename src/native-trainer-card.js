@@ -3,10 +3,10 @@
   let preparation;
   async function open(screen,back,flipped=false){
     if(!preparation)preparation=(async()=>{const images={},image=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=NativeTextLayout.resource(src);});await Promise.all(Object.entries(TRAINER_CARD_ASSETS.images).map(async([k,v])=>images[k]=await image(v.src)));const close=await image(DEX_BROWSER_ASSETS.groups.detailCommon.cells[0].src),flip=await image(TRAINER_CARD_ASSETS.groups.controls.cells[25].src);return {images,close,flip};})();
-    const r=await preparation,a=TRAINER_CARD_ASSETS,s=Journey.state,profile=s.trainer,shortcut=await NativeShortcuts.checkbox(flipped?'trainer:back':'trainer',180,172,()=>open(screen,back,flipped));
+    const r=await preparation,a=TRAINER_CARD_ASSETS,s=Journey.state,profile=s.trainer,appearance=window.PlayerIdentity?.trainerCard(s)||{front:'frontMaleRank0',back:'backMaleRank0',avatar:'avatarMaleRank0'},shortcut=await NativeShortcuts.checkbox(flipped?'trainer:back':'trainer',180,172,()=>open(screen,back,flipped));
     screen.show(s.playerName,c=>{
-      c.drawImage(r.images.frontGridRank0,0,0);c.drawImage(r.images[flipped?'backMaleRank0':'frontMaleRank0'],0,0);if(!flipped)c.drawImage(r.images.avatarMaleRank0,...a.images.avatarMaleRank0.position);c.drawImage(r.images.commonFrame,0,0);
-      const values=[s.playerName,a.classLabels[0],a.labels[31+(profile?.nature||0)],String(s.dex.seen.length),NativeTextLayout.format(a.labels[57],[s.money])];
+      c.drawImage(r.images.frontGridRank0,0,0);c.drawImage(r.images[flipped?appearance.back:appearance.front],0,0);if(!flipped)c.drawImage(r.images[appearance.avatar],...a.images[appearance.avatar].position);c.drawImage(r.images.commonFrame,0,0);
+      const values=[s.playerName,a.classLabels[s.playerGender==='F'?1:0],a.labels[31+(profile?.nature||0)],String(s.dex.seen.length),NativeTextLayout.format(a.labels[57],[s.money])];
       if(!flipped)for(let i=0;i<5;i++){
         if(i===3&&!s.original?.pokedex)continue;const w=a.frontLayout.windows[i];screen.text(a.labels[i],w.tileX*8,w.tileY*8);screen.text(values[i],i===4?232:152,w.tileY*8,false,'right');
       }

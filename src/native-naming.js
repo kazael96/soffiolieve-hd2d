@@ -1,33 +1,35 @@
 /* IRBI naming pages and controls; text is kept as native character codes. */
 (function(root){
-  function edit(value,action,character='',allowed=null){
+  function edit(value,action,character='',allowed=null,maxLength=10){
     const letters=[...String(value)];
     if(action==='delete')letters.pop();
-    else if(action==='insert'&&letters.length<10&&(!allowed||allowed.has(character)))letters.push(character);
+    else if(action==='insert'&&letters.length<maxLength&&(!allowed||allowed.has(character)))letters.push(character);
     return letters.join('');
   }
-  async function open(pokemon){
+  async function open(pokemon,options={}){
+    const player=options.mode==='player',maxLength=player?7:10,title=player?'Il tuo nome':'Soprannome del Pokémon';
+    const prompt=player?'Come ti chiami?':null;
     const data=root.NAMING_ASSETS;
     if(!data)throw Error('Tastiera originale non disponibile');
-    const load=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Risorsa tastiera non disponibile: '+src));im.src=NativeTextLayout.resource(src);});
+    const load=src=>root.RuntimeAssets?.image?root.RuntimeAssets.image(NativeTextLayout.resource(src)):new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Risorsa tastiera non disponibile: '+src));im.src=NativeTextLayout.resource(src);});
     const resources={};await Promise.all(Object.entries(data.images).map(async([key,record])=>resources[key]=await load(record.src)));
     const font=await load(data.font?.src||'assets/pokedex/font.png'),metrics=data.font||POKEDEX_ASSETS.font;
     const cursors=await Promise.all(data.sprites.cells.map(record=>load(record.src)));
     const promptFrame=await load(COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src);
-    const id=GEN5.species.find(s=>s.en===pokemon.name).id,sprite=await load(MENU_ASSETS.pokemonIcons[id].cells[0].src);
-    const dialog=document.createElement('dialog');dialog.id='nativeNaming';dialog.className='native-dual-screen';dialog.setAttribute('aria-label','Soprannome del Pokémon');
+    const id=player?null:GEN5.species.find(s=>s.en===pokemon.name).id,sprite=await load(player?options.iconSrc:MENU_ASSETS.pokemonIcons[id].cells[0].src);
+    const dialog=document.createElement('dialog');dialog.id='nativeNaming';dialog.className='native-dual-screen';dialog.setAttribute('aria-label',title);
     const screens=document.createElement('div');screens.className='native-dual-panels';dialog.append(screens);
     const top=document.createElement('canvas');top.width=256;top.height=192;top.setAttribute('role','img');screens.append(top);
     const stage=document.createElement('div');stage.className='native-stage';screens.append(stage);
     const bottom=document.createElement('canvas');bottom.width=256;bottom.height=192;bottom.setAttribute('role','img');bottom.setAttribute('aria-label','Tastiera italiana originale');stage.append(bottom);
-    const input=document.createElement('input');input.maxLength=10;input.value=pokemon.nickname||'';input.setAttribute('aria-label','Soprannome del Pokémon');input.autocomplete='off';input.spellcheck=false;input.className='native-name-input';screens.append(input);
+    const input=document.createElement('input');input.maxLength=maxLength;input.value=player?options.initialValue||'':pokemon.nickname||'';input.setAttribute('aria-label',title);input.autocomplete='off';input.spellcheck=false;input.className='native-name-input';screens.append(input);
     const a=top.getContext('2d'),b=bottom.getContext('2d');a.imageSmoothingEnabled=b.imageSmoothingEnabled=false;
     let value=input.value,page=0,selected=0,buttons=[],finished=false,request=0;const started=performance.now();
     const allowed=new Set(data.pages.flatMap(p=>p.codes.map(c=>String.fromCharCode(c))).filter(c=>c!=='※'));
     const put=(ctx,text,x,y,white=false,align='left')=>NativeText.draw(ctx,font,String(text),x,y,white,align,metrics);
     let complete;const done=new Promise(resolve=>complete=resolve);
-    function finish(){if(finished)return;finished=true;const result=value.trim();complete(!result||result===(pokemon.nickname||pokemon.name)?null:result);}
-    function change(action,character){value=edit(value,action,character,allowed);input.value=value;draw();}
+    function finish(){if(finished)return;finished=true;const result=value.trim();complete(player?result||options.defaultName:!result||result===(pokemon.nickname||pokemon.name)?null:result);}
+    function change(action,character){value=edit(value,action,character,allowed,maxLength);input.value=value;draw();}
     function command(action){
       if(action==='confirm')finish();else if(action==='delete')change('delete');
       else if(action==='upper')switchPage(page>=3?4:0);else if(action==='lower')switchPage(page>=3?3:1);
@@ -50,19 +52,25 @@
       buttons[selected]?.element.focus();draw();
     }
     function draw(){
-      a.clearRect(0,0,256,192);a.drawImage(resources.upperBackground,0,0,256,192,0,0,256,192);
-      a.drawImage(promptFrame,0,144);
-      NativeTextLayout.wrap(NativeTextLayout.format(data.labels[1],[pokemon.nickname||pokemon.name]),metrics,240).slice(0,2).forEach((line,i)=>put(a,line,8,152+i*16));
-      top.setAttribute('aria-label',NativeTextLayout.format(data.labels[1],[pokemon.nickname||pokemon.name]));
+      const compact=root.innerWidth>600&&root.innerHeight<=500,width=compact?128:256,height=compact?64:192,frameY=compact?16:144;
+      if(top.width!==width||top.height!==height){top.width=width;top.height=height;a.imageSmoothingEnabled=false;}
+      a.clearRect(0,0,width,height);a.drawImage(resources.upperBackground,0,0,width,height,0,0,width,height);
+      // A landscape phone gives the keyboard most of the width. Recompose the
+      // original prompt at native text size instead of shrinking a whole DS.
+      if(compact){const edge=8,h=promptFrame.height;a.drawImage(promptFrame,0,0,edge,h,0,frameY,edge,h);a.drawImage(promptFrame,edge,0,promptFrame.width-edge*2,h,edge,frameY,width-edge*2,h);a.drawImage(promptFrame,promptFrame.width-edge,0,edge,h,width-edge,frameY,edge,h);}
+      else a.drawImage(promptFrame,0,frameY);
+      const message=prompt||NativeTextLayout.format(data.labels[1],[pokemon.nickname||pokemon.name]);
+      NativeTextLayout.wrap(message,metrics,width-16).slice(0,2).forEach((line,i)=>put(a,line,8,frameY+8+i*16));
+      top.setAttribute('aria-label',message);
       b.clearRect(0,0,256,192);b.drawImage(resources.nameHeader,0,0,256,192,0,0,256,192);b.drawImage(resources.buttons,0,0,256,192,0,0,256,192);b.drawImage(resources[page>=3?'qwertyKeys':'alphabetKeys'],0,0,256,192,0,0,256,192);
-      b.drawImage(sprite,30-Math.floor(sprite.width/2),20-Math.floor(sprite.height/2));
+      if(player){const iconScale=Math.min(1,36/sprite.height,48/sprite.width);b.drawImage(sprite,30-Math.floor(sprite.width*iconScale/2),24-Math.floor(sprite.height*iconScale/2),sprite.width*iconScale,sprite.height*iconScale);}else b.drawImage(sprite,30-Math.floor(sprite.width/2),20-Math.floor(sprite.height/2));
       const sequence=data.sprites.animations[0].frames,total=sequence.reduce((sum,frame)=>sum+frame[1],0);let time=Math.floor((performance.now()-started)*60/1000)%total,active=sequence[0][0];for(const frame of sequence){if(time<frame[1]){active=frame[0];break;}time-=frame[1];}
-      const letters=[...value];for(let i=0;i<10;i++){if(letters[i])put(b,letters[i],71+i*14,16,true,'center');const index=i===Math.min(9,letters.length)?active:0,origin=data.sprites.cells[index].origin;b.drawImage(cursors[index],64+i*14+origin[0],37+origin[1]);}
-      bottom.setAttribute('aria-label','Tastiera italiana. Soprannome: '+(value||pokemon.name));
+      const letters=[...value];for(let i=0;i<maxLength;i++){if(letters[i])put(b,letters[i],71+i*14,16,true,'center');const index=i===Math.min(maxLength-1,letters.length)?active:0,origin=data.sprites.cells[index].origin;b.drawImage(cursors[index],64+i*14+origin[0],37+origin[1]);}
+      bottom.setAttribute('aria-label','Tastiera italiana. '+title+': '+(value||(player?options.defaultName:pokemon.name)));
       const p=data.pages[page];p.codes.forEach((code,i)=>{if(code===8251)return;const row=Math.floor(i/p.columns),column=i%p.columns,x=page>=3?(row===1?48:row===2?56:40)+column*16:24+column*16,y=page>=3?64+row*32:40+row*24,pixel=b.getImageData(x+7,y+10,1,1).data;put(b,String.fromCharCode(code),x+7,y+4,pixel[0]+pixel[1]+pixel[2]<450,'center');});
       const selectedButton=buttons[selected];if(selectedButton){b.strokeStyle='#f8f8d0';b.lineWidth=1;b.strokeRect(selectedButton.x,selectedButton.y,selectedButton.w,selectedButton.h);}
     }
-    input.oninput=()=>{value=[...input.value.normalize('NFC')].filter(c=>allowed.has(c)).slice(0,10).join('');input.value=value;draw();};
+    input.oninput=()=>{value=[...input.value.normalize('NFC')].filter(c=>allowed.has(c)).slice(0,maxLength).join('');input.value=value;draw();};
     input.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();finish();}else if(e.key==='Escape'){e.preventDefault();buttons[selected]?.element.focus();}};
     dialog.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey)return;const key=e.key.toLowerCase(),directions={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0]};
       if(directions[key]){e.preventDefault();e.stopImmediatePropagation();selected=NativeUI.nextButton(buttons,selected,...directions[key]);buttons[selected]?.element.focus();}
@@ -74,7 +82,7 @@
     dialog.addEventListener('cancel',e=>{e.preventDefault();change('delete');});
     document.body.append(dialog);dialog.showModal();resetInput();renderButtons();
     const animate=()=>{draw();request=requestAnimationFrame(animate);};request=requestAnimationFrame(animate);
-    try{return await done;}finally{cancelAnimationFrame(request);dialog.close();dialog.remove();resetInput();}
+    try{options.onOpen?.(dialog);return await done;}finally{cancelAnimationFrame(request);dialog.close();dialog.remove();options.onClose?.();resetInput();}
   }
   const api={edit,open};root.NativeNaming=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
