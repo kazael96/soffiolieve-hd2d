@@ -26,6 +26,29 @@ test('female Tris receipt installs original model148 and preserves the existing 
  const incompatible={models:{badgeBackground:{}},hashes:{16:'wrong'},effects:{},materialAlpha:{}};assert.throws(()=>c.TrioBadgeAssets.install(incompatible),/background mismatch/);assert.deepEqual(incompatible.effects,{});
 });
 
+test('a field effect constructor failure removes its overlay, releases only its owned context and allows retry',async()=>{
+ for(const hasLossExtension of [true,false]){
+  const c=environment(),panels=new Set(),canvases=[];let removed=0,lost=0,worldLost=0,destroyed=0,drawn=0,frame=0;
+  vm.runInContext(fs.readFileSync(path.join(root,'trio-badge-assets.js'),'utf8'),c);
+  c.renderer={gl:{getExtension:()=>({loseContext(){worldLost++;}})}};
+  c.document={body:{append:p=>panels.add(p)},createElement(tag){
+   const e={dataset:{},style:{},children:[],append(...children){this.children.push(...children);},setAttribute(){},remove(){if(panels.delete(this))removed++;}};
+   if(tag==='canvas'){
+    const gl={getExtension(name){assert.equal(name,'WEBGL_lose_context');return hasLossExtension?{loseContext(){lost++;}}:null;}};
+    e.getContext=kind=>kind==='webgl'?gl:{clearRect(){}};canvases.push(e);
+   }
+   return e;
+  }};
+  const failure=new Error('native effect shader compile failed');c.StarterScene.Scene=class{constructor(canvas){canvas.getContext('webgl');throw failure;}};
+  assert.throws(()=>new c.FieldEffects.Player(42),error=>error===failure,'The original construction error must survive cleanup');
+  assert.equal(panels.size,0,'Failed construction must not leave nativeFieldEffect covering the game');assert.equal(removed,1);assert.equal(lost,hasLossExtension?1:0);assert.equal(worldLost,0);
+  const failedCanvas=canvases[0];
+  c.StarterScene.Scene=class{constructor(canvas){assert.notEqual(canvas,failedCanvas);canvas.getContext('webgl');this.ready=Promise.resolve();}draw(){drawn++;}destroy(){destroyed++;}};
+  c.Image=class{set src(value){this.onload?.();}};c.requestAnimationFrame=callback=>{const id=++frame;queueMicrotask(()=>callback(id*5000));return id;};c.cancelAnimationFrame=()=>{};
+  await c.FieldEffects.play(42);assert.ok(drawn>0);assert.equal(destroyed,1);assert.equal(panels.size,0);assert.equal(removed,2);assert.equal(lost,hasLossExtension?1:0,'A successful retry must not lose another context');assert.equal(worldLost,0);
+ }
+});
+
 test('all sixteen native badge receipts retain their exact visibility and texture-pattern phase changes',async()=>{
  const c=environment(),a=c.FIELD_EFFECT_ASSETS,dexM=a.effects[50],dexF=a.effects[51];
  // Install shared tracks before later receipt models, as the page does.
