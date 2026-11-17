@@ -25,6 +25,13 @@ L'estrattore di identità aggiorna anche i riferimenti con SHA di Anita e l'imma
 
 ## Prove e limiti
 
+I comandi touch spostati dentro il dialogo ereditavano il testo scuro della
+finestra: la baseline reale misura1,28:1. Il contenitore ora conserva il colore
+chiaro del campo; lo stato premuto mantiene testo scuro sul proprio fondo
+chiaro. La fixture misura i sei pulsanti A/B/frecce effettivi, con contrasto
+minimo4,5:1, sfondi RGBA e opacità, senza cambiare dimensioni o aree di tocco.
+Il controllo fallito e le sue immagini restano nel rapporto della candidata02.
+
 - Baseline riproducibile: il nuovo controllo CPU del layout fallisce perché manca lo spazio dei comandi; il controllo dei volti fallisce per le quattro identità coinvolte e passa per Aralia e Belle.
 - Dopo la correzione: dodici test mirati superati, con verifiche del layout nei tre formati, riadattamento, identità femminile, chiamate 5/6 e pulizia degli osservatori.
 - Rivisti i sei fogli prima/dopo, ciascuno con nove espressioni per riga, e l'immagine introduttiva degli amici. SHA, sorgente nativa e revisione sono in `outputs/chapter057-preparation/phone-native/portrait-provenance.json` e `manual-review.json`, esterni alle build. Il fixture versionato `tests/fixtures/phone-native-057.json` fissa l'assegnazione e gli SHA dei 54 fotogrammi.

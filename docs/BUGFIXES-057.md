@@ -9,7 +9,7 @@ un precedente PASS non dimostra assenza di questi difetti.
 | Protagonista decentrato sul Percorso2 | Il target orizzontale moltiplicava la posizione assoluta per0,7. Ora segue la posizione effettiva, conservando visuale bassa, zoom e camere narrative esplicite. |
 | Protagonista sopra la parete del varco320 | Il triangolo più alto veniva usato come pavimento. Il varco dichiara il piano nativo a−0,125; pareti e soffitto rimangono presenti. Anche la quota5,5 di un vecchio salvataggio non solleva il corpo. |
 | Alberi e dislivelli nel campo di battaglia | Percorso1/2 e Cantiere dei Sogni usavano direttamente ostacoli della mappa esplorabile. La zona d'azione ora è una radura piana con materiali originali del luogo e scenario nativo distante. Ombre e piedi condividono il piano; le specie ambientali restano sullo sfondo. |
-| Volti Interpoké e nomi coperti | Gli estrattori associavano risorse facciali a personaggi diversi. Il nuovo riferimento comprende tutti i sei partecipanti nativi. Il pannello riserva anche lo spazio effettivo della barra velocità/riavvio dopo resize. |
+| Volti Interpoké, nomi coperti e comandi scuri | Gli estrattori associavano risorse facciali a personaggi diversi. Il nuovo riferimento comprende tutti i sei partecipanti nativi. Il pannello riserva lo spazio effettivo della barra velocità/riavvio dopo resize; i comandi touch mantengono testo leggibile anche dentro il dialogo. |
 | Attesa all'apertura della lotta | Le stesse immagini dell'interfaccia sono trasportate in un pacchetto SFP1 dedicato, senza ricompressione o riduzione della qualità. I file individuali e i tentativi automatici restano disponibili. I materiali indipendenti del fondale entrano insieme nel pool limitato a sei richieste. |
 
 ## Prove e criteri di consegna

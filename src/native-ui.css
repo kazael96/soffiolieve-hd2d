@@ -31,6 +31,8 @@
 .native-field-ready #dialogueContinue:focus-visible{outline:none}
 .native-field-ready #dialogue.native-touch-controls{bottom:132px}
 @media(max-height:500px) and (min-width:601px){.native-field-ready #dialogue.native-touch-controls{bottom:12px;width:calc(100% - 300px)}}
+/* Touch labels keep the field palette when moved into a light message dialog. */
+#dialogue>#touch{color:#fff9e9}
 dialog>#touch #openJournal,dialog>#touch #registeredTool{display:none}
 .native-has-top.native-touch-controls,.native-dual-screen.native-touch-controls{position:fixed;inset:12px 0 auto;margin:0 auto}
 .native-has-top.native-touch-controls,.native-dual-screen.native-touch-controls .native-dual-panels{width:min(512px,96vw,calc((100dvh - 148px) * 2 / 3))}
