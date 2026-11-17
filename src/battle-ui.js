@@ -47,7 +47,7 @@ async function throwStoryBall(ballId=4){
  const captureSession=session;busy=true;Journey.consumeItem(ballId);updateBattle();const start=session.battle.log.length;captureVisualContext();
  try{
   const target=session.active('p2'),result=CaptureRules.roll(target,OPENING_DATA[target.species.name].catchRate,n=>session.battle.random(n),Journey.state.dex.caught.length,CaptureRules.ballBonus(ballId,target,{caught:Journey.state.dex.caught.includes(TRAINING_DATA.progression[target.species.name]?.dexName||target.species.name),terrain:battleLocation?.terrain,elapsedTurns:Math.max(0,session.battle.turn-1)}),{ballId,darkGrass:['route3Dark','route5Dark'].includes(battleLocation?.id)}),caught=result.caught;
-  log('Alcide usa '+ORIGINAL_EVENTS.itemNames[ballId]+'!');await MoveFX.capture({...result,ball:ballId,cryIds:{p1:partner.spriteId,p2:enemy.spriteId}});if(session!==captureSession||!battling)return;
+  log(Journey.state.playerName+' usa '+ORIGINAL_EVENTS.itemNames[ballId]+'!');await MoveFX.capture({...result,ball:ballId,cryIds:{p1:partner.spriteId,p2:enemy.spriteId}});if(session!==captureSession||!battling)return;
   if(caught){capturedMon={...session.snapshot('p2'),ballId,ivs:{...target.set.ivs},evs:{...target.set.evs},nature:target.set.nature,gender:target.gender,form:target.nativeForm??target.set?.form??enemy.form,happiness:target.happiness};if(ballId===14){capturedMon.hp=capturedMon.max;capturedMon.status='';for(const m of capturedMon.moves)m.left=m.pp};session.battle.win('p1');visualState.p2.hidden=true;log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][65],[target.species.name]).join('\n'));}
   else{
    log(messagePages(ORIGINAL_EVENTS.progressTexts['15'][61+result.shakes],[]).join('\n'));

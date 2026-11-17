@@ -1,6 +1,28 @@
 const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
 const oldSite=process.argv[2];process.argv[2]=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site');
 const {environment,drain}=require('./check-story-runtime.cjs');process.argv[2]=oldSite;
+
+test('Interpoke follows the chosen female identity, including the label and all nine expression frames',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),root=path.resolve(__dirname,'../src'),c=environment({sourceRoot:root});
+ c.Journey.state.playerName='Élisa';c.Journey.state.playerGender='F';const frames=Array.from({length:9},(_,i)=>'female-phone-'+i+'.png');c.PLAYER_ASSETS={portraits:{Anita:frames}};
+ vm.runInContext(fs.readFileSync(path.join(root,'player-identity.js'),'utf8'),c);let panel;const loaded=[];c.RuntimeAssets={image:async src=>{loaded.push(src);return {};}};
+ c.document.body.append=node=>{if(node.id==='phoneScene')panel=node;};
+ await drain(c,c.NativeStory.vm.host.command({name:'CallXTransceiver'},[1],[1],c.NativeStory.vm));
+ const hero=panel.children.find(tile=>tile.children[0].alt==='Élisa');assert.ok(hero);assert.equal(hero.children[1].textContent,'Élisa');assert.ok(frames.includes(hero.children[0].src));
+ for(const src of frames)assert.ok(loaded.includes(src),src);assert.equal(loaded.some(src=>String(src).includes('/Alcide-')),false);
+});
+
+test('native gender checks and gendered messages use the saved character while battle identity stays stable',async()=>{
+ const c=environment({sourceRoot:path.resolve(__dirname,'../src')});
+ for(const [gender,sex,index]of [['M',0,4],['F',1,5]]){
+  c.Journey.state.playerGender=gender;let result;
+  await c.NativeStory.vm.host.command({name:'TrainerCardGetSex'},[32768],[32768],{set:(address,value)=>{assert.equal(address,32768);result=value;}});assert.equal(result,sex);
+  await drain(c,c.NativeStory.vm.host.command({name:'MsgActorGendered'},[428,4,5,3,5,0],[428,4,5,3,5,0],{words:{0:'Élisa'}}));
+  assert.equal(c.$('dialogue').dataset.source,'428:'+index);
+ }
+ let options;c.FinaleElite={begin:async(room,settings)=>{options=settings;return true;}};
+ await c.NativeStory.vm.host.command({name:'NativeOpcode418'},[0],[0],c.NativeStory.vm);assert.equal(options.female,true);
+});
 test('Interpoke refits on modal placement changes without a resize and disconnects its observer',async()=>{
  const c=environment({sourceRoot:process.env.QA_PHONE_SOURCE_ROOT||path.resolve(__dirname,'../src')}),seen=[];let panel;
  c.MutationObserver=class{constructor(callback){this.callback=callback;seen.push(this);}observe(target,options){this.target=target;this.options=options;}disconnect(){this.disconnected=true;}};

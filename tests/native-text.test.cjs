@@ -17,6 +17,14 @@ test('native naming limits ten character codes and preserves original special gl
  assert.equal(edit('AAAAAAAAAA','insert','É',allowed),'AAAAAAAAAA');assert.equal(edit('A','insert','x',allowed),'A');
 });
 
+test('player naming stops at seven glyphs while Pokemon nicknames retain ten',()=>{
+ const allowed=new Set(['A','É',' ']);
+ assert.equal(edit('AAAAAA','insert','É',allowed,7),'AAAAAAÉ');
+ assert.equal(edit('AAAAAAÉ','insert','A',allowed,7),'AAAAAAÉ');
+ assert.equal(edit('AAAAAAÉ','delete','',allowed,7),'AAAAAA');
+ assert.equal(edit('AAAAAAÉ','insert','A',allowed),'AAAAAAÉA');
+});
+
 test('field shop labels preserve the native currency/dash glyphs and fit measured popup rows',()=>{
  const fs=require('node:fs'),vm=require('node:vm'),c={};c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync('src/party-popup-assets.js','utf8'),c);const font=c.PARTY_POPUP_ASSETS.font,{glyph,fieldChoices}=require('../src/native-text-layout.js');
  assert.equal(glyph('₽',font),font.glyphs.$);for(const mark of ['—','–','−'])assert.equal(glyph(mark,font),font.glyphs['-']);

@@ -19,7 +19,7 @@
   Object.assign(objectives,{driftveil:'Aiuta Komor al Deposito Frigo, poi affronta Rafan.',route6:'Attraversa il Percorso 6 e raggiungi la Cava Pietrelettrica.',chargestone:'Attraversa la Cava Pietrelettrica verso Ponentopoli.',mistralton:'Sei arrivato a Ponentopoli. Visita il Centro Pokémon.'});
   Object.assign(objectives,{mistralton:'Incontra Anemone a Ponentopoli e raggiungila alla Torre Cielo.',route7:'Percorri il Percorso 7 verso la Torre Cielo.',celestial:'Sali sulla Torre Cielo e suona la campana.',skylaGym:'Raggiungi Anemone nella palestra di Ponentopoli.',twistMountain:'Attraversa Monte Vite verso Mistralopoli.',icirrus:'Sei arrivato a Mistralopoli. Esplora la città e il Centro Pokémon.'});
   objectives.brycenGym='Affronta il percorso di ghiaccio e sfida Silvestro.';
-  function fresh(){return {version:2,playerName:'Alcide',phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],dex:{seen:[],caught:[]},pokeballs:0,potions:0,money:3000,routePotion:false};}
+  function fresh(){return {version:2,playerName:'Alcide',playerGender:'M',introductionComplete:false,phase:'gift',scene:'bedroom',player:{x:-10.5,y:-9.5},facing:3,starter:null,party:[],dex:{seen:[],caught:[]},pokeballs:0,potions:0,money:3000,routePotion:false};}
   function advance(s,expected){if(s.phase!==expected)return false;s.phase=phases[phases.indexOf(expected)+1]||expected;return true;}
   function choose(s,name){if(s.phase!=='gift'||!starters.includes(name))return false;s.starter=name;s.phase='belle';return true;}
   function rivalStarter(name,rival){return (rival==='Belle'?{Snivy:'Oshawott',Tepig:'Snivy',Oshawott:'Tepig'}:{Snivy:'Tepig',Tepig:'Oshawott',Oshawott:'Snivy'})[name];}
@@ -56,7 +56,9 @@
     if(!v.dex&&s.starter&&phases.indexOf(s.phase)>=phases.indexOf('mother'))for(const rival of ['Belle','Komor'])register(s,rivalStarter(s.starter,rival));
     s.dex.seen=[...new Set([...s.dex.seen,...s.dex.caught])];
     s.pokeballs=Math.max(0,Math.min(999,Math.floor(v.pokeballs)||0));s.potions=Math.max(0,Math.min(999,Math.floor(v.potions)||0));s.routePotion=v.routePotion===true;
-    s.playerName=typeof v.playerName==='string'?v.playerName.slice(0,10):'Alcide';
+    Object.assign(s,root.PlayerIdentity?root.PlayerIdentity.normalizeState(v):{
+      playerName:typeof v.playerName==='string'?v.playerName.slice(0,10):v.playerGender==='F'?'Anita':'Alcide',
+      playerGender:v.playerGender==='F'?'F':'M',introductionComplete:v.introductionComplete!==false});
     if(v.trainer&&root.TrainerProfile){const profile=root.TrainerProfile.normalize(v.trainer);if(profile)s.trainer=profile;}
     s.money=Number.isFinite(v.money)?Math.max(0,Math.min(9999999,Math.floor(v.money))):3000;
     if(v.original&&Number.isInteger(v.original.zone)&&([6,7,8,9,10,15,16,17,18,19,20,27,28,29,30,31,32,33,34,35,38,40,41,51,56,152,154,155,249,250,251,252,317,319,320,321,322,323,324,389,390,391,392,393,394,395,396,397,398,399,400,401,402,403,404,405,326,327,328,90,62,65,63,64,91,329,253,96,99,97,98,191,192,193,194,195,196,197,331,107,108,109,110,111,112,337,338,339,340,341,342,343,344,198,199,200,201,202,203,204,113,115,116,117,118,119].includes(v.original.zone)||(root.OPELUCID_SCENES?.[v.original.zone]||root.LEAGUE_SCENES?.[v.original.zone]||root.FINALE_SCENES?.[v.original.zone]))){s.original=structuredClone(v.original);s.original.flags=(s.original.flags||[]).filter(Number.isInteger);s.original.vars=Object.fromEntries(Object.entries(s.original.vars||{}).filter(([k,n])=>Number.isInteger(+k)&&Number.isInteger(n)));}

@@ -11,7 +11,7 @@
   const at=8+((Math.floor(z-grid.z)+16)*32+Math.floor(x-grid.x)+16)*8;
   return {behavior:grid.bytes[at]|grid.bytes[at+1]<<8,flags:grid.bytes[at+2]|grid.bytes[at+3]<<8,height};
  }
- const motion=SurfFieldMotion.create({state:native,hero:()=>player,party:()=>Journey.state.party,surface,occupied:(x,z)=>NativeStory.occupied(x,z),direction:()=>facing/3,
+ const motion=SurfFieldMotion.create({presentation:(motion,dt)=>window.FieldHMWorld?.surfBudget(motion,dt),state:native,hero:()=>player,party:()=>Journey.state.party,surface,occupied:(x,z)=>NativeStory.occupied(x,z),direction:()=>facing/3,
   save:()=>Journey.save(true),music:()=>AudioEngine.setScene(NativeStory.music),prepare:async mon=>{
    preparingMon=mon;try{await prepareAssets(mon);const h=renderer.groundHeight(player.x,player.y);native().fieldHeight=IcirrusChapter.surfaceAt(native().zone,player.x,player.y,h)?.height??h;
    await renderer.requireActors([...NativeStory.visualActors(),{name:'AlcideSurf'}]);}finally{preparingMon=null;}
@@ -27,7 +27,7 @@
  async function prepareAssets(mon){await prepareNativeAssets();const selected=mon||preparingMon||window.FieldHMWorld?.swimmer();if(selected&&window.FieldHMWorld&&FieldHMWorld.active?.move!==19)await FieldHMWorld.prepare(selected,57);return true;}
  function wanted(){return mounted()||motion.preparing;}
  function resources(){return wanted()&&catalog?{models:Object.keys(catalog.models),textures:Object.keys(catalog.textures),sprite:'AlcideSurf'}:{models:[],textures:[]};}
- function actor(frame){if(!mounted())return {};const direction=Math.floor(frame%12/3),contact=catalog?.riderContact,support=contact?.supportY||0,padding=contact?.footPadding.AlcideSurf[direction]||0;return {name:'AlcideSurf',hero:true,frame:direction*3,height:(native().fieldHeight||0)+support-padding,noShadow:true};}
+ function actor(frame){if(!mounted())return {};const direction=Math.floor(frame%12/3),contact=catalog?.riderContact,support=contact?.supportY||0,padding=contact?.footPadding[window.PlayerIdentity?.spriteKey('AlcideSurf')||'AlcideSurf']?.[direction]||0;return {name:'AlcideSurf',hero:true,frame:direction*3,height:(native().fieldHeight||0)+support-padding,noShadow:true};}
  function instances(time,isMoving){if(!mounted()||!catalog)return [];const d=facing/3,h=native().fieldHeight||0,offset=catalog.directions.sprayOffsetQ16[d];return [
   ...(!window.FieldHMWorld?.active&&!(window.FieldHMWorld?.surfRenderable?.()??window.FieldHMWorld?.surfReady())?[{model:'surf-sea_ride',x:player.x,y:h,z:player.y,rotation:catalog.directions.rideYaw[d]*Math.PI/32768}]:[]),
   ...(isMoving?[{model:'surf-shibuki01',x:player.x+offset[0]/65536,y:h+offset[1]/65536,z:player.y+offset[2]/65536,rotation:catalog.directions.sprayYaw[d]*Math.PI/32768}]:[])
@@ -37,7 +37,17 @@
   const groups=FieldModels.geometry(sprayModel,{},0,frame),old=renderer.models['surf-shibuki01']||[],gl=renderer.gl;
   renderer.models['surf-shibuki01']=groups.map((group,i)=>{const image=sprayModel.doc.images[sprayModel.doc.textures[group.textureIndex].source],texture='surf-shibuki01-'+image.uri.split('/').pop().replace(/\.png$/,''),buf=old[i]?.buf||gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(group.verts),gl.DYNAMIC_DRAW);return {...group,texture,buf,count:group.verts.length/11,transparent:true};});for(const group of old.slice(groups.length))gl.deleteBuffer(group.buf);uploads.set(renderer,key);
  }
- function tick(dt){motion.tick(dt);if(mounted()&&!motion.busy){const p=surface(native().zone,player.x,player.y,native().fieldHeight||0);if(p)native().fieldHeight=p.height;if(window.FieldHMWorld&&!FieldHMWorld.active&&!FieldHMWorld.surfReady()&&FieldHMWorld.swimmer()&&!refreshingPokemon){refreshingPokemon=true;const task=()=>prepareAssets();const pending=renderer.resourceGate?renderer.resourceGate('surf-pokemon',task):task();void pending.catch(error=>console.error(error)).finally(()=>{refreshingPokemon=false;});}}}
+ function tick(dt){
+  motion.tick(dt);
+  if(mounted()&&!motion.busy){const p=surface(native().zone,player.x,player.y,native().fieldHeight||0);if(p)native().fieldHeight=p.height;}
+  // A restored boarding/landing record also needs a bank before its next
+  // acknowledged frame. Waiting until motion is idle would deadlock it.
+  if(mounted()&&window.FieldHMWorld&&!FieldHMWorld.active&&!FieldHMWorld.surfReady()&&FieldHMWorld.swimmer()&&!refreshingPokemon){
+   refreshingPokemon=true;const task=()=>prepareAssets();
+   const pending=renderer.resourceGate?renderer.resourceGate('surf-pokemon',task):task();
+   void pending.catch(error=>console.error(error)).finally(()=>{refreshingPokemon=false;});
+  }
+ }
  function blocked(x,z,forPlayer=false){if(!forPlayer)return null;if(mounted())return motion.blocked(x,z);const h=renderer.groundHeight(player.x,player.y),row=surface(native()?.zone,x,z,h);return row?.flags&2?true:null;}
  function canStart(index){if(mounted()||motion.user(index)<0)return false;native().fieldHeight=renderer.groundHeight(player.x,player.y);return !!motion.coast();}
  function enter(){const n=native();if(!n?.surf&&!n?.surfMotion)return;if(n.surfMotion?.zone!==n.zone)delete n.surfMotion;motion.restore();}

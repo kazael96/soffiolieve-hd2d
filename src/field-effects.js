@@ -32,7 +32,7 @@
       this.canvas=document.createElement('canvas');this.canvas.width=768;this.canvas.height=576;this.particleCanvas=document.createElement('canvas');this.particleCanvas.width=768;this.particleCanvas.height=576;
       this.panel.append(this.canvas,this.particleCanvas);document.body.append(this.panel);this.context=this.particleCanvas.getContext('2d');
       const models=Object.fromEntries([this.effect.background,this.effect.item].map(name=>[name,assets.models[name].url]));
-      this.scene=new root.StarterScene.Scene(this.canvas,{models,materialAlpha:assets.materialAlpha,perspective:assets.perspective,curves:{[this.effect.background]:[[0,0,0,...assets.camera.eye]]},transparent:true});
+      this.scene=new root.StarterScene.Scene(this.canvas,{models,materialAlpha:assets.materialAlpha,materialTextures:assets.materialTextures,nodeVisibility:assets.nodeVisibility,perspective:assets.perspective,curves:{[this.effect.background]:[[0,0,0,...assets.camera.eye]]},transparent:true});
       this.images=[];this.ready=Promise.all([this.scene.ready,...assets.particles.textures.map((t,i)=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{this.images[i]=image;resolve();};image.onerror=()=>reject(Error('Original particle texture unavailable'));image.src=t.src||'assets/field-effects/'+t.name;}))]);
     }
     draw(frame){

@@ -2,24 +2,25 @@
  * one reusable 1 MiB GPU card per renderer; no accumulating frame textures. */
 (function(root){
  let bank=null,pending=null,generation=0,action=null;
- const cards=new WeakMap(),native=()=>root.NativeStory?.state||root.Journey?.state.original;
+ const cards=new WeakMap(),presented=new WeakMap(),surfGates=new WeakMap(),native=()=>root.NativeStory?.state||root.Journey?.state.original;
  const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
  function graphic(mon){return root.PokemonVisuals.graphic(mon);}
  function alpha(image){const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const x=c.getContext('2d');x.drawImage(image,0,0);return root.ROM_SPRITE_ANIM.alphaBounds(x.getImageData(0,0,c.width,c.height).data,c.width,c.height)||[0,0,c.width,c.height];}
  async function prepare(mon,move){
   const profile=root.FieldHMProfiles.profile(mon,move);if(!profile)throw Error('Animazione MN sul campo non disponibile per '+(mon.nickname||mon.name));
-  const key=graphic(mon);if(bank?.graphic===key&&(![19,57].includes(move)||bank.sitting)){bank.mon=mon;return bank;}
-  if(pending?.graphic===key)return pending.promise;
+  const key=graphic(mon),identity=root.PlayerIdentity?.key||'M';if(bank?.graphic===key&&bank.identity===identity&&(![19,57].includes(move)||bank.sitting)){bank.mon=mon;return bank;}
+  if(pending?.graphic===key&&pending.identity===identity)return pending.promise;
   const ticket=++generation,keys=[key+'-front',key+'-back'],release=root.ROM_SPRITE_ANIM.pin(keys);
   const promise=(async()=>{try{
    if([19,57].includes(move)&&!root.SURF_FIELD_ASSETS)await root.SurfField?.prepareRiderAssets();
    await root.ROM_SPRITE_ANIM.prepare(keys,{gate:false});
-   const sources=[root.OPENING_SPRITES?.Alcide||root.ROM_SPRITES?.Alcide,root.SURF_FIELD_ASSETS?.sprites.AlcideSurf];
+   const sources=root.PlayerIdentity?[root.PlayerIdentity.frames('Alcide'),root.PlayerIdentity.frames('AlcideSurf')]:[root.OPENING_SPRITES?.Alcide||root.ROM_SPRITES?.Alcide,root.SURF_FIELD_ASSETS?.sprites.AlcideSurf];
+   if(!sources[0]||[19,57].includes(move)&&!sources[1])throw Error('Sprite del protagonista MN non disponibile');
    const images=await Promise.all(sources.map(async frames=>frames?Promise.all([0,3,6,9].map(async i=>{const image=await root.RuntimeAssets.image(frames[i]);return {image,bounds:alpha(image)};})):null));
    if(ticket!==generation)throw Error('Preparazione MN sostituita');
-   const previous=bank;bank={graphic:key,mon,displayMon:{...mon},standing:images[0],sitting:images[1],release};previous?.release();return bank;
+   const previous=bank;bank={graphic:key,identity,mon,displayMon:{...mon},standing:images[0],sitting:images[1],release};previous?.release();return bank;
   }catch(error){release();throw error;}finally{if(pending?.ticket===ticket)pending=null;}})();
-  pending={graphic:key,promise,ticket};return promise;
+  pending={graphic:key,identity,promise,ticket};return promise;
  }
  function swimmer(){const n=native(),party=root.Journey?.state.party||[];return party[n?.surfUserIndex]||party.find(p=>!p.egg&&p.pp?.some(m=>m.id===57));}
  function surfReady(){const mon=swimmer();return !!mon&&bank?.graphic===graphic(mon)&&!!bank.sitting&&!!root.FieldHMProfiles.profile(mon,57);}
@@ -45,6 +46,7 @@
   const gl=renderer.gl;gl.bindTexture(gl.TEXTURE_2D,card.texture.texture);gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,gl.RGBA,gl.UNSIGNED_BYTE,card.canvas);card.pose={graphic:p.graphic,move:p.move,phase:s.phase,choreography:s.choreography,bodyScaleX:s.bodyScaleX,bodyScaleY:s.bodyScaleY,seat:s.seat};return card.texture;
  }
  function present(renderer,time,actors){
+  presented.delete(renderer);
   if(renderer.contextLost||renderer.gl?.isContextLost?.())return actors;
   const original=actors.find(a=>a.hero||a.name==='Alcide'||a.name==='AlcideSurf');if(!original)return actors;
   let mon,move,sample,position,rider=true,scale=1;
@@ -77,6 +79,8 @@
   let ball=null;if(!rider&&scale<1){const heroHeight=(action?.height??native()?.fieldHeight??position.height)+1.1,q=1-scale;position={x:position.x+(original.x-position.x)*q,z:position.z+(original.z-position.z)*q,height:position.height+(heroHeight-position.height)*q-sample.height*sample.bodyScaleY*scale*q*.5};const pitch=renderer.cameraPitch||[.423,.906],yaw=renderer.yaw||0,dx=original.x-position.x,dz=original.z-position.z;ball=[256+(dx*Math.cos(yaw)-dz*Math.sin(yaw))*64,384-((heroHeight-position.height)*pitch[1]-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*pitch[0])*64/Math.max(.1,pitch[1])];}
   const texture=paint(renderer,p,sample,move===15?action.elapsed/action.duration:time,{rider,scale,ball});
   const actor={name:'Alcide',fieldHM:true,texture,hero:true,...placement(position,renderer.cameraPitch,0,renderer.yaw||0),...(action?{groundHeight:action.height,shadowAlpha:1/(1+Math.max(0,position.height-action.height)**2)}:{}),worldWidth:8,worldHeight:8,nativeBillboard:true,noShadow:move===57||scale<1,frame:0};
+  if(action)presented.set(renderer,{action,elapsed:action.elapsed});
+  else if(native()?.surfMotion){const motion=native().surfMotion;presented.set(renderer,{motion,progress:surfProgress(motion)});}
   return [...actors.filter(a=>a!==original||!rider),actor];
  }
  function inspectCard(renderer){
@@ -102,14 +106,46 @@
  }
  function copyCard(renderer,context,...rect){const card=cards.get(renderer);if(!card)return false;context.drawImage(card.canvas,...rect);return true;}
  function placement(position,pitch=[.423,.906],bob=0,yaw=0){return {x:position.x+2*pitch[0]*Math.sin(yaw),z:position.z+2*pitch[0]*Math.cos(yaw),height:position.height+bob-2*pitch[1],groundHeight:position.height,groundX:position.x,groundZ:position.z};}
- function cameraFor(base=[.423,.906]){if(action?.move!==15)return base;const t=clamp(action.elapsed/action.duration),amount=ease(t/.18)*(1-ease((t-.82)/.18)),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
- function applyCamera(renderer){const base=renderer.cameraPitch;if(action?.move!==15)return ()=>{};renderer.cameraPitch=cameraFor(base);return ()=>{renderer.cameraPitch=base;};}
- function tick(dt){if(!action||document.hidden)return;if(action.zone!==native()?.zone&&!action.transfer){const old=action;action=null;old.reject(Error('Scena MN sostituita'));return;}if(action.done)return;action.elapsed=Math.min(action.duration,action.elapsed+Math.max(0,dt));if(action.onContact&&!action.committed&&action.elapsed/action.duration>=.52){action.committed=true;try{action.onContact();}catch(error){const old=action;action=null;old.reject(error);return;}}if(action.elapsed>=action.duration){const old=action;old.done=true;if(!old.retain)action=null;old.resolve();}}
- async function start(mon,move,{phase='cut',direction=1,target=null,height=0,duration=2,transfer=false,retain=false,onContact=null}={}){
+ function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;const t=clamp(action.elapsed/action.duration),amount=action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
+ function applyCamera(renderer){const base=renderer.cameraPitch;if(![15,19].includes(action?.move))return ()=>{};renderer.cameraPitch=cameraFor(base);return ()=>{renderer.cameraPitch=base;};}
+ // GameSpeed may run many physics chunks before one draw. Keep every authored
+ // gesture and physical contact behind a successful-frame acknowledgement.
+ // At very low FPS the presentation takes longer instead of skipping poses.
+ function checkpoints(mon,move,phase){
+  const score=root.FieldHMChoreography.get(graphic(mon),move),keys=score[phase].map(row=>row[0]);
+  keys.push(...(move===15?[.34,.52,.84]:move===57?phase==='board'?[.2]:[.7]:phase==='depart'?[.12,.25,.35,.4,.85]:[.65,.7,.85]));
+  const ordered=[...new Set(keys)].sort((a,b)=>a-b),result=[];let previous=0;
+  for(const end of ordered){const count=Math.ceil((end-previous)/.08);for(let i=1;i<=count;i++)result.push(i===count?end:previous+(end-previous)*i/count);previous=end;}
+  return result;
+ }
+ function surfProgress(motion){return motion.phase==='wait'?.2*motion.wait/16:motion.phase==='recall'?.7+.3*motion.wait/16:motion.landing?.7*motion.travel:.2+.8*motion.travel;}
+ function surfBudget(motion,dt){
+  if(!Number.isFinite(dt)||dt<=0)return {dt:0,complete:false};
+  if(!surfRenderable())return {dt:0,complete:false};
+  let gate=surfGates.get(motion);const q=surfProgress(motion);
+  if(!gate){const mon=surfReady()?swimmer():bank.displayMon,stops=checkpoints(mon,57,motion.landing?'land':'board');gate={stops,index:stops.findIndex(t=>t>q+1e-9),complete:false};if(gate.index<0)gate.index=stops.length;surfGates.set(motion,gate);}
+  const rate=motion.phase==='wait'?.75:motion.phase==='recall'?1.125:(motion.landing?2.8:3.2)/Math.max(1,motion.cells),stop=gate.stops[gate.index]??1;
+  return {dt:Math.max(0,Math.min(dt,(stop-q)/rate)),complete:gate.complete};
+ }
+ function rendered(renderer){const frame=presented.get(renderer);presented.delete(renderer);if(!frame||document.hidden||renderer.contextLost||renderer.gl?.isContextLost?.())return;
+  if(frame.motion){const motion=native()?.surfMotion,gate=surfGates.get(frame.motion);if(frame.motion!==motion||!gate||Math.abs(frame.progress-surfProgress(motion))>1e-9)return;while(gate.index<gate.stops.length&&frame.progress+1e-9>=gate.stops[gate.index])gate.index++;if(frame.progress>=1-1e-9)gate.complete=true;return;}
+  if(frame.action!==action||frame.elapsed!==action.elapsed||action.done)return;
+  if(action.elapsed+1e-9>=action.checkpoints[action.checkpoint]*action.duration)action.checkpoint++;
+  if(action.elapsed>=action.duration){const old=action;old.done=true;if(!old.retain)action=null;old.resolve();}
+ }
+ function tick(dt){if(!action||document.hidden)return;if(action.zone!==native()?.zone&&!action.transfer){const old=action;action=null;old.reject(Error('Scena MN sostituita'));return;}if(action.done||!Number.isFinite(dt)||dt<=0)return;
+  action.debt=Math.min(action.duration-action.elapsed,action.debt+dt);
+  const limit=Math.max(action.elapsed,action.checkpoints[action.checkpoint]*action.duration);
+  const elapsed=Math.min(limit,action.elapsed+action.debt);action.debt-=elapsed-action.elapsed;action.elapsed=elapsed;
+  if(action.onContact&&!action.committed&&action.elapsed/action.duration>=.52){action.committed=true;try{action.onContact();}catch(error){const old=action;action=null;old.reject(error);}}
+ }
+ async function start(mon,move,{phase=move===19?'depart':'cut',direction=1,target=null,height=0,duration=2,transfer=false,retain=false,onContact=null}={}){
   if(action&&!action.done)throw Error('Azione MN già in corso');await prepare(mon,move);if(action&&!action.done)throw Error('Azione MN già in corso');
-  const finished=new Promise((resolve,reject)=>{action={mon,move,phase,direction,target,height,duration,transfer,retain,onContact,zone:native()?.zone,elapsed:0,resolve,reject};});if(move===15)void root.AudioEngine?.cry(root.PokemonVisuals.speciesId(mon));return {finished};
+  if(!Number.isFinite(duration)||duration<=0)throw Error('Durata MN non valida');
+  const stops=checkpoints(mon,move,phase);
+  const finished=new Promise((resolve,reject)=>{action={mon,move,phase,direction,target,height,duration,transfer,retain,onContact,zone:native()?.zone,elapsed:0,debt:0,checkpoints:stops,checkpoint:0,resolve,reject};});if(move===15)void root.AudioEngine?.cry(root.PokemonVisuals.speciesId(mon));return {finished};
  }
  async function run(...args){return (await start(...args)).finished;}
  function clear(){generation++;const old=action;action=null;old?.reject(Error('Azione MN annullata'));bank?.release();bank=null;pending=null;}
- root.FieldHMWorld={prepare,present,inspectCard,copyCard,placement,cameraFor,applyCamera,tick,start,run,end(){if(action?.done)action=null;},dispose,clear,swimmer,surfReady,surfRenderable,rendererStats(renderer){const card=cards.get(renderer),valid=!!card&&renderer.gl.isTexture(card.texture.texture);return {gpuCards:valid?1:0,gpuBytes:valid?512*512*4:0};},get active(){return action;},get retained(){return {banks:bank?1:0,gpuCardBudgetBytes:512*512*4};}};
+ root.FieldHMWorld={prepare,present,rendered,inspectCard,copyCard,placement,cameraFor,applyCamera,tick,start,run,end(){if(action?.done)action=null;},dispose,clear,swimmer,surfReady,surfRenderable,surfBudget,rendererStats(renderer){const card=cards.get(renderer),valid=!!card&&renderer.gl.isTexture(card.texture.texture);return {gpuCards:valid?1:0,gpuBytes:valid?512*512*4:0};},get active(){return action;},get retained(){return {banks:bank?1:0,gpuCardBudgetBytes:512*512*4};}};
 })(typeof window==='undefined'?globalThis:window);

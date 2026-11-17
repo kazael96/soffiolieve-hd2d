@@ -32,6 +32,18 @@ jobs:
           name: pages-regression-report
           path: test-results/deep
           if-no-files-found: ignore
+      - name: Install pinned introduction browser driver
+        run: npm install --no-save --ignore-scripts --package-lock=false playwright@1.62.1
+      - name: Install isolated Chromium and system dependencies
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Check production introduction in all three formats
+        run: node scripts/test-introduction-headless.cjs _site test-results/introduction --renderer=software
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pages-introduction-browser-report
+          path: test-results/introduction
+          if-no-files-found: ignore
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

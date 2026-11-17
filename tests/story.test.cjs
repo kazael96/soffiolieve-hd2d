@@ -1,5 +1,14 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const Story=require('../src/story-state.js');
+test('new games show the introduction, female choices persist and legacy saves continue unchanged',()=>{
+ const fresh=Story.fresh();assert.equal(fresh.introductionComplete,false);assert.equal(fresh.playerGender,'M');
+ const female={...fresh,playerGender:'F',playerName:'Élisa',introductionComplete:true};
+ const values=new Map(),storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};
+ assert.equal(Story.write(storage,female),true);assert.equal(Story.read(storage).playerGender,'F');assert.equal(Story.read(storage).playerName,'Élisa');assert.equal(Story.read(storage).introductionComplete,true);
+ const legacy={...female,playerName:'ABCDEFGHIJ'};delete legacy.playerGender;delete legacy.introductionComplete;
+ const resumed=Story.normalize(legacy);assert.equal(resumed.playerGender,'M');assert.equal(resumed.playerName,'ABCDEFGHIJ');assert.equal(resumed.introductionComplete,true);
+ assert.equal(Story.normalize({...female,playerGender:'invalid'}).playerGender,'M');assert.equal(Story.normalize({...female,introductionComplete:'false'}).introductionComplete,true);
+});
 test('all three choices preserve the original rival order and elemental matchups',()=>{
  for(const [starter,belle,komor] of [['Snivy','Oshawott','Tepig'],['Tepig','Snivy','Oshawott'],['Oshawott','Tepig','Snivy']]){
   const s=Story.fresh();assert.equal(Story.advance(s,'route'),false);assert.equal(Story.choose(s,starter),true);
