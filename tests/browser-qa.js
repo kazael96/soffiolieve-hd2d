@@ -1840,6 +1840,7 @@
   }
   check(!NativeStory.state.flags.includes(2490),'Postgame city unlocked');check(AudioEngine.errors.length===preparedResources049.audioErrorsBefore,'Late Fly audio failed');return {rows,nativeTownMapOptions:true,actualServiceAPI:true,partyMenuCoveredSeparately:true,pageReload:false,preparedVisitedFlags:true,postgameUnlocked:false};
  });
+ const earlyAmbientProofs057=AmbientAudit.createNativeProofCache({audit:id=>BattleDiorama.auditAmbient(id),dependencies:()=>({audit:BattleDiorama.auditAmbient,draw:ROM_SPRITE_ANIM.draw,frame:ROM_SPRITE_ANIM.frame,alphaBounds:ROM_SPRITE_ANIM.alphaBounds,imageBounds:ROM_SPRITE_ANIM.imageBounds,canvas:BattleDiorama.ambientCanvas,banks:JSON.parse(arena.dataset.ambient||'[]').map(actor=>{const key=GEN5.species.find(p=>p.en===actor.species).id+'-front';return{key,species:actor.species,bank:ROM_SPRITE_ANIM.cache[key]};})})});
  async function earlyBattleClearings057(doubles=false){
   await ready();const previousStudio=window.SpeciesStudioMode,rows=[];window.SpeciesStudioMode=false;GameSpeed.set(4);
   try{for(const [id,zone]of [['route1',317],['route2',319],['dreamyard',152]])for(const terrain of ['grass','path']){
@@ -1856,8 +1857,8 @@
    // Render a native animation on both sides without substituting a made-up
    // camera. These are explicit effect previews, not a resolved battle turn.
    const effects=[];for(const side of ['p1','p2']){await MoveFX.preview(33,side,0,{cryIds:{p1:495,p2:506}});for(const tick of [0,MoveFX.active.profile.impact,Math.max(0,MoveFX.active.sequence.frames-1)]){MoveFX.setPreviewFrame(tick);drawArena();nativeFrameCheck(pixels(arena),MoveFX.visualState());check(BattleEnvironment.context===context,'057 battle geography changed during an effect');effects.push({side,tick});}MoveFX.cancel();}
-   const cycles=BattleDiorama.auditAmbient(id);for(const cycle of cycles)check(cycle.poses>0&&!cycle.clipped&&!cycle.empty&&!cycle.belowGround,'057 ambient animation left its contact plane '+id+'/'+cycle.species);
-   rows.push({id,terrain,doubles,dimensions:[arena.width,arena.height],ambient,slots:slots.map(p=>({x:p.x,y:p.y,height:p.height,world:p.world})),effects,cycles});
+   const cycleProof=await earlyAmbientProofs057.measure(id,{case:doubles?'qaBattleDoubles057':'qaBattleClearings057',id,terrain,doubles,viewport:[innerWidth,innerHeight]}),{cycles}=cycleProof;for(const cycle of cycles)check(cycle.poses>0&&!cycle.clipped&&!cycle.empty&&!cycle.belowGround,'057 ambient animation left its contact plane '+id+'/'+cycle.species);
+   rows.push({id,terrain,doubles,dimensions:[arena.width,arena.height],ambient,slots:slots.map(p=>({x:p.x,y:p.y,height:p.height,world:p.world})),effects,...cycleProof});
   }check(rows.length===6,'057 early geographic context inventory');return{rows,scope:'Six native geographic previews; original animation cycles, actual rendered feet and shadows. Doubles are renderer regressions, not newly offered encounters. Effect previews do not certify turn mechanics.'};}
   finally{finishPreview049();window.SpeciesStudioMode=previousStudio;GameSpeed.set(1);}
  }

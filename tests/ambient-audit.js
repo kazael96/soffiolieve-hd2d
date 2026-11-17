@@ -42,5 +42,25 @@
   }
   return {poses:p.ticks,uniquePoses:states.size,clipped,empty,belowGround,prefix:p.prefix,period:p.period,coverage:'Every integer tick, identical render states deduplicated'};
  }
- root.AmbientAudit={track,plan,scan};if(typeof module!=='undefined')module.exports=root.AmbientAudit;
+ // QA-only proof reuse. auditAmbient reads the native banks and this fixed
+ // sprite canvas; terrain, view projection and fighter count are tested anew
+ // by each scene's actual GL checks and must never enter this proof cache.
+ function createNativeProofCache({audit,dependencies}){
+  const entries=new Map(),identities=new WeakMap();let sequence=0;
+  const identity=value=>{if(value&&(typeof value==='object'||typeof value==='function')){if(!identities.has(value))identities.set(value,++sequence);return identities.get(value);}return typeof value+':'+String(value);};
+  const stable=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(key=>[key,v[key]])):v);
+  const clone=value=>value===undefined?null:JSON.parse(JSON.stringify(value));
+  const image=value=>({identity:identity(value),src:value?.src,currentSrc:value?.currentSrc,width:value?.width,height:value?.height,naturalWidth:value?.naturalWidth,naturalHeight:value?.naturalHeight});
+  function snapshot(id){const d=dependencies(id);if(!d?.banks?.length)throw Error('Native cycle proof has no banks');return stable({audit:identity(d.audit),draw:identity(d.draw),frame:identity(d.frame),alphaBounds:identity(d.alphaBounds),imageBounds:identity(d.imageBounds),canvas:{identity:identity(d.canvas),size:d.canvas?.size,foot:d.canvas?.foot,body:d.canvas?.body},banks:d.banks.map(({key,species,bank})=>{if(!bank?.data||!bank.image||bank.ready===false||bank.error)throw Error('Native cycle proof bank is not ready: '+key);return{key,species,bank:identity(bank),dataIdentity:identity(bank.data),data:bank.data,image:image(bank.image),atlas:image(bank.atlas),bounds:bank.bounds,groundBounds:bank.groundBounds};})});}
+  return{async measure(id,donor){
+   let before;try{before=snapshot(id);}catch(error){entries.delete(id);throw error;}const prior=entries.get(id);
+   if(prior?.signature===before)return{...clone(prior.proof),cycleProofReused:true};
+   entries.delete(id);const cycles=await audit(id),species=JSON.parse(before).banks.map(row=>row.species);
+   if(!Array.isArray(cycles)||cycles.length!==species.length||cycles.some((row,i)=>row.species!==species[i]||!Number.isSafeInteger(row.poses)||row.poses<1||['clipped','empty','belowGround'].some(key=>row[key]!==0)))throw Error('Invalid native cycle proof: incomplete or failed pixels');
+   if(snapshot(id)!==before)throw Error('Native cycle proof dependencies changed during audit');
+   const proof={cycles:clone(cycles),cycleProofReused:false,cycleProofDonor:clone(donor),nativePoses:cycles.reduce((n,row)=>n+row.poses,0)};
+   entries.set(id,{signature:before,proof});return clone(proof);
+  }};
+ }
+ root.AmbientAudit={track,plan,scan,createNativeProofCache};if(typeof module!=='undefined')module.exports=root.AmbientAudit;
 })(typeof window!=='undefined'?window:globalThis);
