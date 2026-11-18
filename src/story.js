@@ -171,7 +171,7 @@
   $('touchPreference').checked=preferences.touch;$('focusPreference').checked=!preferences.cinema;renderer.zoom=preferences.zoom;renderer.cinema=preferences.cinema;$('zoomValue').value=Math.round(renderer.zoom*100)+'%';document.body.classList.toggle('touch-enabled',preferences.touch);
   $('touchPreference').onchange=()=>{preferences.touch=$('touchPreference').checked;document.body.classList.toggle('touch-enabled',preferences.touch);resetInput();save(true);};$('focusPreference').onchange=()=>{renderer.cinema=!$('focusPreference').checked;save(true);};
   $('resetJourney').onclick=()=>{$('resetConfirmation').hidden=false;$('cancelReset').focus();};$('cancelReset').onclick=()=>{$('resetConfirmation').hidden=true;};
-  function restart(){restarting=true;if(!StoryState.erase(storage)){restarting=false;return false;}location.reload();return true;}
+  function restart(){if(window.GameStart?.savingBlocked)return false;restarting=true;if(!StoryState.erase(storage)){restarting=false;return false;}location.reload();return true;}
   $('confirmReset').onclick=()=>{if(!restart())toast('Impossibile cancellare il salvataggio. Riprova.');};
   for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',resetInput);
   function moveParty(from,to){if(battling||!state.party[from]||!state.party[to])return false;[state.party[from],state.party[to]]=[state.party[to],state.party[from]];const n=state.original;if(n?.surf&&Number.isInteger(n.surfUserIndex)){if(n.surfUserIndex===from)n.surfUserIndex=to;else if(n.surfUserIndex===to)n.surfUserIndex=from;}lead=0;displayPartner();save(true);return true;}
