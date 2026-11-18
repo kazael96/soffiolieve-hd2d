@@ -40,6 +40,14 @@ jobs:
           name: introduction-browser-report
           path: test-results/introduction
           if-no-files-found: ignore
+      - name: Check title and save selection in all three formats
+        run: node scripts/test-start-menu-headless.cjs _site test-results/start-menu --browser=/opt/google/chrome/chrome --renderer=software
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: start-menu-browser-report
+          path: test-results/start-menu
+          if-no-files-found: ignore
       - name: Check reported phone regressions in all three formats
         run: node scripts/test-browser-headless.cjs _site test-results/phone057 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=240000 --cases=qaFieldCamera057,qaFieldGate057,qaPhoneIdentity057,qaBattleClearings057,qaBattleDoubles057
       - uses: actions/upload-artifact@v4
