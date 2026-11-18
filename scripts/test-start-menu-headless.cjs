@@ -40,8 +40,9 @@ async function run(site,out,{playwright='playwright',browser:executable,renderer
        images:[...(d?.querySelectorAll('.start-art img')||[])].map(e=>({alt:e.alt,width:e.naturalWidth,height:e.naturalHeight,complete:e.complete})),
        runtimeError:document.getElementById('world')?.dataset.runtimeError||'',eventError:document.getElementById('world')?.dataset.eventError||''};
      });
+     row.audits.push({label,...audit});
      if(audit.step){assert.equal(audit.bootLocked,true);assert.deepEqual(audit.missingGlyphs,[]);assert.ok(audit.artwork.every(image=>!image.clipped),'Native title artwork is cropped');assert.ok(audit.images.length===2&&audit.images.every(i=>i.complete&&i.width>0&&i.height>0));for(const control of audit.controls){assert.ok(control.rect.x>=-2&&control.rect.y>=-2&&control.rect.right<=width+2&&control.rect.bottom<=height+2,'Clipped boot control '+control.label);assert.equal(control.hit,true,'Obscured boot control '+control.label);}assert.ok(audit.captions.every(c=>c.bitmap&&c.widths.every(w=>w<=232)),'Missing/clipped native title caption');}
-     assert.equal(audit.runtimeError,'');assert.equal(audit.eventError,'');row.audits.push({label,...audit});
+     assert.equal(audit.runtimeError,'');assert.equal(audit.eventError,'');
      const file=row.id+'-'+label+'.png';await page.screenshot({path:path.join(out,file)});const record={file,sha256:sha(fs.readFileSync(path.join(out,file))),case:row.id};row.screenshots.push(record);report.screenshots.push(record);
     }
     async function menu(){await panel.getByRole('button',{name:'PREMI START',exact:true}).click();await page.locator('#gameStart[data-step=menu]').waitFor();}
