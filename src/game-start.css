@@ -19,4 +19,7 @@
 .start-choices canvas{display:block;width:100%;height:auto;max-height:144px;image-rendering:pixelated}
 #gameStart #touch button{color:#fff9e9}
 .native-start #loading{position:static;inset:auto;transform:none;max-width:100%;width:auto;margin:8px 0 0;box-sizing:border-box}
+.start-slots .start-art,.start-slots .start-copyright{display:none}
+.start-slots .start-screen{padding-top:10px}
+.start-slots .start-choices canvas{width:min(100%,320px)}
 @media(max-height:500px) and (min-width:601px){.native-start{width:min(440px,calc(100vw - 300px));max-height:calc(100dvh - 16px)}.start-art{height:62px}.start-logo{height:96px;top:-10px;width:128px}.start-dragon{height:60px;width:60px}.start-title .start-art{height:210px}.start-title .start-logo{height:170px;width:220px;top:-20px}.start-title .start-dragon{width:110px;height:110px;bottom:0}.start-message{font-size:13px}.start-choices{gap:5px}.start-choices button{min-height:40px}}

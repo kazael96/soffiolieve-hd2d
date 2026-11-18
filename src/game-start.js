@@ -3,10 +3,10 @@
  'use strict';
  const RESTART='soffiolieve-start-new-once';
  let running=null,active=false,completed=false,savingBlocked=false;
- function read(storage){
+ function read(storage,slot=root.SaveSlots?.active||1){
   try{
    if(!storage)return {kind:'unavailable',hasData:false};
-   const raw=storage.getItem(root.StoryState.KEY);
+   const raw=storage.getItem(root.SaveSlots?root.SaveSlots.key(slot):root.StoryState.KEY);
    if(raw===null)return {kind:'empty',hasData:false,raw};
    let state;try{state=root.StoryState.normalize(JSON.parse(raw));}catch{}
    return state?{kind:'saved',hasData:true,raw,state}:{kind:'damaged',hasData:true,raw};
@@ -20,22 +20,22 @@
    caught:state.dex?.caught?.length||0,time:Math.floor(seconds/3600)+':'+String(Math.floor(seconds/60)%60).padStart(2,'0'),
    location:place||({bedroom:'Soffiolieve',home:'Soffiolieve',lab:'Soffiolieve'}[state.scene])||'Unima'};
  }
- function prepareRestart(){try{root.sessionStorage.setItem(RESTART,'1');return true;}catch{return false;}}
- function consumeRestart(){try{const pending=root.sessionStorage.getItem(RESTART)==='1';root.sessionStorage.removeItem(RESTART);return pending;}catch{return false;}}
+ function prepareRestart(){try{root.sessionStorage.setItem(RESTART,String(root.SaveSlots?.active||1));return true;}catch{return false;}}
+ function consumeRestart(){try{const pending=root.sessionStorage.getItem(RESTART)===String(root.SaveSlots?.active||1);root.sessionStorage.removeItem(RESTART);return pending;}catch{return false;}}
  function clearRestart(){try{root.sessionStorage.removeItem(RESTART);}catch{}}
  async function start(){
   if(root.SpeciesStudioMode||completed)return false;if(running)return running;
   active=true;
   running=(async()=>{
-   const saved=read(storage());
-   savingBlocked=saved.kind==='unavailable';
+   const saved=root.SaveSlots?.blocked?{kind:'unavailable',hasData:false}:read(storage());
+   savingBlocked=saved.kind==='unavailable'||root.SaveSlots?.blocked===true;
    if(savingBlocked){const status=document.getElementById('saveStatus');if(status)status.textContent='Salvataggio non disponibile su questo browser';}
    if(consumeRestart()&&saved.kind==='empty'){active=false;completed=true;return root.GameIntroduction.start();}
-   return show(saved);
+   return show(saved,root.SaveSlots?.consumeMenu()===true);
   })();
   try{return await running;}finally{running=null;}
  }
- async function show(saved){
+ async function show(saved,skipTitle=false){
   const dialog=document.createElement('dialog');dialog.id='gameStart';dialog.className='native-screen native-start';dialog.setAttribute('aria-label','Pokémon Versione Nera');
   const screen=document.createElement('div');screen.className='start-screen';
   const art=document.createElement('div');art.className='start-art';
@@ -74,7 +74,7 @@
    }
    buttons.firstElementChild?.focus({preventScroll:true});
   }
-  function page(value){step=value;dialog.dataset.step=value;dialog.classList.toggle('start-title',value==='title');announce('');}
+  function page(value){step=value;dialog.dataset.step=value;dialog.classList.toggle('start-title',value==='title');dialog.classList.toggle('start-slots',value==='slots');announce('');}
   function title(){page('title');controls([['PREMI START',menu]]);}
   function menu(){
    page('menu');const options=[];
@@ -83,13 +83,27 @@
     options.push([`CONTINUA\n${s.name}       ${s.time}\nMedaglie: ${s.badges}   Pokédex: ${s.caught}`,resume]);
    }
    options.push(['NUOVO GIOCO',newGame]);
+   if(root.SaveSlots)options.push(['SALVATAGGI - SLOT '+root.SaveSlots.active+'/3',slots]);
    if(saved.kind==='damaged')announce('Il salvataggio non può essere letto. Non è stato cancellato.');
    if(saved.kind==='unavailable')announce('Il browser non rende disponibile il salvataggio. Puoi giocare, ma questa sessione non verrà salvata.');
    controls(options);
   }
+  function slots(){
+   page('slots');announce('Scegli il salvataggio.');
+   const options=[1,2,3].map(slot=>{
+    const data=read(storage(),slot),s=data.state&&summary(data.state);
+    const label='SLOT '+slot+(slot===root.SaveSlots.active?' - ATTUALE':'')+'\n'+(s?s.name+'   '+s.time:data.kind==='empty'?'Nuovo gioco':data.kind==='damaged'?'Dati non leggibili':'Non disponibile');
+    return [label,()=>chooseSlot(slot)];
+   });controls([...options,['INDIETRO',menu]]);
+  }
+  function chooseSlot(slot){
+   if(slot===root.SaveSlots.active)return menu();
+   if(!root.SaveSlots.select(slot)){page('error');announce('Impossibile cambiare slot. I salvataggi sono conservati.');controls([['INDIETRO',slots]]);return;}
+   busy=true;page('starting');announce('Apertura dello slot '+slot+'...');controls([]);root.location.reload();
+  }
   function newGame(){
    if(!saved.hasData)return enter();
-   page('confirm-new');announce('Vuoi iniziare una nuova partita? Il salvataggio precedente verrà cancellato. L’operazione non può essere annullata.');
+   page('confirm-new');announce('Vuoi iniziare una nuova partita? Verrà cancellato soltanto lo slot '+(root.SaveSlots?.active||1)+'. L’operazione non può essere annullata.');
    controls([['NO',menu],['SÌ, NUOVO GIOCO',restart]]);
   }
   function restart(){
@@ -138,7 +152,7 @@
     // revoked after decoding. Copying .src would issue a broken second request.
     loaded[0].alt=logo.alt;loaded[0].className=logo.className;logo.replaceWith(loaded[0]);logo=loaded[0];
     loaded[1].alt=dragon.alt;loaded[1].className=dragon.className;dragon.replaceWith(loaded[1]);dragon=loaded[1];
-    loaded[3].alt=copyright.alt;copyright.replaceWith(loaded[3]);copyright=loaded[3];font=loaded[2];title();
+    loaded[3].alt=copyright.alt;copyright.replaceWith(loaded[3]);copyright=loaded[3];font=loaded[2];if(skipTitle)menu();else title();
    }catch(error){page('error');announce('Non è stato possibile caricare il titolo. Il salvataggio è conservato.');controls([['RIPROVA',()=>void load()]]);}
   }
   dialog.addEventListener('cancel',event=>event.preventDefault());
@@ -147,7 +161,7 @@
    if(!['a','z','enter',' ','b','escape','arrowup','arrowdown','arrowleft','arrowright'].includes(key))return;
    event.preventDefault();event.stopImmediatePropagation();if(event.repeat)return;
    if(busy){if(step==='starting'&&['a','z','enter',' '].includes(key))dialog.querySelector('#loading button:not([disabled])')?.click();return;}
-   if(key==='b'||key==='escape'){if(step==='confirm-new')menu();else if(step==='menu')title();return;}
+   if(key==='b'||key==='escape'){if(step==='confirm-new'||step==='slots')menu();else if(step==='menu')title();return;}
    const rows=[...buttons.children];if(!rows.length)return;
    if(key.startsWith('arrow')){selected=(selected+(['arrowup','arrowleft'].includes(key)?-1:1)+rows.length)%rows.length;rows[selected].focus({preventScroll:true});}
    else rows[selected]?.click();

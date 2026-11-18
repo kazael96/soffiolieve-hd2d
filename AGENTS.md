@@ -1,5 +1,9 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Tre partite indipendenti · 18 novembre2026
+
+Applicare [SAVE-SLOTS-060.md](docs/SAVE-SLOTS-060.md): tre slot, legacy nello slot1 senza riscritture, selezione per scheda, salvataggio e riavvio limitati alla partita scelta. Conservare titolo, introduzione e compatibilità; nessuna cancellazione o selezione fallita può risultare riuscita. Controllare dati cambiati da altre schede e ripresa reale di ogni slot nei tre formati, oltre alle regressioni precedenti.
+
 ## Lancio introduttivo di Aralia · 18 novembre2026
 
 Applicare [ARALIA-RELEASE-059.md](docs/ARALIA-RELEASE-059.md): mantenere contatto mano–Ball, traiettoria continua, apertura prima della comparsa di Minccino, appoggio e ritorno della sfera. Nessun replay tornando indietro. Conservare fotogrammi essenziali a×1/×2/×4, sospensione, caricamenti recuperabili, tutti i controlli precedenti e i12 casi dell'introduzione effettiva con revisione dei PNG.

@@ -2,6 +2,7 @@
 (() => {
   let storage;try{storage=window.SpeciesStudioMode?null:localStorage;}catch{storage=null;}
   if(window.TRAINING_DATA)Object.assign(OPENING_DATA,TRAINING_DATA.pokemonData);
+  if(window.SaveSlots&&!window.SpeciesStudioMode)storage=SaveSlots.wrap(storage);
   const state=StoryState.read(storage),preferences=JourneyState.read(storage).state;
   if(window.TrainerProfile&&!state.trainer)state.trainer=TrainerProfile.create();
   const outdoor={...ROM_SCENE,instances:[...ROM_SCENE.instances,...OPENING_ASSETS.scenes.north.instances],permissionGrids:[...ROM_SCENE.permissionGrids,...OPENING_ASSETS.scenes.north.permissionGrids]};
@@ -40,7 +41,7 @@
   }
   function save(force=false){
     if(window.GameStart?.pending||window.GameStart?.savingBlocked||window.GameIntroduction?.pending||restarting||processing||renderer.ready===false||renderer.contextLost||renderer.modelsRecovering||battling||(window.NativeStory?.locked&&!window.NativeStory?.fieldCheckpointAllowed))return false;window.NativeStory?.captureActors();Object.assign(state,{player:{...player},facing,potions});const encoded=JSON.stringify(state);let saved=encoded===lastSave;
-    if(force||encoded!==lastSave){saved=StoryState.write(storage,state);$('saveStatus').textContent=saved?'Viaggio salvato su questo dispositivo':'Salvataggio non disponibile su questo browser';if(saved)lastSave=encoded;}
+    if(force||encoded!==lastSave){saved=StoryState.write(storage,state);$('saveStatus').textContent=saved?(window.SaveSlots?'Viaggio salvato nello slot '+SaveSlots.active+' su questo dispositivo':'Viaggio salvato su questo dispositivo'):(window.SaveSlots?.problem==='changed'?'La partita è cambiata in un’altra scheda. Ricarica per riprenderla.':'Salvataggio non disponibile su questo browser');if(saved)lastSave=encoded;}
     Object.assign(preferences,{zoom:renderer.zoom,cinema:renderer.cinema});
     const changed=Object.fromEntries(Object.keys(lastPreferences).filter(k=>preferences[k]!==lastPreferences[k]).map(k=>[k,preferences[k]]));
     if(Object.keys(changed).length){const latest=JourneyState.read(storage).state;Object.assign(latest,changed);if(JourneyState.write(storage,latest))Object.assign(lastPreferences,changed);}
