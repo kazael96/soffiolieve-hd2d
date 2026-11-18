@@ -17,8 +17,10 @@ async function run(site,out,{playwright='playwright',browser:executable,renderer
    if(kind==='legacy-restart'){delete legacy.playerGender;delete legacy.introductionComplete;}
    const savedRaw=kind==='legacy-restart'?JSON.stringify(legacy):kind==='corrupt-changed'?'{broken':kind==='unavailable'?JSON.stringify(legacy):null;
    const storageState=savedRaw===null?undefined:{cookies:[],origins:[{origin:new URL(service.url).origin,localStorage:[{name:key,value:savedRaw},{name:'soffiolieve-game-speed',value:'4'}]}]};
-   const context=await browser.newContext({viewport:{width,height},isMobile:viewport!=='desktop',hasTouch:viewport!=='desktop',deviceScaleFactor:1,...(storageState?{storageState}:{})});let page,faults=0;
+   const context=await browser.newContext({viewport:{width,height},isMobile:viewport!=='desktop',hasTouch:viewport!=='desktop',deviceScaleFactor:1,...(storageState?{storageState}:{})});let page,faults=0,releaseScene,heldScene=false;
+   const sceneDelay=new Promise(resolve=>{releaseScene=resolve;});
    try{
+    if(kind==='legacy-restart')await context.route('**/assets/field-pack.bin*',async route=>{heldScene=true;await sceneDelay;return route.continue();});
     if(kind==='unavailable')await context.addInitScript(key=>{const original=Storage.prototype.getItem;Storage.prototype.getItem=function(name){if(this===localStorage&&name===key)throw Error('Injected read denial');return original.call(this,name);};},key);
     if(kind==='asset-recovery')await context.route('**/*',async route=>{if(new URL(route.request().url()).pathname.endsWith('/assets/finale/credits/title.png')&&faults++===0)return route.abort('failed');return route.continue();});
     page=await context.newPage();page.setDefaultTimeout(20000);
@@ -26,6 +28,7 @@ async function run(site,out,{playwright='playwright',browser:executable,renderer
     page.on('requestfailed',r=>row.failedRequests.push({url:r.url(),error:r.failure()?.errorText}));
     const start=Date.now();await page.goto(service.url,{waitUntil:'domcontentloaded',timeout:60000});
     const panel=page.locator('#gameStart');await page.locator('#gameStart[data-step=title]').waitFor();
+    const tap=locator=>viewport==='desktop'?locator.click():locator.tap();
     const current=()=>page.evaluate(key=>localStorage.getItem(key),key);
     async function shot(label){
      const audit=await page.evaluate(()=>{
@@ -45,35 +48,37 @@ async function run(site,out,{playwright='playwright',browser:executable,renderer
      assert.equal(audit.runtimeError,'');assert.equal(audit.eventError,'');
      const file=row.id+'-'+label+'.png';await page.screenshot({path:path.join(out,file)});const record={file,sha256:sha(fs.readFileSync(path.join(out,file))),case:row.id};row.screenshots.push(record);report.screenshots.push(record);
     }
-    async function menu(){await panel.getByRole('button',{name:'PREMI START',exact:true}).click();await page.locator('#gameStart[data-step=menu]').waitFor();}
+    async function menu(){await tap(panel.getByRole('button',{name:'PREMI START',exact:true}));await page.locator('#gameStart[data-step=menu]').waitFor();}
     async function welcome(){await page.locator('#gameIntroduction[data-step=welcome]').waitFor();assert.equal(await page.locator('#gameStart[open]').count(),0);}
     if(kind==='fresh'){
      await shot('title');assert.equal(await current(),null);assert.equal(await page.evaluate(()=>Journey.save(true)),false);await menu();assert.equal(await panel.getByRole('button',{name:/^CONTINUA/}).count(),0);await shot('new-only');
      await page.keyboard.press('b');await page.locator('#gameStart[data-step=title]').waitFor();await page.keyboard.press('Enter');await page.locator('#gameStart[data-step=menu]').waitFor();
-     await panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}).click();await welcome();assert.equal(await current(),null);
+     await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));await welcome();assert.equal(await current(),null);
     }else if(kind==='legacy-restart'){
      assert.equal(await current(),savedRaw);await page.waitForTimeout(350);assert.equal(await current(),savedRaw);assert.equal(await page.evaluate(()=>Journey.save(true)),false);
      await menu();assert.match(await panel.getByRole('button',{name:/^CONTINUA/}).getAttribute('aria-label'),/ABCDEFGHIJ.*\n.*1:01|ABCDEFGHIJ[\s\S]*1:01/);await shot('continue');
-     await panel.getByRole('button',{name:/^CONTINUA/}).click();await panel.waitFor({state:'hidden'});assert.equal(await page.locator('#gameIntroduction[open]').count(),0);assert.equal(await page.evaluate(()=>Journey.state.playerName),'ABCDEFGHIJ');assert.equal(await page.evaluate(()=>Journey.state.playerGender),'M');
+     assert.equal(heldScene,true,'The real field resource must actually be held');assert.equal(await page.evaluate(()=>renderer.ready),false);
+     await tap(panel.getByRole('button',{name:/^CONTINUA/}));await page.locator('#gameStart[data-step=starting]').waitFor({timeout:2000});assert.equal(await page.evaluate(()=>GameStart.pending&&Journey.locked&&!renderer.ready),true);assert.equal(await current(),savedRaw);releaseScene();
+     await panel.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>renderer.ready&&renderer.hasResources(renderer.resourcePlan())),true);row.readiness={realFieldPackHeld:true,coveredUntilReady:true};assert.equal(await page.locator('#gameIntroduction[open]').count(),0);assert.equal(await page.evaluate(()=>Journey.state.playerName),'ABCDEFGHIJ');assert.equal(await page.evaluate(()=>Journey.state.playerGender),'M');
      await page.reload({waitUntil:'domcontentloaded'});await page.locator('#gameStart[data-step=title]').waitFor();await menu();const before=await current();
-     await panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}).click();await shot('confirm-new');await page.keyboard.press('b');await page.locator('#gameStart[data-step=menu]').waitFor();assert.equal(await current(),before);
-     await panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}).click();
+     await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));await shot('confirm-new');await page.keyboard.press('b');await page.locator('#gameStart[data-step=menu]').waitFor();assert.equal(await current(),before);
+     await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));
      await page.evaluate(key=>{const original=Storage.prototype.removeItem;window.restoreBootStorage=()=>Storage.prototype.removeItem=original;Storage.prototype.removeItem=function(name){if(this===localStorage&&name===key)throw Error('Injected delete denial');return original.call(this,name);};},key);
-     await panel.getByRole('button',{name:'SÌ, NUOVO GIOCO',exact:true}).click();await page.locator('#gameStart[data-step=error]').waitFor();assert.equal(await current(),before);assert.equal(await page.evaluate(()=>GameStart.consumeRestart()),false);await shot('delete-denied');
-     await page.evaluate(()=>window.restoreBootStorage());await panel.getByRole('button',{name:'INDIETRO',exact:true}).click();await panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}).click();
-     await Promise.all([page.waitForEvent('domcontentloaded'),panel.getByRole('button',{name:'SÌ, NUOVO GIOCO',exact:true}).click()]);await welcome();assert.equal(await current(),null);assert.equal(await page.evaluate(()=>GameStart.consumeRestart()),false);assert.equal(await page.evaluate(()=>Journey.state.playerName),'Alcide');
+     await tap(panel.getByRole('button',{name:'SÌ, NUOVO GIOCO',exact:true}));await page.locator('#gameStart[data-step=error]').waitFor();assert.equal(await current(),before);assert.equal(await page.evaluate(()=>GameStart.consumeRestart()),false);await shot('delete-denied');
+     await page.evaluate(()=>window.restoreBootStorage());await tap(panel.getByRole('button',{name:'INDIETRO',exact:true}));await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));
+     await Promise.all([page.waitForEvent('domcontentloaded'),tap(panel.getByRole('button',{name:'SÌ, NUOVO GIOCO',exact:true}))]);await welcome();assert.equal(await current(),null);assert.equal(await page.evaluate(()=>GameStart.consumeRestart()),false);assert.equal(await page.evaluate(()=>Journey.state.playerName),'Alcide');
     }else if(kind==='corrupt-changed'){
-     await menu();assert.equal(await panel.getByRole('button',{name:/^CONTINUA/}).count(),0);assert.equal(await current(),savedRaw);await shot('damaged-save');await panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}).click();
-     const newer=JSON.stringify({...legacy,playerName:'Nuovo'});await page.evaluate(({key,newer})=>localStorage.setItem(key,newer),{key,newer});await panel.getByRole('button',{name:'SÌ, NUOVO GIOCO',exact:true}).click();await page.locator('#gameStart[data-step=error]').waitFor();assert.equal(await current(),newer);await shot('changed-save');
+     await menu();assert.equal(await panel.getByRole('button',{name:/^CONTINUA/}).count(),0);assert.equal(await current(),savedRaw);await shot('damaged-save');await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));
+     const newer=JSON.stringify({...legacy,playerName:'Nuovo'});await page.evaluate(({key,newer})=>localStorage.setItem(key,newer),{key,newer});await tap(panel.getByRole('button',{name:'SÌ, NUOVO GIOCO',exact:true}));await page.locator('#gameStart[data-step=error]').waitFor();assert.equal(await current(),newer);await shot('changed-save');
     }else if(kind==='unavailable'){
-     await menu();assert.equal(await page.evaluate(()=>GameStart.savingBlocked),true);await shot('unavailable');await panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}).click();await welcome();assert.equal(await page.evaluate(()=>Journey.save(true)),false);
+     await menu();assert.equal(await page.evaluate(()=>GameStart.savingBlocked),true);await shot('unavailable');await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));await welcome();assert.equal(await page.evaluate(()=>Journey.save(true)),false);
      const storage=(await context.storageState()).origins.find(o=>o.origin===new URL(service.url).origin)?.localStorage;assert.equal(storage?.find(r=>r.name===key)?.value,savedRaw);
     }else{
      assert.ok(faults>=2,'Required native title request/retry was not actually observed');assert.equal(row.failedRequests.length,1);assert.equal(await panel.getByRole('button',{name:'RIPROVA',exact:true}).count(),0);await shot('auto-recovered');row.fault={injectedFailures:1,requests:faults,manualRetryRequired:false};
     }
     assert.deepEqual(row.errors,[]);assert.deepEqual(row.httpErrors,[]);if(kind!=='asset-recovery')assert.deepEqual(row.failedRequests,[]);row.result='PASS';row.durationMs=Date.now()-start;
    }catch(error){row.result='FAIL';row.error=String(error.stack||error);if(page){const file=row.id+'-failure.png';await page.screenshot({path:path.join(out,file)}).then(()=>{const r={file,sha256:sha(fs.readFileSync(path.join(out,file))),case:row.id};row.screenshots.push(r);report.screenshots.push(r);}).catch(()=>{});}}
-   finally{await context.close();persist();console.log(row.result+' '+row.id);}
+   finally{releaseScene();await context.close();persist();console.log(row.result+' '+row.id);}
    if(row.result==='FAIL')throw Error(row.error);
   }
   report.result='FUNCTIONAL_PASS';

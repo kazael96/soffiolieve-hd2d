@@ -106,11 +106,24 @@
    const current=read(storage());if(current.raw===saved.raw&&current.kind===saved.kind)return false;
    page('error');announce('Il salvataggio è cambiato. Ricarica per riprendere i progressi più recenti.');controls([['RICARICA',()=>root.location.reload()]]);return true;
   }
+  async function prepareField(){
+   const attach=()=>{const loading=document.getElementById('loading');if(loading&&loading.parentNode!==dialog)dialog.append(loading);};
+   // The existing bounded resource recovery must remain reachable in the
+   // modal top layer, including its manual control after automatic retries.
+   const observer=new MutationObserver(attach);observer.observe(document.body,{subtree:true,childList:true});attach();
+   try{
+    for(let attempt=0;attempt<3;attempt++){
+     const scene=renderer.scene;
+     try{return await renderer.prepareScene();}catch(error){if(scene===renderer.scene||attempt===2)throw error;}
+    }
+   }finally{observer.disconnect();const loading=document.getElementById('loading');if(loading?.parentNode===dialog)document.body.append(loading);}
+  }
   async function enter(){
    if(busy||changed())return;busy=true;page('starting');controls([]);
    // Keep the boot lock until the introduction has synchronously claimed it.
    try{
     if(!root.AudioEngine?.enabled)void root.AudioEngine?.enable();
+    if(!root.GameIntroduction.pending){announce('Caricamento della partita...');await prepareField();if(changed()){busy=false;return;}}
     const intro=root.GameIntroduction.start();active=false;completed=true;dialog.close();root.resetInput?.();
     const value=await intro;dialog.remove();
     if(!value)void root.AudioEngine?.setScene(root.NativeStory?.music||'town');
@@ -132,7 +145,8 @@
   dialog.addEventListener('keydown',event=>{
    if(event.ctrlKey||event.metaKey||event.altKey)return;const key=event.key.toLowerCase();
    if(!['a','z','enter',' ','b','escape','arrowup','arrowdown','arrowleft','arrowright'].includes(key))return;
-   event.preventDefault();event.stopImmediatePropagation();if(event.repeat||busy)return;
+   event.preventDefault();event.stopImmediatePropagation();if(event.repeat)return;
+   if(busy){if(step==='starting'&&['a','z','enter',' '].includes(key))dialog.querySelector('#loading button:not([disabled])')?.click();return;}
    if(key==='b'||key==='escape'){if(step==='confirm-new')menu();else if(step==='menu')title();return;}
    const rows=[...buttons.children];if(!rows.length)return;
    if(key.startsWith('arrow')){selected=(selected+(['arrowup','arrowleft'].includes(key)?-1:1)+rows.length)%rows.length;rows[selected].focus({preventScroll:true});}
