@@ -2,6 +2,7 @@
 (function(root){
  'use strict';
  const RESTART='soffiolieve-start-new-once';
+ const slotLabel=()=> 'SALVATAGGI - SLOT '+(root.SaveSlots?.active||1)+'/3';
  let running=null,active=false,completed=false,savingBlocked=false;
  function read(storage,slot=root.SaveSlots?.active||1){
   try{
@@ -65,28 +66,28 @@
    lines.forEach((line,i)=>root.NativeText.draw(c,font,line,step==='title'?128:12,7+i*18,false,step==='title'?'center':'left',root.NAMING_ASSETS.font));
    canvas.setAttribute('aria-hidden','true');button.append(canvas);
   }
-  function controls(options){
+  function controls(options,focus=0){
    buttons.replaceChildren();selected=0;
    for(const [label,action]of options){
     const button=document.createElement('button');button.type='button';caption(button,label);
     button.onclick=()=>{if(busy||button.disabled)return;root.resetInput?.();action();};
     button.onfocus=()=>{selected=[...buttons.children].indexOf(button);};buttons.append(button);
    }
-   buttons.firstElementChild?.focus({preventScroll:true});
+   selected=Math.max(0,Math.min(buttons.children.length-1,focus));buttons.children[selected]?.focus({preventScroll:true});
   }
   function page(value){step=value;dialog.dataset.step=value;dialog.classList.toggle('start-title',value==='title');dialog.classList.toggle('start-slots',value==='slots');announce('');}
   function title(){page('title');controls([['PREMI START',menu]]);}
-  function menu(){
+  function menu(focus=''){
    page('menu');const options=[];
    if(saved.kind==='saved'){
     const s=summary(saved.state);
     options.push([`CONTINUA\n${s.name}       ${s.time}\nMedaglie: ${s.badges}   Pokédex: ${s.caught}`,resume]);
    }
    options.push(['NUOVO GIOCO',newGame]);
-   if(root.SaveSlots)options.push(['SALVATAGGI - SLOT '+root.SaveSlots.active+'/3',slots]);
+   if(root.SaveSlots)options.push([slotLabel(),slots]);
    if(saved.kind==='damaged')announce('Il salvataggio non può essere letto. Non è stato cancellato.');
    if(saved.kind==='unavailable')announce('Il browser non rende disponibile il salvataggio. Puoi giocare, ma questa sessione non verrà salvata.');
-   controls(options);
+   controls(options,Math.max(0,options.findIndex(([label])=>label===focus)));
   }
   function slots(){
    page('slots');announce('Scegli il salvataggio.');
@@ -94,7 +95,7 @@
     const data=read(storage(),slot),s=data.state&&summary(data.state);
     const label='SLOT '+slot+(slot===root.SaveSlots.active?' - ATTUALE':'')+'\n'+(s?s.name+'   '+s.time:data.kind==='empty'?'Nuovo gioco':data.kind==='damaged'?'Dati non leggibili':'Non disponibile');
     return [label,()=>chooseSlot(slot)];
-   });controls([...options,['INDIETRO',menu]]);
+   });controls([...options,['INDIETRO',()=>menu(slotLabel())]],root.SaveSlots.active-1);
   }
   function chooseSlot(slot){
    if(slot===root.SaveSlots.active)return menu();
@@ -104,7 +105,7 @@
   function newGame(){
    if(!saved.hasData)return enter();
    page('confirm-new');announce('Vuoi iniziare una nuova partita? Verrà cancellato soltanto lo slot '+(root.SaveSlots?.active||1)+'. L’operazione non può essere annullata.');
-   controls([['NO',menu],['SÌ, NUOVO GIOCO',restart]]);
+   controls([['NO',()=>menu('NUOVO GIOCO')],['SÌ, NUOVO GIOCO',restart]]);
   }
   function restart(){
    if(changed())return;
@@ -161,7 +162,7 @@
    if(!['a','z','enter',' ','b','escape','arrowup','arrowdown','arrowleft','arrowright'].includes(key))return;
    event.preventDefault();event.stopImmediatePropagation();if(event.repeat)return;
    if(busy){if(step==='starting'&&['a','z','enter',' '].includes(key))dialog.querySelector('#loading button:not([disabled])')?.click();return;}
-   if(key==='b'||key==='escape'){if(step==='confirm-new'||step==='slots')menu();else if(step==='menu')title();return;}
+   if(key==='b'||key==='escape'){if(step==='confirm-new')menu('NUOVO GIOCO');else if(step==='slots')menu(slotLabel());else if(step==='menu')title();return;}
    const rows=[...buttons.children];if(!rows.length)return;
    if(key.startsWith('arrow')){selected=(selected+(['arrowup','arrowleft'].includes(key)?-1:1)+rows.length)%rows.length;rows[selected].focus({preventScroll:true});}
    else rows[selected]?.click();

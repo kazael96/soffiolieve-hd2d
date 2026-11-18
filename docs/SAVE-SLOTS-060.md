@@ -1,6 +1,6 @@
 # Tre salvataggi · 0.60
 
-Richiesta del18 novembre2026: offrire tre partite indipendenti. Dal titolo, Premi Start → SALVATAGGI mostra i tre slot e quello attuale; ciascuno riporta nome e tempo oppure Nuovo gioco/Dati non leggibili. Dopo la scelta, Continua o Nuovo gioco riguarda quel solo slot. B torna indietro, frecce e A/Invio/touch mantengono il comportamento esistente. La schermata è adattata allo stile di Nero: il gioco DS offriva una sola partita.
+Richiesta del18 novembre2026: offrire tre partite indipendenti. Dal titolo, Premi Start → SALVATAGGI mostra i tre slot e quello attuale; ciascuno riporta nome e tempo oppure Nuovo gioco/Dati non leggibili. Dopo la scelta, Continua o Nuovo gioco riguarda quel solo slot. Il focus iniziale segue lo slot attuale; B torna alla voce Salvataggi, mentre annullare Nuovo gioco ripristina quella voce. Frecce e A/Invio/touch mantengono il comportamento esistente. La schermata è adattata allo stile di Nero: il gioco DS offriva una sola partita.
 
 Lo slot1 conserva la chiave e i byte del salvataggio precedente, senza migrazioni distruttive. Gli slot2/3 hanno chiavi distinte. L'identità, squadra, mondo, eventi e tutti i campi già normalizzati dal formato2 restano nella singola partita. Audio, velocità e impostazioni grafiche rimangono preferenze condivise del browser. I dati sono locali al browser/dispositivo; questa funzione non aggiunge sincronizzazione cloud.
 
