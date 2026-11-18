@@ -1,9 +1,9 @@
-# Soffiolieve HD-2D — 0.58
+# Soffiolieve HD-2D — 0.59
 
 Un progetto amatoriale di **Pokémon Nero** per browser, con ambienti HD-2D e
 risorse originali convertite dalla ROM fornita per lo sviluppo.
 
-I sorgenti **0.58** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
+I sorgenti **0.59** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
 cattura di Reshiram e le lotte con N e Ghecis. Non comprende il postgame.
 I [criteri della revisione](docs/START-MENU-058.md) distinguono i controlli richiesti dalla
 distribuzione. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
@@ -207,3 +207,7 @@ python tools/extract-opening.py --rom "percorso/Pokemon.nds" --apicula "percorso
 ```
 
 La 0.30 completa Lillipup (Azione, Fulmisguardo, Segugio e Morso), aggiunge reazioni anatomiche ai bersagli delle cinque specie e velocità x1/x2/x4 nelle Opzioni. Studio `?lillipup=1`, con bersaglio selezionabile. Matrice19/19 del perimetro livello10 e limiti in [docs/SPECIES-MOVES-030.md](docs/SPECIES-MOVES-030.md).
+
+La0.59 aggiunge il lancio della Poké Ball di Aralia nella presentazione: [coreografia e prove](docs/ARALIA-RELEASE-059.md).
+
+Al termine del discorso introduttivo la stessa Soffiolieve attraversa gli stili delle generazioni fino a Nero e alla versione HD-2D: [montaggio e limiti](docs/INTRO-HISTORY-059.md).

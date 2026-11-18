@@ -50,7 +50,7 @@ function assertRestartCancellation(before,after){
 }
 function fingerprints(site){
  const manifestBytes=fs.readFileSync(path.join(site,'build.json')),manifest=JSON.parse(manifestBytes);
- const required=['index.html','game-introduction.js','game-introduction.css','player-assets.js','player-identity.js','naming-assets.js','native-naming.js','native-ui.css','native-touch.js','demo-controls.js','story-state.js','story.js','world3d.js','starter-scene.js'];
+ const required=['index.html','intro-pokeball.js','intro-history.js','game-introduction.js','game-introduction.css','player-assets.js','player-identity.js','naming-assets.js','native-naming.js','native-ui.css','native-touch.js','demo-controls.js','story-state.js','story.js','world3d.js','starter-scene.js'];
  const files=Object.fromEntries(required.map(file=>{const digest=sha(fs.readFileSync(path.join(site,file)));if(manifest.files?.[file])assert.equal(digest,manifest.files[file],'Manifest mismatch: '+file);return [file,digest];}));
  const context={};context.window=context;vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(site,'player-assets.js'),'utf8'),context,{filename:'player-assets.js',timeout:2000});
  assert.ok(context.PLAYER_ASSETS?.intro?.Alcide,'Candidate lacks the production introduction catalogue');vm.runInContext(fs.readFileSync(path.join(site,'naming-assets.js'),'utf8'),context,{filename:'naming-assets.js',timeout:2000});

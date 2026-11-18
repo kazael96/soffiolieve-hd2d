@@ -1,5 +1,11 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Lancio introduttivo di Aralia · 18 novembre2026
+
+Applicare [ARALIA-RELEASE-059.md](docs/ARALIA-RELEASE-059.md): mantenere contatto mano–Ball, traiettoria continua, apertura prima della comparsa di Minccino, appoggio e ritorno della sfera. Nessun replay tornando indietro. Conservare fotogrammi essenziali a×1/×2/×4, sospensione, caricamenti recuperabili, tutti i controlli precedenti e i12 casi dell'introduzione effettiva con revisione dei PNG.
+
+Applicare [INTRO-HISTORY-059.md](docs/INTRO-HISTORY-059.md): dopo il discorso completo mostrare la stessa **Soffiolieve** attraverso Giallo, Oro, Smeraldo, quarta generazione, Nero e HD-2D. L'utente ha esplicitamente corretto la proposta della cameretta: il montaggio riguarda la prima città. Preservare il protagonista scelto e i dati del campo; il renderer temporaneo non deve gestire il caricamento o confermare azioni del renderer giocabile. I salvataggi precedenti non ripetono il montaggio.
+
 ## Avvio e selezione della partita · 18 novembre2026
 
 Applicare [START-MENU-058.md](docs/START-MENU-058.md): il titolo e il menu precedono sia la nuova introduzione sia la ripresa. Nessuna scrittura o avanzamento del campo prima della scelta; Continua conserva i salvataggi legacy. Nuovo gioco richiede conferma quando esistono dati, controlla cambi da altre schede e non dichiara cancellazioni riuscite se il browser le nega. Una sessione con dati inizialmente inaccessibili non può scrivere sopra quei dati. Conservare i test dell'index reale, dell'introduzione e delle regressioni precedenti nei tre formati, con revisione di ogni PNG e verifica della pubblicazione.
