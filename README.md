@@ -1,11 +1,11 @@
-# Soffiolieve HD-2D — 0.57
+# Soffiolieve HD-2D — 0.58
 
 Un progetto amatoriale di **Pokémon Nero** per browser, con ambienti HD-2D e
 risorse originali convertite dalla ROM fornita per lo sviluppo.
 
-I sorgenti **0.57** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
+I sorgenti **0.58** collegano il percorso fino alla Lega e al primo finale della storia, comprese la
 cattura di Reshiram e le lotte con N e Ghecis. Non comprende il postgame.
-I [criteri della revisione](docs/BUGFIXES-057.md) distinguono i controlli richiesti dalla
+I [criteri della revisione](docs/START-MENU-058.md) distinguono i controlli richiesti dalla
 distribuzione. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
 indica la versione effettivamente servita da Pages.
 

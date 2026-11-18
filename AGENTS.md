@@ -1,5 +1,9 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Avvio e selezione della partita · 18 novembre2026
+
+Applicare [START-MENU-058.md](docs/START-MENU-058.md): il titolo e il menu precedono sia la nuova introduzione sia la ripresa. Nessuna scrittura o avanzamento del campo prima della scelta; Continua conserva i salvataggi legacy. Nuovo gioco richiede conferma quando esistono dati, controlla cambi da altre schede e non dichiara cancellazioni riuscite se il browser le nega. Una sessione con dati inizialmente inaccessibili non può scrivere sopra quei dati. Conservare i test dell'index reale, dell'introduzione e delle regressioni precedenti nei tre formati, con revisione di ogni PNG e verifica della pubblicazione.
+
 ## Standard da leggere prima di ogni modifica
 
 Applicare tutti gli standard A–H di [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md), consolidati il 29 ottobre 2026: continuità degli eventi e posizioni successive degli NPC, fedeltà HD-2D, sfondi e Pokémon ambientali, animazioni e reazioni sui due lati, audio, comandi/servizi, salvataggi e recupero dagli errori, regressioni e consegna. Aggiornare gli inventari e compilare la checklist della PR per gli aspetti interessati. Queste istruzioni persistono per tutte le modifiche future della demo e della versione completa.
