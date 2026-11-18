@@ -22,7 +22,7 @@
  }
  function clock(){
   let f=0,last=null,finished=false;
-  return{tick(now,{hidden=false,rate=1}={}){if(!Number.isFinite(now))throw Error('Invalid introduction clock');if(last===null){last=now;return pose(f);}const dt=Math.max(0,Math.min(100,now-last));last=now;if(!hidden&&!finished){const next=checkpoints.find(x=>x>f+1e-7)??162;f=Math.min(next,f+dt*.06*Math.max(1,Math.min(4,Number(rate)||1)));if(f>=162)finished=true;}return pose(f);},get done(){return finished;},get frame(){return f;}};
+  return{tick(now,{hidden=false,rate=1}={}){if(!Number.isFinite(now))throw Error('Invalid introduction clock');if(last===null){last=now;return pose(f);}const dt=Math.max(0,Math.min(100,now-last));last=now;if(!hidden&&!finished){const next=checkpoints.find(x=>x>f)??162;f=Math.min(next,f+dt*.06*Math.max(1,Math.min(4,Number(rate)||1)));if(f>=162)finished=true;}return pose(f);},get done(){return finished;},get frame(){return f;}};
  }
  function sprites(image,doc=root.document){
   const polygon=[[29,141],[41,151],[33,166],[29,192],[14,192],[19,164],[23,151]];

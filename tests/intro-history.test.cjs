@@ -17,3 +17,11 @@ test('every era has a displayed stable frame at x1/x2/x4, including long frames 
 test('history frame boundaries blend only adjacent eras and clamp invalid/finished input',()=>{
  assert.equal(H.frame(-100).id,'yellow');assert.equal(H.frame(10000).id,'hd2d');assert.equal(H.frame(43).index,0);assert.ok(H.frame(43).mix>0&&H.frame(43).mix<1);assert.equal(H.frame(54).index,1);assert.equal(H.frame(54).mix,0);assert.equal(H.frame(323).mix,0);
 });
+
+test('fractional browser timestamps cannot step over an almost reached checkpoint',()=>{
+ for(const rate of [1,2,4]){const c=H.clock(),target=H.checkpoints[1];let now=0,p=c.tick(now);
+  while(p.frame<target-1e-8){const dt=Math.min(100,(target-p.frame-1e-10)/(.06*rate));p=c.tick(now+=dt,{rate});}
+  assert.ok(p.frame<target&&target-p.frame<1e-7);assert.equal(c.tick(now+=16.7,{rate}).frame,target,'The actual checkpoint must still be displayed at x'+rate);
+  assert.ok(c.tick(now+=16.7,{rate}).frame>target,'A displayed checkpoint must not hold the clock forever');
+ }
+});

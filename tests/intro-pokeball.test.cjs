@@ -31,3 +31,11 @@ test('cancelled animation cannot paint, play delayed sounds or finish a newer in
  let tick,paint=0,sound=0;const run=P.play({document:{hidden:false},request:f=>(tick=f,1),cancel(){},paint:()=>paint++,sound:()=>sound++});
  tick(0);run.cancel();tick(5000);assert.equal(await run.promise,false);assert.equal(paint,1);assert.equal(sound,0);
 });
+
+test('fractional browser timestamps cannot step over an almost reached checkpoint',()=>{
+ for(const rate of [1,2,4]){const c=P.clock(),target=P.checkpoints[1];let now=0,p=c.tick(now);
+  while(p.frame<target-1e-8){const dt=Math.min(100,(target-p.frame-1e-10)/(.06*rate));p=c.tick(now+=dt,{rate});}
+  assert.ok(p.frame<target&&target-p.frame<1e-7);assert.equal(c.tick(now+=16.7,{rate}).frame,target,'The actual checkpoint must still be displayed at x'+rate);
+  assert.ok(c.tick(now+=16.7,{rate}).frame>target,'A displayed checkpoint must not hold the clock forever');
+ }
+});
