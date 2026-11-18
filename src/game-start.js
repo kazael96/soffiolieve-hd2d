@@ -169,5 +169,5 @@
   });
   void load();return finished;
  }
- root.GameStart={start,read,summary,prepareRestart,consumeRestart,get pending(){return active;},get savingBlocked(){return savingBlocked;}};
+ root.GameStart={start,read,summary,prepareRestart,consumeRestart,get pending(){return !root.SpeciesStudioMode&&!completed;},get savingBlocked(){return savingBlocked;}};
 })(typeof window==='undefined'?globalThis:window);
