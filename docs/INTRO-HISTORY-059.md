@@ -1,0 +1,13 @@
+# Soffiolieve attraverso le generazioni · 0.59
+
+L'utente ha richiesto il18 novembre2026 una transizione grafica dopo il discorso introduttivo di Aralia. Ha scelto la stessa scena nei diversi stili e precisato che deve essere la prima città, **Soffiolieve**. La cameretta non è il soggetto del montaggio.
+
+La sequenza segue Giallo → Oro → Smeraldo → quarta generazione/Platino → Nero → HD-2D. Le prime tre tappe ridisegnano in pixel art la stessa pianta: laboratorio arancione a nord, casa di Komor, case meridionali con tetti blu, alberi, fiori, sentieri e lungomare. Le griglie160×144 e240×160, le palette e il dettaglio cambiano conservando riferimenti e protagonista scelto. Sono reinterpretazioni autoriali degli stili, non risorse estratte dalle ROM di Giallo, Oro o Smeraldo.
+
+La quarta generazione introduce la veduta tridimensionale a256×192. La tappa Nero usa i modelli e le texture nativi della prima mappa di Soffiolieve, con risoluzione256×192; l'ultima usa gli stessi luoghi a768×576, camera più bassa e presentazione HD-2D. Inquadratura e montaggio sono adattati al browser: non vengono dichiarati fotogrammi di un emulatore DS o la riproduzione esatta di una regia originale. Le mappe adiacenti sono escluse dal panorama. Il personaggio resta quello scelto dal giocatore, anche nelle tappe rétro.
+
+`IntroHistory.prepare` prepara le vedute con un renderer isolato, senza cambiare scena, posizione, copioni o telecamera del renderer giocabile. Il renderer temporaneo usa un viewport proprio, non gestisce il pannello di recupero del campo e non conferma fotogrammi alle MN. Dopo le catture rilascia buffer, texture e contesto. Le immagini riutilizzano il caricamento limitato già esistente; una preparazione fallita resta un errore e può essere ritentata dal modal dell'introduzione. Il caricamento viene anticipato mentre si leggono i dialoghi e si sceglie il nome.
+
+Solo dopo la scelta dell'identità, il discorso completo e il comando «Comincia l'avventura» viene eseguito il montaggio. Durante la sequenza la storia e il salvataggio restano sospesi. Le sei tappe hanno fotogrammi effettivamente disegnati anche a×1/×2/×4; nascondere la pagina sospende il clock. Alla fine inizia regolarmente la partita nella cameretta, senza spostare il protagonista in città o alterare eventi. I salvataggi già avviati passano da Continua e non ripetono l'introduzione.
+
+I test mantengono distinti riferimenti grafici del componente, index originale, velocità, generi, errori di risorsa, continuità dei dati del campo e pubblicazione. Le prove finali e le immagini esaminate si trovano in `outputs/chapter059-preparation`, fuori dalle build. Rimangono richiesti suite completa, tre formati, revisione di ogni PNG, pulizia H.8 e verifica dei file pubblici.

@@ -48,7 +48,7 @@ jobs:
           name: start-menu-browser-report
           path: test-results/start-menu
           if-no-files-found: ignore
-      - name: Check Aralia ball release at all speeds in all three formats
+      - name: Check Aralia release and town eras at all speeds in all three formats
         run: node scripts/test-intro-release-headless.cjs _site test-results/intro-release --browser=/opt/google/chrome/chrome --renderer=software
       - uses: actions/upload-artifact@v4
         if: always()

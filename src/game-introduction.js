@@ -14,7 +14,7 @@
   const message=document.createElement('p');message.className='intro-accessible';message.setAttribute('aria-live','polite');
   const buttons=document.createElement('div');buttons.className='intro-choices';dialog.append(canvas,message,buttons);document.body.append(dialog);dialog.showModal();root.resetInput?.();
   const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
-  let font,frame,images={},parts,release=null,releaseToken=0,selected=0,step='loading',retry=null,draft={gender:'M',name:''},complete;
+  let font,frame,images={},parts,release=null,releaseToken=0,historyReady=null,historyPlay=null,selected=0,step='loading',retry=null,draft={gender:'M',name:''},complete;
   const finished=new Promise(resolve=>{complete=resolve;});
   const put=(text,x,y,align='left')=>root.NativeText.draw(c,font,text,x,y,false,align,root.NAMING_ASSETS.font);
   function paint(text,portrait='aralia',releasePose=null){
@@ -45,7 +45,7 @@
    step=next;dialog.dataset.step=step;
    if(step==='welcome')narrate([6],'aralia',[['Continua',()=>page('professor')]]);
    else if(step==='professor'){void root.AudioEngine?.preloadEvents([{kind:'sfx',id:1382},{kind:'sfx',id:1383}],{p2:572});narrate([7],'aralia',[['Continua',()=>void showPokemon()]]);}
-   else if(step==='pokemon')narrate([8,9],'minccino',[['Continua',()=>page('gender')]]);
+   else if(step==='pokemon'){if(!historyReady){historyReady=root.IntroHistory.prepare();historyReady.catch(()=>{});}narrate([8,9],'minccino',[['Continua',()=>page('gender')]]);}
    else if(step==='gender')narrate([10,11],draft.gender==='F'?'Anita':'Alcide',[['Ragazzo',()=>choose('M')],['Ragazza',()=>choose('F')]]);
    else if(step==='genderConfirm')narrate([draft.gender==='F'?13:12],draft.gender==='F'?'Anita':'Alcide',[['SÌ',()=>void name()],['NO',()=>page('gender')]]);
    else if(step==='confirm')narrate([17],draft.gender==='F'?'Anita':'Alcide',[['SÌ',()=>page('friends')],['NO',()=>void name()]]);
@@ -66,7 +66,7 @@
    try{draft.name=await root.NativeNaming.open({name:draft.gender==='F'?'Anita':'Alcide'},{mode:'player',defaultName:draft.gender==='F'?'Anita':'Alcide',initialValue:draft.name,iconSrc:root.PlayerIdentity.introIcon(draft.gender),onOpen:()=>dialog.classList.add('intro-naming'),onClose:()=>dialog.classList.remove('intro-naming')});page('confirm');}
    catch(error){failed(error,()=>void name());}
   }
-  function failed(error,operation){retry=operation;step='error';dialog.dataset.step=step;paint('Non è stato possibile caricare le risorse. Riprova.');controls([['Riprova',()=>{retry=null;operation();}]]);dialog.dataset.error=String(error);}
+  function failed(error,operation){historyPlay?.cancel();historyPlay=null;canvas.width=256;canvas.height=192;c.imageSmoothingEnabled=false;retry=operation;step='error';dialog.dataset.step=step;paint('Non è stato possibile caricare le risorse. Riprova.');controls([['Riprova',()=>{retry=null;operation();}]]);dialog.dataset.error=String(error);}
   async function load(){
    step='loading';dialog.dataset.step=step;paint('Un momento...');controls([]);
    try{
@@ -84,6 +84,13 @@
     const state=root.Journey.state;state.playerGender=draft.gender;state.playerName=draft.name;
     await renderer.pending;await renderer.requireActors([{name:'Alcide'}]);
     if(!renderer.ready||!renderer.hasResources(renderer.resourcePlan()))throw renderer.loadingError||Error('Personaggio non preparato');
+    if(!historyReady){historyReady=root.IntroHistory.prepare();historyReady.catch(()=>{});}
+    let landscapes;try{landscapes=await historyReady;}catch(error){historyReady=null;throw error;}
+    const hero=await root.RuntimeAssets.image(root.PlayerIdentity.frames('Alcide')[3]);const cards=root.IntroHistory.compose(landscapes,hero);
+    canvas.width=768;canvas.height=672;c.imageSmoothingEnabled=false;step='history';dialog.dataset.step=step;message.textContent='Soffiolieve attraverso le generazioni';
+    historyPlay=root.IntroHistory.play({canvas,cards,font,onFrame:p=>{dialog.dataset.historyFrame=String(p.frame);dialog.dataset.historyEra=p.id;canvas.setAttribute('aria-label','Soffiolieve - '+root.IntroHistory.eras[p.index].label);}});
+    if(!await historyPlay.promise)return;historyPlay=null;
+    if(!renderer.ready||renderer.contextLost||!renderer.hasResources(renderer.resourcePlan()))throw renderer.loadingError||Error('La camera non è pronta dopo la presentazione');
     state.introductionComplete=true;dialog.close();complete(true);
    }catch(error){failed(error,()=>void begin());}
   }
@@ -97,7 +104,7 @@
    else rows[selected]?.click();
   });
   dialog.addEventListener('cancel',event=>event.preventDefault());
-  void load();try{return await finished;}finally{releaseToken++;release?.cancel();dialog.remove();root.resetInput?.();}
+  void load();try{return await finished;}finally{releaseToken++;release?.cancel();historyPlay?.cancel();dialog.remove();root.resetInput?.();}
  }
  root.GameIntroduction={start,get pending(){return needed()||!!running;}};
 })(typeof window==='undefined'?globalThis:window);

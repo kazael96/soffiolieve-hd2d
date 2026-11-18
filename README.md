@@ -209,3 +209,5 @@ python tools/extract-opening.py --rom "percorso/Pokemon.nds" --apicula "percorso
 La 0.30 completa Lillipup (Azione, Fulmisguardo, Segugio e Morso), aggiunge reazioni anatomiche ai bersagli delle cinque specie e velocità x1/x2/x4 nelle Opzioni. Studio `?lillipup=1`, con bersaglio selezionabile. Matrice19/19 del perimetro livello10 e limiti in [docs/SPECIES-MOVES-030.md](docs/SPECIES-MOVES-030.md).
 
 La0.59 aggiunge il lancio della Poké Ball di Aralia nella presentazione: [coreografia e prove](docs/ARALIA-RELEASE-059.md).
+
+Al termine del discorso introduttivo la stessa Soffiolieve attraversa gli stili delle generazioni fino a Nero e alla versione HD-2D: [montaggio e limiti](docs/INTRO-HISTORY-059.md).
