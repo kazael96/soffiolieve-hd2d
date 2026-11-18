@@ -3,29 +3,30 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {startServer}=require('./test-introduction-headless.cjs'),{launchOptions}=require('./test-browser-headless.cjs');
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
-async function run(site,out,{playwright='playwright',browser:executable,renderer='software',viewports='desktop,portrait,landscape'}={}){
+async function run(site,out,{playwright='playwright',browser:executable,renderer='software',viewports='desktop,portrait,landscape',cases='fresh,legacy-restart,corrupt-changed,unavailable,asset-recovery'}={}){
  site=path.resolve(site);out=path.resolve(out);assert.ok(!fs.existsSync(out),'Preserve old evidence');fs.mkdirSync(out,{recursive:true});
  const manifest=JSON.parse(fs.readFileSync(path.join(site,'build.json'))),key='soffiolieve-black-opening-v2',S=require('../src/story-state.js');
  const formats=[['desktop',1280,720],['portrait',390,844],['landscape',844,390]].filter(v=>viewports.split(',').includes(v[0]));assert.ok(formats.length);
+ const kinds=['fresh','legacy-restart','corrupt-changed','unavailable','asset-recovery'],selected=cases.split(',');assert.ok(selected.length&&new Set(selected).size===selected.length&&selected.every(k=>kinds.includes(k)));
  const report={result:'RUNNING',build:manifest.revision,version:manifest.version,runnerSHA256:sha(fs.readFileSync(__filename)),created:new Date().toISOString(),environment:{headless:true,isolatedBrowser:true,personalBrowserAttached:false,rendererRequested:renderer},cases:[],screenshots:[],limits:['Explicit isolated prepared saves exercise boot selection and failure boundaries; normal introduction has its separate production runner.','No physical Android certification or audible comparison. Every exported PNG requires manual review.']};
  let service,browser;const persist=()=>fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n');persist();
  try{
   service=await startServer(site);browser=await require(playwright).chromium.launch(launchOptions(executable,renderer));report.environment.browser=browser.version();
-  for(const [viewport,width,height]of formats)for(const kind of ['fresh','legacy-restart','corrupt-changed','unavailable','asset-recovery']){
+  for(const [viewport,width,height]of formats)for(const kind of selected){
    const row={id:viewport+'-'+kind,viewport,kind,result:'RUNNING',errors:[],httpErrors:[],failedRequests:[],screenshots:[],audits:[]};report.cases.push(row);persist();
    const legacy={...S.fresh(),playerName:'ABCDEFGHIJ',playerGender:'F',introductionComplete:true,trainer:{id:12345,nature:0,startedAt:'2026-10-23T12:00:00.000Z',playSeconds:3671}};
    if(kind==='legacy-restart'){delete legacy.playerGender;delete legacy.introductionComplete;}
-   const savedRaw=kind==='legacy-restart'?JSON.stringify(legacy):kind==='corrupt-changed'?'{broken':kind==='unavailable'?JSON.stringify(legacy):null;
+   const savedRaw=['legacy-restart','unavailable','asset-recovery'].includes(kind)?JSON.stringify(legacy):kind==='corrupt-changed'?'{broken':null;
    const storageState=savedRaw===null?undefined:{cookies:[],origins:[{origin:new URL(service.url).origin,localStorage:[{name:key,value:savedRaw},{name:'soffiolieve-game-speed',value:'4'}]}]};
-   const context=await browser.newContext({viewport:{width,height},isMobile:viewport!=='desktop',hasTouch:viewport!=='desktop',deviceScaleFactor:1,...(storageState?{storageState}:{})});let page,faults=0,releaseScene,heldScene=false;
+   const context=await browser.newContext({viewport:{width,height},isMobile:viewport!=='desktop',hasTouch:viewport!=='desktop',deviceScaleFactor:1,...(storageState?{storageState}:{})});let page,faults=0,releaseScene,heldScene=false,fieldFailures=0,releaseField=false,offlineFault=false;
    const sceneDelay=new Promise(resolve=>{releaseScene=resolve;});
    try{
     if(kind==='legacy-restart')await context.route('**/assets/field-pack.bin*',async route=>{heldScene=true;await sceneDelay;return route.continue();});
     if(kind==='unavailable')await context.addInitScript(key=>{const original=Storage.prototype.getItem;Storage.prototype.getItem=function(name){if(this===localStorage&&name===key)throw Error('Injected read denial');return original.call(this,name);};},key);
-    if(kind==='asset-recovery')await context.route('**/*',async route=>{if(new URL(route.request().url()).pathname.endsWith('/assets/finale/credits/title.png')&&faults++===0)return route.abort('failed');return route.continue();});
+    if(kind==='asset-recovery')await context.route('**/*',async route=>{const pathname=new URL(route.request().url()).pathname;if(pathname.endsWith('/assets/finale/credits/title.png')&&faults++===0)return route.abort('failed');if(pathname.endsWith('/assets/player-identity/Anita-0.png')&&!releaseField){fieldFailures++;return route.abort('failed');}return route.continue();});
     page=await context.newPage();page.setDefaultTimeout(20000);
     page.on('pageerror',e=>row.errors.push(String(e.stack||e)));page.on('response',r=>{if(r.status()>=400&&!r.url().endsWith('/favicon.ico'))row.httpErrors.push({url:r.url(),status:r.status()});});
-    page.on('requestfailed',r=>row.failedRequests.push({url:r.url(),error:r.failure()?.errorText}));
+    page.on('requestfailed',r=>row.failedRequests.push({url:r.url(),error:r.failure()?.errorText,expectedFault:kind==='asset-recovery'&&(offlineFault||new URL(r.url()).pathname.endsWith('/assets/finale/credits/title.png')||new URL(r.url()).pathname.endsWith('/assets/player-identity/Anita-0.png'))}));
     const start=Date.now();await page.goto(service.url,{waitUntil:'domcontentloaded',timeout:60000});
     const panel=page.locator('#gameStart');await page.locator('#gameStart[data-step=title]').waitFor();
     const tap=locator=>viewport==='desktop'?locator.click():locator.tap();
@@ -74,17 +75,22 @@ async function run(site,out,{playwright='playwright',browser:executable,renderer
      await menu();assert.equal(await page.evaluate(()=>GameStart.savingBlocked),true);await shot('unavailable');await tap(panel.getByRole('button',{name:'NUOVO GIOCO',exact:true}));await welcome();assert.equal(await page.evaluate(()=>Journey.save(true)),false);
      const storage=(await context.storageState()).origins.find(o=>o.origin===new URL(service.url).origin)?.localStorage;assert.equal(storage?.find(r=>r.name===key)?.value,savedRaw);
     }else{
-     assert.ok(faults>=2,'Required native title request/retry was not actually observed');assert.equal(row.failedRequests.length,1);assert.equal(await panel.getByRole('button',{name:'RIPROVA',exact:true}).count(),0);await shot('auto-recovered');row.fault={injectedFailures:1,requests:faults,manualRetryRequired:false};
+     assert.ok(faults>=2,'Required native title request/retry was not actually observed');assert.equal(row.failedRequests.filter(r=>new URL(r.url).pathname.endsWith('/assets/finale/credits/title.png')).length,1);assert.equal(await panel.getByRole('button',{name:'RIPROVA',exact:true}).count(),0);await shot('auto-recovered');
+     await menu();await tap(panel.getByRole('button',{name:/^CONTINUA/}));await page.locator('#gameStart[data-step=starting]').waitFor();
+     await page.locator('#gameStart #loading button').waitFor();assert.ok(fieldFailures>=3,'The real required female actor image must fail before scene recovery is tested');offlineFault=true;await context.setOffline(true);await page.waitForFunction(()=>navigator.onLine===false&&document.querySelector('#gameStart #loading button:not([disabled])'));
+     const retry=await page.evaluate(()=>{const b=document.querySelector('#gameStart #loading button'),r=b.getBoundingClientRect();window.bootRetryClicks=0;b.addEventListener('click',()=>window.bootRetryClicks++);return {rect:[r.x,r.y,r.right,r.bottom],hit:b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)),enabled:!b.disabled};});assert.ok(retry.hit&&retry.enabled&&retry.rect[0]>=0&&retry.rect[1]>=0&&retry.rect[2]<=width&&retry.rect[3]<=height,'The actual recovery control is not reachable in the modal');
+     await shot('scene-recovery-offline');if(viewport==='desktop')await page.keyboard.press('a');else await page.locator('#interact').tap();assert.equal(await page.evaluate(()=>window.bootRetryClicks),1,'A must reach the existing real resource retry control');assert.equal(await current(),savedRaw);assert.equal(await page.evaluate(()=>GameStart.pending&&Journey.locked),true);
+     releaseField=true;await context.setOffline(false);await panel.waitFor({state:'hidden'});offlineFault=false;assert.equal(await page.evaluate(()=>renderer.ready&&renderer.hasResources(renderer.resourcePlan())),true);assert.equal(await page.evaluate(()=>Journey.state.playerGender),'F');assert.ok(row.failedRequests.every(r=>r.expectedFault));row.fault={titleFailures:1,titleRequests:faults,titleManualRetryRequired:false,requiredActorFailures:fieldFailures,recoveryControl:retry,realOfflineOnline:true,retryViaA:true};
     }
     assert.deepEqual(row.errors,[]);assert.deepEqual(row.httpErrors,[]);if(kind!=='asset-recovery')assert.deepEqual(row.failedRequests,[]);row.result='PASS';row.durationMs=Date.now()-start;
    }catch(error){row.result='FAIL';row.error=String(error.stack||error);if(page){const file=row.id+'-failure.png';await page.screenshot({path:path.join(out,file)}).then(()=>{const r={file,sha256:sha(fs.readFileSync(path.join(out,file))),case:row.id};row.screenshots.push(r);report.screenshots.push(r);}).catch(()=>{});}}
    finally{releaseScene();await context.close();persist();console.log(row.result+' '+row.id);}
    if(row.result==='FAIL')throw Error(row.error);
   }
-  report.result='FUNCTIONAL_PASS';
+  report.result=formats.length===3&&selected.length===kinds.length?'FUNCTIONAL_PASS':'INCOMPLETE';
  }catch(error){report.result='FAIL';report.error=String(error.stack||error);process.exitCode=1;}
  finally{await browser?.close();await service?.close();report.browserClosed=true;report.finished=new Date().toISOString();persist();}
  return report;
 }
 module.exports={run};
-if(require.main===module){const [site,out,...args]=process.argv.slice(2),options=Object.fromEntries(args.map(arg=>{assert.match(arg,/^--(?:playwright|browser|renderer|viewports)=/);const at=arg.indexOf('=');return [arg.slice(2,at),arg.slice(at+1)];}));run(site,out,options).then(r=>console.log(r.result+' production start menu')).catch(e=>{console.error(e);process.exitCode=1;});}
+if(require.main===module){const [site,out,...args]=process.argv.slice(2),options=Object.fromEntries(args.map(arg=>{assert.match(arg,/^--(?:playwright|browser|renderer|viewports|cases)=/);const at=arg.indexOf('=');return [arg.slice(2,at),arg.slice(at+1)];}));run(site,out,options).then(r=>console.log(r.result+' production start menu')).catch(e=>{console.error(e);process.exitCode=1;});}
