@@ -16,6 +16,36 @@ spec.loader.exec_module(builder)
 
 
 class BuildTests(unittest.TestCase):
+    def test_battle_pack_preserves_native_bytes_and_only_first_icon_frames(self):
+        with builder.build_staging() as folder:
+            site=Path(folder)
+            (site/'assets/battle-ui').mkdir(parents=True)
+            (site/'assets/battle-party').mkdir()
+            paths=['assets/panel.png','assets/party.png','assets/icon.png','assets/font.png','assets/later.png']
+            for i,name in enumerate(paths):(site/name).write_bytes(bytes([i+1])*17)
+            (site/'assets/battle-ui/provenance.json').write_text(json.dumps({'panel':{'path':paths[0]}}))
+            (site/'assets/battle-party/provenance.json').write_text(json.dumps({'base':paths[1],'same':paths[0]}))
+            (site/'menu-assets.js').write_text('window.MENU_ASSETS='+json.dumps({'pokemonIcons':{'495':{'cells':[{'src':paths[2]},{'src':'assets/not-used.png'}]}},'unrelated':'assets/not-needed.png'})+';')
+            (site/'pokedex-assets.js').write_text('window.POKEDEX_ASSETS='+json.dumps({'font':{'atlas':paths[3]},'unrelated':'assets/not-needed.png'})+';')
+            (site/'later-menu.js').write_text('window.LATER_MENU='+json.dumps({'icons':{'643':{'cells':[{'src':paths[4]},{'src':'assets/not-used.png'}]}},'unrelated':'assets/not-needed.png'})+';Object.assign(MENU_ASSETS.pokemonIcons,LATER_MENU.icons);')
+            report=builder.battle_ui_pack(site)
+            raw=(site/'assets/battle-ui-pack.bin').read_bytes()
+            length=struct.unpack_from('<I',raw,4)[0];index=json.loads(raw[8:8+length])
+            self.assertEqual(report['images'],5)
+            self.assertEqual(set(index),set(paths))
+            self.assertEqual(report['bytes'],len(raw))
+            for name,(offset,size) in index.items():
+                self.assertEqual(raw[8+length+offset:8+length+offset+size],(site/name).read_bytes())
+            (site/'assets/icon.png').unlink()
+            with self.assertRaisesRegex(ValueError,'Missing pack image'):builder.battle_ui_pack(site)
+
+    def test_pack_paths_cannot_escape_the_assets_directory(self):
+        with builder.build_staging() as folder:
+            site=Path(folder);(site/'assets').mkdir()
+            for name in ['../outside.png','assets/../../outside.png','C:/outside.png','assets\\outside.png']:
+                with self.assertRaisesRegex(ValueError,'Invalid pack image path'):
+                    builder.image_pack(site,[name],'assets/test.bin',strict=True)
+
     def test_geographic_seasons_produce_separate_complete_family_packs(self):
         with builder.build_staging() as folder:
             site = Path(folder)

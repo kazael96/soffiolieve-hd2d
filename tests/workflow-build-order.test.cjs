@@ -4,6 +4,16 @@ for(const name of ['pages.yml','qa.yml'])test(name+' builds the site before invo
  assert.ok(build>=0,'The checked site must be built explicitly');assert.ok(deep>build,'Asset-dependent tests must run on the built site via the same runner as pull requests');assert.equal(/node --test tests\/\*\.test\.cjs/.test(text),false,'A separate pre-build unit command loses the actual site path and drifts from the shared stage inventory');
 });
 
+for(const name of ['pages.yml','qa.yml'])test(name+' gates every publication on the reported phone regressions, preserving all formats and failure artifacts',()=>{
+ const text=fs.readFileSync(path.join(__dirname,'../.github/workflows',name),'utf8'),line=text.split(/\r?\n/).find(row=>row.includes('node scripts/test-browser-headless.cjs _site test-results/phone057'));
+ assert.ok(line,'Reported phone defects need a persistent browser gate');
+ for(const id of ['qaFieldCamera057','qaFieldGate057','qaPhoneIdentity057','qaBattleClearings057','qaBattleDoubles057'])assert.ok(line.includes(id));
+ assert.ok(line.includes('--renderer=software')&&line.includes('--fail-fast=true'));
+ assert.doesNotMatch(line,/--viewports=|--timeout=(?:[3-9]\d{5}|\d{7,})/,'Retain all three formats and the approved case budget');
+ assert.match(text,/path: test-results\/phone057/);
+ const at=text.indexOf(line);assert.ok(at>text.indexOf('node scripts/test-deep.cjs'));if(name==='pages.yml')assert.ok(at<text.indexOf('uses: actions/upload-pages-artifact@'));
+});
+
 function job(text,name){
  const match=text.match(new RegExp('^  '+name+':\\r?\\n([\\s\\S]*?)(?=^  [A-Za-z][\\w-]*:\\r?$|(?![\\s\\S]))','m'));
  assert.ok(match,'Missing separate '+name+' job');return match[1];

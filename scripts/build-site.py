@@ -38,6 +38,52 @@ def build_staging():
         shutil.rmtree(resolved)
 
 
+def image_pack(site, paths, filename, strict=False):
+    index={};chunks=[];offset=0
+    for name in sorted(set(paths)):
+        if not name.startswith('assets/') or '..' in Path(name).parts or ':' in name or '\\' in name:
+            raise ValueError(f'Invalid pack image path: {name}')
+        file=site/name
+        if not file.is_file():
+            if strict:raise ValueError(f'Missing pack image: {name}')
+            continue
+        raw=file.read_bytes();index[name]=[offset,len(raw)];chunks.append(raw);offset+=len(raw)
+    header=json.dumps(index,separators=(',',':')).encode()
+    dest=site/filename;dest.write_bytes(b'SFP1'+struct.pack('<I',len(header))+header+b''.join(chunks))
+    return {'images':len(index),'bytes':dest.stat().st_size}
+
+
+def battle_ui_pack(site):
+    # The exact native panels/fonts/icons already loaded by BattleScreen, in one
+    # optional transport. Keep individual files for retries and old clients.
+    paths=set()
+    def visit(value):
+        if isinstance(value,str) and value.endswith('.png'):paths.add(value)
+        elif isinstance(value,dict):
+            for v in value.values():visit(v)
+        elif isinstance(value,list):
+            for v in value:visit(v)
+    for filename in ['assets/battle-ui/provenance.json','assets/battle-party/provenance.json']:
+        visit(json.loads((site/filename).read_text(encoding='utf8')))
+    for filename in ['menu-assets.js','pokedex-assets.js']:
+        text=(site/filename).read_text(encoding='utf8')
+        match=re.search(r'window\.[A-Z][A-Z0-9_]*\s*=\s*',text)
+        if not match:raise ValueError(f'Invalid pack catalogue: {filename}')
+        data=json.JSONDecoder().raw_decode(text[match.end():])[0]
+        visit([row['cells'][0]['src'] for row in data['pokemonIcons'].values()] if filename=='menu-assets.js' else data['font'])
+    # Every chapter extends the same live registry before the battle UI loads.
+    # Include those first icon cells too; reading only the original catalog
+    # otherwise leaves the later species making individual HTTP requests.
+    for file in sorted(site.glob('*-menu.js')):
+        text=file.read_text(encoding='utf8')
+        if 'Object.assign(MENU_ASSETS.pokemonIcons' not in text:continue
+        match=re.search(r'window\.[A-Z][A-Z0-9_]*\s*=\s*',text)
+        if not match:raise ValueError(f'Invalid icon catalogue: {file.name}')
+        data=json.JSONDecoder().raw_decode(text[match.end():])[0]
+        visit([row['cells'][0]['src'] for row in data['icons'].values()])
+    return image_pack(site,paths,'assets/battle-ui-pack.bin',strict=True)
+
+
 def startup_pack(site, sources=None, filename='assets/field-pack.bin', strict=False):
     paths=set()
     for name in sources or ['assets/scene.js','assets/sprites.js','opening-assets.js','opening-sprites.js','accumula-assets.js','route2-assets.js','striaton-assets.js','route3-assets.js','pinwheel-assets.js']:
@@ -57,16 +103,7 @@ def startup_pack(site, sources=None, filename='assets/field-pack.bin', strict=Fa
             elif isinstance(value,list):
                 for v in value:visit(v)
         visit(data)
-    index={};chunks=[];offset=0
-    for name in sorted(paths):
-        file=site/name
-        if not file.is_file():
-            if strict:raise ValueError(f'Missing pack image: {name}')
-            continue
-        raw=file.read_bytes();index[name]=[offset,len(raw)];chunks.append(raw);offset+=len(raw)
-    header=json.dumps(index,separators=(',',':')).encode()
-    dest=site/filename;dest.write_bytes(b'SFP1'+struct.pack('<I',len(header))+header+b''.join(chunks))
-    return {'images':len(index),'bytes':dest.stat().st_size}
+    return image_pack(site,paths,filename,strict)
 
 
 def geographic_packs(site, prefix='opelucid'):
@@ -149,6 +186,7 @@ def build(archive, target):
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, destination)
         packed = startup_pack(site)
+        battle_pack = battle_ui_pack(site)
         chapter_pack = startup_pack(site,['castelia-assets.js'],'assets/castelia-pack.bin')
         nimbasa_pack = startup_pack(site,['nimbasa-assets.js'],'assets/nimbasa-pack.bin')
         driftveil_pack = startup_pack(site,['driftveil-assets.js'],'assets/driftveil-pack.bin')
@@ -181,6 +219,7 @@ def build(archive, target):
         asset_hashes['assets/nimbasa-pack.bin'] = hashlib.sha256((site/'assets/nimbasa-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/castelia-pack.bin'] = hashlib.sha256((site/'assets/castelia-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/field-pack.bin'] = hashlib.sha256((site/'assets/field-pack.bin').read_bytes()).hexdigest()
+        asset_hashes['assets/battle-ui-pack.bin'] = hashlib.sha256((site/'assets/battle-ui-pack.bin').read_bytes()).hexdigest()
         asset_hashes['assets/capture-pack.bin'] = hashlib.sha256((site/'assets/capture-pack.bin').read_bytes()).hexdigest()
         revision = hashlib.sha256(json.dumps({'files': hashes, 'assets': asset_hashes}, sort_keys=True).encode()).hexdigest()[:16]
         index = site / 'index.html'
@@ -191,11 +230,11 @@ def build(archive, target):
         index.write_text(html, encoding='utf-8', newline='\n')
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
-            'version': '0.56', 'revision': revision, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
+            'version': '0.57', 'revision': revision, 'battleUI': {'pack':'assets/battle-ui-pack.bin', **battle_pack}, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs, 'finale': finale_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         publish_staging(site, target)
-    print(f"Built Soffiolieve 0.56 ({revision}) in {target}")
+    print(f"Built Soffiolieve 0.57 ({revision}) in {target}")
 
 
 if __name__ == '__main__':
