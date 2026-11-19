@@ -32,6 +32,12 @@ test('actual save remains locked before GameStart.start while later scripts are 
  assert.equal(c.save(true),false);assert.equal(c.save(),false);
 });
 test('isolated species studio does not open title or touch real storage',async()=>{const {c}=host();c.SpeciesStudioMode=true;c.localStorage={getItem(){throw Error('must not read')}};assert.equal(await c.GameStart.start(),false);assert.equal(c.GameStart.pending,false);});
+
+test('isolated boot completes its handoff before fixtures temporarily enable real field input',async()=>{
+ const {c}=host();c.SpeciesStudioMode=true;c.localStorage={getItem(){throw Error('must not read');}};
+ assert.equal(await c.GameStart.start(),false);c.SpeciesStudioMode=false;
+ assert.equal(c.GameStart.pending,false,'An already completed isolated boot must not re-lock real gate input');
+});
 test('a read-only boot session cannot erase inaccessible progress through the field restart control',()=>{
  const c={window:{GameStart:{savingBlocked:true}},StoryState,storage:{removeItem(){throw Error('must not erase inaccessible data')}},location:{reload(){throw Error('must not reload')}},restarting:false};vm.createContext(c);
  const source=fs.readFileSync(require.resolve('../src/story.js'),'utf8');vm.runInContext(source.slice(source.indexOf('function restart(){'),source.indexOf("  $('confirmReset')")),c);assert.equal(c.restart(),false);assert.equal(c.restarting,false);

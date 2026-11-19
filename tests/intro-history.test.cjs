@@ -20,8 +20,13 @@ test('history frame boundaries blend only adjacent eras and clamp invalid/finish
 
 test('fractional browser timestamps cannot step over an almost reached checkpoint',()=>{
  for(const rate of [1,2,4]){const c=H.clock(),target=H.checkpoints[1];let now=0,p=c.tick(now);
-  while(p.frame<target-1e-8){const dt=Math.min(100,(target-p.frame-1e-10)/(.06*rate));p=c.tick(now+=dt,{rate});}
+  while(p.frame<target-1e-8){const dt=Math.min(100,(target-p.frame-1e-10)/(.04*rate));p=c.tick(now+=dt,{rate});}
   assert.ok(p.frame<target&&target-p.frame<1e-7);assert.equal(c.tick(now+=16.7,{rate}).frame,target,'The actual checkpoint must still be displayed at x'+rate);
   assert.ok(c.tick(now+=16.7,{rate}).frame>target,'A displayed checkpoint must not hold the clock forever');
  }
+});
+test('pixel reveal has no holes or backwards tiles and settles exactly before each era boundary',()=>{
+ for(let y=0;y<6;y++)for(let x=0;x<8;x++){let previous=0;assert.equal(H.tileAlpha(0,x/7,y/5),0);for(let n=0;n<=100;n++){const alpha=H.tileAlpha(n/100,x/7,y/5);assert.ok(alpha>=previous&&alpha<=1);previous=alpha;}assert.equal(previous,1);}
+ assert.ok(H.tileAlpha(.5,0,0)>H.tileAlpha(.5,1,1),'The reveal travels across the panorama');
+ for(let era=0;era<5;era++){assert.equal(H.frame(era*54+27).mix,0,'A stable city witness precedes the reveal');assert.equal(H.frame(era*54+32).mix,0);assert.ok(H.frame(era*54+43).mix>.49&&H.frame(era*54+43).mix<.51);assert.ok(H.frame(era*54+54-1e-6).mix>1-1e-10);assert.equal(H.frame((era+1)*54).mix,0);}
 });

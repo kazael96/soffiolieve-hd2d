@@ -25,7 +25,8 @@
  function consumeRestart(){try{const pending=root.sessionStorage.getItem(RESTART)===String(root.SaveSlots?.active||1);root.sessionStorage.removeItem(RESTART);return pending;}catch{return false;}}
  function clearRestart(){try{root.sessionStorage.removeItem(RESTART);}catch{}}
  async function start(){
-  if(root.SpeciesStudioMode||completed)return false;if(running)return running;
+  if(root.SpeciesStudioMode){active=false;completed=true;return false;}
+  if(completed)return false;if(running)return running;
   active=true;
   running=(async()=>{
    const saved=root.SaveSlots?.blocked?{kind:'unavailable',hasData:false}:read(storage());

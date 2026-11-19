@@ -1,5 +1,9 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Sprite interi e passaggi generazionali · 19 novembre2026
+
+Applicare [INTRO-FULLBODY-060.md](docs/INTRO-FULLBODY-060.md): nell'introduzione usare le figure intere native di Aralia, Alcide, Anita, Belle e Komor, senza ritratti Interpoké tagliati. Il lancio anima le parti originali del braccio e della mano, conserva piedi, contatto con la sfera, sequenza e recupero. Il montaggio resta sulla stessa Soffiolieve; conservare una vista stabile e un passaggio graduale verso ciascuna generazione, anche a×2/×4. Verificare i passaggi effettivamente disegnati e tutti i personaggi, senza trasferire i PASS della0.59 a queste modifiche.
+
 ## Tre partite indipendenti · 18 novembre2026
 
 Applicare [SAVE-SLOTS-060.md](docs/SAVE-SLOTS-060.md): tre slot, legacy nello slot1 senza riscritture, selezione per scheda, salvataggio e riavvio limitati alla partita scelta. Conservare titolo, introduzione e compatibilità; nessuna cancellazione o selezione fallita può risultare riuscita. Controllare dati cambiati da altre schede e ripresa reale di ogni slot nei tre formati, oltre alle regressioni precedenti.
