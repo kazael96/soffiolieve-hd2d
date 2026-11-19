@@ -29,20 +29,30 @@ async function run(site,out,{playwright='playwright',browser:exe,renderer='softw
    }
    async function titleMenu(){await page.locator('#gameStart[data-step=title]').waitFor();await tap(button('PREMI START'));await page.locator('#gameStart[data-step=menu]').waitFor();}
    async function choose(slot){await tap(button(/^SALVATAGGI/));await page.locator('#gameStart[data-step=slots]').waitFor();await shot('slots-before-'+slot);const active=await page.evaluate(()=>SaveSlots.active);assert.match(await page.locator(':focus').getAttribute('aria-label'),new RegExp('^SLOT '+active+'\\b'));await page.keyboard.press('b');assert.match(await page.locator(':focus').getAttribute('aria-label'),/^SALVATAGGI/);await tap(button(/^SALVATAGGI/));await Promise.all([page.waitForEvent('domcontentloaded'),tap(button(new RegExp('^SLOT '+slot+'\\b')))]);await page.locator('#gameStart[data-step=menu]').waitFor();assert.equal(await page.evaluate(()=>SaveSlots.active),slot);}
-   async function field(){
+   async function field(money){
     await page.waitForFunction(()=>!GameStart.pending&&!GameIntroduction.pending&&renderer.ready,null,{timeout:45000});
     // The real new game opens Komor's greeting. Advance its pages through A,
     // rather than waiting for a script that is correctly waiting for the player.
     const deadline=Date.now()+45000;
-    for(;;){const state=await page.evaluate(()=>({locked:NativeStory.locked,checkpoint:NativeStory.fieldCheckpointAllowed,dialogue:!!document.querySelector('#dialogue[open]')}));if(!state.locked||state.checkpoint)return;if(Date.now()>deadline)throw Error('Field did not return a save checkpoint');if(state.dialogue)await page.keyboard.press('a');await page.evaluate(()=>new Promise(requestAnimationFrame));}
+    for(;;){const state=await page.evaluate(amount=>{
+     const locked=NativeStory.locked,checkpoint=NativeStory.fieldCheckpointAllowed,dialogue=!!document.querySelector('#dialogue[open]');
+     const ready=!GameStart.pending&&!GameStart.savingBlocked&&!GameIntroduction.pending&&!Journey.processing&&renderer.ready&&!renderer.contextLost&&!renderer.modelsRecovering&&!battling;
+     // Test the checkpoint and perform the requested save in the SAME JS task:
+     // an event may legitimately start between two separate browser evaluations.
+     let attempted=false,saved=false;if(amount!==null&&ready&&(!locked||checkpoint)){Journey.state.money=amount;attempted=true;saved=Journey.save(true);}
+     return {locked,checkpoint,dialogue,ready,attempted,saved};
+    },Number.isFinite(money)?money:null);
+    if(state.attempted){assert.equal(state.saved,true,'A normal slot write at a verified checkpoint failed');row.initialSaveAtCheckpoint=true;return;}
+    if(money===undefined&&state.ready&&(!state.locked||state.checkpoint))return;
+    if(Date.now()>deadline)throw Error('Field did not return a save checkpoint: '+JSON.stringify(state));if(state.dialogue)await page.keyboard.press('a');await page.evaluate(()=>new Promise(requestAnimationFrame));}
    }
    async function toIntro(step,label){for(let n=0;n<40;n++){await page.waitForFunction(()=>document.querySelector('#gameIntroduction .intro-choices button'),null,{timeout:30000});if(await page.locator('#gameIntroduction').getAttribute('data-step')===step&&await page.locator('#gameIntroduction').getByRole('button',{name:label,exact:true}).isVisible())return;assert.equal(await page.locator('#gameIntroduction').getByRole('button',{name:'Continua',exact:true}).isVisible(),true);await tap(page.locator('#gameIntroduction').getByRole('button',{name:'Continua',exact:true}));}throw Error('Intro path exhausted');}
    await page.goto(server.url,{waitUntil:'domcontentloaded',timeout:60000});await titleMenu();assert.deepEqual(await bytes(),[original,null,thirdRaw]);
    if(kind==='roundtrip'){
     await choose(2);await shot('empty-slot2');assert.equal(await button(/^CONTINUA/).count(),0);await tap(button('NUOVO GIOCO'));await page.locator('#gameIntroduction[data-step=welcome]').waitFor();assert.deepEqual(await bytes(),[original,null,thirdRaw]);
     await toIntro('gender','Ragazza');await tap(page.locator('#gameIntroduction').getByRole('button',{name:'Ragazza',exact:true}));await toIntro('genderConfirm','SÌ');await tap(page.locator('#gameIntroduction').getByRole('button',{name:'SÌ',exact:true}));
-    await page.locator('#nativeNaming[open] input').waitFor();await page.locator('#nativeNaming input').fill('Seconda');await page.locator('#nativeNaming input').press('Enter');await toIntro('confirm','SÌ');await tap(page.locator('#gameIntroduction').getByRole('button',{name:'SÌ',exact:true}));await toIntro('ready',"Comincia l'avventura");await tap(page.locator('#gameIntroduction').getByRole('button',{name:"Comincia l'avventura",exact:true}));await field();
-    await page.waitForFunction(k=>localStorage.getItem(k)!==null,key(2));assert.equal(await page.evaluate(()=>{Journey.state.money=2222;return Journey.save(true);}),true);let records=await bytes();const second=JSON.parse(records[1]);assert.equal(second.playerName,'Seconda');assert.equal(second.playerGender,'F');assert.equal(second.money,2222);assert.equal(records[0],original);assert.equal(records[2],thirdRaw);await shot('slot2-saved');
+    await page.locator('#nativeNaming[open] input').waitFor();await page.locator('#nativeNaming input').fill('Seconda');await page.locator('#nativeNaming input').press('Enter');await toIntro('confirm','SÌ');await tap(page.locator('#gameIntroduction').getByRole('button',{name:'SÌ',exact:true}));await toIntro('ready',"Comincia l'avventura");await tap(page.locator('#gameIntroduction').getByRole('button',{name:"Comincia l'avventura",exact:true}));await field(2222);
+    await page.waitForFunction(k=>localStorage.getItem(k)!==null,key(2));assert.equal(row.initialSaveAtCheckpoint,true);let records=await bytes();const second=JSON.parse(records[1]);assert.equal(second.playerName,'Seconda');assert.equal(second.playerGender,'F');assert.equal(second.money,2222);assert.equal(records[0],original);assert.equal(records[2],thirdRaw);await shot('slot2-saved');
     await page.reload({waitUntil:'domcontentloaded'});await titleMenu();await shot('slot2-continue');await tap(button(/^CONTINUA/));await field();assert.deepEqual(await page.evaluate(()=>({name:Journey.state.playerName,gender:Journey.state.playerGender,money:Journey.state.money,scene:Journey.state.scene,player:Journey.state.player})),{name:'Seconda',gender:'F',money:2222,scene:second.scene,player:second.player});assert.equal(await page.locator('#gameIntroduction[open]').count(),0);
     await page.reload({waitUntil:'domcontentloaded'});await titleMenu();const stableSecond=(await bytes())[1];await choose(3);await tap(button(/^CONTINUA/));await field();assert.equal(await page.evaluate(()=>Journey.state.playerName),'Terza');assert.equal((await bytes())[1],stableSecond);
     // Simulate a real external tab edit, then exercise actual in-field save and restart guards.
