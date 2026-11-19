@@ -1,5 +1,9 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Regia del lancio e Nero2 → HD-2D · 19 novembre2026
+
+Applicare [INTRO-DIRECTOR-062.md](docs/INTRO-DIRECTOR-062.md): conservare leggibilità, impulso e contatto della Ball e la tappa Smeraldo sulla griglia GBA. Le tappe sono sette, con Nero2 prima dell'HD-2D. L'ultimo passaggio usa una sola scena e camera realmente mobile, sincronizzata con la resa grafica; vietata una semplice fusione di vedute statiche differenti. Il proprietario privato riusa superfici e framebuffer e si libera a conclusione, annullamento o errore, senza chiamare sistemi del campo attivo. Conservare i12 replay, i tre formati, le tre velocità e il recupero da perdita reale del contesto privato. Richiedere camera del campo invariata e zero viste private residue, oltre alla revisione dei117PNG e alle regressioni precedenti.
+
 ## Regia e stili della prima città · 19 novembre2026
 
 Applicare [INTRO-ART-061.md](docs/INTRO-ART-061.md): Aralia mantiene un appoggio fisso e una spinta in avanti con gesto, testa e camice coerenti; rispettare contatto, velocità, apertura e recupero della sfera. I primi tre stili richiedono dettaglio a pixel di edifici, fogliame e costa sulla medesima Soffiolieve. Platino e Nero devono distinguersi per prospettiva, texture e colori dalla resa HD-2D. Le viste si preparano sullo stesso descrittore privato senza riavviare il caricamento; il replay deve rifiutare panorami vuoti e mostrare i passaggi fini, oltre a conservare tutti i controlli della0.60. I test numerici non sostituiscono l'esame delle immagini.
