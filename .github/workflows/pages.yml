@@ -34,8 +34,15 @@ jobs:
           if-no-files-found: ignore
       - name: Install pinned introduction browser driver
         run: npm install --no-save --ignore-scripts --package-lock=false playwright@1.62.1
-      - name: Install browser system dependencies
-        run: npx --no-install playwright install-deps chromium
+      - name: Check browser system dependencies
+        run: |
+          test -x /opt/google/chrome/chrome
+          ldd /opt/google/chrome/chrome > /tmp/soffiolieve-chrome-libraries.txt
+          if grep -q 'not found' /tmp/soffiolieve-chrome-libraries.txt; then
+            npx --no-install playwright install-deps chromium
+          else
+            echo "System Chrome libraries already available; keeping the preinstalled browser environment."
+          fi
       - name: Verify sandboxed system Chrome
         run: |
           test -x /opt/google/chrome/chrome
@@ -63,6 +70,14 @@ jobs:
         with:
           name: pages-intro-release-browser-report
           path: test-results/intro-release
+          if-no-files-found: ignore
+      - name: Check all three save slots in all three formats
+        run: node scripts/test-save-slots-headless.cjs _site test-results/save-slots --browser=/opt/google/chrome/chrome --renderer=software
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pages-save-slots-browser-report
+          path: test-results/save-slots
           if-no-files-found: ignore
       - name: Check reported phone regressions in all three formats
         run: node scripts/test-browser-headless.cjs _site test-results/phone057 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=240000 --cases=qaFieldCamera057,qaFieldGate057,qaPhoneIdentity057,qaBattleClearings057,qaBattleDoubles057

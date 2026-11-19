@@ -38,7 +38,7 @@
  }
  function introIcon(value){
   const sex=gender(value),key=defaults[sex];
-  return root.PLAYER_ASSETS?.intro?.[key]||root.PLAYER_ASSETS?.portraits?.[key]?.[0]||
+  return root.INTRO_FULLBODY_ASSETS?.actors?.[key]?.src||root.PLAYER_ASSETS?.intro?.[key]||root.PLAYER_ASSETS?.portraits?.[key]?.[0]||
    frames(key,{playerGender:sex})?.[0]||null;
  }
  const api={defaults,nameLimit,legacyNameLimit,battleKey:'Alcide',normalizeName,normalizeState,gender,name,

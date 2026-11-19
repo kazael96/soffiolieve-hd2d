@@ -23,7 +23,10 @@
    c.fillStyle='#f2faf6';c.beginPath();c.ellipse(128,125,80,12,0,0,Math.PI*2);c.fill();
    if(releasePose)root.IntroPokeball.draw(c,images,parts,releasePose);
    else if(portrait==='minccino'&&parts)root.IntroPokeball.draw(c,images,parts,root.IntroPokeball.pose(162));
-   else{const image=images[portrait];if(image){const scale=Math.min(160/image.height,180/image.width);c.drawImage(image,128-image.width*scale/2,135-image.height*scale,image.width*scale,image.height*scale);}}
+   else{
+    const actor=(key,x,height=122)=>{const image=images[key],bounds=root.INTRO_FULLBODY_ASSETS.actors[key]?.bounds;if(!image||!bounds)return;const scale=height/(bounds[3]-bounds[1]);c.drawImage(image,x-(bounds[0]+bounds[2])*scale/2,130-bounds[3]*scale,image.width*scale,image.height*scale);};
+    if(portrait==='friends'){actor('Belle',88,118);actor('Komor',168,122);}else actor(portrait,128);
+   }
    if(frame)c.drawImage(frame,0,0,frame.width,frame.height,0,136,256,56);else{c.fillStyle='#fff';c.fillRect(2,136,252,54);}
    if(font)root.NativeTextLayout.wrap(text,root.NAMING_ASSETS.font,238).slice(0,2).forEach((line,i)=>put(line,9,145+16*i));
    else{c.fillStyle='#233239';c.font='11px sans-serif';c.fillText(text,9,157,238);}
@@ -70,12 +73,12 @@
   async function load(){
    step='loading';dialog.dataset.step=step;paint('Un momento...');controls([]);
    try{
-    const data=root.PLAYER_ASSETS;
-    if(!data)throw Error('Risorse della presentazione mancanti');
+    const data=root.PLAYER_ASSETS,native=root.INTRO_FULLBODY_ASSETS;
+    if(!data||!native)throw Error('Risorse della presentazione mancanti');
     const loadImage=src=>root.RuntimeAssets.image(src);
     [font,frame]=await Promise.all([loadImage(root.NAMING_ASSETS.font.src),loadImage(root.COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src)]);
-    const entries=await Promise.all(Object.entries(data.intro).map(async([key,src])=>[key,await loadImage(typeof src==='string'?src:src.src)]));images=Object.fromEntries(entries);
-    const balls=await Promise.all(root.IntroPokeball.assets.map(loadImage));images.balls={0:balls[0],9:balls[1],10:balls[2]};images.white=root.IntroPokeball.white(images.minccino);parts=root.IntroPokeball.sprites(images.aralia);page('welcome');
+    const entries=await Promise.all(Object.entries({...native.actors,minccino:data.intro.minccino}).map(async([key,src])=>[key,await loadImage(typeof src==='string'?src:src.src)]));images=Object.fromEntries(entries);
+    const balls=await Promise.all(root.IntroPokeball.assets.map(loadImage));images.balls={0:balls[0],9:balls[1],10:balls[2]};images.white=root.IntroPokeball.white(images.minccino);parts=root.IntroPokeball.sprites(images);page('welcome');
    }catch(error){failed(error,()=>void load());}
   }
   async function begin(){

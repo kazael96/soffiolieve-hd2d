@@ -1,0 +1,13 @@
+# Tre salvataggi · 0.60
+
+Richiesta del18 novembre2026: offrire tre partite indipendenti. Dal titolo, Premi Start → SALVATAGGI mostra i tre slot e quello attuale; ciascuno riporta nome e tempo oppure Nuovo gioco/Dati non leggibili. Dopo la scelta, Continua o Nuovo gioco riguarda quel solo slot. Il focus iniziale segue lo slot attuale; B torna alla voce Salvataggi, mentre annullare Nuovo gioco ripristina quella voce. Frecce e A/Invio/touch mantengono il comportamento esistente. La schermata è adattata allo stile di Nero: il gioco DS offriva una sola partita.
+
+Lo slot1 conserva la chiave e i byte del salvataggio precedente, senza migrazioni distruttive. Gli slot2/3 hanno chiavi distinte. L'identità, squadra, mondo, eventi e tutti i campi già normalizzati dal formato2 restano nella singola partita. Audio, velocità e impostazioni grafiche rimangono preferenze condivise del browser. I dati sono locali al browser/dispositivo; questa funzione non aggiunge sincronizzazione cloud.
+
+La scelta dello slot appartiene alla sessione della singola scheda. Il cambio richiesto dal giocatore ricarica il runtime coperto dal menu, così nessuna variabile della partita precedente rimane nel campo successivo. La scelta attiva resta immutabile fino alla ricarica; titolo e cambio slot non scrivono progressi. Una sessione che non può memorizzare la scelta mostra un errore senza modificare le partite.
+
+Il salvataggio e Ricomincia agiscono soltanto sulla chiave attiva. Nuovo gioco su dati esistenti richiede conferma con NO predefinito; annullare conserva i dati. Le descrizioni di Salva e Ricomincia identificano lo slot. Un record danneggiato non cancella gli altri e può essere sostituito soltanto con conferma. Permessi negati, cancellazione inefficace o quota esaurita non devono risultare successi.
+
+L'adattatore mantiene il valore letto all'avvio e ricontrolla prima di scrivere/cancellare. Un cambiamento osservabile da un'altra scheda blocca le scritture e il riavvio della scheda obsoleta, richiedendo una ricarica. È una protezione ottimistica su localStorage, non un sistema di transazioni distribuite. Un accesso iniziale negato resta protetto anche se il permesso torna successivamente. Le preferenze non vengono inoltrate alla chiave della partita.
+
+Le prove comprendono test CPU di isolamento e confini, index originale nei tre formati con introduzione completa nello slot2, salvataggio e riapertura, ripresa dello slot3 e del legacy1, Ricomincia, cambi esterni e dinieghi reali iniettati. Restano obbligatori tutti i controlli precedenti,49 fasi, revisione dei PNG, H.8 e verifica dei file pubblici. I rapporti e la ricevuta effettiva sono esterni alle build in `outputs/chapter060-preparation`: questo documento non dichiara da solo un rilascio completato.

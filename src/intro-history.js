@@ -9,10 +9,13 @@
   {id:'black',label:'NERO',size:[256,192]},
   {id:'hd2d',label:'HD-2D',size:[768,576]}
  ]);
- const checkpoints=Object.freeze(Array.from({length:13},(_,i)=>i*27));
+ const checkpoints=Object.freeze([...Array.from({length:13},(_,i)=>i*27),...Array.from({length:5},(_,i)=>i*54+43)].sort((a,b)=>a-b));
  function townScene(source){const instances=source.instances.filter(i=>i.x>=-16&&i.x<16&&i.z>=-16&&i.z<16);if(!instances.some(i=>i.model==='map0'))throw Error('Mappa originale di Soffiolieve mancante');return{...source,instances,permissionGrids:source.permissionGrids.filter(g=>g.x===0&&g.z===0)};}
- function frame(value){const f=Math.max(0,Math.min(324,Number(value)||0)),index=Math.min(5,Math.floor(f/54)),local=f-index*54;return{frame:f,index,id:eras[index].id,mix:index<5?Math.max(0,Math.min(1,(local-42)/12)):0,done:f>=324};}
- function clock(){let f=0,last;return{tick(now,{hidden=false,rate=1}={}){if(!Number.isFinite(now))throw Error('Invalid era clock');if(last===undefined){last=now;return frame(0);}const dt=Math.max(0,Math.min(100,now-last));last=now;if(!hidden){const next=checkpoints.find(x=>x>f)??324;f=Math.min(next,f+dt*.06*Math.max(1,Math.min(4,Number(rate)||1)));}return frame(f);},get done(){return f===324;}};}
+ const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
+ function frame(value){const f=Math.max(0,Math.min(324,Number(value)||0)),index=Math.min(5,Math.floor(f/54)),local=f-index*54;return{frame:f,index,id:eras[index].id,mix:index<5?smooth((local-32)/22):0,done:f>=324};}
+ function clock(){let f=0,last;return{tick(now,{hidden=false,rate=1}={}){if(!Number.isFinite(now))throw Error('Invalid era clock');if(last===undefined){last=now;return frame(0);}const dt=Math.max(0,Math.min(100,now-last));last=now;if(!hidden){const next=checkpoints.find(x=>x>f)??324;f=Math.min(next,f+dt*.04*Math.max(1,Math.min(4,Number(rate)||1)));}return frame(f);},get done(){return f===324;}};}
+ // Bounded diagonal pixel reveal: every tile settles before the next era starts.
+ function tileAlpha(mix,x,y){return smooth((clamp(mix)*1.18-x*.70-y*.30)/.18);}
  function bounds(scene){const b={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,minZ:Infinity,maxZ:-Infinity};for(const i of scene.instances){const model=root.OPENING_ASSETS.models[i.model]||scene.models[i.model],cs=Math.cos(i.rotation),sn=Math.sin(i.rotation);for(const g of model.groups)for(let at=0;at<g.verts.length;at+=11){const v=g.verts,x=v[at]*cs+v[at+2]*sn+i.x,y=v[at+1]+i.y,z=-v[at]*sn+v[at+2]*cs+i.z;b.minX=Math.min(b.minX,x);b.maxX=Math.max(b.maxX,x);b.minY=Math.min(b.minY,y);b.maxY=Math.max(b.maxY,y);b.minZ=Math.min(b.minZ,z);b.maxZ=Math.max(b.maxZ,z);}}if(!Object.values(b).every(Number.isFinite))throw Error('Soffiolieve geometry is incomplete');return b;}
  let prepares=0;
  async function prepare(){
@@ -42,13 +45,19 @@
   const pixel=gb?16:era.id==='gold'?16:24,icon=palette(hero,C,doc);c.drawImage(icon,Math.round(w*.5-pixel/2),Math.round(h*22/32-pixel),pixel,pixel);return canvas;
  }
  function compose(landscapes,hero,doc=root.document){
-  return eras.map(era=>{if(era.colors&&era.id!=='platinum')return retro(era,hero,doc);const record=landscapes[era.id],canvas=doc.createElement('canvas');canvas.width=record.image.width;canvas.height=record.image.height;const c=canvas.getContext('2d');c.drawImage(record.image,0,0);const p=record.hero,w=p.width*canvas.width,h=p.height*canvas.height;c.fillStyle='#18352e55';c.beginPath();c.ellipse(p.x*canvas.width,p.y*canvas.height,w*.3,h*.1,0,0,Math.PI*2);c.fill();c.imageSmoothingEnabled=false;c.drawImage(hero,p.x*canvas.width-w/2,p.y*canvas.height-h,w,h);return canvas;});
+  return eras.map(era=>{if(era.colors&&era.id!=='platinum'){const image=retro(era,hero,doc),matte=doc.createElement('canvas');matte.width=Math.round(Math.max(image.width,image.height*4/3));matte.height=Math.round(Math.max(image.height,image.width*3/4));const c=matte.getContext('2d');c.fillStyle='#13272e';c.fillRect(0,0,matte.width,matte.height);c.drawImage(image,(matte.width-image.width)/2,(matte.height-image.height)/2);return matte;}const record=landscapes[era.id],canvas=doc.createElement('canvas');canvas.width=record.image.width;canvas.height=record.image.height;const c=canvas.getContext('2d');c.drawImage(record.image,0,0);const p=record.hero,w=p.width*canvas.width,h=p.height*canvas.height;c.fillStyle='#18352e55';c.beginPath();c.ellipse(p.x*canvas.width,p.y*canvas.height,w*.3,h*.1,0,0,Math.PI*2);c.fill();c.imageSmoothingEnabled=false;c.drawImage(hero,p.x*canvas.width-w/2,p.y*canvas.height-h,w,h);return canvas;});
  }
  function draw(c,cards,p,font){
   const canvas=c.canvas,scale=canvas.width/256;c.save();c.setTransform(scale,0,0,scale,0,0);c.clearRect(0,0,256,224);c.fillStyle='#13272e';c.fillRect(0,0,256,224);
   const card=(image,alpha)=>{const s=Math.min(256/image.width,192/image.height);c.save();c.globalAlpha=alpha;c.imageSmoothingEnabled=false;c.drawImage(image,(256-image.width*s)/2,(192-image.height*s)/2,image.width*s,image.height*s);c.restore();};
-  card(cards[p.index],1);if(p.mix)card(cards[p.index+1],p.mix);c.fillStyle='#f8f8f0';c.fillRect(0,192,256,32);root.NativeText.draw(c,font,'SOFFIOLIEVE - '+eras[p.index].label,128,202,false,'center',root.NAMING_ASSETS.font);c.restore();
+  card(cards[p.index],1);
+  if(p.mix){const image=cards[p.index+1],s=Math.min(256/image.width,192/image.height),ox=(256-image.width*s)/2,oy=(192-image.height*s)/2;
+   for(let y=0;y<6;y++)for(let x=0;x<8;x++){const alpha=tileAlpha(p.mix,x/7,y/5);if(!alpha)continue;const sx=x*image.width/8,sy=y*image.height/6;c.save();c.globalAlpha=alpha;c.imageSmoothingEnabled=false;c.drawImage(image,sx,sy,image.width/8,image.height/6,ox+sx*s,oy+sy*s,image.width*s/8,image.height*s/6);c.restore();}
+  }
+  c.fillStyle='#f8f8f0';c.fillRect(0,192,256,32);
+  const alpha=Math.abs(1-2*p.mix),caption=Math.min(5,p.index+(p.mix>.5?1:0));
+  if(alpha>0){c.save();c.globalAlpha=alpha;root.NativeText.draw(c,font,'SOFFIOLIEVE - '+eras[caption].label,128,202,false,'center',root.NAMING_ASSETS.font);c.restore();}c.restore();
  }
  function play({canvas,cards,font,onFrame=()=>{},request=root.requestAnimationFrame,cancel=root.cancelAnimationFrame,document:doc=root.document,rate=()=>root.GameSpeed?.rate||1}={}){const time=clock(),c=canvas.getContext('2d');let raf,stopped=false,resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});const stop=()=>{if(stopped)return;stopped=true;cancel(raf);resolve(false);};const tick=now=>{if(stopped)return;try{const p=time.tick(now,{hidden:doc.hidden,rate:rate()});if(!doc.hidden){draw(c,cards,p,font);onFrame(p);}if(time.done){stopped=true;resolve(true);}else raf=request(tick);}catch(error){stopped=true;reject(error);}};raf=request(tick);return{promise,cancel:stop};}
- const api={eras,checkpoints,townScene,frame,clock,bounds,prepare,palette,retro,compose,draw,play,get preparing(){return prepares>0;}};root.IntroHistory=api;if(typeof module!=='undefined')module.exports=api;
+ const api={eras,checkpoints,townScene,frame,clock,tileAlpha,bounds,prepare,palette,retro,compose,draw,play,get preparing(){return prepares>0;}};root.IntroHistory=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);

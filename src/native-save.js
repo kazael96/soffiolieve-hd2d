@@ -8,7 +8,7 @@
     const zone=s.original?.zone===317?317:s.original?.zone===397?397:389,location=TOWNMAP_ASSETS.places.find(p=>p.zone===zone)?.name||'';
     const values=[NativeTextLayout.format(t[0],[s.playerName]),date(now),pad(now.getHours())+':'+pad(now.getMinutes()),location,NativeTextLayout.format(t[4],[0]),s.original?.pokedex?NativeTextLayout.format(t[5],[s.dex.seen.length]):'',NativeTextLayout.format(t[6],[Math.floor(seconds/3600),pad(Math.floor(seconds/60)%60)]),''];
     screen.show('Salva',c=>{c.drawImage(r.panel,0,0);r.a.windows.forEach((w,i)=>{if(values[i])NativeText.draw(c,i?r.body:r.header,values[i],w.pixelRect[0]+w.textLocalOrigin[0],w.pixelRect[1]+w.textLocalOrigin[1],false,'left',r.a.font);});},[],back,{drawFocus:false});
-    confirm('Vuoi salvare il gioco?',()=>{const success=Journey.save(true);notice(success?NativeTextLayout.format(MENU_ASSETS.texts[36][4],[s.playerName]):document.getElementById('saveStatus').textContent,back);},back);
+    confirm(root.SaveSlots?'Vuoi salvare nello slot '+root.SaveSlots.active+'?':'Vuoi salvare il gioco?',()=>{const success=Journey.save(true);notice(success?NativeTextLayout.format(MENU_ASSETS.texts[36][4],[s.playerName]):document.getElementById('saveStatus').textContent,back);},back);
   }
   root.NativeSave={open};
 })(typeof window!=='undefined'?window:globalThis);
