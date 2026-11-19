@@ -24,8 +24,8 @@
    if(releasePose)root.IntroPokeball.draw(c,images,parts,releasePose);
    else if(portrait==='minccino'&&parts)root.IntroPokeball.draw(c,images,parts,root.IntroPokeball.pose(162));
    else{
-    const actor=(key,x,height=122)=>{const image=images[key],bounds=root.INTRO_FULLBODY_ASSETS.actors[key]?.bounds;if(!image||!bounds)return;const scale=height/(bounds[3]-bounds[1]);c.drawImage(image,x-(bounds[0]+bounds[2])*scale/2,130-bounds[3]*scale,image.width*scale,image.height*scale);};
-    if(portrait==='friends'){actor('Belle',88,118);actor('Komor',168,122);}else actor(portrait,128);
+    const actor=(key,x,height=122)=>{const image=images[key],bounds=root.INTRO_FULLBODY_ASSETS.actors[key]?.bounds;if(!image||!bounds)return;const scale=height/(bounds[3]-bounds[1]);c.drawImage(image,x-(key==='aralia'?96:(bounds[0]+bounds[2])/2)*scale,130-bounds[3]*scale,image.width*scale,image.height*scale);};
+    if(portrait==='friends'){actor('Belle',88,118);actor('Komor',168,122);}else actor(portrait,portrait==='aralia'?72:128);
    }
    if(frame)c.drawImage(frame,0,0,frame.width,frame.height,0,136,256,56);else{c.fillStyle='#fff';c.fillRect(2,136,252,54);}
    if(font)root.NativeTextLayout.wrap(text,root.NAMING_ASSETS.font,238).slice(0,2).forEach((line,i)=>put(line,9,145+16*i));

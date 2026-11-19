@@ -97,6 +97,17 @@ def extract(archive,output,report):
     actors['araliaUpper']=save('Aralia-upper',compose(parts,nodes,indices={4}),base)
     actors['araliaForearm']=save('Aralia-forearm',compose(parts,nodes,indices={2}),base)
     actors['araliaHand']=save('Aralia-hand',compose(parts,nodes,indices={0,1}),base)
+    # Native cells split hair/legs from face/chest, rather than at anatomical joints.
+    # Join the unmodified native pixels first, then separate at the neck row.
+    anatomical=compose(parts,nodes,indices={3,5,6,7})
+    head=anatomical.copy();head.paste((0,0,0,0),(0,64,192,192))
+    torso=anatomical.copy();torso.paste((0,0,0,0),(0,0,192,64))
+    actors['araliaHead']=save('Aralia-head',head,{**base,'nativeYBand':[0,64]})
+    actors['araliaTorso']=save('Aralia-torso',torso,{**base,'nativeYBand':[64,192]})
+    actors['araliaCoatLeft']=save('Aralia-coat-left',compose(parts,nodes,indices={8}),base)
+    actors['araliaCoatRight']=save('Aralia-coat-right',compose(parts,nodes,indices={9}),base)
+    check=compose(parts,nodes,indices={8,9});check.alpha_composite(torso);check.alpha_composite(head)
+    assert check.tobytes()==compose(parts,nodes,False).tobytes(),'Anatomical split changed the native body pixels'
     catalog={'source':'Native Pokemon Black new-game graphics, existing workspace NitroFS archive','archive':'a/1/7/0','archiveSHA256':hashlib.sha256(data).hexdigest(),'actors':actors,'rig':{'origin':[96,96],'shoulder':[89,67],'elbow':[83,76],'hand':[75,69],'feet':[96,158]},'nodes':nodes}
     (output/'intro-fullbody-assets.js').write_bytes(('window.INTRO_FULLBODY_ASSETS='+json.dumps(catalog,separators=(',',':'))+';\n').encode('utf8'))
     report.parent.mkdir(parents=True,exist_ok=True);report.write_bytes(json.dumps({'archiveFile':str(archive.resolve()),'catalog':catalog,'images':records,'reference':'https://ds-pokemon-hacking.github.io/docs/generation-v/resources/sprite_locations/bw-sprite_locations/'},indent=2).encode('utf8'))

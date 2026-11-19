@@ -1,5 +1,9 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Regia e stili della prima città · 19 novembre2026
+
+Applicare [INTRO-ART-061.md](docs/INTRO-ART-061.md): Aralia mantiene un appoggio fisso e una spinta in avanti con gesto, testa e camice coerenti; rispettare contatto, velocità, apertura e recupero della sfera. I primi tre stili richiedono dettaglio a pixel di edifici, fogliame e costa sulla medesima Soffiolieve. Platino e Nero devono distinguersi per prospettiva, texture e colori dalla resa HD-2D. Le viste si preparano sullo stesso descrittore privato senza riavviare il caricamento; il replay deve rifiutare panorami vuoti e mostrare i passaggi fini, oltre a conservare tutti i controlli della0.60. I test numerici non sostituiscono l'esame delle immagini.
+
 ## Sprite interi e passaggi generazionali · 19 novembre2026
 
 Applicare [INTRO-FULLBODY-060.md](docs/INTRO-FULLBODY-060.md): nell'introduzione usare le figure intere native di Aralia, Alcide, Anita, Belle e Komor, senza ritratti Interpoké tagliati. Il lancio anima le parti originali del braccio e della mano, conserva piedi, contatto con la sfera, sequenza e recupero. Il montaggio resta sulla stessa Soffiolieve; conservare una vista stabile e un passaggio graduale verso ciascuna generazione, anche a×2/×4. Verificare i passaggi effettivamente disegnati e tutti i personaggi, senza trasferire i PASS della0.59 a queste modifiche.
