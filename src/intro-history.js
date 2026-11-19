@@ -30,7 +30,16 @@
    for(const [id,size]of [['platinum',[256,192]],['black',[256,192]],['hd2d',[768,576]]]){const {angle,cinema,clear}=cameras[id];r.scene.clearColor=clear;
     r.viewSize=size;r.center=[(box.minX+box.maxX)/2,(box.minZ+box.maxZ)/2];r.cameraPitch=[Math.sin(angle*Math.PI/180),Math.cos(angle*Math.PI/180)];r.elevation=(box.maxY+box.minY)*.4;r.cinema=cinema;
     const scale=Math.min(size[0]/30,size[1]/21),height=spanZ*r.cameraPitch[0]+(box.maxY-box.minY)*r.cameraPitch[1];r.zoom=Math.min(size[0]/(spanX*1.08*scale),size[1]/(height*1.1*scale));r.draw(0,[]);if(!r.ready||!r.hasResources(r.resourcePlan([]))||r.gl.isContextLost()||r.gl.getError())throw Error('Panorama context lost or resources no longer ready');
-    const image=doc.createElement('canvas');image.width=size[0];image.height=size[1];image.getContext('2d').drawImage(canvas,0,0);const point=r.screen(0,6,.04);result[id]={image,hero:{x:point[0]/size[0],y:point[1]/size[1],width:2*point[2]/size[0],height:2*point[2]/size[1]},camera:{angle,zoom:r.zoom,center:[...r.center]},style:cameras[id].style};
+    const image=doc.createElement('canvas');image.width=size[0];image.height=size[1];const target=image.getContext('2d');
+    if(cinema)target.drawImage(canvas,0,0);
+    else{
+     // Read the prepared scene before the project's bloom, sun and vignette pass.
+     // Merely setting cinema=false disables blur, but retains those modern effects.
+     const gl=r.gl,pixels=new Uint8Array(size[0]*size[1]*4),captured=target.createImageData(size[0],size[1]);gl.bindFramebuffer(gl.FRAMEBUFFER,r.framebuffer);
+     try{gl.readPixels(0,0,size[0],size[1],gl.RGBA,gl.UNSIGNED_BYTE,pixels);if(gl.getError())throw Error('Cattura DS non disponibile');}finally{gl.bindFramebuffer(gl.FRAMEBUFFER,null);}
+     for(let y=0;y<size[1];y++)captured.data.set(pixels.subarray((size[1]-1-y)*size[0]*4,(size[1]-y)*size[0]*4),y*size[0]*4);target.putImageData(captured,0,0);
+    }
+    const point=r.screen(0,6,.04);result[id]={image,hero:{x:point[0]/size[0],y:point[1]/size[1],width:2*point[2]/size[0],height:2*point[2]/size[1]},camera:{angle,zoom:r.zoom,center:[...r.center]},style:cameras[id].style};
    }return result;
   }finally{try{if(r){r.resourceEpoch++;r.recovery?.dispose();r.disposeGraphics();r.gl.getExtension('WEBGL_lose_context')?.loseContext();canvas.width=canvas.height=0;}}finally{prepares--;}}
  }
@@ -91,7 +100,7 @@
   const green=[[36,68,60],[52,92,72],[76,120,84],[112,152,100],[148,180,128],[184,204,160]],blue=[[44,60,100],[60,84,128],[88,120,160],[132,164,192],[180,204,216]],roof=[[72,52,60],[112,64,72],[156,84,88],[196,116,112],[224,164,148]];
   for(let at=0;at<data.data.length;at+=4){let r=data.data[at],g=data.data[at+1],b=data.data[at+2];
    if(id==='platinum'){const light=(r+g+b)/3;let colors=g>r*1.08&&g>b*1.06?green:b>r*1.12&&b>g*.94?blue:r>g*1.15?roof:null;
-    if(colors){const color=colors[Math.min(colors.length-1,Math.floor(light/256*colors.length))];[r,g,b]=color;}
+    if(colors){const level=colors===green?g:light,color=colors[Math.min(colors.length-1,Math.floor(level/256*colors.length))];[r,g,b]=color;}
     else{r=Math.min(248,Math.round((r*.92+14)/16)*16);g=Math.min(248,Math.round((g*.93+13)/16)*16);b=Math.min(248,Math.round((b*.98+11)/16)*16);}
    }else{r=Math.min(248,Math.round(r/8)*8);g=Math.min(248,Math.round(g/8)*8);b=Math.min(248,Math.round(b/8)*8);}
    data.data[at]=r;data.data[at+1]=g;data.data[at+2]=b;
