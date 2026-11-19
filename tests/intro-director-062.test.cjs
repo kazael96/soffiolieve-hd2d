@@ -55,3 +55,12 @@ test('normal rendering retains full postprocessing and only private views can op
   const gl=new Proxy({getUniformLocation:(p,k)=>k,uniform1f:(k,v)=>uniforms.set(k,v),getAttribLocation:()=>1},{get:(o,k)=>k in o?o[k]:()=>{}}),r={isolated,evolutionBlend:graphics,ready:true,scene:{zone:18,instances:[]},canvas:{width:768,height:576},center:[0,0],zoom:1,cinema:true,gl,attrs:[],loc:{},resize(){},hasResources:()=>true,resourcePlan:()=>({}),indoor:()=>false};context.Renderer.prototype.draw.call(r,0,[]);assert.equal(uniforms.get('uEvolutionBlend'),isolated&&graphics!==undefined?graphics:1);if(isolated)assert.deepEqual(calls,[],'A private intro view called active field/cinematic systems');else assert.ok(calls.includes('fieldCamera')&&calls.includes('hmPresented'));
  }
 });
+
+test('private town resource plans ignore live identity, story actors and Surf while field plans retain them',()=>{
+ const fs=require('fs'),vm=require('vm'),path=require('path'),context={};context.window=context;context.OPENING_ASSETS={models:{map0:{groups:[{texture:'town'}]}}};context.ROM_SCENE={models:{}};let gender='M',storyCalls=0,surfCalls=0;context.NativeStory={visualActors(){storyCalls++;return [{name:'Aralia'}];}};context.SurfField={resources(){surfCalls++;return {sprite:'SurfMon',models:['surf-model'],textures:['surf-texture']};}};
+ vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/world3d.js'),'utf8')+';this.Renderer=VillageRenderer;',context);
+ const renderer={isolated:true,scene:{instances:[{model:'map0'}]},spriteName:n=>n==='Alcide'?gender:n,spriteFrames:n=>[n==='Alcide'?gender+'.png':n+'.png']};
+ const plan=()=>JSON.parse(JSON.stringify(context.Renderer.prototype.resourcePlan.call(renderer)));
+ const male=plan();gender='F';assert.deepEqual(plan(),male);assert.deepEqual(male,{models:['map0'],textures:['town'],sprites:[]});assert.equal(storyCalls,0);assert.equal(surfCalls,0);
+ renderer.isolated=false;const field=plan();assert.ok(field.models.includes('surf-model'));assert.ok(field.textures.includes('surf-texture'));assert.deepEqual(field.sprites.map(s=>s.key),['F-0','Aralia-0','SurfMon-0']);assert.equal(storyCalls,1);assert.equal(surfCalls,1);
+});
