@@ -69,7 +69,8 @@
    try{draft.name=await root.NativeNaming.open({name:draft.gender==='F'?'Anita':'Alcide'},{mode:'player',defaultName:draft.gender==='F'?'Anita':'Alcide',initialValue:draft.name,iconSrc:root.PlayerIdentity.introIcon(draft.gender),onOpen:()=>dialog.classList.add('intro-naming'),onClose:()=>dialog.classList.remove('intro-naming')});page('confirm');}
    catch(error){failed(error,()=>void name());}
   }
-  function failed(error,operation){historyPlay?.cancel();historyPlay=null;canvas.width=256;canvas.height=192;c.imageSmoothingEnabled=false;retry=operation;step='error';dialog.dataset.step=step;paint('Non è stato possibile caricare le risorse. Riprova.');controls([['Riprova',()=>{retry=null;operation();}]]);dialog.dataset.error=String(error);}
+  function abandonHistory(){const pending=historyReady;historyReady=null;historyPlay?.cancel();historyPlay=null;pending?.then(bundle=>bundle.evolution?.dispose()).catch(()=>{});}
+  function failed(error,operation){abandonHistory();canvas.width=256;canvas.height=192;c.imageSmoothingEnabled=false;retry=operation;step='error';dialog.dataset.step=step;paint('Non è stato possibile caricare le risorse. Riprova.');controls([['Riprova',()=>{retry=null;operation();}]]);dialog.dataset.error=String(error);}
   async function load(){
    step='loading';dialog.dataset.step=step;paint('Un momento...');controls([]);
    try{
@@ -91,7 +92,7 @@
     let landscapes;try{landscapes=await historyReady;}catch(error){historyReady=null;throw error;}
     const hero=await root.RuntimeAssets.image(root.PlayerIdentity.frames('Alcide')[3]);const cards=root.IntroHistory.compose(landscapes,hero);
     canvas.width=768;canvas.height=672;c.imageSmoothingEnabled=false;step='history';dialog.dataset.step=step;message.textContent='Soffiolieve attraverso le generazioni';
-    historyPlay=root.IntroHistory.play({canvas,cards,font,onFrame:p=>{dialog.dataset.historyFrame=String(p.frame);dialog.dataset.historyEra=p.id;canvas.setAttribute('aria-label','Soffiolieve - '+root.IntroHistory.eras[p.index].label);}});
+    historyPlay=root.IntroHistory.play({canvas,cards,font,onFrame:p=>{dialog.dataset.historyFrame=String(p.frame);dialog.dataset.historyEra=p.id;if(p.view)dialog.dataset.historyView=JSON.stringify(p.view);else delete dialog.dataset.historyView;canvas.setAttribute('aria-label','Soffiolieve - '+root.IntroHistory.eras[p.index].label);}});
     if(!await historyPlay.promise)return;historyPlay=null;
     if(!renderer.ready||renderer.contextLost||!renderer.hasResources(renderer.resourcePlan()))throw renderer.loadingError||Error('La camera non è pronta dopo la presentazione');
     state.introductionComplete=true;dialog.close();complete(true);
@@ -107,7 +108,7 @@
    else rows[selected]?.click();
   });
   dialog.addEventListener('cancel',event=>event.preventDefault());
-  void load();try{return await finished;}finally{releaseToken++;release?.cancel();historyPlay?.cancel();dialog.remove();root.resetInput?.();}
+  void load();try{return await finished;}finally{releaseToken++;release?.cancel();abandonHistory();dialog.remove();root.resetInput?.();}
  }
  root.GameIntroduction={start,get pending(){return needed()||!!running;}};
 })(typeof window==='undefined'?globalThis:window);

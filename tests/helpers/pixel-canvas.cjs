@@ -1,0 +1,6 @@
+function document2d(){
+ return {createElement(){let canvas={width:0,height:0},pixels,context;const data=()=>{const length=canvas.width*canvas.height*4;if(pixels?.length!==length)pixels=new Uint8ClampedArray(length);return pixels;};
+  context={get fillStyle(){return this.color;},set fillStyle(v){this.color=v;},fillRect(x,y,w,h){const color=this.color.slice(1),rgb=[0,2,4].map(i=>parseInt(color.slice(i,i+2),16)),d=data();for(let yy=Math.max(0,y);yy<Math.min(canvas.height,y+h);yy++)for(let xx=Math.max(0,x);xx<Math.min(canvas.width,x+w);xx++){const at=(yy*canvas.width+xx)*4;d.set([...rgb,255],at);}},drawImage(image,...a){const raw=image.data||image.getContext('2d').getImageData().data,x=a[0]||0,y=a[1]||0,w=a[2]??image.width,h=a[3]??image.height,d=data();for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const dx=x+xx,dy=y+yy;if(dx<0||dy<0||dx>=canvas.width||dy>=canvas.height)continue;const at=(Math.floor(yy/h*image.height)*image.width+Math.floor(xx/w*image.width))*4;if(raw[at+3])d.set(raw.subarray(at,at+4),(dy*canvas.width+dx)*4);}},createImageData(w,h){return{data:new Uint8ClampedArray(w*h*4)};},getImageData(){return{data:data().slice()};},putImageData(v){pixels=new Uint8ClampedArray(v.data);}};canvas.getContext=()=>context;return canvas;
+ }};
+}
+module.exports={document2d};
