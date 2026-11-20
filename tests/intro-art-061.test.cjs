@@ -3,9 +3,10 @@ test('Aralia keeps her planted feet in the same place throughout anticipation, t
  const positions=Array.from({length:325},(_,i)=>{const a=P.pose(i/2).actor;return a.x+96*a.scale;});
  assert.ok(Math.max(...positions)-Math.min(...positions)<1,'The old intro slid the whole actor across the platform without a step');
 });
-test('the throwing shoulder stays in a natural forward arc instead of rotating the arm over the head',()=>{
- for(let f=0;f<=162;f+=.25){const a=P.pose(f).actor;assert.ok(a.arm> -2.65&&a.arm<.4,'Unnatural shoulder rotation at '+f);}
+test('Aralia changes complete drawn poses instead of forcing a static arm over her head',()=>{
+ const cells=new Set();for(let f=0;f<=162;f+=.25){const a=P.pose(f).actor;cells.add(a.cell);assert.equal(a.arm,0);assert.equal(a.forearm,0);assert.equal(a.lean,0);}assert.equal(cells.size,12);
 });
+
 test('the new city reveal advances through fine scanline bands rather than large rectangular tiles',()=>{
  assert.equal(typeof H.revealBand,'function');
  let previous=-Infinity;
@@ -13,14 +14,13 @@ test('the new city reveal advances through fine scanline bands rather than large
  assert.ok(H.revealBand(0,0).front<=-8);assert.ok(H.revealBand(1,1).front>=256);
  assert.ok(H.revealBand(.5,0).front>H.revealBand(.5,1).front);
 });
-test('ball velocity follows the rendered hand at release and catch and settles before opening',()=>{
- const derivative=(f,key,side)=>{const a=P.pose(f+side*.0001)[key],b=P.pose(f)[key];return {x:(a.x-b.x)/(side*.0001),y:(a.y-b.y)/(side*.0001)};};
- for(const [f,left,right]of [[46,'hand','ball'],[150,'ball','hand']]){
-  const a=derivative(f,left,-1),b=derivative(f,right,1);assert.ok(Math.hypot(a.x-b.x,a.y-b.y)<.002,'Velocity jump at '+f);
- }
- const opening=derivative(76,'ball',-1);assert.ok(Math.hypot(opening.x,opening.y)<.002);
+test('free ball velocity inherits the last authored contact displacement and settles at opening and catch',()=>{
+ const a=P.pose(40).hand,b=P.pose(46).hand,expected={x:(b.x-a.x)/6,y:(b.y-a.y)/6},epsilon=.0001;
+ const start=P.pose(46).ball,after=P.pose(46+epsilon).ball;assert.ok(Math.hypot((after.x-start.x)/epsilon-expected.x,(after.y-start.y)/epsilon-expected.y)<.002);
+ for(const f of [76,150]){const before=P.pose(f-epsilon).ball,end=P.pose(f).ball;assert.ok(Math.hypot(end.x-before.x,end.y-before.y)/epsilon<.002,'Ball fails to settle at '+f);}
  assert.ok(P.pose(61).ball.y<43);assert.equal(P.pose(162).actor.head,0);assert.ok(Math.abs(P.pose(162).actor.coat)<1e-12);
 });
+
 // A small actual pixel surface for the production rect/stamp painter, not a copied town.
 const {document2d}=require('./helpers/pixel-canvas.cjs');
 
@@ -81,8 +81,8 @@ test('Emerald paints a distinct native GBA town with warm tiled roofs and shaded
  assert.deepEqual([image.width,image.height],[240,160]);assert.ok(area(35,5,64,17).has('173,107,74'),'Emerald needs its warm terracotta roof course palette');assert.ok(area(0,30,28,30).size>=6,'Rounded GBA foliage needs leaf, rim and ground shades');assert.ok(area(25,135,185,25).size>=8,'Coastal promenade, rail and sea should retain authored GBA detail');
 });
 test('the free Pokeball inherits a visible forward launch and remains legible at native scale',()=>{
- const a=P.pose(45.999).hand,b=P.pose(46).hand;assert.ok((b.x-a.x)/.001>1.1,'The hand was nearly stationary at release, making the ball accelerate away later');
- for(const f of [0,46,54,61,76,128,150]){const calls=[],c={save(){},restore(){},translate(){},scale(){},rotate(){},drawImage(...args){calls.push(args);},beginPath(){},ellipse(){},fill(){},stroke(){},moveTo(){},lineTo(){}};const closed={},opened={},half={};P.draw(c,{balls:{0:closed,9:half,10:opened},minccino:{width:1,height:1},white:{}},{body:{},upper:{},forearm:{},hand:{}},P.pose(f));const balls=calls.filter(a=>[closed,opened,half].includes(a[0]));assert.equal(balls.length,1,'Motion cues must not duplicate the actual Ball');const call=balls[0];assert.ok(22*call[7]/call[3]>=6.5,'Transparent crop shrank the visible closed sphere');}
+ const a=P.pose(40).hand,b=P.pose(46).hand;assert.ok((b.x-a.x)/6>1.1,'The last authored contact interval must carry a visible forward impulse');
+ for(const f of [0,46,54,61,76,128,150]){const calls=[],c={save(){},restore(){},translate(){},scale(){},rotate(){},drawImage(...args){calls.push(args);},beginPath(){},ellipse(){},fill(){},stroke(){},moveTo(){},lineTo(){}};const closed={},opened={},half={};P.draw(c,{balls:{0:closed,9:half,10:opened},minccino:{width:1,height:1},white:{}},{atlas:{}},P.pose(f));const balls=calls.filter(a=>[closed,opened,half].includes(a[0]));assert.equal(balls.length,1,'Motion cues must not duplicate the actual Ball');const call=balls[0];assert.ok(22*call[7]/call[3]>=6.5,'Transparent crop shrank the visible closed sphere');}
 });
 test('the Ball motion trail follows its real past path and fades before it opens',()=>{
  for(const f of [48,54,61,70]){const p=P.pose(f);assert.ok(p.trail.length>0&&p.trail.length<=4);for(const t of p.trail){assert.ok(t.frame<f&&t.frame>=46);const actual=P.pose(t.frame).ball;assert.ok(Math.hypot(t.x-actual.x,t.y-actual.y)<1e-8);}}

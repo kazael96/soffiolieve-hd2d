@@ -22,7 +22,8 @@
    const gradient=c.createLinearGradient(0,0,0,140);gradient.addColorStop(0,'#e3f5f4');gradient.addColorStop(1,'#b8ddd1');c.fillStyle=gradient;c.fillRect(0,0,256,192);
    c.fillStyle='#f2faf6';c.beginPath();c.ellipse(128,125,80,12,0,0,Math.PI*2);c.fill();
    if(releasePose)root.IntroPokeball.draw(c,images,parts,releasePose);
-   else if(portrait==='minccino'&&parts)root.IntroPokeball.draw(c,images,parts,root.IntroPokeball.pose(162));
+    else if(portrait==='minccino'&&parts)root.IntroPokeball.draw(c,images,parts,root.IntroPokeball.pose(162));
+    else if(portrait==='aralia'&&parts)root.IntroPokeball.draw(c,images,parts,root.IntroPokeball.pose(0));
    else{
     const actor=(key,x,height=122)=>{const image=images[key],bounds=root.INTRO_FULLBODY_ASSETS.actors[key]?.bounds;if(!image||!bounds)return;const scale=height/(bounds[3]-bounds[1]);c.drawImage(image,x-(key==='aralia'?96:(bounds[0]+bounds[2])/2)*scale,130-bounds[3]*scale,image.width*scale,image.height*scale);};
     if(portrait==='friends'){actor('Belle',88,118);actor('Komor',168,122);}else actor(portrait,portrait==='aralia'?72:128);
@@ -59,7 +60,7 @@
    if(release||step==='pokemon-release')return;
    const token=++releaseToken;step='pokemon-release';dialog.dataset.step=step;controls([]);root.resetInput?.();
    const text='Aralia lancia una Poké Ball!';
-   release=root.IntroPokeball.play({paint:p=>paint(text,'aralia',p),onFrame:p=>{dialog.dataset.releaseFrame=String(p.frame);dialog.dataset.releasePhase=p.phase;},sound:id=>void root.AudioEngine?.playSound(id),cry:()=>void root.AudioEngine?.cry(572)});
+   release=root.IntroPokeball.play({paint:p=>paint(text,'aralia',p),onFrame:p=>{dialog.dataset.releaseFrame=String(p.frame);dialog.dataset.releaseCel=String(p.actor.cell);dialog.dataset.releasePhase=p.phase;},sound:id=>void root.AudioEngine?.playSound(id),cry:()=>void root.AudioEngine?.cry(572)});
    try{const shown=await release.promise;if(token!==releaseToken||!dialog.isConnected)return;release=null;if(shown)page('pokemon');}
    catch(error){if(token===releaseToken){release=null;failed(error,()=>void showPokemon());}}
   }
@@ -78,7 +79,8 @@
     if(!data||!native)throw Error('Risorse della presentazione mancanti');
     const loadImage=src=>root.RuntimeAssets.image(src);
     [font,frame]=await Promise.all([loadImage(root.NAMING_ASSETS.font.src),loadImage(root.COMMON_DIALOGUE_ASSETS.images.fieldDialogue.src)]);
-    const entries=await Promise.all(Object.entries({...native.actors,minccino:data.intro.minccino}).map(async([key,src])=>[key,await loadImage(typeof src==='string'?src:src.src)]));images=Object.fromEntries(entries);
+     const actors=Object.fromEntries(['aralia','Alcide','Anita','Belle','Komor','araliaThrow'].map(key=>[key,native.actors[key]]));
+     const entries=await Promise.all(Object.entries({...actors,minccino:data.intro.minccino}).map(async([key,src])=>[key,await loadImage(typeof src==='string'?src:src.src)]));images=Object.fromEntries(entries);
     const balls=await Promise.all(root.IntroPokeball.assets.map(loadImage));images.balls={0:balls[0],9:balls[1],10:balls[2]};images.white=root.IntroPokeball.white(images.minccino);parts=root.IntroPokeball.sprites(images);page('welcome');
    }catch(error){failed(error,()=>void load());}
   }

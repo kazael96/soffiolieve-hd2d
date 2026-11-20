@@ -37,6 +37,8 @@ Riferimento corrente: [CITY-CONTINUITY-037.md](CITY-CONTINUITY-037.md). Dopo il 
 
 ### D. Mosse, Pokémon e reazioni
 
+Dal20 novembre2026 applicare [ANIMATION-QUALITY.md](ANIMATION-QUALITY.md) a tutte le animazioni del gioco, comprese figure umane, introduzione, oggetti e transizioni. Le skill `sprite-animation` e `pixel-art-fundamentals` guidano costruzione e critica. Giudicare pose, anatomia, ritmo e contatti separatamente da correttezza del pacchetto e test del runtime. Una sequenza funzionante o un inventario numerico non certificano la naturalezza del movimento. La revisione dell'intero catalogo resta distinta dall'applicazione del metodo alle modifiche correnti.
+
 - Misurare la copertura per coppia specie/forma–mossa, includendo ogni fonte di apprendimento resa disponibile. La priorità iniziale entro il livello 10 è stata ampliata alle mosse della demo: mantenere e aggiornare la [matrice corrente 0.49](SPECIES-MOVES-049.md),1760 coppie su85 specie e forme predisposte fino al livello35, distinguendo sempre specie effettivamente ottenibili e verifiche grafiche dai soli controlli numerici. Le matrici precedenti restano riferimenti storici.
 - Animare coerentemente sia la mossa sia il Pokémon che la esegue: corpo, anatomia, punto di emissione/contatto, traiettorie e recupero. Integrare effetti originali, sequenze senza particelle, contesti speciali e movimenti di camera pertinenti.
 - Ogni coreografia e reazione deve funzionare per il giocatore e per l’avversario. Il bersaglio reagisce in modo coerente con impatto, esito, stato e numero dei colpi; distinguere mancato bersaglio, fallimento e mosse rivolte a sé stessi.

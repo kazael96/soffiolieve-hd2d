@@ -1,0 +1,529 @@
+{
+  "method": "Built-in image_gen.imagegen",
+  "first": "Create a production animation key-pose sprite sheet for a browser RPG, using the attached native Professor Juniper / Professoressa Aralia Pok\u00c3\u00a9mon Black sprite as the exact character and pixel-art style reference. This is a motion study to replace a stiff cutout puppet with genuinely redrawn full-body poses. Retain the brown high bun with blue band, face, white long lab coat, green short skirt, pale legs, red-white shoes, the original proportions, sprite outlines and restrained DS palette. Full body in EVERY frame, NO head-only portraits, no redesign, no painted shading, no 3D render.\n\nOutput one transparent PNG, square 1536x1536, exactly 4 columns x 3 rows with spacious equal 384x512 cells. Twelve poses in row-major order, all the same camera and anatomical scale, planted front foot aligned to the same baseline in each cell, useful character height about 340px, generous empty margins. Clean pixel-art clusters like the reference enlarged, not blurry illustration. Transparent background, no ground, no platform, no shadows, no labels, no frames or dividers, NO Pok\u00c3\u00a9 Balls or props at all; the game will attach its own ball to the throwing hand.\n\nOne continuous natural gentle underhand Pok\u00c3\u00a9 Ball toss toward screen RIGHT, like confidently tossing a small ball to someone close by. Character retains a three-quarter mostly frontal view, modest torso twist toward the right and natural human joints. Her anatomical RIGHT arm (on viewer's LEFT at rest) throws. Her other hand relaxes by hip, never stays unnaturally behind the head. Both shoes stay grounded in the same positions while knees/hips absorb the gentle weight shift. Neck, shoulders, hips and coat follow the gesture coherently. No rubber limbs or extreme wrist rotations.\nFrames:\n1 relaxed ready stance, throwing forearm bent, palm up near left waist.\n2 hand lowers next to left hip, knees soften.\n3 weight settles slightly back, hand swings behind left hip, elbow mostly relaxed.\n4 deepest gentle backswing, right hand low and a little left behind hip, torso turned slightly back.\n5 forward swing: hand passes low in front of pelvis, torso begins turning toward screen right.\n6 RELEASE: arm has swung FORWARD toward screen right and modestly upward, elbow naturally bent, open palm at chest level well clear of body, wrist follows arm. Torso is slightly forward, not a static torso with a rotated arm.\n7 follow through: open throwing hand reaches right/up, shoulder rotates naturally, elbow unfolds, face follows the invisible ball.\n8 follow through settles: hand still forward right at shoulder height, coat lags subtly.\n9 recovery: elbow bends naturally, hand lowers forward right, torso recenters.\n10 arm returns near waist, coat settling.\n11 open palm ready to receive the returning ball, same stance as frame1.\n12 relaxed ready position matching frame1 precisely.\n\nThe arm path must actually progress between poses; no repeated copies or separate unrelated gestures. Correct fingers and limb ownership, anatomical elbow bending, consistent face/hair and clothing and constant scale across all twelve. No ball drawn anywhere.",
+  "cleanup": "Edit image 2, the twelve-pose sprite sheet. Image 1 is the original native character identity/palette reference. Keep the twelve full-body underhand toss poses, their order, camera, body scale, and positions in image2. Crucial cleanup: REMOVE ALL neon green, pure red, bright yellow and colored fringe/scraps around the coat, legs, shoes, hair and empty background. These stray bright artifacts are errors, not part of the character. Repair the affected edge pixels using the original sprite's dark outline and proper pale lab coat/skin/shoe colors. Keep the green skirt and red shoe accents, but no bright colored fragments outside their actual objects. Genuine transparent alpha background, fully opaque character interiors, crisp pixel-art boundaries, no glows or semi-transparent haze. Maintain brown high bun/blue band and Professor Juniper's original adult face and proportions from image1, not a child. No props, no Pok\u00c3\u00a9 Balls, no text or grid lines. Natural hands and correct connected elbows. Preserve the exact twelve-pose body progression from image2 while cleaning it. Single transparent PNG, four columns and three rows, each full body with all margins.",
+  "reference": "work/faithful-repo/src/assets/intro-fullbody/Aralia.png",
+  "raw1": "aralia-poses-01-raw.png",
+  "raw2": "aralia-poses-02-raw.png",
+  "notes": "Images returned at1254 square despite requested1536. Actual geometry inspected; no claim of generated exact atlas. Colored RGB fringe has alpha1/255, removed only as deterministic alpha packing.",
+  "packaging": {
+    "source": "C:\\Users\\AlessandroCapoccetti\\Documents\\Codex\\2026-10-23\\se\\outputs\\chapter063-preparation\\aralia-poses-02-raw.png",
+    "sourceSHA256": "86947e006fe3f175f4c11c29f8ffc8fda4db4df015ac61828ec6f0cd0d097f4e",
+    "method": "Twelve Imagegen-authored full-body poses; uniform .375 nearest sampling, thresholded generated matte, stable inspected shoe pivot; no independent bbox centering or cutout joint rotations.",
+    "size": [
+      768,
+      576
+    ],
+    "cell": [
+      192,
+      192
+    ],
+    "frames": [
+      {
+        "id": 0,
+        "rect": [
+          0,
+          0,
+          192,
+          192
+        ],
+        "hand": [
+          73,
+          81
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          66,
+          32,
+          121,
+          158
+        ],
+        "sourceRect": [
+          0,
+          0,
+          314,
+          418
+        ],
+        "sourceHand": [
+          107,
+          184
+        ],
+        "sourceFoot": [
+          144,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 1,
+        "rect": [
+          192,
+          0,
+          192,
+          192
+        ],
+        "hand": [
+          74,
+          93
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          66,
+          33,
+          119,
+          158
+        ],
+        "sourceRect": [
+          314,
+          0,
+          627,
+          418
+        ],
+        "sourceHand": [
+          110,
+          216
+        ],
+        "sourceFoot": [
+          144,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 2,
+        "rect": [
+          384,
+          0,
+          192,
+          192
+        ],
+        "hand": [
+          67,
+          102
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          60,
+          35,
+          117,
+          158
+        ],
+        "sourceRect": [
+          627,
+          0,
+          940,
+          418
+        ],
+        "sourceHand": [
+          92,
+          240
+        ],
+        "sourceFoot": [
+          144,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 3,
+        "rect": [
+          576,
+          0,
+          192,
+          192
+        ],
+        "hand": [
+          62,
+          106
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          54,
+          37,
+          114,
+          158
+        ],
+        "sourceRect": [
+          940,
+          0,
+          1254,
+          418
+        ],
+        "sourceHand": [
+          77,
+          248
+        ],
+        "sourceFoot": [
+          144,
+          387
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          13
+        ]
+      },
+      {
+        "id": 4,
+        "rect": [
+          0,
+          192,
+          192,
+          192
+        ],
+        "hand": [
+          102,
+          99
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          58,
+          36,
+          117,
+          158
+        ],
+        "sourceRect": [
+          0,
+          418,
+          314,
+          836
+        ],
+        "sourceHand": [
+          185,
+          232
+        ],
+        "sourceFoot": [
+          144,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 5,
+        "rect": [
+          192,
+          192,
+          192,
+          192
+        ],
+        "hand": [
+          115,
+          81
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          61,
+          35,
+          123,
+          158
+        ],
+        "sourceRect": [
+          314,
+          418,
+          627,
+          836
+        ],
+        "sourceHand": [
+          220,
+          183
+        ],
+        "sourceFoot": [
+          144,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 6,
+        "rect": [
+          384,
+          192,
+          192,
+          192
+        ],
+        "hand": [
+          124,
+          61
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          61,
+          32,
+          131,
+          158
+        ],
+        "sourceRect": [
+          627,
+          418,
+          940,
+          836
+        ],
+        "sourceHand": [
+          243,
+          131
+        ],
+        "sourceFoot": [
+          145,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 7,
+        "rect": [
+          576,
+          192,
+          192,
+          192
+        ],
+        "hand": [
+          133,
+          64
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          62,
+          32,
+          139,
+          158
+        ],
+        "sourceRect": [
+          940,
+          418,
+          1254,
+          836
+        ],
+        "sourceHand": [
+          267,
+          138
+        ],
+        "sourceFoot": [
+          145,
+          388
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          12
+        ]
+      },
+      {
+        "id": 8,
+        "rect": [
+          0,
+          384,
+          192,
+          192
+        ],
+        "hand": [
+          125,
+          73
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          63,
+          33,
+          134,
+          158
+        ],
+        "sourceRect": [
+          0,
+          836,
+          314,
+          1254
+        ],
+        "sourceHand": [
+          244,
+          161
+        ],
+        "sourceFoot": [
+          144,
+          387
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          13
+        ]
+      },
+      {
+        "id": 9,
+        "rect": [
+          192,
+          384,
+          192,
+          192
+        ],
+        "hand": [
+          88,
+          90
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          65,
+          33,
+          118,
+          158
+        ],
+        "sourceRect": [
+          314,
+          836,
+          627,
+          1254
+        ],
+        "sourceHand": [
+          147,
+          206
+        ],
+        "sourceFoot": [
+          144,
+          387
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          13
+        ]
+      },
+      {
+        "id": 10,
+        "rect": [
+          384,
+          384,
+          192,
+          192
+        ],
+        "hand": [
+          72,
+          83
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          66,
+          31,
+          120,
+          158
+        ],
+        "sourceRect": [
+          627,
+          836,
+          940,
+          1254
+        ],
+        "sourceHand": [
+          105,
+          186
+        ],
+        "sourceFoot": [
+          144,
+          387
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          13
+        ]
+      },
+      {
+        "id": 11,
+        "rect": [
+          576,
+          384,
+          192,
+          192
+        ],
+        "hand": [
+          74,
+          81
+        ],
+        "foot": [
+          87,
+          158
+        ],
+        "bounds": [
+          66,
+          31,
+          121,
+          158
+        ],
+        "sourceRect": [
+          940,
+          836,
+          1254,
+          1254
+        ],
+        "sourceHand": [
+          110,
+          181
+        ],
+        "sourceFoot": [
+          145,
+          387
+        ],
+        "scale": 0.375,
+        "offset": [
+          33,
+          13
+        ]
+      }
+    ]
+  },
+  "outputSHA256": "94092d4c8de93186668b2b44cf0365eba577a469e3df26367a57a7c99d3ba570"
+}

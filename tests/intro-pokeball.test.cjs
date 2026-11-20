@@ -4,13 +4,17 @@ test('all five introduction actors use complete native new-game cells, with sepa
  const fs=require('fs'),path=require('path'),vm=require('vm'),crypto=require('crypto'),context={window:{}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/intro-fullbody-assets.js'),'utf8'),context);const catalog=context.window.INTRO_FULLBODY_ASSETS;
  assert.equal(catalog.archive,'a/1/7/0');const hashes=new Set();for(const key of ['aralia','Alcide','Anita','Belle','Komor']){const row=catalog.actors[key],raw=fs.readFileSync(path.join(__dirname,'../src',row.src));assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),row.sha256);hashes.add(row.sha256);assert.deepEqual([raw.readUInt32BE(16),raw.readUInt32BE(20)],[192,192]);assert.ok(row.bounds[1]>0&&row.bounds[3]<192&&row.bounds[3]-row.bounds[1]>=70,'Native full-body bounds must fit with head and feet');assert.ok(!row.src.includes('phone'));}assert.equal(hashes.size,5);
  for(const key of ['araliaBody','araliaUpper','araliaForearm','araliaHand'])assert.ok(catalog.actors[key]?.source.multiCell===2);
- const image={width:192,height:192};assert.deepEqual(Object.keys(P.sprites({araliaBody:image,araliaUpper:image,araliaForearm:image,araliaHand:image,araliaHead:image,araliaTorso:image,araliaCoatLeft:image,araliaCoatRight:image})),['body','upper','forearm','hand','head','torso','coatLeft','coatRight']);assert.throws(()=>P.sprites({araliaBody:{width:128,height:192}}),/incomplete/);
+ const atlas={width:768,height:576};assert.deepEqual(P.sprites({araliaThrow:atlas}),{atlas});assert.throws(()=>P.sprites({araliaThrow:{width:192,height:192}}),/incomplete/);assert.throws(()=>P.sprites({}),/incomplete/);
+ const authored=catalog.actors.araliaThrow,raw=fs.readFileSync(path.join(__dirname,'../src',authored.src));assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),authored.sha256);assert.deepEqual([raw.readUInt32BE(16),raw.readUInt32BE(20)],[768,576]);assert.equal(authored.source.authored,true);assert.equal(authored.source.poses,12);
 });
-test('rendered two-joint hand matches the physical ball anchor throughout the full-body choreography',()=>{
- for(const f of P.checkpoints){let m=[1,0,0,1,0,0],stack=[],hand;const mul=n=>{const[a,b,c,d,e,g]=m,[h,i,j,k,l,o]=n;m=[a*h+c*i,b*h+d*i,a*j+c*k,b*j+d*k,a*l+c*o+e,b*l+d*o+g];};const handImage={},c={save(){stack.push([...m]);},restore(){m=stack.pop();},translate(x,y){mul([1,0,0,1,x,y]);},scale(x,y){mul([x,0,0,y,0,0]);},rotate(a){mul([Math.cos(a),Math.sin(a),-Math.sin(a),Math.cos(a),0,0]);},drawImage(image){if(image===handImage)hand={x:m[0]*75+m[2]*69+m[4],y:m[1]*75+m[3]*69+m[5]};},beginPath(){},ellipse(){},fill(){},stroke(){},moveTo(){},lineTo(){}};
-  const p=P.pose(f);P.draw(c,{balls:{0:{},9:{},10:{}},minccino:{width:1,height:1},white:{}},{body:{},upper:{},forearm:{},hand:handImage},p);assert.ok(distance(hand,p.hand)<1e-10,'Displayed hand and ball disagree at '+f);assert.equal(stack.length,0);
+
+test('the actual rendered cel projects its inspected palm to the held sphere contact without cutout rotations',()=>{
+ const palmLandmarks=[[73,81],[74,93],[67,102],[62,106],[102,99],[115,81],[124,61],[133,64],[125,73],[88,90],[72,83],[74,81]],atlas={};
+ for(const f of P.checkpoints){let depth=0,body;const c={save(){depth++;},restore(){depth--;},translate(){},scale(){},rotate(){},drawImage(image,...a){if(image===atlas){assert.equal(body,undefined);body=a;}},beginPath(){},ellipse(){},fill(){},stroke(){},moveTo(){},lineTo(){}};
+  const p=P.pose(f);P.draw(c,{balls:{0:{},9:{},10:{}},minccino:{width:1,height:1},white:{}},{atlas},p);assert.ok(body);const [sx,sy,sw,sh,dx,dy,dw,dh]=body,index=sy/192*4+sx/192;assert.equal(sw,192);assert.equal(sh,192);assert.equal(dw/sw,dh/sh);const landmark=palmLandmarks[index];assert.ok(landmark);const palm={x:dx+landmark[0]*dw/sw,y:dy+landmark[1]*dh/sh};assert.ok(distance(palm,p.palm)<1e-10,'Displayed palm mismatch at '+f);if(f<46||f>=150){assert.ok(Math.abs(p.ball.y+p.ball.size*22/64-palm.y)<1e-10);assert.ok(Math.abs(p.ball.x-palm.x-1)<1e-10);}assert.equal(depth,0);
  }
 });
+
 test('Aralia holds the ball in the moving hand until release; flight and return are continuous',()=>{
  for(let f=0;f<46;f+=.2){const p=P.pose(f);assert.equal(distance(p.ball,p.hand),0);assert.equal(p.pokemon.visible,false);}
  assert.ok(P.pose(34).hand.x<60,'Windup remains behind the throwing shoulder');assert.ok(P.pose(34).hand.y>P.pose(14).hand.y+10);
@@ -50,4 +54,11 @@ test('fractional browser timestamps cannot step over an almost reached checkpoin
   assert.ok(p.frame<target&&target-p.frame<1e-7);assert.equal(c.tick(now+=16.7,{rate}).frame,target,'The actual checkpoint must still be displayed at x'+rate);
   assert.ok(c.tick(now+=16.7,{rate}).frame>target,'A displayed checkpoint must not hold the clock forever');
  }
+});
+
+test('every authored body cel survives slow rendering and x4; returning ball clears the face',()=>{
+ assert.equal(new Set(P.poses.map(p=>p[1])).size,12);
+ for(const rate of [1,2,4]){const clock=P.clock(),cells=new Set();let now=0;cells.add(clock.tick(now).actor.cell);for(let i=0;i<2000&&!clock.done;i++)cells.add(clock.tick(now+=i%2?240:16.7,{rate}).actor.cell);assert.equal(clock.done,true);assert.deepEqual([...cells].sort((a,b)=>a-b),Array.from({length:12},(_,i)=>i));}
+ for(let f=128;f<=150;f+=.05){const p=P.pose(f);if(p.ball.x>=60&&p.ball.x<=100)assert.ok(p.ball.y>=68,'Returning sphere crosses the face at '+f);}
+ assert.equal(P.pose(162).actor.cell,P.pose(0).actor.cell);
 });

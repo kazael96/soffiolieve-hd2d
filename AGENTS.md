@@ -1,5 +1,11 @@
 # Regole vincolanti di Soffiolieve HD-2D
 
+## Qualità di tutte le animazioni · 20 novembre2026
+
+Applicare [ANIMATION-QUALITY.md](docs/ANIMATION-QUALITY.md) a tutte le nuove animazioni e alle revisioni: personaggi, Pokémon, mosse e reazioni su entrambi i lati, MN sul campo, oggetti, camera e transizioni. Usare le skill `sprite-animation` e `pixel-art-fundamentals` quando disponibili, mantenendo il metodo documentato anche su altri ambienti. La preferenza dell'utente e le regole del progetto prevalgono su domande o workflow generici delle skill; ricavare dal progetto risoluzione, palette e contesto già definiti. Non chiedere di nuovo informazioni già presenti.
+
+Il lancio0.62 è stato rifiutato dall'utente per rigidità e naturalezza: i vecchi PASS restano prove tecniche storiche, non approvazione estetica. [ARALIA-AUTHORED-063.md](docs/ARALIA-AUTHORED-063.md) sostituisce per questo lancio il precedente metodo di rotazione dei ritagli con pose complete disegnate appositamente, riferite alla figura nativa. Conservare gli originali e distinguere l'adattamento dalla sequenza estratta dalla ROM. Registrare un metodo per tutte le animazioni non certifica una revisione già compiuta su tutte.
+
 ## Regia del lancio e Nero2 → HD-2D · 19 novembre2026
 
 Applicare [INTRO-DIRECTOR-062.md](docs/INTRO-DIRECTOR-062.md): conservare leggibilità, impulso e contatto della Ball e la tappa Smeraldo sulla griglia GBA. Le tappe sono sette, con Nero2 prima dell'HD-2D. L'ultimo passaggio usa una sola scena e camera realmente mobile, sincronizzata con la resa grafica; vietata una semplice fusione di vedute statiche differenti. Il proprietario privato riusa superfici e framebuffer e si libera a conclusione, annullamento o errore, senza chiamare sistemi del campo attivo. Conservare i12 replay, i tre formati, le tre velocità e il recupero da perdita reale del contesto privato. Richiedere camera del campo invariata e zero viste private residue, oltre alla revisione dei117PNG e alle regressioni precedenti.
