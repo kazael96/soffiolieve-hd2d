@@ -1,10 +1,15 @@
 /* Controller/ownership tests. These do not certify world-rendered pixels. */
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+/* CPU Canvas state observer: record actual drawImage matrices, not metadata. */
+function matrixPoint064(m,x,y){return[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];}
+function matrixRecorder064(onImage){let mirrored=false,m=[1,0,0,1,0,0],stack=[];const multiply=b=>{const a=m;m=[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];},state=()=>({mirrored,matrix:m.slice()}),context=new Proxy({},{get:(_,key)=>key==='getImageData'?(()=>({data:new Uint8Array(4096)})):key==='drawImage'?((image,...args)=>onImage(image,args,state())):key==='save'?(()=>stack.push({mirrored,m:m.slice()})):key==='restore'?(()=>{const prior=stack.pop();mirrored=prior.mirrored;m=prior.m;}):key==='scale'?((x,y)=>{if(x<0)mirrored=!mirrored;multiply([x,0,0,y,0,0]);}):key==='translate'?((x,y)=>multiply([1,0,0,1,x,y])):key==='rotate'?(a=>multiply([Math.cos(a),Math.sin(a),-Math.sin(a),Math.cos(a),0,0])):()=>{}});return{context,state};}
+
 function setup(){
  const calls={pins:0,releases:0},n={zone:152},party=[{id:501,name:'Oshawott',pp:[{id:57}]}];
+ const nativeSnapshots=new Proxy({},{get(cache,key){if(typeof key!=='string')return cache[key];if(cache[key])return cache[key];const data=JSON.parse(fs.readFileSync(path.join(process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site'),'assets/animated/'+key+'.json'),'utf8'));return cache[key]={data,groundBounds:[-128,-128,128,0]};}}); // Controller fixture only: native tracks, conservative geometry; no pixel acceptance.
  const image={width:32,height:32},context=new Proxy({drawImage(){},getImageData(){return {data:new Uint8Array(4096)};}},{get:(target,key)=>key in target?target[key]:()=>{}});
- const c={console,Promise,Map,WeakMap,document:{hidden:false,createElement:()=>({getContext:()=>context})},NativeStory:{state:n},Journey:{state:{party,original:n}},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},SURF_FIELD_ASSETS:{sprites:{AlcideSurf:Array(12).fill('surf')}},RuntimeAssets:{image:async()=>image},ROM_SPRITE_ANIM:{pin(){calls.pins++;return ()=>calls.releases++;},prepare:async()=>{},draw:()=>true,alphaBounds:()=>[0,0,32,32]}};
- c.window=c;vm.createContext(c);for(const f of ['pokemon-visuals.js','field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js','field-hm-world.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',f),'utf8'),c,{filename:f});return {c,n,party,calls,world:c.FieldHMWorld};
+ const c={console,Promise,Map,WeakMap,setTimeout,clearTimeout,Image:class{set src(value){const png=Buffer.from(value.split(',')[1],'base64');this.naturalWidth=png.readUInt32BE(16);this.naturalHeight=png.readUInt32BE(20);queueMicrotask(()=>this.onload?.());}},document:{hidden:false,createElement:()=>({getContext:()=>context})},NativeStory:{state:n},Journey:{state:{party,original:n}},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},SURF_FIELD_ASSETS:{sprites:{AlcideSurf:Array(12).fill('surf')}},RuntimeAssets:{image:async()=>image},ROM_SPRITE_ANIM:{cache:nativeSnapshots,frame:a=>a.frames[0],pin(){calls.pins++;return ()=>calls.releases++;},prepare:async()=>{},draw:()=>true,alphaBounds:()=>[0,0,32,32]}};
+ c.window=c;vm.createContext(c);for(const f of ['pokemon-visuals.js','field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js','field-hm-oshawott-cut.js','field-hm-evolved-cut.js','field-hm-world.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',f),'utf8'),c,{filename:f});return {c,n,party,calls,world:c.FieldHMWorld};
 }
 test('changing player sex rebuilds the native rider bank for the same Pokemon without leaking pins',async()=>{
  const {c,world,calls}=setup(),loaded=[];c.PLAYER_ASSETS={sprites:{Anita:Array(12).fill('female-standing'),AnitaSurf:Array(12).fill('female-sitting')}};
@@ -41,8 +46,7 @@ function finishField(world,c,renderer){const f=fieldPresenter(world,c,renderer);
 async function flyFrame({height=7,yaw=0,direction=1,elapsed=1.94,graphic=519,pitch=[0,1],phase=elapsed>1.5?'arrive':'depart'}={}){
  const a=setup(),{c,n,world}=a,draws=[],images=[];n.zone=28;n.fieldHeight=height;
  c.OPENING_SPRITES.Alcide=Array.from({length:12},(_,i)=>'hero-'+i);c.SURF_FIELD_ASSETS.sprites.AlcideSurf=Array.from({length:12},(_,i)=>'surf-'+i);c.RuntimeAssets.image=async src=>({width:32,height:32,src});
- let mirrored=false;const stack=[];const context=new Proxy({}, {get:(_,key)=>key==='getImageData'?(()=>({data:new Uint8Array(4096)})):key==='drawImage'?((...args)=>images.push({...args[0],mirrored,drawArgs:args.slice(1)})):key==='save'?(()=>stack.push(mirrored)):key==='restore'?(()=>{mirrored=stack.pop()??false;}):key==='scale'?((x)=>{if(x<0)mirrored=!mirrored;}):()=>{}});c.document.createElement=()=>({width:512,height:512,getContext:()=>context});
- c.ROM_SPRITE_ANIM.draw=(...args)=>{draws.push(Object.assign(args,{mirrored}));return true;};c.SpeciesMoves={select:()=>({frames:10}),sample:()=>({})};
+ const recorder=matrixRecorder064((image,drawArgs,state)=>images.push({...image,...state,drawArgs})),context=recorder.context;c.document.createElement=()=>({width:512,height:512,getContext:()=>context});c.ROM_SPRITE_ANIM.draw=(...args)=>{draws.push(Object.assign(args,recorder.state()));return true;};c.SpeciesMoves={select:()=>({frames:10}),sample:()=>({})};
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/native-rails.js'),'utf8'),c);
  const renderer={scene:{zone:28},cameraPitch:pitch,yaw,groundHeight:()=>7,upload:()=>({texture:{},w:512,h:512}),gl:{isTexture:()=>true,bindTexture(){},texSubImage2D(){}}};
  const task=await world.start({id:graphic},19,{phase,duration:2,direction,height:7});world.active.elapsed=elapsed;
@@ -50,17 +54,17 @@ async function flyFrame({height=7,yaw=0,direction=1,elapsed=1.94,graphic=519,pit
 }
 test('the standing rider reaches the exact composite seat before Fly attaches it, including lean, squash and camera pitch',async()=>{
  const pitch=[Math.sin(.44),Math.cos(.44)],yaw=.6,epsilon=1e-8;
- for(const graphic of [519,567,623,635])for(const direction of [0,1,2,3]){
+ for(const graphic of [519,567,580,581,623,635])for(const direction of [0,1,2,3]){
   const before=await flyFrame({graphic,direction,pitch,yaw,elapsed:2*(.35-epsilon)}),after=await flyFrame({graphic,direction,pitch,yaw,elapsed:2*(.35+epsilon)}),hero=before.actors.find(a=>!a.fieldHM&&a.hero),card=after.actors.find(a=>a.fieldHM),image=after.images.filter(i=>i.drawArgs.length===8).at(-1);assert.ok(hero&&card&&image);
-  const d=image.drawArgs,sx=(d[4]+d[6]/2-256)/64,sy=(384-d[5]-d[7])/64,base={x:card.x-2*pitch[0]*Math.sin(yaw),z:card.z-2*pitch[0]*Math.cos(yaw),height:card.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};
+  const d=image.drawArgs,feet=matrixPoint064(image.matrix,d[4]+d[6]/2,d[5]+d[7]),sx=(feet[0]-256)/64,sy=(384-feet[1])/64,base={x:card.x-2*pitch[0]*Math.sin(yaw),z:card.z-2*pitch[0]*Math.cos(yaw),height:card.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};
   assert.ok(Math.hypot(hero.x-seat.x,hero.z-seat.z,hero.height-seat.height)<1e-5,`Fly attachment jumps at ${graphic}/${direction}: hero=${JSON.stringify(hero)} seat=${JSON.stringify(seat)}`);
  }
 });
 test('Fly landing releases the rider at the exact composite seat with the raised view, yaw, lean and squash',async()=>{
  const pitch=[Math.sin(62*Math.PI/180),Math.cos(62*Math.PI/180)],yaw=-.6,epsilon=1e-8;
- for(const graphic of [519,567,623,635])for(const direction of [0,1,2,3]){
+ for(const graphic of [519,567,580,581,623,635])for(const direction of [0,1,2,3]){
   const before=await flyFrame({graphic,direction,pitch,yaw,phase:'arrive',elapsed:2*(.65-epsilon)}),after=await flyFrame({graphic,direction,pitch,yaw,phase:'arrive',elapsed:2*(.65+epsilon)}),hero=after.actors.find(a=>!a.fieldHM&&a.hero),card=before.actors.find(a=>a.fieldHM),image=before.images.filter(i=>i.drawArgs.length===8).at(-1);assert.ok(hero&&card&&image);
-  const d=image.drawArgs,sx=(d[4]+d[6]/2-256)/64,sy=(384-d[5]-d[7])/64,base={x:card.x-2*pitch[0]*Math.sin(yaw),z:card.z-2*pitch[0]*Math.cos(yaw),height:card.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};
+  const d=image.drawArgs,feet=matrixPoint064(image.matrix,d[4]+d[6]/2,d[5]+d[7]),sx=(feet[0]-256)/64,sy=(384-feet[1])/64,base={x:card.x-2*pitch[0]*Math.sin(yaw),z:card.z-2*pitch[0]*Math.cos(yaw),height:card.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};
   assert.ok(Math.hypot(hero.x-seat.x,hero.z-seat.z,hero.height-seat.height)<1e-5,`Fly landing detached discontinuously at ${graphic}/${direction}`);
  }
 });
@@ -89,12 +93,12 @@ test('entering a native Surf landing retains the previous swimming joint pose be
 });
 
 test('Surf mounting and dismounting share the exact visible composite seat in all four directions',async()=>{
- for(const graphic of [501,503,508,635])for(const direction of [0,1,2,3])for(const landing of [false,true]){
-  const {c,n,world}=setup(),images=[],pitch=[Math.sin(.44),Math.cos(.44)],yaw=-.6,context=new Proxy({},{get:(_,key)=>key==='getImageData'?(()=>({data:new Uint8Array(4096)})):key==='drawImage'?((...args)=>{if(args.length===9)images.push(args.slice(1));}):()=>{}});c.document.createElement=()=>({getContext:()=>context});c.ROM_SPRITE_ANIM.draw=()=>true;c.SurfField={mounted:()=>true};c.moving=true;Object.assign(c.Journey.state.party[0],{id:graphic,name:({501:'Oshawott',503:'Samurott',508:'Stoutland',635:'Hydreigon'})[graphic]});n.surf=true;n.surfUserIndex=0;n.fieldHeight=3.2;
+ for(const graphic of [501,503,507,508,515,516,580,581,635])for(const direction of [0,1,2,3])for(const landing of [false,true]){
+  const {c,n,world}=setup(),images=[],pitch=[Math.sin(.44),Math.cos(.44)],yaw=-.6,context=matrixRecorder064((image,args,state)=>{if(args.length===8)images.push(Object.assign(args,{matrix:state.matrix}));}).context;c.document.createElement=()=>({getContext:()=>context});c.ROM_SPRITE_ANIM.draw=()=>true;c.SurfField={mounted:()=>true};c.moving=true;Object.assign(c.Journey.state.party[0],{id:graphic,name:({501:'Oshawott',503:'Samurott',508:'Stoutland',635:'Hydreigon'})[graphic]});n.surf=true;n.surfUserIndex=0;n.fieldHeight=3.2;
   const renderer={cameraPitch:pitch,yaw,gl:{isContextLost:()=>false,isTexture:()=>true,bindTexture(){},texSubImage2D(){}},upload:()=>({texture:{}})},actors=()=>[{name:'AlcideSurf',hero:true,x:1,z:2,height:3.2,frame:direction*3}];await world.prepare(c.Journey.state.party[0],57);let riderCard,standing,time=0;
-  if(landing){world.present(renderer,0,actors());time=.26/c.FieldHMProfiles.profile(c.Journey.state.party[0],57).cadence;riderCard=world.present(renderer,time,actors()).find(a=>a.fieldHM);n.surfMotion={landing:true,phase:'move',from:{x:1,y:2,height:3.2},to:{x:1,y:1,height:3.2},travel:0,direction,wait:0};standing=world.present(renderer,time,actors()).find(a=>!a.fieldHM&&a.hero);}
+  if(landing){world.present(renderer,0,actors());time=.26/c.FieldHMProfiles.profile(c.Journey.state.party[0],57).cadence;riderCard=world.present(renderer,time,actors()).find(a=>a.fieldHM);n.surfMotion={landing:true,phase:'move',from:{x:1,y:2,height:3.2},to:{x:1,y:1,height:3.2},travel:0,direction,wait:0};standing=world.present(renderer,time,actors()).find(a=>!a.fieldHM&&a.hero);if(!standing){const poses=[];for(let i=0;i<16&&!standing;i++){const current=world.present(renderer,time,actors());riderCard=current.find(a=>a.fieldHM)||riderCard;standing=current.find(a=>!a.fieldHM&&a.hero);if(standing)break;const im=images.at(-1);poses.push(Math.abs(Math.atan2(im.matrix[1],im.matrix[0])));world.rendered(renderer);world.surfBudget(n.surfMotion,.04);}assert.ok(standing,'The private balance stage did not finish');assert.ok(poses.length>=5,'The balance stage skipped required poses');assert.ok(poses[0]>.19&&poses.at(-1)<1e-10);assert.ok(poses.every((v,i)=>!i||v<=poses[i-1]+1e-10),'Landing balance must unwind progressively');}}
   else{n.surfMotion={landing:false,phase:'move',from:{x:1,y:1,height:3.2},to:{x:1,y:2,height:3.2},travel:1-1e-9,direction,wait:0};standing=world.present(renderer,0,actors()).find(a=>!a.fieldHM&&a.hero);delete n.surfMotion;riderCard=world.present(renderer,0,actors()).find(a=>a.fieldHM);}
-  const d=images.at(-1),sx=(d[4]+d[6]/2-256)/64,sy=(384-d[5]-d[7])/64,base={x:riderCard.x-2*pitch[0]*Math.sin(yaw),z:riderCard.z-2*pitch[0]*Math.cos(yaw),height:riderCard.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};assert.ok(Math.hypot(standing.x-seat.x,standing.z-seat.z,standing.height-seat.height)<1e-6,`Surf seat discontinuity ${graphic}/${direction}/${landing}`);world.clear();
+  const d=images.at(-1),feet=matrixPoint064(d.matrix,d[4]+d[6]/2,d[5]+d[7]),sx=(feet[0]-256)/64,sy=(384-feet[1])/64,base={x:riderCard.x-2*pitch[0]*Math.sin(yaw),z:riderCard.z-2*pitch[0]*Math.cos(yaw),height:riderCard.height+2*pitch[1]},seat={x:base.x+sx*Math.cos(yaw)-sy*pitch[0]*Math.sin(yaw),z:base.z-sx*Math.sin(yaw)-sy*pitch[0]*Math.cos(yaw),height:base.height+sy*pitch[1]};assert.ok(Math.hypot(standing.x-seat.x,standing.z-seat.z,standing.height-seat.height)<1e-6,`Surf seat discontinuity ${graphic}/${direction}/${landing}`);world.clear();
  }
 });
 
@@ -161,6 +165,29 @@ test('an inactive field action releases its sprite pins instead of pinning the l
 test('world preparation loads and pins both orientations before north-facing Cut or Surf can render',async()=>{
  const {world,c}=setup(),prepared=[],pinned=[];c.ROM_SPRITE_ANIM.prepare=async mons=>prepared.push([...mons]);c.ROM_SPRITE_ANIM.pin=mons=>{pinned.push([...mons]);return ()=>{};};
  await world.prepare({id:496,name:'Servine'},15);assert.deepEqual(prepared.flat().sort(),['496-back','496-front']);assert.deepEqual(pinned.flat().sort(),['496-back','496-front']);
+});
+
+test('only Oshawott Cut uses its authored atlas; Surf keeps the original native bank',async()=>{
+ const {c,n,world}=setup();let originalDraws=0;c.ROM_SPRITE_ANIM.draw=()=>{originalDraws++;return true;};
+ const renderer={cameraPitch:[.423,.906],gl:{isTexture:()=>true,bindTexture(){},texSubImage2D(){}},upload:()=>({texture:{}})},actors=()=>[{name:'Alcide',hero:true,x:0,z:0,height:0,frame:3}];
+ const task=await world.start({id:501},15,{duration:2,target:{x:0,y:1}});const rejected=assert.rejects(task.finished,/annullata/);world.active.elapsed=1.04;world.present(renderer,0,actors());
+ assert.equal(originalDraws,0);assert.equal(world.inspectCard(renderer).authoredAtlas,'oshawott-cut-064');assert.equal(world.retained.authoredAtlasBytes,1806336);world.clear();await rejected;assert.equal(world.retained.authoredAtlasBytes,0);
+ c.SurfField={mounted:()=>true};n.surfUserIndex=0;await world.prepare(c.Journey.state.party[0],57);world.present(renderer,0,actors());assert.ok(originalDraws>0);assert.equal(world.inspectCard(renderer).authoredAtlas,undefined);assert.equal(world.retained.authoredAtlasBytes,0);world.clear();
+});
+
+test('evolved Cut owns a single decoded source across species switches and releases it before Surf',async()=>{
+ const {c,world,calls}=setup(),f=fieldPresenter(world,c);let originalDraws=0;c.ROM_SPRITE_ANIM.draw=()=>{originalDraws++;return true;};
+ for(const graphic of [501,502,503,502]){
+  const task=await world.start({id:graphic},15,{duration:2,target:{x:0,y:1}}),rejected=assert.rejects(task.finished,/annullata/);world.active.elapsed=1.04;f.draw();assert.equal(originalDraws,0);assert.equal(world.inspectCard(f.renderer).authoredAtlas,graphic===501?'oshawott-cut-064':graphic===502?'dewott-cut-064':'samurott-cut-064');assert.equal(world.retained.authoredAtlasBytes,graphic===501?1806336:graphic===502?2490368:6230016);world.clear();await rejected;assert.equal(world.retained.authoredAtlasBytes,0);
+ }
+ await world.prepare({id:503},15);await world.prepare({id:502},15);assert.equal(c.FieldHMEvolvedCut.stats.graphic,502);assert.equal(c.FieldHMEvolvedCut.stats.retainedAtlases,1);assert.equal(world.retained.authoredAtlasBytes,2490368);
+ await world.prepare({id:502},57);assert.equal(world.retained.authoredAtlasBytes,0);world.clear();assert.equal(calls.pins,calls.releases);
+});
+
+test('a cancelled atlas decode cannot create a late Cut action or replace the following bank',async()=>{
+ const {c,world,calls}=setup(),images=[];c.Image=class{constructor(){this.naturalWidth=448;this.naturalHeight=1008;images.push(this);}set src(value){this.source=value;}};
+ const old=world.start({id:501},15,{target:{x:0,y:1}}),rejected=assert.rejects(old,/sostituita/);await new Promise(setImmediate);assert.equal(images.length,1);assert.equal(world.active,null,'No action may start before its source is decoded');
+ world.clear();await world.prepare({id:519},19);images[0].onload();await rejected;assert.equal(world.active,null);assert.equal(world.retained.banks,1);assert.equal(world.retained.authoredAtlasBytes,0);assert.equal(calls.pins-calls.releases,1);world.clear();assert.equal(calls.pins,calls.releases);
 });
 test('a superseded asynchronous bank cannot replace the newer selected species',async()=>{
  const {world,c,calls}=setup();let resolve;c.ROM_SPRITE_ANIM.prepare=([p])=>p.id===501||p==='501-front'?new Promise(r=>resolve=r):Promise.resolve();const old=world.prepare({id:501},57);await world.prepare({id:519},19);resolve();await assert.rejects(old,/sostituita/);assert.equal(world.retained.banks,1);assert.equal(calls.pins-calls.releases,1);world.clear();assert.equal(calls.pins,calls.releases);
@@ -273,7 +300,7 @@ test('field joint pivots belong to the active native map, not an inactive altern
  const pose={graphic:501,species:501,dir:1,head:0,arms:1,feet:0,tail:0,wings:0,sideHeads:0};const p=c.FieldHMChoreography.part(ids.at(-1),false,pose,data);assert.equal(p.pivotX,0);assert.equal(p.pivotY,0);
 });
 test('joint chains stay rigid around one active pivot and every mapped track is native',()=>{
- const c=exclusiveSetup(),site=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../../fidelity-build-054-field-candidate-08'),done=new Set();
+ const c=exclusiveSetup(),site=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site'),done=new Set();
  for(const p of c.FieldHMProfiles.profiles.values()){if(done.has(p.graphic))continue;done.add(p.graphic);const anatomy=c.FieldHMChoreography.anatomy(p.graphic);assert.ok(anatomy,'Missing native map '+p.graphic);
   for(const back of [false,true]){const data=JSON.parse(fs.readFileSync(path.join(site,'assets/animated',p.graphic+'-'+(back?'back':'front')+'.json'),'utf8')),active=new Map(data.maps[data.parent[0].frames[0][0]].map(row=>[row[0],row])),all=new Set(data.maps.flat().map(row=>row[0])),assigned=new Set(),map=anatomy[back?'back':'front'];assert.ok(map);
    for(const [role,tracks]of Object.entries(map)){if(!Array.isArray(tracks))continue;const rendered=tracks.filter(track=>active.has(track)),transforms=[];
@@ -302,6 +329,26 @@ test('Fly uses its own cruise wing pattern while airborne and retains the author
   const s=c.FieldHMProfiles.sample(p,0,{phase,progress,cycle:.37}),base=c.FieldHMChoreography.sample(p.choreography,phase,progress),loop=c.FieldHMChoreography.sample(p.choreography,'cruise',.37),weight=phase==='depart'&&progress===.7?.65:0;
   for(const key of ['arms','wings','tail','sideHeads'])assert.ok(Math.abs(s[key]-(base[key]*(1-weight)+loop[key]*weight))<1e-9);
  }}
+});
+
+}
+
+/* Additional private CPU contracts. No graphical acceptance inferred. */
+async function balanceFixture064(graphic=580){const a=setup(),{c,n,world}=a,images=[],recorder=matrixRecorder064((image,args,state)=>{if(args.length===8)images.push({args,...state});});c.document.createElement=()=>({width:512,height:512,getContext:()=>recorder.context});c.ROM_SPRITE_ANIM.draw=()=>true;c.SurfField={mounted:()=>true};Object.assign(c.Journey.state.party[0],{id:graphic,name:graphic===613?'Cubchoo':'Ducklett'});n.surf=true;n.surfUserIndex=0;n.fieldHeight=0;await world.prepare(c.Journey.state.party[0],57);const renderer={cameraPitch:[.423,.906],gl:{isTexture:()=>true,bindTexture(){},texSubImage2D(){},isContextLost:()=>false},upload:()=>({texture:{}})},actors=()=>[{name:'AlcideSurf',hero:true,x:1,z:2,height:0,frame:3}];let time=0;return{...a,renderer,images,draw(){const actorsDrawn=world.present(renderer,time,actors());return{actors:actorsDrawn,angle:images.length?Math.atan2(images.at(-1).matrix[1],images.at(-1).matrix[0]):null};},advance(dt){time+=dt;world.tick(dt);},ack(){world.rendered(renderer);}};}
+for(const [graphic,lean,name]of [[580,.2,'Ducklett'],[613,.16,'Cubchoo']]){
+test(name+' mount balance holds every observed pose until an actual render acknowledgement',async()=>{
+ const f=await balanceFixture064(graphic),{n,c,world}=f;try{n.surfMotion={landing:false,phase:'move',from:{x:1,y:1,height:0},to:{x:1,y:2,height:0},travel:1-1e-9,direction:1,wait:16,cells:1,zone:113};f.draw();delete n.surfMotion;assert.equal(f.draw().angle,0);for(let i=0;i<10;i++)f.advance(.3);assert.equal(f.draw().angle,0,'Undrawn mount progressed past its first pose');
+ const angles=[];for(let i=0;i<5;i++){const a=f.draw().angle;angles.push(a);for(let j=0;j<10;j++)f.advance(.3);assert.equal(f.draw().angle,a,'Physics chunks skipped an unacknowledged rider pose');if(i===1){c.document.hidden=true;f.ack();c.document.hidden=false;f.advance(.3);assert.equal(f.draw().angle,a,'Hidden frame acknowledged rider pose');f.renderer.contextLost=true;f.ack();f.renderer.contextLost=false;f.advance(.3);assert.equal(f.draw().angle,a,'Lost-context frame acknowledged rider pose');}f.ack();f.advance(.3);}assert.ok(angles.every((a,i)=>!i||a>angles[i-1]));assert.ok(Math.abs(angles[0])<1e-10&&Math.abs(angles.at(-1)-lean)<1e-10);assert.equal(new Set(angles.map(a=>a.toFixed(6))).size,5);
+ }finally{world.clear();}
+});
+test(name+' dismount unwinds before native travel without writing presentation state into its saveable record',async()=>{
+ const f=await balanceFixture064(graphic),{n,world}=f;try{assert.ok(Math.abs(f.draw().angle-lean)<1e-10);n.surfMotion={landing:true,phase:'move',from:{x:1,y:2,height:0},to:{x:1,y:1,height:0},travel:0,direction:1,wait:16,cells:1,zone:113};const unchanged=JSON.stringify(n.surfMotion),angles=[];
+ for(let i=0;i<5;i++){for(let j=0;j<10;j++)assert.equal(world.surfBudget(n.surfMotion,.3).dt,0,'Native travel started before the rider was upright');const current=f.draw();assert.ok(!current.actors.some(a=>!a.fieldHM&&a.hero),'Free standing avatar appeared before unwind completed');angles.push(current.angle);assert.equal(JSON.stringify(n.surfMotion),unchanged,'Presentation data leaked into save record');f.ack();}
+ assert.ok(angles.every((a,i)=>!i||a<angles[i-1]));assert.ok(Math.abs(angles[0]-lean)<1e-10&&Math.abs(angles.at(-1))<1e-10);assert.ok(world.surfBudget(n.surfMotion,.3).dt>0,'Native travel did not resume');assert.ok(f.draw().actors.some(a=>!a.fieldHM&&a.hero),'Upright standing avatar was not released');assert.equal(JSON.stringify(n.surfMotion),unchanged);
+ }finally{world.clear();}
+});
+test('a freshly restored '+name+' landing or recall never restarts balancing or pulls the avatar back onto the water',async()=>{
+ for(const [phase,travel]of [['move',.4],['recall',1]]){const f=await balanceFixture064(graphic),{n,world}=f;try{n.surfMotion={landing:true,phase,from:{x:1,y:2,height:0},to:{x:1,y:1,height:0},travel,direction:1,wait:0,cells:1,zone:113};const unchanged=JSON.stringify(n.surfMotion);assert.ok(world.surfBudget(n.surfMotion,.03).dt>0,`Restored ${phase}/${travel} restarted the pre-departure balance wait`);assert.ok(f.draw().actors.some(a=>!a.fieldHM&&a.hero),`Restored ${phase}/${travel} pulled the standing avatar back onto the Pokemon`);assert.equal(JSON.stringify(n.surfMotion),unchanged);}finally{world.clear();}}
 });
 
 }

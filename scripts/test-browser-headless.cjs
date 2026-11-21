@@ -28,10 +28,10 @@ async function startServer(o,fixture){
 }
 async function run(o){
  fs.mkdirSync(o.out,{recursive:true});const manifest=JSON.parse(fs.readFileSync(path.join(o.site,'build.json'),'utf8')),fixture=path.join(o.out,'fixture');require('./build-browser-qa.cjs')(o.site,fixture,{preview:o.preview});
- const {chromium}=require(o.playwright);let service,browser;const report={schema:1,build:manifest.revision,version:manifest.version,created:new Date().toISOString(),result:'RUNNING',environment:{headless:true,isolatedProfile:true,rendererRequested:o.renderer,audioOutputMuted:true,personalBrowserAttached:false},requestedCases:o.cases,preview:o.preview||null,viewports:[],limits:['Desktop WebGL backend recorded per viewport, not physical Android GPU certification','Audio engine active when fieldAudio=1; speaker output muted by the test browser','No audible cartridge comparison','Fixture prerequisites remain explicit in individual case details']};
+ const {chromium}=require(o.playwright);let service,browser,browserServer;const report={schema:1,build:manifest.revision,version:manifest.version,created:new Date().toISOString(),result:'RUNNING',environment:{headless:true,isolatedProfile:true,rendererRequested:o.renderer,audioOutputMuted:true,personalBrowserAttached:false},requestedCases:o.cases,preview:o.preview||null,viewports:[],limits:['Desktop WebGL backend recorded per viewport, not physical Android GPU certification','Audio engine active when fieldAudio=1; speaker output muted by the test browser','No audible cartridge comparison','Fixture prerequisites remain explicit in individual case details']};
  const save=()=>fs.writeFileSync(path.join(o.out,'report.json'),JSON.stringify(report,null,2)+'\n');save();
  try{
-  service=await startServer(o,fixture);browser=await chromium.launch(launchOptions(o.browser,o.renderer));report.environment.browser=browser.version();
+  service=await startServer(o,fixture);browserServer=await chromium.launchServer(launchOptions(o.browser,o.renderer));report.environment.ownedBrowserPid=browserServer.process().pid;browser=await chromium.connect(browserServer.wsEndpoint());report.environment.browser=browser.version();
   report.requestedViewports=(o.viewports||viewports).map(v=>v[0]);save();for(const [name,width,height]of o.viewports||viewports){const context=await browser.newContext({viewport:{width,height}}),page=await context.newPage(),errors=[],consoleErrors=[],failedRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});page.on('requestfailed',r=>failedRequests.push({url:r.url(),error:r.failure()?.errorText}));const row={name,viewport:[width,height],result:'RUNNING',cases:[],errors};report.viewports.push(row);save();
    try{
     await page.exposeFunction('DeepQAUiScreenshot',async label=>{if(typeof label!=='string'||!/^(?:052|057) [A-Za-z0-9 ]{1,90}$/.test(label))throw Error('Invalid isolated UI screenshot label');const filename=width+'x'+height+'-'+label.replace(/[^a-zA-Z0-9-]/g,'-')+'.png';await page.screenshot({path:path.join(fixture,filename),timeout:15000});return {filename,viewport:[width,height],actualPage:true};});
@@ -47,7 +47,7 @@ async function run(o){
    if(o.failFast&&row.result==='FAIL'){report.stoppedAfterFailure=name;break;}
   }
   report.result=completeViewports(report.viewports,o.viewports||viewports)?'PASS':'FAIL';
- }catch(e){report.result='FAIL';report.error=String(e.stack||e);throw e;}finally{await browser?.close();service?.server.kill();service?.log.end();save();}
+ }catch(e){report.result='FAIL';report.error=String(e.stack||e);throw e;}finally{report.cleanup=await require('./close-owned-browser.cjs')(browser,browserServer);if(report.cleanup.result!=='PASS')report.result='FAIL';service?.server.kill();service?.log.end();save();}
  return report;
 }
 if(require.main===module)run(options(process.argv.slice(2))).then(r=>{console.log(r.result+' background browser QA');process.exitCode=r.result==='PASS'?0:1;}).catch(e=>{console.error(e);process.exitCode=1;});

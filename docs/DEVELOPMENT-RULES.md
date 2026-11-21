@@ -228,6 +228,10 @@ Il banco usa ora 256 voci per la cache di sola compilazione, mantenendo 96 MiB d
 
 Il tentativo locale precedente in `outputs/chapter055-preparation/deep-exclusive03` resta una baseline interrotta dopo i timeout180 s dei gruppi 3–6; i log e la ricevuta di arresto sono preservati. Il nuovo rapporto completo usa `deep-exclusive03-final`. Registrare il runtime Node effettivo di ogni esecuzione e distinguere le versioni del banco dai browser del gioco. Un nuovo PASS non riscrive i vecchi FAIL.
 
+### Budget delle fixture native · revisione0.64
+
+Il primo gruppo della candidata04 ha superato il limite400MiB durante il confronto di3048 pose, mentre condivideva il processo con gli inventari VM di altri test. Conservare quel FAIL in `outputs/animation-review064/deep-candidate04-r2`; il rapporto non certifica una candidata corretta. Non alzare il limite né rimuovere l'asserzione. I confronti `emboar-contact064.test.cjs` e `battle-actor-framing064.test.cjs`, che misurano la memoria dell'intero processo proprietario, hanno ciascuno un processo sequenziale dedicato. Gli altri file restano distribuiti negli otto gruppi bilanciati. L'inventario completo viene eseguito una sola volta, senza gruppi vuoti, con gli stessi flag Windows/Linux e180s per fase; il registro corrente passa da49 a51 fasi. I test verificano inventario, isolamento e determinismo. La separazione conserva un significato corretto del budget per fixture; un miglioramento complessivo richiede la misura e la nuova suite completa.
+
 ### Identità e tempi di presentazione · 0.56
 
 Per la nuova introduzione conservare la scelta del personaggio e il nome in tutti i sistemi che li mostrano, con immagini native coerenti, tastiera italiana e comandi touch/tastiera. Distinguere i sette caratteri del nuovo nome dai dieci dei soprannomi e dai nomi legacy già salvati. Le partite precedenti proseguono senza ripetere l'introduzione; Ricomincia mantiene conferma e cancellazione verificate. Testi originali lunghi devono essere impaginati senza perdere righe.

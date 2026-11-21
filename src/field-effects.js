@@ -6,6 +6,16 @@
     const tail=Math.max(0,...assets.particles.emitters.map(e=>(effect.emitterStartFrame||0)+(e.delay||0)+(e.emitterLife||0)+(e.life||0)+1));
     return Math.max(effect.frames,tail);
   }
+  // One-frame PAT keys and BVA handoffs must remain visible even when x4 or
+  // a slow renderer advances past them between two browser frames.
+  function checkpoints(effect,assets,end=duration(effect,assets)){
+    const frames=new Set([0,end-1]);
+    for(const name of [effect.background,effect.item]){
+      for(const keys of Object.values(assets.materialTextures?.[name]||{}))for(const key of keys)if(Number.isInteger(key.frame)&&key.frame>=0&&key.frame<end)frames.add(key.frame);
+      for(const values of Object.values(assets.nodeVisibility?.[name]||{}))for(let f=1;f<Math.min(end,values.length);f++)if(values[f]!==values[f-1])frames.add(f);
+    }
+    return [...frames].sort((a,b)=>a-b);
+  }
   function project(matrix,point,w,h){
     const p=[...point,1],clip=Array.from({length:4},(_,i)=>p.reduce((sum,v,j)=>sum+v*matrix[j*4+i],0));
     return {x:(clip[0]/clip[3]+1)*w/2,y:(1-clip[1]/clip[3])*h/2,w:clip[3]};
@@ -51,10 +61,11 @@
   }
   async function play(id){
     root.ParticleSPL.clear();const player=new Player(id);let request;
-    try{await player.ready;const end=duration(player.effect,player.assets);await new Promise((resolve,reject)=>{let last,elapsed=0;
-      const tick=now=>{try{last??=now;elapsed+=(now-last)*(root.GameSpeed?.rate||1);last=now;const frame=Math.min(end-1,Math.floor(elapsed*fieldRate/1000));player.draw(frame);if(elapsed*fieldRate/1000>=end)resolve();else request=requestAnimationFrame(tick);}catch(error){reject(error);}};
+    const doc=root.document;let last;const resetClock=()=>{last=undefined;};doc?.addEventListener?.('visibilitychange',resetClock);
+    try{await player.ready;const end=duration(player.effect,player.assets),required=checkpoints(player.effect,player.assets,end);await new Promise((resolve,reject)=>{let elapsed=0,shown=-1;
+      const tick=now=>{try{last??=now;const delta=Math.max(0,Math.min(100,now-last));last=now;if(!doc?.hidden){elapsed+=delta*(root.GameSpeed?.rate||1);const desired=Math.min(end-1,Math.floor(elapsed*fieldRate/1000)),next=required.find(f=>f>shown&&f<=desired),frame=next??desired;player.draw(frame);shown=frame;if(frame>=end-1&&elapsed*fieldRate/1000>=end){resolve();return;}}request=requestAnimationFrame(tick);}catch(error){reject(error);}};
       request=requestAnimationFrame(tick);
-    });}finally{if(request)cancelAnimationFrame(request);player.destroy();}
+    });}finally{doc?.removeEventListener?.('visibilitychange',resetClock);if(request)cancelAnimationFrame(request);player.destroy();}
   }
-  root.FieldEffects={Player,play,duration,particles,project,fieldRate};
+  root.FieldEffects={Player,play,duration,checkpoints,particles,project,fieldRate};
 })(typeof window!=='undefined'?window:globalThis);

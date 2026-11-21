@@ -1,0 +1,562 @@
+{
+  "scope": "Expected native dorsal/shoulder pixels manually inspected against source art and actual private compositor. The fixture is not approval by metadata; actual command/C3 reviews are separate.",
+  "rows": [
+    {
+      "graphic": 507,
+      "view": "front",
+      "track": 12,
+      "globalNative": [
+        0.5,
+        -24.5
+      ],
+      "trackLocal": [
+        -0.5,
+        -6.5
+      ],
+      "sourceRGBA": [
+        74,
+        74,
+        106,
+        255
+      ]
+    },
+    {
+      "graphic": 507,
+      "view": "back",
+      "track": 5,
+      "globalNative": [
+        -0.5,
+        -23.5
+      ],
+      "trackLocal": [
+        -3.5,
+        -5.5
+      ],
+      "sourceRGBA": [
+        41,
+        49,
+        65,
+        255
+      ]
+    },
+    {
+      "graphic": 508,
+      "view": "front",
+      "track": 8,
+      "globalNative": [
+        14.5,
+        -34.5
+      ],
+      "trackLocal": [
+        7.5,
+        -10.5
+      ],
+      "sourceRGBA": [
+        74,
+        74,
+        106,
+        255
+      ]
+    },
+    {
+      "graphic": 508,
+      "view": "back",
+      "track": 5,
+      "globalNative": [
+        -6.5,
+        -35.5
+      ],
+      "trackLocal": [
+        -1.5,
+        -13.5
+      ],
+      "sourceRGBA": [
+        74,
+        74,
+        106,
+        255
+      ]
+    },
+    {
+      "graphic": 515,
+      "view": "front",
+      "track": 5,
+      "globalNative": [
+        0.5,
+        -16.5
+      ],
+      "trackLocal": [
+        0.5,
+        -13.5
+      ],
+      "sourceRGBA": [
+        24,
+        139,
+        172,
+        255
+      ]
+    },
+    {
+      "graphic": 515,
+      "view": "back",
+      "track": 5,
+      "globalNative": [
+        -0.5,
+        -15.5
+      ],
+      "trackLocal": [
+        -0.5,
+        -12.5
+      ],
+      "sourceRGBA": [
+        32,
+        115,
+        156,
+        255
+      ]
+    },
+    {
+      "graphic": 516,
+      "view": "front",
+      "track": 8,
+      "globalNative": [
+        1.5,
+        -33.5
+      ],
+      "trackLocal": [
+        0.5,
+        1.5
+      ],
+      "sourceRGBA": [
+        197,
+        197,
+        197,
+        255
+      ]
+    },
+    {
+      "graphic": 516,
+      "view": "back",
+      "track": 7,
+      "globalNative": [
+        -4.5,
+        -29.5
+      ],
+      "trackLocal": [
+        -2.5,
+        6.5
+      ],
+      "sourceRGBA": [
+        156,
+        156,
+        156,
+        255
+      ]
+    },
+    {
+      "graphic": 580,
+      "view": "front",
+      "track": 3,
+      "globalNative": [
+        10.5,
+        -17.5
+      ],
+      "trackLocal": [
+        6.5,
+        -9.5
+      ],
+      "sourceRGBA": [
+        148,
+        222,
+        246,
+        255
+      ]
+    },
+    {
+      "graphic": 580,
+      "view": "back",
+      "track": 2,
+      "globalNative": [
+        -6.5,
+        -14.5
+      ],
+      "trackLocal": [
+        -5.5,
+        -8.5
+      ],
+      "sourceRGBA": [
+        98,
+        180,
+        205,
+        255
+      ]
+    },
+    {
+      "graphic": 581,
+      "view": "front",
+      "track": 2,
+      "globalNative": [
+        14.5,
+        -29.5
+      ],
+      "trackLocal": [
+        22.5,
+        -20.5
+      ],
+      "sourceRGBA": [
+        255,
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "graphic": 581,
+      "view": "back",
+      "track": 2,
+      "globalNative": [
+        -8.5,
+        -27.5
+      ],
+      "trackLocal": [
+        -15.5,
+        -20.5
+      ],
+      "sourceRGBA": [
+        148,
+        156,
+        172,
+        255
+      ]
+    },
+    {
+      "graphic": 501,
+      "move": 57,
+      "view": "front",
+      "track": 1,
+      "globalNative": [
+        3.5,
+        -17.5
+      ],
+      "trackLocal": [
+        1.5,
+        -6.5
+      ],
+      "sourceRGBA": [
+        32,
+        90,
+        98,
+        255
+      ],
+      "headNativeShift": [
+        -6,
+        8
+      ]
+    },
+    {
+      "graphic": 501,
+      "move": 57,
+      "view": "back",
+      "track": 1,
+      "globalNative": [
+        -1.5,
+        -18.5
+      ],
+      "trackLocal": [
+        -0.5,
+        -6.5
+      ],
+      "sourceRGBA": [
+        32,
+        90,
+        98,
+        255
+      ],
+      "headNativeShift": [
+        4,
+        2
+      ]
+    },
+    {
+      "graphic": 502,
+      "move": 57,
+      "view": "front",
+      "track": 26,
+      "globalNative": [
+        3.5,
+        -28.5
+      ],
+      "trackLocal": [
+        3.5,
+        -17.5
+      ],
+      "sourceRGBA": [
+        32,
+        139,
+        148,
+        255
+      ],
+      "headNativeShift": [
+        -6,
+        10
+      ]
+    },
+    {
+      "graphic": 502,
+      "move": 57,
+      "view": "back",
+      "track": 20,
+      "globalNative": [
+        -0.5,
+        -29.5
+      ],
+      "trackLocal": [
+        -0.5,
+        -15.5
+      ],
+      "sourceRGBA": [
+        32,
+        139,
+        148,
+        255
+      ],
+      "headNativeShift": [
+        5,
+        3
+      ]
+    },
+    {
+      "graphic": 531,
+      "move": 57,
+      "view": "front",
+      "track": 3,
+      "globalNative": [
+        5.5,
+        -31.5
+      ],
+      "trackLocal": [
+        4.5,
+        -27.5
+      ],
+      "sourceRGBA": [
+        246,
+        230,
+        172,
+        255
+      ],
+      "headNativeShift": [
+        -8,
+        12
+      ]
+    },
+    {
+      "graphic": 531,
+      "move": 57,
+      "view": "back",
+      "track": 3,
+      "globalNative": [
+        0.5,
+        -34.5
+      ],
+      "trackLocal": [
+        0.5,
+        -31.5
+      ],
+      "sourceRGBA": [
+        205,
+        106,
+        115,
+        255
+      ],
+      "headNativeShift": [
+        5,
+        3
+      ]
+    },
+    {
+      "graphic": 613,
+      "move": 57,
+      "view": "front",
+      "track": 5,
+      "globalNative": [
+        7.5,
+        -16.5
+      ],
+      "trackLocal": [
+        4.5,
+        -8.5
+      ],
+      "sourceRGBA": [
+        57,
+        74,
+        74,
+        255
+      ],
+      "headNativeShift": [
+        -8,
+        4
+      ],
+      "forearm6NativeY": 3,
+      "riderLeanRadians": 0.16
+    },
+    {
+      "graphic": 613,
+      "move": 57,
+      "view": "back",
+      "track": 4,
+      "globalNative": [
+        -1.5,
+        -14.5
+      ],
+      "trackLocal": [
+        2.5,
+        -10.5
+      ],
+      "sourceRGBA": [
+        115,
+        164,
+        180,
+        255
+      ],
+      "headNativeShift": [
+        7,
+        3
+      ],
+      "riderLeanRadians": 0.16
+    },
+    {
+      "graphic": 623,
+      "move": 19,
+      "view": "front",
+      "track": 1,
+      "globalNative": [
+        -11.5,
+        -63.5
+      ],
+      "trackLocal": [
+        -13.5,
+        -12.5
+      ],
+      "sourceRGBA": [
+        24,
+        24,
+        32,
+        255
+      ],
+      "headNativeShift": [
+        0,
+        0
+      ]
+    },
+    {
+      "graphic": 623,
+      "move": 19,
+      "view": "back",
+      "track": 1,
+      "globalNative": [
+        -10.5,
+        -66.5
+      ],
+      "trackLocal": [
+        -12.5,
+        -16.5
+      ],
+      "sourceRGBA": [
+        24,
+        24,
+        32,
+        255
+      ],
+      "headNativeShift": [
+        0,
+        0
+      ]
+    },
+    {
+      "graphic": 594,
+      "move": 57,
+      "view": "front",
+      "track": 0,
+      "globalNative": [
+        7.5,
+        -54.5
+      ],
+      "trackLocal": [
+        8.5,
+        -11.5
+      ],
+      "sourceRGBA": [
+        255,
+        189,
+        189,
+        255
+      ],
+      "headNativeShift": [
+        0,
+        0
+      ]
+    },
+    {
+      "graphic": 594,
+      "move": 57,
+      "view": "back",
+      "track": 0,
+      "globalNative": [
+        -4.5,
+        -58.5
+      ],
+      "trackLocal": [
+        -5.5,
+        -15.5
+      ],
+      "sourceRGBA": [
+        246,
+        115,
+        131,
+        255
+      ],
+      "headNativeShift": [
+        0,
+        0
+      ]
+    }
+  ],
+  "waists": {
+    "M": [
+      [
+        16,
+        25
+      ],
+      [
+        16,
+        23.5
+      ],
+      [
+        19.5,
+        23.5
+      ],
+      [
+        12.5,
+        23.5
+      ]
+    ],
+    "F": [
+      [
+        16,
+        24.5
+      ],
+      [
+        16,
+        23.5
+      ],
+      [
+        18.5,
+        23.5
+      ],
+      [
+        13.5,
+        23.5
+      ]
+    ]
+  }
+}

@@ -30,7 +30,7 @@
 .native-field-ready #starterChoices button:focus-visible{outline:none}
 .native-field-ready #dialogueContinue:focus-visible{outline:none}
 .native-field-ready #dialogue.native-touch-controls{bottom:132px}
-@media(max-height:500px) and (min-width:601px){.native-field-ready #dialogue.native-touch-controls{bottom:12px;width:calc(100% - 300px)}}
+@media(max-height:500px) and (min-width:601px){.native-field-ready #dialogue.native-touch-controls{inset:auto 110px 12px 180px;margin:0;width:auto}}
 /* Touch labels keep the field palette when moved into a light message dialog. */
 #dialogue>#touch{color:#fff9e9}
 dialog>#touch #openJournal,dialog>#touch #registeredTool{display:none}

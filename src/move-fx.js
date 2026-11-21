@@ -42,16 +42,34 @@
   if(context.nativeWaitGroups)end=Math.max(0,...events.map(e=>e.end),...visual.map(e=>e.end),...clact.map(e=>e.end));
   return{events,audio,visual,clact,frames:Math.max(28,end,at),nativeFrames:Math.max(28,end,at)};
  }
- function cancel(){window.ParticleSPL?.clear();window.AudioEngine?.cancelMove();generation++;if(active){if(window.GameSpeed)GameSpeed.cancel(active.timer);else clearTimeout(active.timer);active.resolve();active=null}window.GameSpeed?.flush();}
+ function cancel(){try{active?.presentationAudio?.cancel();}catch(error){failPresentation(active,error);}window.ParticleSPL?.clear();window.AudioEngine?.cancelMove();generation++;if(active){if(window.GameSpeed)GameSpeed.cancel(active.timer);else clearTimeout(active.timer);active.resolve();active=null}window.GameSpeed?.flush();}
  function preload(moveId,effect){let m=effect||data?.moves[moveId],pending=[];for(let variant of m?.variants||[])for(let [op,a]of variant.commands)if(op===36){let im=backgroundImage(a[0]);if(!im.complete)pending.push(new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}))}for(let id of m?.spas||[])for(let t of data.spas[id]?.textures||[]){let im=image(t);if(!im.complete)pending.push(new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}))}return Promise.race([Promise.all(pending),new Promise(resolve=>setTimeout(resolve,1000))])}
  async function play(moveId,side='p1',options={}){
   cancel();const token=generation,move=options.effect||data?.moves[moveId];if(!move)return;const choice=window.BattleContext?.choose(move,options.context||{});if(choice&&options.variant===undefined)options.variant=choice.variant;
   const profile=window.SpeciesMoves?.select(options.cryIds?.[side],moveId,{...options.context,phase:choice?.phase??options.context?.phase??0});let sequence=timeline(move,options.variant||0,0,side,options.context||{});if(profile)sequence=SpeciesMoves.timeline(sequence,profile);const speed=playbackSpeed;
-  await Promise.all([preload(moveId,options.effect),options.effect?window.NativeCapture?.preload(options.ball):null,options.effect?window.AudioEngine?.preloadEvents(sequence.audio,audioCryIds(options.cryIds)):window.AudioEngine?.preloadMove(moveId,audioCryIds(options.cryIds),options.variant||0,playbackSpeed,side)]);if(token!==generation)return;
-  return new Promise(resolve=>{const x=active={profile,cryIds:options.cryIds,moveId,side,targetSide:profile?.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),miss:!!options.miss,hiddenSides:options.hiddenSides||[],sequence,speed,start:(window.GameSpeed?.now()??performance.now()),resolve};window.AudioEngine?.beginMove(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:x.targetSide,speed:speed*(window.GameSpeed?.rate||1),cryIds:audioCryIds(options.cryIds),miss:options.miss});x.timer=(window.GameSpeed?.schedule||setTimeout)(()=>{if(active===x){if(options.hold){x.preview=true;x.previewFrame=sequence.frames}else active=null;window.AudioEngine?.cancelMove();window.GameSpeed?.flush();resolve()}},sequence.frames/speed*1000/60+30)});
+  // Native slow/normal clips depend on the effective action speed. The player
+  // can change the global rate while this cold preparation is still pending.
+  let loadedRate;do{loadedRate=window.GameSpeed?.rate||1;try{await Promise.all([preload(moveId,options.effect),options.effect?window.NativeCapture?.preload(options.ball):null,options.effect?window.AudioEngine?.preloadEvents(sequence.audio,audioCryIds(options.cryIds)):window.AudioEngine?.preloadMove(moveId,audioCryIds(options.cryIds),options.variant||0,speed*loadedRate,side),profile?window.SpeciesMoves?.prepare?.(profile,{cryIds:options.cryIds,side}):null]);}catch(error){if(token!==generation)return;throw error;}if(token!==generation)return;}while(loadedRate!==(window.GameSpeed?.rate||1));
+  const presentationEligible=presentationEligibility(profile,{...options,side})==='ELIGIBLE';
+  if(presentationEligible&&typeof window.BattlePresentation?.plan!=='function')throw Error('Battle presentation clock is unavailable');
+  let presentationPlan=presentationEligible?window.BattlePresentation.plan(profile,sequence):null,presentationAudio=null;
+  if(presentationPlan){
+   if(typeof window.AudioEngine?.preparePresentation!=='function')throw Error('Presentation audio bridge is unavailable');
+   let preparedRate;do{
+    preparedRate=window.GameSpeed?.rate||1;
+    try{presentationAudio=await window.AudioEngine.preparePresentation(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:profile.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),speed:speed*preparedRate,playbackSpeed:speed,cryIds:audioCryIds(options.cryIds),miss:options.miss,requiredKeys:presentationPlan.keys});}catch(error){if(token!==generation)return;throw error;}
+    if(token!==generation){presentationAudio?.cancel();return;}
+    if(preparedRate!==(window.GameSpeed?.rate||1)){presentationAudio?.cancel();presentationAudio=null;}
+   }while(!presentationAudio);
+   for(const key of ['canPresent','acknowledge','pause','resume','cancel','finish'])if(typeof presentationAudio?.[key]!=='function'){presentationAudio?.cancel?.();throw Error('Incomplete presentation audio contract: '+key);}
+   // Visual ownership can change while cold audio is loading. Never acquire
+   // a controller whose raw-identity marks can no longer be drawn.
+   if(presentationEligibility(profile,{...options,side})!=='ELIGIBLE'){presentationAudio.cancel();presentationAudio=null;presentationPlan=null;}
+  }
+  return new Promise((resolve,reject)=>{const x=active={profile,cryIds:options.cryIds,moveId,side,targetSide:profile?.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),miss:!!options.miss,hiddenSides:options.hiddenSides||[],sequence,speed,start:(window.GameSpeed?.now()??performance.now()),resolve};if(presentationPlan){x.presentationClock=window.BattlePresentation.create({...presentationPlan,now:presentationNow(x)});x.presentationAudio=presentationAudio;x.presentationHold=!!options.hold;x.presentationReject=reject;return;}window.AudioEngine?.beginMove(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:x.targetSide,speed:speed*(window.GameSpeed?.rate||1),cryIds:audioCryIds(options.cryIds),miss:options.miss});x.timer=(window.GameSpeed?.schedule||setTimeout)(()=>{if(active===x){if(options.hold){x.preview=true;x.previewFrame=sequence.frames}else active=null;window.AudioEngine?.cancelMove();window.GameSpeed?.flush();resolve()}},sequence.frames/speed*1000/60+30)});
  }
- function frame(){return active?(active.preview?active.previewFrame:((window.GameSpeed?.now()??performance.now())-active.start)*.06*active.speed):0}
- async function preview(moveId,side='p1',variant=0,options={}){cancel();const token=generation;await preload(moveId);if(token!==generation)return 0;const context=options.context||{phase:moveId===117?Math.max(0,(data.moves[moveId].phaseMap||[0,1]).indexOf(variant)):0};if(options.context&&window.BattleContext)variant=window.BattleContext.choose(data.moves[moveId],context).variant;let profile=window.SpeciesMoves?.select(options.cryIds?.[side],moveId,context),sequence=timeline(data.moves[moveId],variant,0,side,context);if(profile)sequence=SpeciesMoves.timeline(sequence,profile);active={profile,cryIds:options.cryIds,hiddenSides:options.hiddenSides||[],miss:!!options.miss,moveId,side,targetSide:profile?.target==='self'?side:side==='p1'?'p2':'p1',sequence,preview:true,previewFrame:sequence.frames*.5,speed:1,resolve(){}};return sequence.frames}
+ function frame(){return active?(active.preview?active.previewFrame:active.presentationClock?active.presentationClock.value:((window.GameSpeed?.now()??performance.now())-active.start)*.06*active.speed):0}
+ async function preview(moveId,side='p1',variant=0,options={}){cancel();const token=generation;await preload(moveId);if(token!==generation)return 0;const context=options.context||{phase:moveId===117?Math.max(0,(data.moves[moveId].phaseMap||[0,1]).indexOf(variant)):0};if(options.context&&window.BattleContext)variant=window.BattleContext.choose(data.moves[moveId],context).variant;let profile=window.SpeciesMoves?.select(options.cryIds?.[side],moveId,context),sequence=timeline(data.moves[moveId],variant,0,side,context);if(profile)sequence=SpeciesMoves.timeline(sequence,profile);try{if(profile)await window.SpeciesMoves?.prepare?.(profile,{cryIds:options.cryIds,side});}catch(error){if(token!==generation)return 0;throw error;}if(token!==generation)return 0;active={profile,cryIds:options.cryIds,hiddenSides:options.hiddenSides||[],miss:!!options.miss,moveId,side,targetSide:profile?.target==='self'?side:side==='p1'?'p2':'p1',sequence,preview:true,previewFrame:sequence.frames*.5,speed:1,resolve(){}};return sequence.frames}
  function nativeFrame(){const x=active,f=frame();if(!x?.profile?.nativeEffects)return f;const q=x.sequence,a=q.nativeAnchor||0,i=q.customImpact;return a>0&&f<=i?f/i*a:a+(f-i)/Math.max(1,q.frames-i)*(q.nativeFrames-a);}
  function point(side,W,H){if(active?.profile?.nativeEffects&&side===active.side){const l=BattleGround.layout(W,H),p=active.profile,a=SpeciesMoves.sample(p,frame(),side,active.miss),b=SpeciesMoves.pose(p,frame(),side,side,active.miss,l);return DemoMoves.attachment(p,a,l[side],b,side);}let s=Math.min(W/1000,H/650),p=BattleGround.effect(side,W,H),pose=window.NativeVisual?.sprite(active?.sequence.visual||[],frame(),side,active?.side,active?.targetSide);if(pose){p.x+=pose.x*s;p.y+=pose.y*s}if(active?.profile?.nativeEffects&&active.miss&&side===active.targetSide)p.x+=(active.side==='p1'?1:-1)*BattleGround.layout(W,H)[side].height*.9;return p}
  function keys(values,t,times){if(!values)return 1;let a=times?.[0]??.15,b=times?.[1]??.8;if(t<a)return values[0]+(values[1]-values[0])*t/Math.max(.001,a);if(t>b)return values[1]+(values[2]-values[1])*(t-b)/Math.max(.001,1-b);return values[1]}
@@ -81,5 +99,58 @@
   if(b.tint>0){let key=b.id+':'+b.color+':'+Math.round(b.tint*16),cache=tintedBackgrounds.get(key);if(!cache){cache=document.createElement('canvas');cache.width=im.naturalWidth;cache.height=im.naturalHeight;let cx=cache.getContext('2d');cx.drawImage(im,0,0);let cs=rgb(b.color);cx.globalCompositeOperation='source-atop';cx.fillStyle='rgba('+cs.join(',')+','+b.tint+')';cx.fillRect(0,0,cache.width,cache.height);tintedBackgrounds.set(key,cache)}source=cache}
   let scale=Math.max(W/256,H/192),tw=im.naturalWidth*scale,th=im.naturalHeight*scale,ox=(-b.x*scale%tw+tw)%tw,oy=(-b.y*scale%th+th)%th;c.save();c.imageSmoothingEnabled=false;for(let x=ox-tw;x<W;x+=tw)for(let y=oy-th;y<H;y+=th)c.drawImage(source,x,y,tw,th);c.restore();
  }
- window.MoveFX={play,speciesPose(side,id){const r=reaction(side,id);if(r)return r;return active?.profile&&active.side===side&&anatomicalId(id)===active.profile.species?SpeciesMoves.sample(active.profile,frame(),side,active.miss):window.PatratMoves?.idlePose(side,id)||null},drawSpecies(c,w,h,layer){if(active?.profile)SpeciesMoves.draw(c,w,h,active,frame(),layer)},capture(options={}){const effect=window.NativeCapture.compile(window.CAPTURE_DATA,data.spas,options);return play(effect.id,'p1',{...options,effect,context:{nativeWaitGroups:true},hold:!!options.caught})},draw,pose,cancel,preload,visualState,drawBackground,preview,idleTick(side){return active?.preview?window.NativeVisual?.idleTick(active.sequence.visual,frame(),side,active.side,active.targetSide):null},setPreviewFrame(f){if(active?.preview)active.previewFrame=clamp(+f,0,active.sequence.frames)},get speed(){return playbackSpeed},set speed(v){playbackSpeed=v===.5?.5:1},get active(){return active},get coverage(){return data?.coverage},timeline};
+
+ const presentationArenaMarks=new WeakMap();
+ function presentationNow(x){return (window.GameSpeed?.now()??performance.now())*x.speed;}
+ function presentationEligibility(profile,options={}){
+  const owners=(window.BattlePresentationOwners?.read?.()||{layoutSupported:false});
+  if(!owners.layoutSupported)return 'UNSUPPORTED_NATIVE_LAYOUT';
+  if(!profile||![500,521].includes(profile.species))return 'UNSUPPORTED_PROFILE';
+  if(!owners.available)return 'UNAVAILABLE_VISUAL_OWNERS';
+  if(options.hiddenSides?.length)return 'UNVERIFIED_HIDDEN_SIDES';
+  if(owners.nativeSpecies[options.side||'p1']!==profile.species)return 'UNVERIFIED_NATIVE_ACTOR';
+  for(const role of ['p1','p2']){
+   const record=owners.roles[role];
+   if(record.altered)return 'UNVERIFIED_ALTERED_VISUAL_BODY';
+   if(record.graphic===undefined||String(record.graphic)!==String(options.cryIds?.[role]))return 'UNVERIFIED_VISIBLE_GRAPHIC';
+   if(!record.bankReady)return 'UNPREPARED_VISIBLE_BANK';
+   if(profile.species===500&&owners.nativeSpecies[role]!==500)return 'UNVERIFIED_500_MIRROR';
+  }
+  return 'ELIGIBLE';
+ }
+ function failPresentation(x,error){
+  if(!x||active!==x)return;active=null;
+  try{x.presentationClock?.cancel();}catch{}try{x.presentationAudio?.cancel();}catch{}
+  try{window.GameSpeed?.flush();}catch{}x.presentationReject(error);
+ }
+ function beginArenaFrame(){
+  const x=active;if(!x?.presentationClock||x.preview||x.presentationCompleting)return null;
+  try{
+  if(x.presentationAudio.canPresent?.()===false){pauseArenaFrame();return null;}
+  const at=presentationNow(x);
+  if(x.presentationPaused){x.presentationClock.resume(at);x.presentationAudio.resume(x.presentationClock.value);x.presentationPaused=false;}
+  const token=x.presentationClock.begin(at);if(!token)return null;const record=Object.freeze({action:x,token});presentationArenaMarks.set(record,new Map());x.presentationRecord=record;return record;
+  }catch(error){failPresentation(x,error);return null;}
+ }
+ function markArenaActor(side,id){const x=active,marks=presentationArenaMarks.get(x?.presentationRecord);if(marks)marks.set(side,String(id));}
+ function pauseArenaFrame(){const x=active;if(!x?.presentationClock||x.preview||x.presentationPaused||x.presentationCompleting)return;try{const at=presentationNow(x);x.presentationClock.pause(at);x.presentationPaused=true;x.presentationAudio.pause(x.presentationClock.value);}catch(error){failPresentation(x,error);}}
+ function presentedArenaFrame(record,drawable=true){
+  const x=active;if(!record||record.action!==x||record!==x.presentationRecord||!x?.presentationClock||x.preview||x.presentationCompleting)return false;
+  try{
+  const marks=presentationArenaMarks.get(record),sides=['p1','p2'].filter(side=>!x.hiddenSides?.includes(side));
+  const actorsDrawn=sides.every(side=>x.cryIds?.[side]!==undefined&&marks?.get(side)===String(x.cryIds[side]));
+  const ack=x.presentationClock.presented(record.token,presentationNow(x),{drawable:drawable&&actorsDrawn,visible:!window.document?.hidden});if(!ack)return false;
+  x.presentationAudio.acknowledge(ack.frame,ack.nextKey);
+  if(ack.complete){
+   x.presentationCompleting=true;
+   Promise.resolve().then(()=>x.presentationAudio.finish()).then(()=>{
+    if(active!==x)return;x.presentationAudio.cancel();if(x.presentationHold){x.preview=true;x.previewFrame=x.sequence.frames;}else active=null;
+    try{window.GameSpeed?.flush();}catch(error){x.presentationReject(error);return;}x.resolve();
+   }).catch(error=>failPresentation(x,error));
+  }
+  return ack;
+  }catch(error){failPresentation(x,error);return false;}
+ }
+ window.document?.addEventListener?.('visibilitychange',()=>{if(window.document.hidden)pauseArenaFrame();});
+ window.MoveFX={presentationEligibility,beginArenaFrame,presentedArenaFrame,pauseArenaFrame,markArenaActor,presentationState(){const x=active;return x?.presentationClock?{clock:x.presentationClock.snapshot(),paused:!!x.presentationPaused,completing:!!x.presentationCompleting,audio:x.presentationAudio.status?.()}:null;},play,speciesPose(side,id){const r=reaction(side,id);if(r)return r;return active?.profile&&active.side===side&&anatomicalId(id)===active.profile.species?SpeciesMoves.sample(active.profile,frame(),side,active.miss):window.PatratMoves?.idlePose(side,id)||null},drawSpecies(c,w,h,layer){if(active?.profile)SpeciesMoves.draw(c,w,h,active,frame(),layer)},capture(options={}){const effect=window.NativeCapture.compile(window.CAPTURE_DATA,data.spas,options);return play(effect.id,'p1',{...options,effect,context:{nativeWaitGroups:true},hold:!!options.caught})},draw,pose,cancel,preload,visualState,drawBackground,preview,idleTick(side){return active?.preview?window.NativeVisual?.idleTick(active.sequence.visual,frame(),side,active.side,active.targetSide):null},setPreviewFrame(f){if(active?.preview)active.previewFrame=clamp(+f,0,active.sequence.frames)},get speed(){return playbackSpeed},set speed(v){playbackSpeed=v===.5?.5:1},get active(){return active},get generation(){return generation},get coverage(){return data?.coverage},timeline};
 })();

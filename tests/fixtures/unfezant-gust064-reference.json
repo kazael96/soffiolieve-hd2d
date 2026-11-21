@@ -1,0 +1,174 @@
+{
+  "scope": "Accepted authored private28rig and12sourcebyte reference, notDSanimation. All508providedbodyframes andindependentstage/ownershipread; normaltempo/commands/mobile/C3pending. Groundbounds derivedfromnative4tick0RGBA provenexactnativebankcomposition byallcap26-native-bank-check; fixed64,104nativebodyanchor.",
+  "private28HookSHA256": "62c60b0a471ce7480e1eb35f0dacd0134af446fcc639ef30161cd53c27b6dc84",
+  "actual28ReportSHA256": "23eda330bfdcfaf5bbbc12a422c36ee0efdd5f1788b06d1d0534b64ab1f81b12",
+  "storyActualBodyLedgerSHA256": "4fbafd8d353cd5fa384d696bff2a79dac78ecc6b7bb4e4c6441fb79a12387df9",
+  "helpers": [
+    {
+      "name": "prepare",
+      "sha256": "64c5dce1236206dd6572e967743dee158e33e4f1ee6c122bf5a370029b449d3b"
+    },
+    {
+      "name": "phase",
+      "sha256": "e3052bd4632636ac437536b8ccb2ee673122c9c7917a9f17ddc329bbc4f38216"
+    },
+    {
+      "name": "projection",
+      "sha256": "2a4d659b152a568466f19d17b3b7a2e9248d7b6050f9b9543f60d5be1308c7df"
+    },
+    {
+      "name": "author",
+      "sha256": "a3c0da9fcdf0d67de32e35a31f2afe7189870b3ec4836a03bf2edc272f90b7fb"
+    },
+    {
+      "name": "surface",
+      "sha256": "5487cd0e9a2824143bf0e47f8134096ce8d752622dd2e417db4578839b1652fb"
+    }
+  ],
+  "sources": [
+    {
+      "key": "front-near-cap",
+      "sha256": "f1b5a12053e4fc6dceea5ad218f2a5af246240adb4ee354718f3d87c0c127b03"
+    },
+    {
+      "key": "front-near-fan",
+      "sha256": "e9ff9d78992788e53f4920d382a589f7638446a6e341b7780f87b80c0e21581b"
+    },
+    {
+      "key": "front-near-cuff",
+      "sha256": "fc85c4699ef9e4ad2ebc1715daa9f8a6e3fe8413be34eb3f2939431f98f54c49"
+    },
+    {
+      "key": "front-far-cap",
+      "sha256": "1047068f74b0b3958ec2f232b3783473e3e9519fa38a2512d2b43f4467c4b05b"
+    },
+    {
+      "key": "front-far-fan",
+      "sha256": "ba1fe6e29b128dce6a8c3a02bd56d74ca94f0195b0b690c9e28fbd65ecc2ad3b"
+    },
+    {
+      "key": "front-far-cuff",
+      "sha256": "ff1df69ba355c8ebcfecfff2d2ed6a0419f31dfd308e8ccb11211fa4a06d1252"
+    },
+    {
+      "key": "back-near-cap",
+      "sha256": "4eaea3b11025c9ad45f8ba812c9f16b27220cb9d98815d454779e63c9bdb7d4f"
+    },
+    {
+      "key": "back-near-fan",
+      "sha256": "f1ca1f3a693d534648a3e9f7ca5036015c4bbbf82f04826cb3f7c3f92d3963a0"
+    },
+    {
+      "key": "back-near-cuff",
+      "sha256": "1bd20fbd2b741d8f94b850b9bed2b9f40dd8d9a3d5320e1a513578c431c62d06"
+    },
+    {
+      "key": "back-far-cap",
+      "sha256": "3d8780d1d9af41644d302e2f6d576f18fcee195cc41481894144e21c05ef011a"
+    },
+    {
+      "key": "back-far-fan",
+      "sha256": "3e1a3781db818ab996209b37710e8ca114aaa0bba8cc565f98b63c0e8e10be10"
+    },
+    {
+      "key": "back-far-cuff",
+      "sha256": "06c8113ea01aa669583ad92fec42cc2514161cd267b6d6f803585ab235321435"
+    }
+  ],
+  "banks": [
+    {
+      "bank": "521-front",
+      "groundBounds": [
+        -24,
+        -75,
+        33,
+        0
+      ],
+      "nativeFiles": [
+        {
+          "name": "521-front.json",
+          "sha256": "2031400edf87205307a0f38c9a9e16884625a53fb749b840ed34feec9c55892d"
+        },
+        {
+          "name": "521-front.png",
+          "sha256": "89c842eb9d199bc8979cddaea5718b8b06b1d5ba9ddcee6b589a0f84c1ad6576"
+        }
+      ],
+      "source0SHA256": "4787465dc3ab91f69b71e748d8c5e77cb369647b632cb2f9c0eac0e417bd76f5"
+    },
+    {
+      "bank": "521-back",
+      "groundBounds": [
+        -42,
+        -74,
+        20,
+        0
+      ],
+      "nativeFiles": [
+        {
+          "name": "521-back.json",
+          "sha256": "58f82a4886529243ab135b0e507c88a2a7a05d280554c0df4d938c851fc345d1"
+        },
+        {
+          "name": "521-back.png",
+          "sha256": "f9f396d1a33e5331c195f1df15d8068a3bbec180830b01cd963d43eb43a9ee66"
+        }
+      ],
+      "source0SHA256": "b3d616cb35e0793076d0a70cff06851c4ef802b09359625a2994e4b6f7ed0c90"
+    },
+    {
+      "bank": "521-female-front",
+      "groundBounds": [
+        -17,
+        -69,
+        33,
+        0
+      ],
+      "nativeFiles": [
+        {
+          "name": "521-female-front.json",
+          "sha256": "2031400edf87205307a0f38c9a9e16884625a53fb749b840ed34feec9c55892d"
+        },
+        {
+          "name": "521-female-front.png",
+          "sha256": "012dbe7e6274dd403a434753f334e617dbe524e033ad91c55531f786d07f2846"
+        }
+      ],
+      "source0SHA256": "f387cfb77f1be03942162da3c760b67011a76a5f1fd171400119aa96db13cf7a"
+    },
+    {
+      "bank": "521-female-back",
+      "groundBounds": [
+        -42,
+        -65,
+        18,
+        0
+      ],
+      "nativeFiles": [
+        {
+          "name": "521-female-back.json",
+          "sha256": "58f82a4886529243ab135b0e507c88a2a7a05d280554c0df4d938c851fc345d1"
+        },
+        {
+          "name": "521-female-back.png",
+          "sha256": "2cea45948c2f704fcfd6e8c99b79f9f1bad46ec675e2c6d028fde643658acb87"
+        }
+      ],
+      "source0SHA256": "afa5d449ea66502d65ba014747d208093f05fe2e4f32d699236931400e4618ec"
+    }
+  ],
+  "criticalFrames": [
+    0,
+    8,
+    9,
+    33,
+    43,
+    54,
+    64,
+    78,
+    91,
+    111,
+    112,
+    126
+  ]
+}

@@ -1,0 +1,18 @@
+# Durate native nulle · revisione0.64
+
+Il selettore `ROM_SPRITE_ANIM.frame` conserva la durata zero dei descrittori originali: li attraversa senza assegnare loro un fotogramma visibile. In precedenza `Math.max(1,duration)` inventava un intervallo e allungava il ciclo. In alcune parti di Unfezant maschio visto da dietro questo selezionava CEL0, cioè una testa, all'origine dei nastri superiori.
+
+L'indagine parte dalla lotta effettiva su telefono della candidata internaC3: un'immagine mostra un collo/testa scuro e alto, mentre le immagini vicine sono normali. Il tick nativo del bersaglio non era registrato in quella prova; non si attribuisce quindi a quell'immagine un tick dedotto. La scomposizione CPU dei dati C3 riproduce la stessa topologia a289/347: le parti2/3 scelgono CEL0 al posto dei nastri, mentre il busto resta integro. Questa ricostruzione diagnostica non è un confronto pixel del browser.
+
+La lettura binaria indipendente del membro NANR10434 dell'archivio IRBI `a/0/0/4` conferma che i descrittori CEL0/durata0 sono realmente contati nella risorsa, non aggiunti dall'estrattore. Il [controller NitroSystem al commit documentato](https://github.com/ntrtwl/NitroSystem/blob/d636fb5d2b212e8736f09859fff447be2bd0ac85/libraries/g2d/src/g2d_Animation.c) attraversa i descrittori nulli ma aggiorna il contenuto mostrato soltanto per durate positive. Non è stata identificata la stessa funzione binaria nella ROM italiana: dati IRBI e riferimento del controller restano prove distinte. Le copie del riferimento rimangono nell'audit locale; questa modifica non ne redistribuisce il sorgente.
+
+Il cambiamento riguarda soltanto `frame`. Mantiene gli indici originali di ciclo, le matrici, l'ordine delle parti, `bounds`, la preparazione delle banche e il calcolo dell'appoggio. Una sequenza completamente nulla conserva in sicurezza il primo elemento; è una regola di compatibilità del browser, non una dichiarazione di validità nativa per cicli privi di avanzamento temporale. Le semantiche preesistenti delle estremità ping-pong non vengono riscritte né certificate dal confronto di questa correzione.
+
+## Verifiche e limiti
+
+- Nei302 banchi delle150 grafiche della matrice più Sostituto ci sono6529 animazioni,1526 con durate nulle, tutte di modalità2;2091 descrittori nulli,24 animazioni padre coinvolte e nessuna sequenza interamente nulla. Sono dati interessati, non1526 difetti visivi già osservati.
+- Le sei regressioni della temporizzazione conservano la vecchia implementazione: prima5FAIL/1PASS, dopo6PASS. Coprono i veri nastri di Unfezant, durata nulla interna/finale, indici di ciclo, compatibilità delle sequenze nulle, modalità sintetiche e tutte le animazioni native positive e nulle della matrice.
+- Le animazioni interamente positive mantengono l'identità dell'elemento selezionato ai confini e a tick lontani. Parti e limiti conservativi al tick0 sono identici prima/dopo in tutti302 banchi. Questo non equivale a una nuova cattura pixel del caricamento `opaqueReference`.
+- Le tre regressioni delle celle native restano attive: la vecchia fixture è conservata byte per byte, mentre nel riferimento in memoria si aggiorna esclusivamente il selettore temporale verificato. Vecchia e nuova scomposizione vengono così confrontate alla stessa fase; restano tutti i controlli sulle celle della bocca, sulle matrici e sulle2100 scomposizioni nei due lati.
+
+Le9 regressioni mirate passano. I rapporti originali C3 e i precedenti FAIL restano storici. La correzione del sorgente richiede una candidata successiva e nuove verifiche grafiche del codice effettivamente servito; non trasferisce automaticamente i risultati della C3 alla nuova versione.

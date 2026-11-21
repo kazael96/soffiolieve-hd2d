@@ -1,0 +1,44 @@
+{
+  "scope": "Native tick0 alpha bounds for prepared-bank CPU fixtures. Asset hashes prevent silently borrowing geometry from another source. No DOM rendering/resource or aesthetic certification.",
+  "views": {
+    "front": {
+      "view": "front",
+      "jsonSHA256": "8ea23b2229636e1c710130a3920268b863b27cee79d593f1bbea6b0cb7a8b4fc",
+      "pngSHA256": "0c974285cc883e43ceb35bf43602499387fb13a80f769c3e671eee8391cd49ce",
+      "nativeOpaqueVertices": 188,
+      "method": "Convex hull of all alpha>=64 native pixel rectangles at tick0, each original OAM flip/row/frame offset applied. No texture edits or resize. All affine projection extrema retained.",
+      "groundBounds": [
+        -37,
+        -73,
+        43,
+        0
+      ]
+    },
+    "back": {
+      "view": "back",
+      "jsonSHA256": "0ed04f265eb27169f0500ba29c14593b44e60862151aafc46e3548c444293adf",
+      "pngSHA256": "7f90ceb11ebb09dbc0c734bf788bcf78322ede69a3456cf8adc00bf555ec76c4",
+      "nativeOpaqueVertices": 170,
+      "method": "Convex hull of all alpha>=64 native pixel rectangles at tick0, each original OAM flip/row/frame offset applied. No texture edits or resize. All affine projection extrema retained.",
+      "groundBounds": [
+        -35,
+        -71,
+        42,
+        0
+      ]
+    }
+  },
+  "reviewedPrivate08FunctionSHA256": {
+    "SpeciesMoves.part": "aeb64ae5910002d729fb45f1845f6245a9b60a4b8e2d2fd93b216638a4e0a16f",
+    "SpeciesMoves.pose": "6c1ab32ac906b275ba246daca98102091bf1bf1d362b05c355e957cd27da70a8",
+    "ChapterMoves.sample": "f0b778c7efd876b9015f34be7d6fd47cf7f2cde71f026494d84e9d3153d334c6",
+    "DemoMoves.sample": "3083cca52e24146a539d12634aefbf3f549e3409fd807d78bdd72a34d045a1f0"
+  },
+  "functionComparison": "Historical raw CRLF hashes retained. LF hashes derived from the same executed private08 function bodies; only CRLF→LF normalized, as in Python bundle transport.",
+  "reviewedPrivate08FunctionSHA256LF": {
+    "SpeciesMoves.part": "f96b969e0b21aef9385133d127288f4d763977201f25afa86f891a97f13d796e",
+    "SpeciesMoves.pose": "93d36a990bed6b56199a19dc3247488f96c18a8adba035f6974112b0a72176fb",
+    "ChapterMoves.sample": "f0b778c7efd876b9015f34be7d6fd47cf7f2cde71f026494d84e9d3153d334c6",
+    "DemoMoves.sample": "3083cca52e24146a539d12634aefbf3f549e3409fd807d78bdd72a34d045a1f0"
+  }
+}

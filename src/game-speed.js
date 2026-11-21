@@ -1,10 +1,11 @@
 /* Virtual gameplay clock; browser I/O and readable menus keep wall time. */
 (function(root){
- let pending=null,rate=1,wall=performance.now(),time=wall;const timers=new Set(),listeners=new Set();
+ let pending=null,rate=1,wall=performance.now(),time=wall,paused=!!root.document?.hidden;const timers=new Set(),listeners=new Set();
  const publish=()=>listeners.forEach(fn=>fn());
  try{const saved=+localStorage.getItem('soffiolieve-game-speed');if([1,2,4].includes(saved))rate=saved;}catch{}
- function now(){const n=performance.now();time+=(n-wall)*rate;wall=n;return time;}
- function arm(t){clearTimeout(t.handle);t.handle=setTimeout(()=>{if(!timers.has(t))return;if(now()+.5<t.at)return arm(t);timers.delete(t);t.fn();},Math.max(0,(t.at-now())/rate));}
+ function now(){const n=performance.now();if(!paused&&!root.document?.hidden)time+=Math.max(0,n-wall)*rate;wall=n;return time;}
+ function arm(t){clearTimeout(t.handle);t.handle=null;if(paused||root.document?.hidden)return;t.handle=setTimeout(()=>{if(!timers.has(t))return;if(paused||root.document?.hidden||now()+.5<t.at)return arm(t);timers.delete(t);t.fn();},Math.max(0,(t.at-now())/rate));}
+ root.document?.addEventListener?.('visibilitychange',()=>{const n=performance.now();if(!paused)time+=Math.max(0,n-wall)*rate;wall=n;paused=!!root.document.hidden;for(const timer of timers)arm(timer);});
  function schedule(fn,ms){const t={fn,at:now()+Math.max(0,ms)};timers.add(t);arm(t);return t;}
  function cancel(t){if(!t)return;clearTimeout(t.handle);timers.delete(t);}
  function set(value){value=+value;if([1,2,4].includes(value)&&root.MoveFX?.active&&!root.MoveFX.active.preview){pending=value;publish();return rate;}if(![1,2,4].includes(value))return rate;now();rate=value;try{localStorage.setItem('soffiolieve-game-speed',String(rate));}catch{}for(const t of timers)arm(t);root.document?.documentElement?.setAttribute('data-game-speed',String(rate));publish();return rate;}

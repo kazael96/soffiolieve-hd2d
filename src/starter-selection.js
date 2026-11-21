@@ -12,13 +12,15 @@
     const dialog=document.createElement('dialog');dialog.id='starterSelection';dialog.tabIndex=-1;dialog.setAttribute('aria-label','Scegli il tuo primo Pokémon');
     dialog.innerHTML='<div class="starter-screens"><div class="starter-top"><canvas class="starter-model" width="768" height="576" aria-label="Il regalo della Professoressa Aralia"></canvas><img class="starter-cursor" alt="" hidden><div class="starter-letter" hidden></div><div class="starter-white"></div></div><div class="starter-bottom" hidden><canvas class="starter-pokemon" width="512" height="384" aria-hidden="true"></canvas><div class="starter-hits"></div><p class="starter-description" aria-live="polite"></p></div></div><p class="starter-prompt" aria-live="polite"></p><div class="starter-actions"></div>';
     document.body.append(dialog);dialog.showModal();const query=s=>dialog.querySelector(s),top=query('.starter-model'),bottom=query('.starter-bottom'),canvas=query('.starter-pokemon'),context=canvas.getContext('2d'),actions=query('.starter-actions'),prompt=query('.starter-prompt'),description=query('.starter-description'),letter=query('.starter-letter'),white=query('.starter-white'),cursor=query('.starter-cursor');cursor.src=STARTER_ASSETS.cursor.src;
-    let selected=-1,stage='loading',scene='letter',modelFrame=0,cameraFrame=0,ballFrame=0,animation=null,request=0,last=performance.now(),selectionWait=null,confirmationWait=null,continueWait=null;
+    let selected=-1,stage='loading',scene='letter',modelFrame=0,cameraFrame=0,ballFrame=0,animation=null,request=0,last,stopped=false,selectionWait=null,confirmationWait=null,continueWait=null;
     let keyboard=false,cursorFrame=0;const progress=[0,0,0];let models,pictures,backgrounds;
     const sound=id=>{void window.AudioEngine?.playSound(id);};
     function button(label,action){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=action;actions.append(b);return b;}
     function setStage(next){stage=next;dialog.dataset.stage=next;dialog.focus();}
     function setSelection(i,keys=false){if(stage!=='select')return;keyboard=keys;if(i===selected)return;selected=i;sound(1352);ballFrame=0;dialog.dataset.selected=names[i];description.textContent=text([18,17,16][i],names[i]);for(const [j,b] of [...query('.starter-hits').children].entries())b.setAttribute('aria-pressed',String(j===i));actions.replaceChildren();button('Conferma',()=>selectionWait?.(i));}
+    const resetClock=()=>{if(!stopped)last=undefined;};
     function draw(now){
+      if(stopped)return;if(document.hidden){last=undefined;request=requestAnimationFrame(draw);return;}last??=now;
       const dt=Math.max(0,Math.min(4,(now-last)/1000)*(window.GameSpeed?.rate||1));last=now;
       if(animation){const a=animation;a.time=Math.min(a.duration,a.time+dt);const k=a.duration?a.time/a.duration:1;a.update(k);if(k===1){animation=null;a.resolve();}}
       if(scene==='selection'){
@@ -49,11 +51,11 @@
         else if(['Enter',' ','z'].includes(nativeKey))confirmationWait?.(document.activeElement!==actions.lastElementChild);
       }
     }
-    window.addEventListener('keydown',key,true);dialog.addEventListener('cancel',e=>e.preventDefault());
+    document.addEventListener?.('visibilitychange',resetClock);window.addEventListener('keydown',key,true);dialog.addEventListener('cancel',e=>e.preventDefault());
     try{
       prompt.textContent='…';models=new StarterScene.Scene(top);
       [pictures,backgrounds]=await Promise.all([Promise.all(STARTER_ASSETS.sprites.map(async p=>({normal:await image(p.normal),dim:await image(p.dim)}))),Promise.all(STARTER_ASSETS.backgrounds.map(image)),models.ready]);
-      request=requestAnimationFrame(draw);prompt.textContent='';setStage('letter-opening');await animate(138,k=>modelFrame=cameraFrame=69*k);
+      last=undefined;request=requestAnimationFrame(draw);prompt.textContent='';setStage('letter-opening');await animate(138,k=>modelFrame=cameraFrame=69*k);
       letter.textContent=text(12);letter.hidden=false;setStage('letter');
       await new Promise(resolve=>{continueWait=()=>{continueWait=null;sound(1356);resolve();};button('▼',continueWait).focus();});actions.replaceChildren();letter.hidden=true;setStage('opening');
       let opened=false;await animate(61,k=>{modelFrame=cameraFrame=69+30.5*k;if(!opened&&modelFrame>=90){opened=true;sound(1956);}});
@@ -70,7 +72,7 @@
         await animate(frames[3]-frames[2],k=>{cameraFrame=frames[2]/2+(frames[3]-frames[2])*k/2;const tick=frames[2]+(frames[3]-frames[2])*k;white.style.opacity=String(Math.max(0,Math.min(1,(tick-frames[4]+2)/20)));});
         return i;
       }
-    }finally{window.removeEventListener('keydown',key,true);cancelAnimationFrame(request);models?.destroy();dialog.close();dialog.remove();}
+    }finally{stopped=true;document.removeEventListener?.('visibilitychange',resetClock);window.removeEventListener('keydown',key,true);cancelAnimationFrame(request);models?.destroy();dialog.close();dialog.remove();}
   }
   window.StarterSelection={choose,pokePose};
 })();
