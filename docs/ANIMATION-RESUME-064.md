@@ -32,14 +32,14 @@ i PASS della07.
 La diagnosi dell'artefatto originale mostra55 PNG parziali di Tynamo e il
 caso ancora in esecuzione, senza errore del gioco registrato. Il workflow
 divide adesso soltanto Tynamo in tre lotti sequenziali ×1/×2/×4, con gli
-stessi otto turni per velocità, audio e assert originali. Conserva tutte
+stessi quattro turni, con otto azioni dei due lati per velocità, audio e assert originali. Conserva tutte
 le54 celle formato–caso–velocità,180s per caso,30 minuti per passo, una
 sola build e rapporti distinti sempre raccolti. Il runner inoltra il filtro
 al server QA isolato e controlla anche le velocità dei turni conclusi;
 un parametro nell'URL da solo non prova copertura. Venti controlli mirati
 passano, compresi inventario, limiti e rifiuto di velocità mancanti o
 duplicate. Il primo replay reale desktop della08 a×1 supera tutti gli
-otto turni in82099ms, con25 PNG esportati,399 moduli verificati e chiusura
+quattro turni e otto azioni in82099ms, con25 PNG esportati,399 moduli verificati e chiusura
 dei processi confermata. I lotti×2/×4 sono ancora da concludere: non
 attribuire ancora un PASS complessivo né una riduzione del tempo totale.
 
@@ -241,3 +241,68 @@ originale NARC e non dimostra un nuovo difetto alpha.
 Nessuna nuova pubblicazione o revisione completa di tutte le animazioni viene
 dichiarata da questo aggiornamento. I comandi MN, i filmati modificati e i
 lifecycle durante le mosse rimangono attività di collaudo esplicite.
+
+## Candidata09 · comando nativo e leggibilità ancora da correggere
+
+La candidata09 privata è congelata alla revisione `80b062d4e490b7bc`;
+SHA256 di `app.js`
+`1cdae3ef0542a536489dcca2f22f997108df2387ad0e7239def0aa3f67bee590`.
+Rispetto alla08 cambiano sei moduli: audio, presentazione, interfaccia,
+coreografia Minccino, effetti e inquadratura. Tutti i20841 asset restano
+identici. Manifest e ricevute sono esterni alle build, in
+`outputs/animation-review064-resume-20261123`.
+
+Minccino572/Doppiasberla3 usa le parti native con piedi fermi, preparazione,
+alternanza delle zampe e recupero finale. Il numero dei gesti deriva dai colpi
+effettivi del motore: nessun secondo danno inventato per un effetto sonoro,
+nessun recupero intermedio duplicato. Fra colpi reali viene conservata solo
+la posa conclusa, mentre audio, timer e conferme precedenti vengono ritirati.
+Cancellazione, errore e cambio di sessione, attore o banco invalidano quel
+possesso; un caricamento vecchio non può riattivarlo. Botta1 e Sveglipacca541
+rimangono escluse dalla nuova coreografia. Canto47 conserva il suo profilo.
+
+Il framing comune delle singole510/572 considera le silhouette originali dei
+due banchi e le camere previste. Le sei regressioni CPU coprono parti,
+alpha, dispatcher e proprietà dei banchi: non certificano ogni fase della
+nuova azione di Liepard, che resta separata e non integrata.
+
+Le prove mirate registrano42/42 PASS per contratti e osservatore,
+109/109 regressioni preesistenti e6/6 controlli del framing. Un comando reale
+LOTTA/Doppiasberla è stato eseguito in due replay verticali indipendenti,
+ciascuno con un turno GEN5, due clip di colpo,66 conferme di fotogramma,
+399 sorgenti verificati e ripristino delle nove funzioni osservate. Gli otto
+avvii di voce per replay provengono dai due clip originali; non rappresentano
+otto colpi. Non è dichiarato un confronto all'ascolto.
+
+Tutti i17 PNG del primo replay e i67 del secondo sono stati esaminati dal
+responsabile. Il primo ha anche una lettura indipendente. La correttezza
+tecnica **non chiude la verifica visiva**: il gesto resta poco evidente e il
+simbolo SPA163 viene presentato in circa7–11 pixel CSS, troppo piccolo per
+leggersi chiaramente. I raggi generici iniziano prima del contatto nativo e
+possono coprirlo. È in preparazione un confronto privato che conserva corpo,
+texture, tempi e meccaniche, adattando l'unità spaziale dell'effetto alla scala
+del bersaglio e togliendo soltanto quell'overlay generico per572/3. Non è
+installato in questa candidata e non è presentato come misura esatta del DS.
+
+La CI45183464849 sul commit `195c1ad56e18ad2d471670c6673a969c1a812c5e`
+è terminata con successo:52 fasi CLI, cinque gate dell'indice originale e
+replay nativi nei tre formati, con Tynamo suddiviso per velocità. Certifica
+il checkpoint precedente08, non i sei moduli nuovi della09. Ciascun lotto
+Tynamo di una velocità esegue quattro turni e otto azioni: i tre lotti desktop
+locali contano12 turni,24 azioni e75 PNG, non24 turni. La nuova suite completa
+della09 e la matrice di comandi sui due lati rimangono da eseguire.
+
+Restano aperti la leggibilità Minccino, lo staging di Liepard con resize e
+recupero, e il rendering effettivo a quattro combattenti delle doppie602.
+I FAIL privati di preparazione e degli inviluppi vengono conservati; i nuovi
+contratti numerici non li trasformano in approvazione estetica. La revisione
+dell'intero catalogo4365 coppie, dei105 comandi MN e dei filmati/oggetti resta
+distinta da queste prove mirate. La storia principale già consegnata non
+cambia e la PR58 rimane una bozza senza nuova pubblicazione.
+
+Pulizia H.8: la07 è stata ricostruita e verificata file per file prima della
+rimozione della sola directory generata. Sono conservate04,08 e09:04 resta
+base obbligatoria degli archivi,08 confronto verificato e09 candidata.
+Sorgenti, ROM, archivio base e rapporti sono preservati. Prima di una candidata
+successiva occorre rispettare nuovamente questo limite e conservare una
+sostituta verificata; nessun accumulo di copie generate è autorizzato.

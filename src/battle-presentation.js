@@ -28,7 +28,11 @@
  // Colpocoda has no target-impact sound. Native attacker cues map to60 and
  //86.25; retain those onsets while protecting both authored tail gestures.
  const tailDefinition=Object.freeze({nativeFrames:88,nativeAnchor:0,cues:[],keys:[0,12.6,21.42,25.2,31.5,42.84,45.36,56.7,60,69.3,75.6,78.12,88.2,99.54,100.8,109.62,110.88,117.18,126]});
+ // Private572/3: preserve the original planted body score and target SPA163.
+ const nativeSlapKeys064=Object.freeze([...new Set([0,20,24,42,44,56,58,60,62,64,66,70,78,80,84,88,92,96,126,...[0,5,10,15,20,22,25,28,33,38,43,47,52,56,100,129].map(n=>60+n/129*66)])].sort((a,b)=>a-b));
+ const nativeSlapContext064=q=>!!q&&Object.keys(q).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(q.hitCount)&&q.hitCount>=0&&q.hitCount<=5&&Number.isInteger(q.hitIndex)&&q.hitIndex>=0&&(q.hitCount===0?q.hitIndex===0:q.hitIndex<q.hitCount);
  const definitions=Object.freeze({
+  '572:3':Object.freeze({privateSlap:true,nativeFrames:129,nativeAnchor:0,cues:[],keys:nativeSlapKeys064}),
   '500:205':Object.freeze({nativeFrames:112,nativeAnchor:41,cues:[1475],keys:[0,25,38,48,60,63,84,98,107,116,126]}),
   '500:360':Object.freeze({nativeFrames:135,nativeAnchor:84,cues:[1686],keys:[0,25,36,48,60,63,88,102,110,119,126]}),
   '521:16':Object.freeze({nativeFrames:182,nativeAnchor:34,cues:[1497,1717],keys:[0,8,9,21,33,43,54,64,78,91,95,101,106,111,112,126]}),
@@ -45,9 +49,17 @@
   '602:451':Object.freeze({nativeFrames:194,nativeAnchor:0,cues:[],keys:[0,10.5,15.75,28.98,31.5,47.25,52.5,60,73.5,78.75,93.24,94.5,110.25,115.5,126]})
  });
  function plan(profile,sequence){
+  // Unmarked pre-existing572/3 keeps its previous unsupported/null result.
+  if(profile?.species===572&&profile.id===3&&profile.minccinoNativeSlap064===undefined)return null;
   const definition=definitions[profile?.species+':'+profile?.id];if(!definition)return null;
   const openingStatus=!!definition.profileKey,duration=definition.duration??126,impact=definition.impact??60;
   if(profile.frames!==duration||profile.impact!==impact||(!openingStatus&&profile.nativeEffects!==true)||sequence?.frames!==duration||sequence.nativeFrames!==definition.nativeFrames||sequence.nativeAnchor!==definition.nativeAnchor||!Array.isArray(sequence.audio))throw Error('Supported battle presentation timing changed');
+  if(definition.privateSlap){
+   if(profile.minccinoNativeSlap064!=='private-native-paw-SPA163'||!nativeSlapContext064(profile.nativeSlapContext064)||profile.key!=='training-572-3'||profile.kind!=='palmFlurry'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='hand'||profile.damage!==true||profile.graphic!==undefined&&profile.graphic!==572||sequence.customImpact!==60)throw Error('Private Minccino presentation requires its exact native slap profile/context');
+   const expected=[[1422,1,16,60],[1420,2,16,60],[1422,1,16,60+25/129*66],[1420,2,16,60+25/129*66]];
+   if(sequence.audio.length!==4||sequence.audio.some((e,i)=>e.kind!=='sfx'||[e.id,e.channel,e.target,e.start].some((v,j)=>v!==expected[i][j])||JSON.stringify(e.raw)!==JSON.stringify([expected[i][0],expected[i][1],16,i<2?0:25,0,expected[i][0]===1422?125:35,0,0,0])))throw Error('Private Minccino native cue changed');
+   if(!Array.isArray(sequence.events)||sequence.events.length!==4||sequence.events.some((e,i)=>e.spa?.id!==163||e.emitterIndex!==[1,3,4,2][i]||e.target!==11||e.travel!==false||e.start!==0||e.end!==[100,58,27,129][i]))throw Error('Private Minccino native SPA163 order changed');
+  }
   if(profile.species===510&&(profile.id!==10||profile.key!=='training-510-10'||profile.kind!=='furySlash'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='hand'||profile.damage!==true))throw Error('Liepard presentation requires its unchanged authored claw profile');
   if(openingStatus&&(profile.key!==definition.profileKey||profile.nativeEffects!==undefined||Object.keys(profile).sort().join(',')!=='frames,id,impact,key,name,species'))throw Error('Opening status presentation requires its unchanged authored profile');
   if(openingStatus){const expected=profile.id===43?[[1449,1,14,24/52*46],[1449,2,14,39/52*46],[1836,1,16,46]]:[[1527,1,14,51],[1527,1,14,51+35/88*57]];if(sequence.audio.length!==expected.length||sequence.audio.some((e,i)=>e.kind!=='sfx'||[e.id,e.channel,e.target,e.start].some((v,j)=>v!==expected[i][j])))throw Error('Opening status native cue changed');}

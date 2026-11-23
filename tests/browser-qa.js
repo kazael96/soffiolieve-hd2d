@@ -172,14 +172,14 @@
   GEN5.Session=class extends NativeSession{constructor(p1,p2,options){super(p1,p2,{...options,seed:[1,2,3,4]});}};
   const finish=()=>{if(battling){session.battle.win('p1');snapshotPartner();busy=false;endBattle();}MoveFX.cancel();};
   MoveFX.play=async function(...args){
-   const row={ordinal:rows.length+1,id:args[0],side:args[1],bodySamples:0,reactionSamples:0,maxForepaw:0,minccinoBodySamples:0,authoredMinccinoSamples:0,frames:[],captured:false};rows.push(row);current=row;
+   const row={ordinal:rows.length+1,id:args[0],side:args[1],bodySamples:0,reactionSamples:0,maxForepaw:0,minccinoBodySamples:0,authoredMinccinoSamples:0,authoredNativeSlapSamples:0,frames:[],captured:false};rows.push(row);current=row;
    try{const result=play.apply(this,args);await until(()=>!!MoveFX.active,'064 actual move activation');const p=MoveFX.active.profile;row.profile=p&&{id:p.id,species:p.species,target:p.target,phase:p.phase};return await result;}
    finally{if(current===row)current=null;}
   };
   ROM_SPRITE_ANIM.draw=function(c,id,back,x,y,size,tick,grounded,a){
    const result=sprite.apply(this,arguments),row=current,side=back?'p1':'p2';
    if(result&&row&&a){
-    if(side===row.side&&!a.reaction){row.bodySamples++;row.maxForepaw=Math.max(row.maxForepaw,Math.abs(a.liepardClawPose?.foreA||0));if(Number(id)===572&&a.species===572){row.minccinoBodySamples++;if(a.minccinoPose)row.authoredMinccinoSamples++;}if(row.frames.length<8)row.frames.push({t:a.t??null,graphic:id,side});}
+    if(side===row.side&&!a.reaction){row.bodySamples++;row.maxForepaw=Math.max(row.maxForepaw,Math.abs(a.liepardClawPose?.foreA||0));if(Number(id)===572&&a.species===572){row.minccinoBodySamples++;if(a.minccinoPose)row.authoredMinccinoSamples++;if(a.minccinoSlap064)row.authoredNativeSlapSamples++;}if(row.frames.length<8)row.frames.push({t:a.t??null,graphic:id,side});}
     if(a.reaction){row.reactionSamples++;if(['intimidated','distracted','alert'].includes(a.kind))check(a.recoil===0&&a.rotation===0,'064 status move applied a physical recoil in the actual sprite renderer');}
     const readable=a.reaction?(a.wind||0)>.15:Number(id)===572&&a.species===572?a.t>.3&&a.t<.8:(a.liepardClawPose?.foreA||0)>.35;
     if(readable&&!row.captured&&!pendingShot)pendingShot={row,label:'064 actual '+row.id+' '+row.side+' '+GameSpeed.rate+'x step '+row.ordinal};
@@ -191,8 +191,9 @@
    const samples=played.filter(r=>r.profile?.species===572&&r.id===id);
    check(samples.length>0&&samples.every(r=>r.minccinoBodySamples>0),'064 actual Minccino command did not render its real native body');
    if(id===47)check(samples.every(r=>r.authoredMinccinoSamples>0),'064 actual Minccino song did not render its authored pose');
-   else{check([1,3,541].includes(id),'064 unexpected Minccino coverage contract');check(samples.every(r=>r.authoredMinccinoSamples===0),'064 withheld Minccino contact choreography was installed');}
-   return {mode:id===47?'authored-song':'preceding-contact-baseline-withheld',move:id,bodySamples:samples.reduce((n,r)=>n+r.minccinoBodySamples,0),authoredSamples:samples.reduce((n,r)=>n+r.authoredMinccinoSamples,0),visualApproval:false};
+   else if(id===3)check(samples.every(r=>r.authoredNativeSlapSamples>0&&r.authoredMinccinoSamples===0),'064 actual Minccino Double Slap did not render its native paw choreography');
+   else{check([1,541].includes(id),'064 unexpected Minccino coverage contract');check(samples.every(r=>r.authoredMinccinoSamples===0&&r.authoredNativeSlapSamples===0),'064 withheld Minccino contact choreography was installed');}
+   return {mode:id===47?'authored-song':id===3?'native-paw-double-slap':'preceding-contact-baseline-withheld',move:id,bodySamples:samples.reduce((n,r)=>n+r.minccinoBodySamples,0),authoredSamples:samples.reduce((n,r)=>n+r.authoredMinccinoSamples,0),nativePawSamples:samples.reduce((n,r)=>n+r.authoredNativeSlapSamples,0),visualApproval:false};
   }
   const cases=[
    {name:'status',p1:{name:'Snivy',level:50,gender:'M',moves:[43]},p2:{name:'Tepig',level:50,gender:'M',moves:[39]}},
@@ -224,7 +225,7 @@
     }
     turns.push({scenario:scenario.name,speed,seed:[1,2,3,4],input:'actual LOTTA and move DOM buttons',inputLabel,before,turn:session.battle.turn,played,...(scenario.minccinoMove?{minccinoCoverage:minccinoCoverage064(played,scenario.minccinoMove)}:{})});
    }
-   check(AudioEngine.errors.length===audioErrors,'064 actual commands raised audio errors');return {turns,selectedRates,realGEN5Turns:true,suppliedBattleOutcomes:false,audio:{engineEnabled:audioWanted,audibleComparison:false},scope:'Six isolated scenarios at each explicitly selected rate, both sides; controlled legal fixture teams, native accuracy/multihit rolls and cleanup outcomes. Minccino47 requires its authored song;1/3/541 require the preceding native-body baseline and forbid the withheld new choreography. Baseline contact overlap remains a separate visual limitation; no new approval follows from these checks. This does not certify the full move matrix, audible synchronization or physical Android.'};
+   check(AudioEngine.errors.length===audioErrors,'064 actual commands raised audio errors');return {turns,selectedRates,realGEN5Turns:true,suppliedBattleOutcomes:false,audio:{engineEnabled:audioWanted,audibleComparison:false},scope:'Six isolated scenarios at each explicitly selected rate, both sides; controlled legal fixture teams, native accuracy/multihit rolls and cleanup outcomes. Minccino47 requires its authored song;3 requires the new native-paw gesture;1/541 require the preceding native-body baseline and forbid the withheld new choreography. Baseline contact overlap remains a separate visual limitation; no new approval follows from these checks. This does not certify the full move matrix, audible synchronization or physical Android.'};
   }finally{GEN5.Session=NativeSession;MoveFX.play=play;ROM_SPRITE_ANIM.draw=sprite;drawArena=arenaDraw;current=null;pendingShot=null;finish();GameSpeed.set(1);AudioEngine.disable();AudioEngine.enable=audioEnable;}
  });
  case049('qaGustActions064','Unfezant064: Raffica reale M/F e due lati','animation064-real-renderer-unfezant-gust-native-turns',async()=>{

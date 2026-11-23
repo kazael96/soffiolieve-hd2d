@@ -53,6 +53,17 @@
   // The original control envelopes and stereo trajectories are already baked
   // into these finite native clips. Changed scripts/banks require a new review.
   const contracts={
+   3:{frames:129,anchor:0,events:[
+    {kind:'sfx',id:1422,channel:1,target:16,start:0,raw:[1422,1,16,0,0,125,0,0,0]},
+    {kind:'sfx',id:1420,channel:2,target:16,start:0,raw:[1420,2,16,0,0,35,0,0,0]},
+    {kind:'sfx',id:1422,channel:1,target:16,start:25,raw:[1422,1,16,25,0,125,0,0,0]},
+    {kind:'sfx',id:1420,channel:2,target:16,start:25,raw:[1420,2,16,25,0,35,0,0,0]}
+   ],voices:[
+    [0,1422,1,16,0,25,true,'47ab500ae04c7347b09f','47ab500ae04c7347b09f','47ab500ae04c7347b09f','47ab500ae04c7347b09f'],
+    [1,1420,2,16,0,25,true,'ffa615fd1f396051dc5a','ffa615fd1f396051dc5a','ffa615fd1f396051dc5a','ffa615fd1f396051dc5a'],
+    [2,1422,1,16,25,129,true,'47ab500ae04c7347b09f','47ab500ae04c7347b09f','47ab500ae04c7347b09f','47ab500ae04c7347b09f'],
+    [3,1420,2,16,25,129,true,'ffa615fd1f396051dc5a','ffa615fd1f396051dc5a','ffa615fd1f396051dc5a','ffa615fd1f396051dc5a']
+   ]},
    10:{frames:80,anchor:29,events:[{kind:'sfx',id:1423,channel:1,target:16,start:29,raw:[1423,1,16,5,0,120,0,0,0]}],voices:[[0,1423,1,16,29,80,true,'cac484e800f0f05c08d7','cac484e800f0f05c08d7','cac484e800f0f05c08d7','cac484e800f0f05c08d7']]},
    43:{frames:126,anchor:52,events:[
     {kind:'sfx',id:1449,channel:1,target:14,start:24,raw:[1449,1,14,0,0,115,0,0,0]},
@@ -157,10 +168,13 @@
   function validate(events,options){
    const species=options.cryIds?.[options.side],definition=contracts[options.moveId];
    const openingStatus=(species===495&&options.moveId===43&&options.profileSpecies===495&&options.profileKey==='snivy-43')||(species===498&&options.moveId===39&&options.profileSpecies===498&&options.profileKey==='tepig-39'),duration=openingStatus?(species===495?100:108):126,impact=openingStatus?(species===495?46:51):60;
+   const q=options.nativeSlapContext064,slap=species===572&&options.moveId===3&&options.profileSpecies===572&&options.profileKey==='training-572-3'&&options.profileKind==='palmFlurry'&&options.profileMarker==='private-native-paw-SPA163';
+   if(slap&&(!q||Object.keys(q).sort().join(',')!=='hitCount,hitIndex'||!Number.isInteger(q.hitCount)||q.hitCount<0||q.hitCount>5||!Number.isInteger(q.hitIndex)||q.hitIndex<0||(q.hitCount===0?q.hitIndex!==0:q.hitIndex>=q.hitCount)||q.hitCount===0&&options.miss!==true||(options.variant??0)!==0||options.nativeWaitGroups!==false))throw Error('Invalid private native slap audio context');
+   if(slap&&(window.NATIVE_AUDIO_BANK?.moves[3]?.length!==1||!window.NATIVE_AUDIO_BANK.moves[3][0].p2))throw Error('Changed private native slap variant bank');
    const claw=species===510&&options.moveId===10&&options.profileSpecies===510&&options.profileKey==='training-510-10';
    const tail=options.moveId===39&&[500,503].includes(species)&&options.profileKind==='nativeTailWhipStatus064'&&options.profileMarker==='native500503TailWhip064';
    const tynamo=species===602&&options.profileSpecies===602&&options.profileKind===({33:'bodyRam',86:'electricWave',209:'flameRush',451:'electricWave'}[options.moveId])&&[33,86,209,451].includes(options.moveId);
-   if(!definition||!([205,360].includes(options.moveId)&&species===500||options.moveId===16&&species===521||tail||tynamo||openingStatus||claw)||options.frames!==duration)throw Error('Unsupported native battle presentation audio');
+   if(!definition||!([205,360].includes(options.moveId)&&species===500||options.moveId===16&&species===521||tail||tynamo||openingStatus||claw||slap)||options.frames!==duration)throw Error('Unsupported native battle presentation audio');
    if(![.5,1].includes(options.playbackSpeed)||![1,2,4].includes(options.speed/options.playbackSpeed)||![.5,1,2,4].includes(options.speed))throw Error('Unsupported native battle presentation speed');
    if(!['p1','p2'].includes(options.side)||!['p1','p2'].includes(options.targetSide)||options.targetSide===options.side||!Array.isArray(options.requiredKeys)||options.requiredKeys.length>256||!Number.isInteger(options.variant??0)||(options.variant??0)<0)throw Error('Invalid native battle action contract');
    const keys=Object.freeze([...new Set([0,...options.requiredKeys,duration])].sort((a,b)=>a-b));if(keys.some(k=>!Number.isFinite(k)||k<0||k>duration))throw Error('Invalid native battle audio key');
@@ -299,7 +313,7 @@
      }
      log({event:'finish-waits-native-tail',frame,at:context.currentTime,graceEnd:finishCutoff,activeNodes:nodes.size});checkFinish();return finishJob;
     },
-    status(){return{mode:'native-battle-presentation',policy:'mapped-onset-ACK/native-relative-window',frame,paused,awaitResumeDraw,cancelled,finished,finalizedKeys,silent:records.length===0,ownedEpoch,drawnKeys:[...drawn],backend:{closed:cancelled||finished,activeRecords:nodes.size,pausedVoices:records.filter(r=>r.state==='paused').length,cancellingFade:cancelCleanupTimer!==null},voices:records.map(r=>({order:r.order,id:r.id,state:r.state,onsetFrame:r.onsetFrame,nativeStart:r.nativeStart,nativeEnd:r.nativeEnd,windowSeconds:r.windowSeconds,legacyRelativeStopSeconds:r.legacyRelativeStopSeconds,src:r.src,rate:r.rate,gain:r.gain,pan:r.pan,mirror:r.mirror,generation:r.generation})),ledger:ledger.slice(),droppedLogs,limits:['Native500205/360, exact normalized native52116, guarded native500/50339 and original60233/86/209/451, plus exact authored49543/49839/51010; dynamic fallback/runtime automation and cries are deliberately rejected. Native miss omits target voices; TailWhip keeps both original attacker voices.','Only onsets follow visual ACK; an already-started native voice continues through unrelated body holds. Separate onset spacing may stretch.','Native-relative window replaces the old browser absolute-end policy after onset remapping.','Two-ms fades adapt explicit graphic pauses/resumes; waveform continuity at those interruptions needs real Web Audio tests.','Mute or an epoch change suppresses this entire action without replay, matching the original beginMove cancellation policy.','Running-context cancel retains35ms fade/stop45ms with60ms owned cleanup fallback; suspended or error disposal is immediate.']};}
+    status(){return{mode:'native-battle-presentation',policy:'mapped-onset-ACK/native-relative-window',frame,paused,awaitResumeDraw,cancelled,finished,finalizedKeys,silent:records.length===0,ownedEpoch,drawnKeys:[...drawn],backend:{closed:cancelled||finished,activeRecords:nodes.size,pausedVoices:records.filter(r=>r.state==='paused').length,cancellingFade:cancelCleanupTimer!==null},voices:records.map(r=>({order:r.order,id:r.id,state:r.state,onsetFrame:r.onsetFrame,nativeStart:r.nativeStart,nativeEnd:r.nativeEnd,windowSeconds:r.windowSeconds,legacyRelativeStopSeconds:r.legacyRelativeStopSeconds,src:r.src,rate:r.rate,gain:r.gain,pan:r.pan,mirror:r.mirror,generation:r.generation})),ledger:ledger.slice(),droppedLogs,limits:['Native500205/360, exact normalized native52116, guarded native500/50339 and original60233/86/209/451, plus exact authored49543/49839/51010 and guarded private5723; dynamic fallback/runtime automation and cries are deliberately rejected. Native miss omits target voices; TailWhip keeps both original attacker voices.','Only onsets follow visual ACK; an already-started native voice continues through unrelated body holds. Separate onset spacing may stretch.','Native-relative window replaces the old browser absolute-end policy after onset remapping.','Two-ms fades adapt explicit graphic pauses/resumes; waveform continuity at those interruptions needs real Web Audio tests.','Mute or an epoch change suppresses this entire action without replay, matching the original beginMove cancellation policy.','Running-context cancel retains35ms fade/stop45ms with60ms owned cleanup fallback; suspended or error disposal is immediate.']};}
    };
    if(!initial.enabled||!context||context.state==='closed'){cancel('disabled-or-closed-at-prepare');return instance;}
    pendingPreparations.add(instance);
@@ -331,7 +345,7 @@
   // Each action claims its owner before IO. Cancelling a pending load settles
   // its caller without aborting the shared cache request or replaying a turn.
   cancelMove();
-  const frozenOptions={...options,cryIds:{...options.cryIds},requiredKeys:Array.isArray(options.requiredKeys)?options.requiredKeys.slice():options.requiredKeys};
+  const frozenOptions={...options,cryIds:{...options.cryIds},requiredKeys:Array.isArray(options.requiredKeys)?options.requiredKeys.slice():options.requiredKeys,...(options.nativeSlapContext064!==undefined?{nativeSlapContext064:options.nativeSlapContext064&&typeof options.nativeSlapContext064==='object'?{...options.nativeSlapContext064}:options.nativeSlapContext064}:{})};
   const frozenEvents=Array.isArray(events)?events.map(event=>({...event,raw:Array.isArray(event.raw)?event.raw.slice():event.raw})):events;
   return presentationAudio.prepare(frozenEvents,frozenOptions);
  }
