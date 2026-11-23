@@ -79,12 +79,15 @@ jobs:
           name: phone057-browser-report
           path: test-results/phone057
           if-no-files-found: ignore
-      - name: Check native animation commands, audio and protected poses in all formats
+      - name: Check native animation commands, audio and protected poses in portrait
         timeout-minutes: 30
-        run: |
-          for viewport in portrait landscape desktop; do
-            node scripts/test-browser-headless.cjs _site "test-results/animation064-$viewport" --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports="$viewport" --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
-          done
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
+      - name: Check native animation commands, audio and protected poses in landscape
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
+      - name: Check native animation commands, audio and protected poses in desktop
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
       - uses: actions/upload-artifact@v4
         if: always()
         with:

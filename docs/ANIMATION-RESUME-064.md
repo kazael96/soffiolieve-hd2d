@@ -1,5 +1,32 @@
 # Ripresa della revisione064 · 23 novembre2026
 
+## Aggiornamento del collaudo e del controllo automatico
+
+Il run GitHub45157199563, sul commit120158159fdac3e65cd5616424c2614adff1a8a4,
+ha superato le52 fasi automatiche e i controlli di introduzione, titolo,
+salvataggi e regressioni telefono. Il blocco delle animazioni resta **FAIL**:
+sei casi in verticale, sei in orizzontale e cinque su desktop sono passati,
+ma il limite cumulativo di30 minuti ha interrotto l'ultimo caso Tynamo su
+desktop. Il log originale e la ricevuta sono conservati in
+`outputs/animation-review064-resume-20261123/ci-45157199563-timeout`.
+
+I workflow QA e Pages eseguono ora i tre formati in passi sequenziali
+separati, con un solo download e una sola build. Restano gli stessi18 casi,
+il limite di180s per caso, il fallimento immediato e la raccolta dei rapporti
+anche dopo un errore. Dodici controlli mirati della configurazione passano;
+occorre un nuovo run completo. Questa correzione non modifica il runtime,
+non converte il vecchio FAIL in PASS e non certifica le immagini non ancora
+esaminate del nuovo run.
+
+Il port privato per i gesti saltati di Snivy/Fulmisguardo,
+Tepig/Colpocoda e Liepard/Graffio conserva9 prove CPU mirate e100 regressioni
+esistenti superate, ma non è ancora installato nei sorgenti. La prima prova
+grafica privata ha completato i sei scenari a×1 e fallito nell'esportazione
+del rapporto oltre4MB: l'esito complessivo rimane FAIL. La raccolta delle
+tracce viene separata dal rapporto, senza alzare il limite o indebolire gli
+assert. La sovrapposizione dei corpi Minccino/Liepard e l'inquadratura delle
+doppie con Tynamo rimangono problemi distinti, ancora in revisione.
+
 La revisione prosegue dal checkout esistente. La cartella privata
 `outputs/animation-review064` non risulta più presente e la ricerca nei percorsi
 locali accessibili e nei metadati del Cestino non ha recuperato i suoi file.
