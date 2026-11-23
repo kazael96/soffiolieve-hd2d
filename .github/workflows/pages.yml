@@ -89,13 +89,40 @@ jobs:
           if-no-files-found: ignore
       - name: Check native animation commands, audio and protected poses in portrait
         timeout-minutes: 30
-        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064
+      - name: Check Tynamo native commands and audio in portrait at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-tynamo-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaTynamoActions064 --rates=1
+      - name: Check Tynamo native commands and audio in portrait at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-tynamo-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaTynamoActions064 --rates=2
+      - name: Check Tynamo native commands and audio in portrait at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaTynamoActions064 --rates=4
       - name: Check native animation commands, audio and protected poses in landscape
         timeout-minutes: 30
-        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064
+      - name: Check Tynamo native commands and audio in landscape at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-tynamo-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaTynamoActions064 --rates=1
+      - name: Check Tynamo native commands and audio in landscape at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-tynamo-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaTynamoActions064 --rates=2
+      - name: Check Tynamo native commands and audio in landscape at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaTynamoActions064 --rates=4
       - name: Check native animation commands, audio and protected poses in desktop
         timeout-minutes: 30
-        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064
+      - name: Check Tynamo native commands and audio in desktop at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=1
+      - name: Check Tynamo native commands and audio in desktop at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=2
+      - name: Check Tynamo native commands and audio in desktop at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=4
       - uses: actions/upload-artifact@v4
         if: always()
         with:

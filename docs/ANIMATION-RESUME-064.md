@@ -29,6 +29,20 @@ precedente è quindi risolto, mentre questo FAIL per singolo caso rimane
 distinto e richiede diagnosi. Non aumentare il timeout né trasferire alla08
 i PASS della07.
 
+La diagnosi dell'artefatto originale mostra55 PNG parziali di Tynamo e il
+caso ancora in esecuzione, senza errore del gioco registrato. Il workflow
+divide adesso soltanto Tynamo in tre lotti sequenziali ×1/×2/×4, con gli
+stessi otto turni per velocità, audio e assert originali. Conserva tutte
+le54 celle formato–caso–velocità,180s per caso,30 minuti per passo, una
+sola build e rapporti distinti sempre raccolti. Il runner inoltra il filtro
+al server QA isolato e controlla anche le velocità dei turni conclusi;
+un parametro nell'URL da solo non prova copertura. Venti controlli mirati
+passano, compresi inventario, limiti e rifiuto di velocità mancanti o
+duplicate. Il primo replay reale desktop della08 a×1 supera tutti gli
+otto turni in82099ms, con25 PNG esportati,399 moduli verificati e chiusura
+dei processi confermata. I lotti×2/×4 sono ancora da concludere: non
+attribuire ancora un PASS complessivo né una riduzione del tempo totale.
+
 Il run GitHub45157199563, sul commit120158159fdac3e65cd5616424c2614adff1a8a4,
 ha superato le52 fasi automatiche e i controlli di introduzione, titolo,
 salvataggi e regressioni telefono. Il blocco delle animazioni resta **FAIL**:
