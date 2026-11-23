@@ -18,14 +18,41 @@ occorre un nuovo run completo. Questa correzione non modifica il runtime,
 non converte il vecchio FAIL in PASS e non certifica le immagini non ancora
 esaminate del nuovo run.
 
-Il port privato per i gesti saltati di Snivy/Fulmisguardo,
-Tepig/Colpocoda e Liepard/Graffio conserva9 prove CPU mirate e100 regressioni
-esistenti superate, ma non è ancora installato nei sorgenti. La prima prova
-grafica privata ha completato i sei scenari a×1 e fallito nell'esportazione
+Il port per i gesti saltati di Snivy/Fulmisguardo, Tepig/Colpocoda e
+Liepard/Graffio è ora nei sorgenti del ramo e nella candidata locale08
+`b2fa3b18ae22f8c2`, ancora **in collaudo e non pubblicata**. Le durate originali
+100/108/126 e gli impatti46/51/60 restano invariati. Il controller conserva
+le pose finché entrambi i corpi sono effettivamente disegnati nell'arena;
+gli attacchi diversi e i contesti non verificati mantengono le guardie
+precedenti. Non cambia le parti anatomiche, gli esiti GEN5 o i campioni audio
+nativi. Nove nuovi test sui sorgenti reali e100 regressioni esistenti passano
+in45738ms, con180s di budget, heap400MiB e sorgenti invariati durante la prova.
+Il primo avvio del banco era stato negato dal sandbox prima dei test: quel
+tentativo resta documentato separatamente.
+
+La candidata08 usa il normale server QA Python, senza il trasferimento HTTP
+aggiuntivo dei prototipi. Il primo replay a×4 in orizzontale supera i sei
+scenari, con399 moduli verificati e tutte le chiavi effettivamente confermate
+per le direzioni offerte dal caso. Restano necessari gli altri replay,
+le direzioni inverse, il lifecycle audio/GPU e la nuova suite completa.
+Le473 voci di sorgenti/trasporti cambiano soltanto per i tre moduli, `app.js`
+e l'HTML versionato; tutte le20841 voci degli asset restano identiche alla07.
+
+La prima prova grafica privata aveva completato i sei scenari a×1 e fallito nell'esportazione
 del rapporto oltre4MB: l'esito complessivo rimane FAIL. La raccolta delle
-tracce viene separata dal rapporto, senza alzare il limite o indebolire gli
-assert. La sovrapposizione dei corpi Minccino/Liepard e l'inquadratura delle
+tracce è stata separata dal rapporto, senza alzare il limite o indebolire gli
+assert. I successivi prototipi passano in verticale a×1/×2/×4 e in orizzontale
+a×1/×2; due interruzioni del trasporto locale prima del caricamento
+dell'app restano FAIL e non sono prove della geometria o delle azioni.
+La sovrapposizione dei corpi Minccino/Liepard e l'inquadratura delle
 doppie con Tynamo rimangono problemi distinti, ancora in revisione.
+
+H.8: la06 `cf264ab8433c8fe9` è stata archiviata e rimossa dopo ricostruzione e
+verifica di tutti i32009 file:32001 dalla04 obbligatoria e8 dal delta ZIP,
+SHA256 `134eba7d60b596ad78f4d749b849e730664436d87ce1e073029c5b65bbcc2f69`.
+Prove, sigilli e ricevuta sono in
+`outputs/animation-review064-resume-20261123/h8-c6`. Durante il collaudo restano
+soltanto04 come dipendenza degli archivi,07 come confronto e08 come candidata.
 
 La revisione prosegue dal checkout esistente. La cartella privata
 `outputs/animation-review064` non risulta più presente e la ricerca nei percorsi

@@ -33,6 +33,9 @@
   '500:360':Object.freeze({nativeFrames:135,nativeAnchor:84,cues:[1686],keys:[0,25,36,48,60,63,88,102,110,119,126]}),
   '521:16':Object.freeze({nativeFrames:182,nativeAnchor:34,cues:[1497,1717],keys:[0,8,9,21,33,43,54,64,78,91,95,101,106,111,112,126]}),
   '500:39':tailDefinition,'503:39':tailDefinition,
+  '510:10':Object.freeze({nativeFrames:80,nativeAnchor:29,cues:[1423],keys:[0,27,28,29,30,31,32,33,36,43,47,51,54,55,56,60,68,69,75,76,77,82,83,89,90,95,97.5,112,126]}),
+  '495:43':Object.freeze({duration:100,impact:46,profileKey:'snivy-43',nativeFrames:126,nativeAnchor:52,cues:[1836],keys:[0,22,25,40,46,64,65,76,82,84,100]}),
+  '498:39':Object.freeze({duration:108,impact:51,profileKey:'tepig-39',nativeFrames:88,nativeAnchor:0,cues:[],keys:[0,1.35,14.85,21.6,28.35,35.1,41.85,48.6,51,55.35,62.1,68.85,70,75.6,82.35,83.16,89,89.1,95.85,102.6,108]}),
   // Existing602 recipe: wind reaches1 at.23 and releases at.74.
   // Contact advance peaks at impact, returns at impact+.08, ends at.94;
   // sampled phase landmarks also retain its sin6 tail / sin4 electric pulses.
@@ -43,8 +46,12 @@
  });
  function plan(profile,sequence){
   const definition=definitions[profile?.species+':'+profile?.id];if(!definition)return null;
-  if(profile.frames!==126||profile.impact!==60||profile.nativeEffects!==true||sequence?.frames!==126||sequence.nativeFrames!==definition.nativeFrames||sequence.nativeAnchor!==definition.nativeAnchor||!Array.isArray(sequence.audio))throw Error('Supported battle presentation timing changed');
-  if(profile.id===39){
+  const openingStatus=!!definition.profileKey,duration=definition.duration??126,impact=definition.impact??60;
+  if(profile.frames!==duration||profile.impact!==impact||(!openingStatus&&profile.nativeEffects!==true)||sequence?.frames!==duration||sequence.nativeFrames!==definition.nativeFrames||sequence.nativeAnchor!==definition.nativeAnchor||!Array.isArray(sequence.audio))throw Error('Supported battle presentation timing changed');
+  if(profile.species===510&&(profile.id!==10||profile.key!=='training-510-10'||profile.kind!=='furySlash'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='hand'||profile.damage!==true))throw Error('Liepard presentation requires its unchanged authored claw profile');
+  if(openingStatus&&(profile.key!==definition.profileKey||profile.nativeEffects!==undefined||Object.keys(profile).sort().join(',')!=='frames,id,impact,key,name,species'))throw Error('Opening status presentation requires its unchanged authored profile');
+  if(openingStatus){const expected=profile.id===43?[[1449,1,14,24/52*46],[1449,2,14,39/52*46],[1836,1,16,46]]:[[1527,1,14,51],[1527,1,14,51+35/88*57]];if(sequence.audio.length!==expected.length||sequence.audio.some((e,i)=>e.kind!=='sfx'||[e.id,e.channel,e.target,e.start].some((v,j)=>v!==expected[i][j])))throw Error('Opening status native cue changed');}
+  if(profile.id===39&&!openingStatus){
    if(profile.kind!=='nativeTailWhipStatus064'||profile.tailWhip064!=='native500503TailWhip064'||profile.damage!==false||profile.target!=='foe')throw Error('TailWhip presentation requires its guarded native status profile');
    if(sequence.audio.length!==2||sequence.audio.some((event,i)=>event.kind!=='sfx'||event.id!==1527||event.channel!==1||event.target!==14||event.start!==[60,86.25][i]))throw Error('Native TailWhip attacker cue changed');
   }
@@ -53,9 +60,9 @@
    if(!kind||profile.kind!==kind||profile.training!==true||profile.chapter!==true||profile.target!=='foe'||profile.damage!==(profile.id!==86)||profile.graphic!==undefined&&profile.graphic!==602)throw Error('Tynamo presentation requires its unchanged native recipe');
    if(profile.id===451)for(const [id,start]of[[1445,60],[1963,90.61855670103093],[1407,90.61855670103093]]){const cues=sequence.audio.filter(event=>event.kind==='sfx'&&event.id===id&&event.target===14);if(cues.length!==1||cues[0].start!==start)throw Error('Native Tynamo attacker cue changed');}
   }
-  for(const id of definition.cues){const cues=sequence.audio.filter(event=>event.kind==='sfx'&&event.id===id&&event.target===16);if(cues.length!==1||cues[0].start!==60)throw Error('Native battle impact cue changed');}
-  const keys=definition.keys.slice();for(const event of sequence.audio){if(!Number.isFinite(event.start)||event.start<0||event.start>126||!['sfx','control','panControl'].includes(event.kind))throw Error('Invalid supported battle audio event');keys.push(event.start);}
-  return Object.freeze({duration:126,keys:Object.freeze([...new Set(keys)].sort((a,b)=>a-b))});
+  for(const id of definition.cues){const cues=sequence.audio.filter(event=>event.kind==='sfx'&&event.id===id&&event.target===16);if(cues.length!==1||cues[0].start!==impact)throw Error('Native battle impact cue changed');}
+  const keys=definition.keys.slice();for(const event of sequence.audio){if(!Number.isFinite(event.start)||event.start<0||event.start>duration||!['sfx','control','panControl'].includes(event.kind))throw Error('Invalid supported battle audio event');keys.push(event.start);}
+  return Object.freeze({duration,keys:Object.freeze([...new Set(keys)].sort((a,b)=>a-b))});
  }
  const api=Object.freeze({create,plan});root.BattlePresentation=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
