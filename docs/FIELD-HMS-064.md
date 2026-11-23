@@ -1,5 +1,13 @@
 # Revisione MN 0.64 e conchiglia di Oshawott
 
+Le acquisizioni private citate in questo registro sono storiche. Il percorso
+`outputs/animation-review064` non risulta più disponibile nella ripresa del
+23 novembre; non si attribuisce ai vecchi verbali un nuovo esito C7.
+Asset o riferimenti ancora presenti nel checkout non recuperano da soli le
+prove private mancanti.
+Per stato e prove correnti vedere
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+
 
 
 La revisione distingue quattro prove: inventario delle coreografie, fotogrammi del compositore, giudizio visivo e comandi reali nel mondo. Un inventario completo o un controllo numerico non approva la qualità dell'animazione.

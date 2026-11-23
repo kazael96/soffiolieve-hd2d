@@ -1,5 +1,11 @@
 # Unfezant · Raffica · sorgente autoriale0.64
 
+Questa scheda conserva anche il registro storico del pilot e della prima
+promozione. Il precedente percorso `outputs/animation-review064` non risulta
+più disponibile: la sua descrizione come «preservato» sotto è storica, non una
+conferma di recupero attuale. Le fixture commesse e le nuove prove hanno
+provenienza distinta; vedere [ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+
 `src/unfezant-moves.js` integra le quattro viste maschio/femmina, fronte/retro del pilot privato28. Il corpo e l'identità rimangono nativi; copritrici, ventaglio delle remiganti e sovrapposizione del polso sono un adattamento HD-2D autoriale. Non sono animazioni estratte dal DS. Effetti nativi della mossa, audio, meccaniche e profilo temporale rimangono affidati ai sistemi esistenti.
 
 La sorgente precedente è preservata fuori dalle build: `outputs/animation-review064/story/unfezant-gust-private/wing-split-allcap26-064.js`, SHA-256 `62c60b0a471ce7480e1eb35f0dacd0134af446fcc639ef30161cd53c27b6dc84`. La fixture `tests/fixtures/unfezant-gust064-reference.json` conserva i dodici SHA delle immagini, i cinque SHA delle funzioni del rig effettivamente osservato e i riferimenti alle quattro banche native. I cinque corpi di funzione `prepare`, `phase`, `author`, `projection`, `surface` sono invariati rispetto al pilot.
@@ -37,3 +43,20 @@ Il pilot28 ha prodotto508 fotogrammi del corpo realmente letti dall'agente Story
 La nuova suite `tests/unfezant-gust064.test.cjs` verifica13 casi: difetto originale delle ali chiuse, installazione ripetuta, barriera delle risorse, richieste concorrenti, errori e ripresa, entrambe le forme, banche espulse/incomplete, concatenazione del preparatore, sorgenti/funzioni accettate, pool, geometria ibrida e delega dell'intero catalogo ottenibile. Il caso originale fallisce con il modulo disattivato e passa con il nuovo modulo. L'output EPERM del primo tentativo del test runner è un limite del lancio isolato, non una regressione dell'app; è preservato separatamente. Il successivo FAIL di copertura del sottoinsieme iniziale è stato corretto esercitando l'intero catalogo, senza abbassare il controllo.
 
 Queste prove CPU non certificano il rendering della nuova integrazione. Restano obbligatori candidata C3 immutabile, comandi reali, ritmo normale e rallentato, ×1/×2/×4, telefoni, audio e compositore ibrido. Il modulo non è ancora dichiarato pubblicato o completamente collaudato.
+
+## Requisito attuale del collaudo
+
+Il riferimento a C3 nel paragrafo precedente appartiene alla prima promozione;
+la sua build non è disponibile nella ripresa. Il requisito attuale riguarda
+la candidata07 immutabile `85b98d70e88848df`, con sorgenti realmente eseguiti attestati,
+comandi e immagini nei tre formati e alle velocità dichiarate. Normale,
+rallentato, audio ascoltato e immagini statiche restano prove distinte: un
+parametro o un PASS CPU non ne certifica l'esecuzione grafica.
+
+La lettura indipendente delle20 immagini di battaglia C5/ritratto/×2 copre
+soltanto i cinque istanti60/95/101/106/126 per le quattro azioni. Non certifica
+tutti i fotogrammi continui o il nuovo pacchetto C7. Il verbale conserva la
+vicinanza ala/testa in alcune viste femminili e il rinculo sollevato del
+difensore. Gli esiti e i limiti dei
+nuovi replay vanno aggiunti dopo la loro effettiva esecuzione e lettura;
+la bozza della PR e la suite r2 in corso non costituiscono pubblicazione.

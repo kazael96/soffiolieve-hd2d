@@ -160,3 +160,19 @@ La suite04/r3 è poi terminata: **51/51 fasi PASS**, revisione `9d50b97661c11307
 Nei replay successivi Emboar completa72 azioni nei tre formati a×1/×2/×4; un revisore indipendente ha letto tutti288PNG originali, senza ridimensionamenti. Non osserva nuovi tagli, distacchi o forti fusioni dei corpi nei campioni di preparazione, contatto, mancato bersaglio e recupero. Le pose126 sono distinte dai ritorni o salti intermedi della fixture. La lettura non certifica tutti i fotogrammi continui o il ritmo normale/rallentato. Aggiungendo le otto azioni e16PNG di Raffica già dichiarati, il sigillo `candidate04-reviewed-battle-batches064.json` registra80 azioni e304PNG effettivamente esaminati, SHA256 `0b70b11e71323690f453585f26992bb58b5386b970a711bb608319f609aa8831`.
 
 La prova lifecycle01 resta FAIL: il contesto audio impiega562,4ms per riprendere e supera la politica originale di500ms; il corpo conclude correttamente126 in silenzio, mentre l'osservatore pretendeva soltanto il ritorno della stessa voce. Il nuovo osservatore conserva i sette helper originari e verifica separatamente cancellazione definitiva e ripresa breve, senza aumentare i limiti del runtime. Il replay02 passa tutte quattro le operazioni reali: perdita/ripristino WebGL, sospensione/ripresa Web Audio, annullamento e muto. La ripresa breve è effettivamente ottenuta in493,7ms, con frame25, offset0,224s e finestra residua0,388s conservati, senza duplicare onset; ogni azione termina senza nodi del proprietario residui. I64PNG del FAIL e i64 del nuovo replay hanno letture indipendenti proprie. Raffica×2/altri formati e il piccolo pilot dei nuovi wrapper narrativi sono preparati ma non ancora eseguiti; la carenza effettiva di spazio locale mantiene in attesa le nuove catture, preservando ROM, sorgenti e rapporti.
+
+## Aggiornamento della ripresa · candidata07
+
+Il checkpoint precedente descriveva la candidata04 e i materiali allora
+disponibili; non è lo stato finale della07. La ripresa ha acquisito e letto
+le20 immagini di Raffica C5 nel formato telefono a×2, limitate a cinque
+istanti per azione. L'integrazione del fit idle di Tynamo e dei controller
+di Colpocoda e delle quattro mosse di Tynamo è ora nella candidata07 `85b98d70e88848df`;
+non certifica tutti i gesti, gli appoggi o i formati del corpus storico.
+
+La nuova suite r2 è ancora in corso dopo il FAIL conservato di r1. I replay
+e le letture indipendenti del codice congelato devono avere ricevute proprie;
+i vecchi51/51 e le immagini di04/05 non vengono promossi a un nuovo PASS
+completo. Disponibilità dei rapporti, copie conservate, bozza PR e stato
+delle verifiche sono in [ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+Nessuna nuova pubblicazione o approvazione estetica globale è dichiarata.

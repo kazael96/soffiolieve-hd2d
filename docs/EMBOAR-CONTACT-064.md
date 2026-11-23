@@ -1,5 +1,11 @@
 # Contatto di Emboar nella revisione0.64
 
+Le descrizioni delle vecchie acquisizioni C3 restano storiche: il percorso
+privato `outputs/animation-review064` non è più disponibile nella ripresa.
+Il riferimento CPU commesso in `tests/fixtures` è distinto da quei sigilli.
+Per prove attuali e candidata congelata vedere
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+
 `emboar-contact-moves.js` porta il modello geometrico phase2 al solo caso effettivo di una lotta singola fra due Emboar500 nativi, visibili e senza Sostituto, Minimizzato o stato di esausto. La grafica viene letta dalla stessa vista usata dal combattente, insieme al vero slot nativo, allo stato visivo e al banco pronto. I punti vita già risolti dal simulatore non vengono scambiati per la visibilità del corpo durante il replay.
 
 Il modulo va installato **dopo `pokemon-anim.js`, `emboar-moves.js` e `unfezant-moves.js`**. Conserva il riferimento delle parti realmente eseguite: installare successivamente il wrapper alare cambia quel proprietario e deve continuare a far fallire la guardia. La valutazione ripetuta dello script e `install()` sono idempotenti.
@@ -15,3 +21,17 @@ Queste prove non approvano i comandi o l'estetica della nuova candidata. Prima d
 La candidata interna03, revisione `5e6034059fa4921b`, ha poi eseguito il vero index integrato con dodici momenti forniti di contatto, recupero e mancato bersaglio nel formato390×844. I testi e le funzioni realmente eseguiti combaciano prima e dopo l'osservatore. Sono state lette tutte le dodici viste dell'arena e le ventiquattro maschere fisiche native, con riferimenti separati per regia del campo e integrità delle sagome. Il contatto di205 sovrappone0/1 pixel sui due lati e360 ne sovrappone2/2: piccoli contatti tangenti, non zero dichiarato né approvazione automatica da una soglia. I quattro recuperi e i quattro MISS forniti mantengono separazione. Ombre e terreno sono coerenti nelle immagini; i parametri effettivi di `BattleGround.shadow` non sono stati osservati in quel lotto. Il sigillo comune è `outputs/animation-review064/battles/contact-stills-overlay_contact_c3_geometry01/joint-geometry-seal064.json`, esterno alle build. Sono fotogrammi di preview, compreso il MISS di360: non provano una precisione nativa fallita, un comando, tutta la sequenza o il nuovo controller temporale.
 
 Gli altri bersagli, le forme e gli stati esclusi, le doppie/multi e il fit generale restano esplicitamente non verificati e conservano il ramo precedente. Questo port non dichiara risolto il taglio di Tynamo nel telefono né tutti i contatti di Emboar. Il prototipo privato del fit dinamico conserva il percorso sul terreno e scala anatomia, sollevamento e punti attaccati intorno al vero appoggio risolto; il suo inviluppo continuo delle mosse non è ancora approvato. Nessun risultato idle o confronto numerico sostituisce tale lavoro.
+
+## Stato nella candidata07
+
+La candidata07 `85b98d70e88848df` conserva il perimetro di contatto500/500 di questo
+modulo. L'estensione di Colpocoda ad avversari diversi non amplia205/360.
+Nella catena attuale `tail-whip-moves.js` entra dopo Emboar e prima di
+Unfezant; Contact rimane dopo Unfezant e le reazioni. I controlli dei
+proprietari restano attivi.
+
+I nuovi replay di comandi, contatto, miss e recupero richiedono l'esame delle
+proprie immagini, separato dalle vecchie preview C3 e dai test CPU. La suite
+completa r2 è ancora in corso: questo aggiornamento non anticipa un PASS
+grafico o una pubblicazione. Il fit e il ritmo di Tynamo hanno documenti e
+contratti separati e non approvano il contatto generale di altri Pokémon.

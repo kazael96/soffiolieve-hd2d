@@ -1,6 +1,6 @@
 # Ritmo delle quattro mosse di Tynamo · 064
 
-La prova effettiva della candidata06 sul telefono a×4 ha saltato la finestra
+La prova effettiva della candidata06 nel formato telefono390×844 a×4 ha saltato la finestra
 di impatto di Scintilla/P2 e quella iniziale di P1. Il rapporto resta FAIL,
 con16 immagini di battaglia e una schermata d'errore lette separatamente.
 Le immagini presenti conservano la sagoma nell'arena; non approvano i gesti
@@ -47,3 +47,9 @@ Contratti, log completi e misure sono in
 Queste prove non sostituiscono i nuovi replay della candidata congelata,
 la lettura delle immagini, la suite completa o la verifica della pubblicazione.
 Nessun confronto audio all'ascolto è implicito.
+
+Il codice descritto è nella candidata07 congelata `85b98d70e88848df`. Il nuovo
+collaudo non è il replay fallito della06: deve produrre ricevute, immagini
+lette e risultati propri. Per la suite r2 ancora in corso e la PR in bozza
+consultare [ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md); non viene
+anticipato un PASS completo o una pubblicazione.

@@ -43,8 +43,13 @@ transfer of the earlier ×1 visual evidence to the new timing controller.
 
 Run with `SOFFIOLIEVE_TEST_SITE` pointing to the preserved prepared asset build:
 
+Use two separate Node processes: each native fixture owns its400MiB RSS
+assertion. Combining their VMs in one `--test-isolation=none` invocation is
+outside that measurement condition. Keep the original assertions and budgets.
+
 ```text
-node --test --test-isolation=none tests/battle-tynamo-framing064.test.cjs tests/battle-actor-framing064.test.cjs
+node --test --test-isolation=none tests/battle-tynamo-framing064.test.cjs
+node --test --test-isolation=none tests/battle-actor-framing064.test.cjs
 ```
 
 The baseline failure, source-data generator, measurements and CPU logs are under

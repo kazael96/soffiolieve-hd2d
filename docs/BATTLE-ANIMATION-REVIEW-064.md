@@ -1,5 +1,12 @@
 # Revisione delle animazioni di battaglia · candidata 0.64
 
+**Registro storico delle acquisizioni precedenti alla ripresa del23 novembre.**
+I percorsi `outputs/animation-review064` citati sotto non risultano più
+disponibili e non sono stati recuperati. Le vecchie letture e i PASS descritti
+restano cronologia documentale, senza diventare nuove prove della candidata
+corrente. Disponibilità effettiva e stato del collaudo sono in
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+
 Stato: **in corso, nessuna certificazione estetica globale**. Il riferimento immutato è la build 0.63 `abedec256cddc00e`. La revisione applica [ANIMATION-QUALITY.md](ANIMATION-QUALITY.md), Sprite Animation/production e Pixel Art Fundamentals/critique. Inventario, movimento, pacchetto e integrazione hanno esiti distinti.
 
 **Rettifica della provenienza dei pilot:** il precedente server sostituiva gli URL dei singoli sorgenti, mentre la build esegue i testi inline di `app.js`. Gli overlay JavaScript non raggiungevano quel trasporto. Il corpus è sospeso; le attribuzioni al renderer aggiornato, compreso il confronto254RGBA di Canto47, richiedono una nuova cattura con attestazione runtime. Le immagini e le letture visive precedenti restano prove dell'output osservato, non dell'overlay previsto. I rapporti, i FAIL e gli indici originali sono preservati; l'audit separato `outputs/animation-review064/battles/historical-transport-erratum064.json` e la relativa rettifica Markdown distinguono i moduli privati aggiunti direttamente, gli asset e gli script inline. Il pin del server storico non era registrato e rimane nullo. Nessun PASS storico viene trasferito alla candidata corretta.
@@ -117,3 +124,15 @@ Il fallback a freddo richiede comunque risorse reali: i due nuovi `src/assets/po
 Le54mappe native restano non promosse: Dewott55 ha una lettura corporea limitata positiva, mentre Pidove519/16 conserva ali ripiegate in tutti254fotogrammi letti e non soddisfa Raffica. La nuova diagnosi503 distingue la vera pinna-coda(front28/back8) dai vecchi indici che muovono arti/piedi; il fix39 è ancora un override privato. Un PASS di dispatch o una parte raggiungibile non certificano anatomia o gesto.
 
 `base-corpus-branch-reconciliation064.json` distingue3.340gruppi con profili e rami sorgente identici al riferimento base da14condizioni modificate dei tre fix congelati. Il metodo verifica l'intero delta letterale dei sorgenti e tutti12.082contesti; campiona integralmente soltanto i rami modificati. È una prova di identità del ramo sorgente, non una nuova cattura. Due gruppi hanno rappresentante Heatmor316ma includono il membro Scippo289: la sola immagine316non dimostra il comando289. Le nuove modifiche a500,521, ombre e renderer restano fuori da questa qualifica. Il precedente tentativo numerico fermato dal limite400MiB è preservato come FAIL del banco, separato da questa classificazione.
+
+## Stato successivo del codice · candidata07
+
+La frase storica sul fix39 ancora privato descrive il precedente pilot.
+La nuova implementazione di [Colpocoda500/503](TAIL-WHIP-064.md) è invece
+integrata nella candidata07 `85b98d70e88848df`, con propria provenienza e prove CPU.
+Il [dimensionamento602](TYNAMO-FRAMING-064.md) e il
+[controller delle sue quattro mosse](TYNAMO-PRESENTATION-064.md) sono
+interventi separati. Nessuno promuove implicitamente le vecchie54 mappe,
+l'intero corpus di4.365 coppie o i pilot mancanti. La suite completa r2 e i
+nuovi replay sono ancora da concludere secondo il registro della ripresa;
+non viene dichiarata una certificazione estetica globale o una pubblicazione.

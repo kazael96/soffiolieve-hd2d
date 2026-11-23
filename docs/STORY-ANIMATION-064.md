@@ -1,5 +1,12 @@
 # Revisione delle animazioni di storia - 0.64 in lavorazione
 
+Questo è il registro storico delle acquisizioni anteriori alla ripresa del
+23 novembre. Il percorso `outputs/animation-review064` citato sotto non
+risulta più disponibile e le sue copie private non sono state recuperate.
+I vecchi PASS e le letture descrivono quanto registrato allora; non sono
+nuovi rapporti C7. Disponibilità effettiva e collaudo corrente sono in
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+
 Richiesta del20 novembre2026: esaminare le animazioni gia aggiunte con il metodo di `ANIMATION-QUALITY.md` e le skill `sprite-animation` e `pixel-art-fundamentals`. Il lancio di Aralia0.63 resta quello gia rifatto con pose complete; non viene ridisegnato in questa revisione. Registrare un metodo o generare tavole non certifica una revisione grafica compiuta.
 
 ## Inventario e metodo

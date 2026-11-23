@@ -55,7 +55,8 @@ effettivamente, prima di attribuire una approvazione visiva o pubblicare.
 
 ## Ritmo e verifica successiva
 
-Il primo replay della candidata05 sul telefono, con input reali e audio attivo,
+Il primo replay della candidata05 nel formato telefono390×844, con comandi
+reali nel browser isolato e audio attivo,
 ha saltato la finestra di rilascio di Samurott/P1 anche a×1. Il rapporto rimane
 FAIL; le15 immagini disponibili non approvano la fase assente. La correzione
 conserva i landmark delle due curve e richiede il disegno completo dell'arena
@@ -77,3 +78,10 @@ non risultano parti staccate o tagli al bordo; recupero e riposo hanno pixel
 corporei identici. Il controgesto di testa e braccia di Emboar è molto sottile.
 Questo giudizio non certifica il ritmo dei comandi: il clock corretto e gli
 avversari di specie diverse richiedono i propri replay della nuova candidata.
+
+La candidata corrente è07 `85b98d70e88848df`. Il controller riconosce gli attaccanti
+500/503 con profilo di stato verificato contro qualunque avversario nativo
+visibile e invariato nella lotta singola. Questa estensione non amplia il
+modello di contatto205/360 né approva doppie, stati alterati graficamente o
+le nuove immagini per deduzione. Lo stato della suite completa e dei replay
+è mantenuto in [ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
