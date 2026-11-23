@@ -168,7 +168,8 @@
   finally{renderer.draw=draw;renderer.probeActor=probe;}
  });
  case049('qaBattleActions064','Animazioni064: comandi reali, gesti e reazioni','animation064-real-touch-turns-both-sides-status-damage-snatch',async()=>{
-  await ready();const play=MoveFX.play,sprite=ROM_SPRITE_ANIM.draw,arenaDraw=drawArena,rows=[];let current=null,pendingShot=null;
+  await ready();const NativeSession=GEN5.Session,play=MoveFX.play,sprite=ROM_SPRITE_ANIM.draw,arenaDraw=drawArena,rows=[],selectedRates=QAGust064.rates(location.search),audioEnable=AudioEngine.enable,audioErrors=AudioEngine.errors.length,audioWanted=new URLSearchParams(location.search).get('fieldAudio')==='1';let current=null,pendingShot=null;
+  GEN5.Session=class extends NativeSession{constructor(p1,p2,options){super(p1,p2,{...options,seed:[1,2,3,4]});}};
   const finish=()=>{if(battling){session.battle.win('p1');snapshotPartner();busy=false;endBattle();}MoveFX.cancel();};
   MoveFX.play=async function(...args){
    const row={ordinal:rows.length+1,id:args[0],side:args[1],bodySamples:0,reactionSamples:0,maxForepaw:0,authoredMinccinoSamples:0,frames:[],captured:false};rows.push(row);current=row;
@@ -192,7 +193,8 @@
    {name:'snatch',p1:{name:'Purrloin',level:50,gender:'M',moves:[289]},p2:{name:'Snivy',level:50,gender:'M',moves:[74]}}
   ],turns=[];
   try{
-   for(const speed of [1,2,4])for(const scenario of cases){
+   if(audioWanted){AudioEngine.enable=qa049AudioEnable;await qa049AudioEnable();check(AudioEngine.enabled,'064 actual command audio unavailable');}
+   for(const speed of selectedRates)for(const scenario of cases){
     finish();GameSpeed.set(speed);const from=rows.length;
     await startBattle(true,{previewLocation:Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass',variant:'grass'}),p1:[scenario.p1],p2:[scenario.p2]});
     await until(()=>!busy,'064 real battle commands ready');const before={turn:session.battle.turn,hp:['p1','p2'].map(side=>session.active(side).hp)};
@@ -212,23 +214,57 @@
      check(session.active('p1').boosts.atk>0&&session.active('p1').boosts.spa>0&&session.active('p2').boosts.atk===0,'064 native Snatch did not steal Growth');
      const snatches=played.filter(r=>r.id===289);check(snatches.length>0&&snatches.every(r=>r.profile?.target==='self'&&r.reactionSamples===0),'064 actual Snatch targeted a victim or applied a victim reaction');
     }
-    turns.push({scenario:scenario.name,speed,input:'actual LOTTA and move DOM buttons',inputLabel,before,turn:session.battle.turn,played});
+    turns.push({scenario:scenario.name,speed,seed:[1,2,3,4],input:'actual LOTTA and move DOM buttons',inputLabel,before,turn:session.battle.turn,played});
    }
-   return {turns,realGEN5Turns:true,suppliedBattleOutcomes:false,scope:'Eighteen isolated actual command turns, both sides at x1/x2/x4; controlled legal fixture teams, native accuracy/multihit rolls and cleanup outcomes. This does not certify the full move matrix, audible synchronization or physical Android.'};
-  }finally{MoveFX.play=play;ROM_SPRITE_ANIM.draw=sprite;drawArena=arenaDraw;current=null;pendingShot=null;finish();GameSpeed.set(1);}
+   check(AudioEngine.errors.length===audioErrors,'064 actual commands raised audio errors');return {turns,selectedRates,realGEN5Turns:true,suppliedBattleOutcomes:false,audio:{engineEnabled:audioWanted,audibleComparison:false},scope:'Six isolated scenarios at each explicitly selected rate, both sides; controlled legal fixture teams, native accuracy/multihit rolls and cleanup outcomes. This does not certify the full move matrix, audible synchronization or physical Android.'};
+  }finally{GEN5.Session=NativeSession;MoveFX.play=play;ROM_SPRITE_ANIM.draw=sprite;drawArena=arenaDraw;current=null;pendingShot=null;finish();GameSpeed.set(1);AudioEngine.disable();AudioEngine.enable=audioEnable;}
  });
+ case049('qaGustActions064','Unfezant064: Raffica reale M/F e due lati','animation064-real-renderer-unfezant-gust-native-turns',async()=>{
+  await ready();check(!!window.QAGust064,'064 Gust isolated driver missing');
+  const enable=AudioEngine.enable,audioErrorsBefore=AudioEngine.errors.length;try{
+  check(new URLSearchParams(location.search).get('fieldAudio')==='1','064 Gust requires real audio presentation');AudioEngine.enable=qa049AudioEnable;await qa049AudioEnable();check(AudioEngine.enabled,'064 Gust actual audio engine unavailable');
+  const result=await QAGust064.run({GEN5,MoveFX,ROM_SPRITE_ANIM,GameSpeed,check,until,search:location.search,sourcePins:{build:document.documentElement.dataset.build,fixture:document.documentElement.dataset.qaFixture},getArenaDraw:()=>drawArena,setArenaDraw:fn=>{drawArena=fn;},session:()=>session,busy:()=>busy,
+   finish(){if(battling){session.battle.win('p1');snapshotPartner();busy=false;endBattle();}},
+   start:team=>startBattle(true,{previewLocation:Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass',variant:'grass'}),p1:team,p2:team}),
+   async command(){const fight=[...document.querySelectorAll('#battleTouch button')].find(b=>b.getAttribute('aria-label')==='LOTTA');check(fight&&!fight.disabled,'064 Gust LOTTA unavailable');fight.click();await until(()=>document.getElementById('bwBattleFooter').dataset.mode==='moves','064 Gust move menu');const choice=document.querySelector('#battleTouch button:not(:disabled)');check(choice&&choice.getAttribute('aria-label')!=='Indietro','064 Gust move unavailable');choice.click();},
+   capture(label,frame){frame.ground=JSON.parse(arena.dataset.ground||'null');frame.combatants=JSON.parse(arena.dataset.combatants||'null');frame.visual=JSON.parse(arena.dataset.visual||'null');shot(label,arena,{nativeFrame:pixels(arena)});}
+  });check(AudioEngine.errors.length===audioErrorsBefore,'064 Gust real audio errors');return {...result,audio:{engineEnabled:true,errorsBefore:audioErrorsBefore,errorsAfter:AudioEngine.errors.length,audibleComparison:false}};
+  }finally{AudioEngine.disable();AudioEngine.enable=enable;}
+ });
+ case049('qaTailReference064','Colpocoda064: sequenze corporee complete','animation064-tail-reference-508-native-rendered-poses',async()=>{
+  await ready();check(!!window.QATailReference064,'064 tail reference driver missing');return QATailReference064.run({SpeciesMoves,ROM_SPRITE_ANIM,check,sourcePins:{build:document.documentElement.dataset.build,fixture:document.documentElement.dataset.qaFixture},capture(label,canvas,metadata){shot(label,canvas,{reference:metadata});}});
+ });
+ case049('qaGustReference064','Raffica064: quattro sequenze corporee complete','animation064-gust-reference-508-native-rendered-poses',async()=>{
+  await ready();check(!!window.QAGustReference064,'064 Gust reference driver missing');return QAGustReference064.run({SpeciesMoves,ROM_SPRITE_ANIM,check,sourcePins:{build:document.documentElement.dataset.build,fixture:document.documentElement.dataset.qaFixture},capture(label,canvas,metadata){shot(label,canvas,{reference:metadata});}});
+ });
+ async function bodyActions064(kind){
+  await ready();check(!!window.QABodyActions064&&!!window.QATailMixed064,'064 body actions driver missing');const enable=AudioEngine.enable,audioErrorsBefore=AudioEngine.errors.length;
+  try{check(new URLSearchParams(location.search).get('fieldAudio')==='1','064 body actions require real audio');AudioEngine.enable=qa049AudioEnable;await qa049AudioEnable();check(AudioEngine.enabled,'064 body actual audio unavailable');
+   const run=kind==='mixedtail'?QATailMixed064.run:QABodyActions064[kind==='tail'?'runTail':'runTynamo'];const result=await run({GEN5,MoveFX,ROM_SPRITE_ANIM,GameSpeed,BattleGround,check,until,search:location.search,sourcePins:{build:document.documentElement.dataset.build,fixture:document.documentElement.dataset.qaFixture},getArenaDraw:()=>drawArena,setArenaDraw:fn=>{drawArena=fn;},getArenaInfo:()=>({width:arena.width,height:arena.height,visible:!document.hidden}),session:()=>session,busy:()=>busy,
+    finish(){if(battling){session.battle.win('p1');snapshotPartner();busy=false;endBattle();}},
+    start:(p1,p2)=>startBattle(true,{previewLocation:Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass',variant:'grass'}),p1,p2}),
+    async command(){const fight=[...document.querySelectorAll('#battleTouch button')].find(b=>b.getAttribute('aria-label')==='LOTTA');check(fight&&!fight.disabled,'064 body LOTTA unavailable');fight.click();await until(()=>document.getElementById('bwBattleFooter').dataset.mode==='moves','064 body move menu');const choice=document.querySelector('#battleTouch button:not(:disabled)');check(choice&&choice.getAttribute('aria-label')!=='Indietro','064 body move unavailable');choice.click();},
+    capture(label,frame){frame.ground=JSON.parse(arena.dataset.ground||'null');frame.combatants=JSON.parse(arena.dataset.combatants||'null');frame.visual=JSON.parse(arena.dataset.visual||'null');shot(label,arena,{nativeFrame:pixels(arena)});}
+   });check(AudioEngine.errors.length===audioErrorsBefore,'064 body actual audio errors');return {...result,audio:{engineEnabled:true,errorsBefore:audioErrorsBefore,errorsAfter:AudioEngine.errors.length,audibleComparison:false}};
+  }finally{AudioEngine.disable();AudioEngine.enable=enable;}
+ }
+ case049('qaTailActions064','Colpocoda064: Emboar e Samurott reali','animation064-tail-native-turns-status-joints',()=>bodyActions064('tail'));
+ case049('qaTailMixedActions064','Colpocoda064: avversari di specie diverse','animation064-tail-mixed-native-turns-protected-poses',()=>bodyActions064('mixedtail'));
+ case049('qaTynamoActions064','Tynamo064: inquadratura e quattro mosse reali','animation064-tynamo-native-turns-stable-framing',()=>bodyActions064('tynamo'));
  case049('qaEmboarActions064','Emboar064: colpi e miss dai comandi reali','animation064-emboar-native-turns-contact-miss-recovery',async()=>{
-  await ready();const NativeSession=GEN5.Session,play=MoveFX.play,sprite=ROM_SPRITE_ANIM.draw,arenaDraw=drawArena,rows=[],turns=[];let seed=null,current=null,pendingShot=null;
+  await ready();const NativeSession=GEN5.Session,play=MoveFX.play,sprite=ROM_SPRITE_ANIM.draw,presented=MoveFX.presentedArenaFrame,arenaDraw=drawArena,rows=[],turns=[],selectedRates=QAGust064.rates(location.search),audioEnable=AudioEngine.enable,audioErrors=AudioEngine.errors.length,audioWanted=new URLSearchParams(location.search).get('fieldAudio')==='1';let seed=null,current=null,pendingShot=null;
   const finish=()=>{if(battling){session.battle.win('p1');snapshotPartner();busy=false;endBattle();}MoveFX.cancel();};
   // Seeds enter the native simulator at construction. No RNG, accuracy result,
   // damage, event rows or displayed animation outcomes are replaced.
   GEN5.Session=class extends NativeSession{constructor(p1,p2,options){super(p1,p2,{...options,seed:seed.slice()});}};
   MoveFX.play=async function(id,side,options={}){
-   const row={ordinal:rows.length+1,id,side,miss:!!options.miss,samples:0,maxGather:0,maxArm:0,maxLeg:0,maxHop:0,reactionSamples:0,actionShot:false,recoveryShot:false};rows.push(row);current=row;
-   try{return await play.apply(this,arguments);}finally{if(current===row)current=null;}
+   const row={ordinal:rows.length+1,id,side,miss:!!options.miss,samples:0,maxGather:0,maxArm:0,maxLeg:0,maxHop:0,reactionSamples:0,actionShot:false,recoveryShot:false,contactShot:false};rows.push(row);current=row;
+   row.contactGate=QAGust064.captureGate({graphic:500,onCapture:frame=>{if(frame.frame!==60)return;row.contactShot=true;row.contactFrame=frame;shot('064 Emboar step '+row.ordinal+' '+row.id+' '+row.side+' '+(row.miss?'miss ':'hit ')+'contact60 '+GameSpeed.rate+'x',arena,{nativeFrame:pixels(arena)});}});
+   try{return await play.apply(this,arguments);}finally{if(current===row)current=null;delete row.contactGate;}
   };
   ROM_SPRITE_ANIM.draw=function(c,id,back,x,y,size,tick,grounded,a){
    const result=sprite.apply(this,arguments),row=current,side=back?'p1':'p2';
+   if(row){const active=MoveFX.active;row.contactGate.observe(active?.presentationRecord,{success:result===true,graphic:id,side,back,x,y,size,contextMatches:(c.globalAlpha??1)>0&&active?.side===row.side&&active.moveId===row.id&&active.profile?.species===500&&active.profile.id===row.id&&String(active.cryIds?.[side])===String(id),grounded:!!grounded,effectiveTick:a?(Number.isFinite(a.nativeTick)?a.nativeTick:0):tick});}
    if(result&&row&&id===500&&a){
     if(side===row.side&&!a.reaction){
      check(Number.isFinite(a.emboarGather),'064 real Emboar command bypassed the authored body');row.samples++;
@@ -239,10 +275,12 @@
    }
    return result;
   };
-  drawArena=function(...args){const result=arenaDraw.apply(this,args);if(pendingShot){const capture=pendingShot;pendingShot=null;capture.row[capture.kind+'Shot']=true;shot('064 Emboar step '+capture.row.ordinal+' '+capture.row.id+' '+capture.row.side+' '+(capture.row.miss?'miss ':'hit ')+capture.kind+' '+GameSpeed.rate+'x',arena,{nativeFrame:pixels(arena)});}return result;};
+  MoveFX.presentedArenaFrame=function(record,...args){const ack=presented.call(this,record,...args);if(current)current.contactGate.acknowledge(record,ack);return ack;};
+  drawArena=function(...args){const result=arenaDraw.apply(this,args);if(current)current.contactGate.complete();if(pendingShot){const capture=pendingShot;pendingShot=null;capture.row[capture.kind+'Shot']=true;shot('064 Emboar step '+capture.row.ordinal+' '+capture.row.id+' '+capture.row.side+' '+(capture.row.miss?'miss ':'hit ')+capture.kind+' '+GameSpeed.rate+'x',arena,{nativeFrame:pixels(arena)});}return result;};
   const scenarios=[{id:205,seed:[1,2,3,4],miss:null},{id:360,seed:[1,2,3,4],miss:null},{id:205,seed:[2,2,3,4],miss:'p1'},{id:205,seed:[17,2,3,4],miss:'p2'}];
   try{
-   for(const speed of [1,2,4])for(const scenario of scenarios){
+   if(audioWanted){AudioEngine.enable=qa049AudioEnable;await qa049AudioEnable();check(AudioEngine.enabled,'064 Emboar actual audio unavailable');}
+   for(const speed of selectedRates)for(const scenario of scenarios){
     finish();GameSpeed.set(speed);seed=scenario.seed;const from=rows.length,team=[{name:'Emboar',level:50,gender:'M',moves:[scenario.id]}];
     await startBattle(true,{previewLocation:Object.freeze({id:'route1',label:'Percorso 1',terrain:'grass',variant:'grass'}),p1:team,p2:team});await until(()=>!busy,'064 Emboar commands ready');
     const before={turn:session.battle.turn,hp:['p1','p2'].map(side=>session.active(side).hp),log:session.battle.log.length};
@@ -253,12 +291,12 @@
     const played=rows.slice(from),nativeLog=session.battle.log.slice(before.log),misses=nativeLog.filter(line=>line.startsWith('|-miss|'));
     check(played.length===2&&['p1','p2'].every(side=>played.some(row=>row.side===side&&row.id===scenario.id)),'064 Emboar actual native turn omitted or duplicated a body');
     if(scenario.miss)check(misses.length===1&&misses[0].startsWith('|-miss|'+scenario.miss),'064 native seeded miss differs');else check(misses.length===0,'064 native seeded contact unexpectedly missed');
-    for(const row of played){check(row.miss===(row.side===scenario.miss),'064 actual native miss not passed to body renderer');check(row.samples>0&&row.maxGather>.95&&row.maxArm>.8&&row.maxLeg>1.4,'064 Emboar actual rendered body did not gather real limbs');check(row.maxHop>.3&&row.actionShot&&row.recoveryShot,'064 Emboar actual return gesture was skipped');if(row.miss)check(row.reactionSamples===0,'064 Emboar miss reacted against a target');}
+    for(const row of played){check(row.miss===(row.side===scenario.miss),'064 actual native miss not passed to body renderer');check(row.samples>0&&row.maxGather>.95&&row.maxArm>.8&&row.maxLeg>1.4,'064 Emboar actual rendered body did not gather real limbs');check(row.maxHop>.3&&row.actionShot&&row.recoveryShot,'064 Emboar actual return gesture was skipped');check(row.contactShot&&row.contactFrame?.frame===60,'064 Emboar protected contact60 was not actually drawn and acknowledged');if(row.miss)check(row.reactionSamples===0,'064 Emboar miss reacted against a target');}
     for(const [i,side]of ['p1','p2'].entries())check((session.active(side).hp<before.hp[i])===(scenario.miss!==(side==='p1'?'p2':'p1')),'064 native HP disagrees with actual hit/miss');
     turns.push({id:scenario.id,seed:scenario.seed,speed,expectedMiss:scenario.miss,input:'actual LOTTA and move DOM buttons',before,turn:session.battle.turn,played,nativeLog});
    }
-   return {turns,realGEN5Turns:true,suppliedBattleOutcomes:false,scope:'Twelve seeded actual turns, both bodies at x1/x2/x4; native misses separately on each side. Prepared legal fixture teams. Actual rendered joints, action and return readbacks; not the complete500 repertoire, doubles, audible or physical Android certification.'};
-  }finally{GEN5.Session=NativeSession;MoveFX.play=play;ROM_SPRITE_ANIM.draw=sprite;drawArena=arenaDraw;current=null;pendingShot=null;finish();GameSpeed.set(1);}
+   check(AudioEngine.errors.length===audioErrors,'064 Emboar actual command audio errors');return {turns,selectedRates,realGEN5Turns:true,suppliedBattleOutcomes:false,audio:{engineEnabled:audioWanted,audibleComparison:false},scope:'Four seeded actual scenarios per explicitly selected rate, both bodies; native misses separately on each side. Prepared legal fixture teams. Actual rendered joints, action and return readbacks; not the complete500 repertoire, doubles, audible or physical Android certification.'};
+  }finally{GEN5.Session=NativeSession;MoveFX.play=play;ROM_SPRITE_ANIM.draw=sprite;MoveFX.presentedArenaFrame=presented;drawArena=arenaDraw;current=null;pendingShot=null;finish();GameSpeed.set(1);AudioEngine.disable();AudioEngine.enable=audioEnable;}
  });
  panel.querySelector('#qaStory').onclick=async()=>{if(running)return;running=true;publish();await ready();await test('real-renderer-city-story-and-departures',chapterReplay);running=false;status.textContent='Riproduzione della storia conclusa';publish();};
  panel.querySelector('#qaMenus').onclick=async()=>{if(running)return;running=true;await test('cold-menu-and-resource-recovery',async()=>{await ready();check(!!window.MENU_ASSETS,'Menu catalogue absent at startup');return menus();});running=false;publish();};

@@ -53,6 +53,62 @@
   // The original control envelopes and stereo trajectories are already baked
   // into these finite native clips. Changed scripts/banks require a new review.
   const contracts={
+   33:{frames:72,anchor:24,events:[
+    {kind:'sfx',id:1437,channel:1,target:16,start:24,raw:[1437,1,16,0,0,120,0,0,0]},
+    {kind:'sfx',id:1424,channel:2,target:16,start:32,raw:[1424,2,16,8,-300,115,0,0,0]},
+    {kind:'sfx',id:1424,channel:1,target:16,start:36,raw:[1424,1,16,12,-300,115,0,0,0]}
+   ],voices:[
+    [0,1437,1,16,24,36,true,'146e40305826aa9e51d9','146e40305826aa9e51d9','146e40305826aa9e51d9','146e40305826aa9e51d9'],
+    [1,1424,2,16,32,72,true,'6512632a745b3c1104a3','6512632a745b3c1104a3','6512632a745b3c1104a3','6512632a745b3c1104a3'],
+    [2,1424,1,16,36,72,true,'6512632a745b3c1104a3','6512632a745b3c1104a3','6512632a745b3c1104a3','6512632a745b3c1104a3']
+   ]},
+   86:{frames:205,anchor:53,events:[
+    {kind:'sfx',id:1522,channel:1,target:16,start:53,raw:[1522,1,16,0,0,120,0,0,0]},
+    {kind:'sfx',id:1458,channel:2,target:16,start:113,raw:[1458,2,16,60,0,120,0,0,0]}
+   ],voices:[
+    [0,1522,1,16,53,205,true,'f73176aae4d39e8b236b','f73176aae4d39e8b236b','f73176aae4d39e8b236b','f73176aae4d39e8b236b'],
+    [1,1458,2,16,113,205,true,'ef3df4616d2339e998b1','ef3df4616d2339e998b1','ef3df4616d2339e998b1','ef3df4616d2339e998b1']
+   ]},
+   209:{frames:245,anchor:193,events:[
+    {kind:'sfx',id:1458,channel:1,target:14,start:20,raw:[1458,1,14,20,0,120,0,0,0]},
+    {kind:'sfx',id:1483,channel:2,target:14,start:0,raw:[1483,2,14,0,0,100,0,0,0]},
+    {kind:'sfx',id:1376,channel:2,target:14,start:90,raw:[1376,2,14,90,0,0,0,0,0]},
+    {kind:'sfx',id:1421,channel:1,target:14,start:140,raw:[1421,1,14,140,0,115,0,0,0]},
+    {kind:'control',channel:2,start:0,raw:[2,0,0,-1000,2000,0,90,0,0]},
+    {kind:'sfx',id:1505,channel:1,target:16,start:193,raw:[1505,1,16,20,0,120,0,0,0]},
+    {kind:'sfx',id:1458,channel:2,target:16,start:193,raw:[1458,2,16,20,0,120,0,0,0]}
+   ],voices:[
+    [1,1483,2,14,0,90,true,'b860cd6841dbf78efb6b','394e1655d76a279eb7e4','b860cd6841dbf78efb6b','394e1655d76a279eb7e4'],
+    [0,1458,1,14,20,140,true,'fb0995c4127af578000e','fb0995c4127af578000e','fb0995c4127af578000e','fb0995c4127af578000e'],
+    [3,1421,1,14,140,193,true,'e4c86cf04189594e3baa','e4c86cf04189594e3baa','e4c86cf04189594e3baa','e4c86cf04189594e3baa'],
+    [5,1505,1,16,193,245,true,'ea006f17a29deefbda54','ea006f17a29deefbda54','ea006f17a29deefbda54','ea006f17a29deefbda54'],
+    [6,1458,2,16,193,245,true,'ef3df4616d2339e998b1','ef3df4616d2339e998b1','ef3df4616d2339e998b1','ef3df4616d2339e998b1']
+   ]},
+   451:{frames:194,anchor:0,events:[
+    {kind:'sfx',id:1445,channel:1,target:14,start:0,raw:[1445,1,14,0,0,110,0,0,0]},
+    {kind:'sfx',id:1376,channel:1,target:14,start:90,raw:[1376,1,14,90,0,0,0,0,0]},
+    {kind:'control',channel:1,start:0,raw:[1,0,0,-2000,2000,0,90,0,0]},
+    {kind:'sfx',id:1963,channel:2,target:14,start:90,raw:[1963,2,14,90,1000,100,0,0,0]},
+    {kind:'sfx',id:1376,channel:2,target:14,start:170,raw:[1376,2,14,170,0,0,0,0,0]},
+    {kind:'control',channel:2,start:0,raw:[2,0,1,115,0,140,30,0,0]},
+    {kind:'sfx',id:1407,channel:1,target:14,start:90,raw:[1407,1,14,90,0,115,0,0,0]},
+    {kind:'sfx',id:1376,channel:1,target:14,start:170,raw:[1376,1,14,170,0,0,0,0,0]},
+    {kind:'control',channel:1,start:0,raw:[1,0,0,-1000,2000,0,90,0,0]},
+    {kind:'control',channel:1,start:0,raw:[1,0,1,115,0,140,30,0,0]},
+    {kind:'panControl',channel:1,start:0,raw:[1,0,2,0,0,85,40,0,0],from:14,to:16},
+    {kind:'panControl',channel:2,start:0,raw:[2,0,2,0,0,85,40,0,0],from:14,to:16}
+   ],voices:[
+    [0,1445,1,14,0,90,false,'59f9358a804a7c3e83a7','2d19b3f32fa2d301e0ff','12eefd735b75915db192','a2d1909b9169a8d08b96'],
+    [3,1963,2,14,90,170,false,'67a3ead98f88620cb804','d54a77460d6846d87bfc','b7352d10957f1dbb0cb3','77edaabe80692fcf2d11'],
+    [6,1407,1,14,90,170,false,'c01faa52595ed1fd43eb','3796c907444f1288734d','a4020f72d3601420ce3c','9f63c66d8184bf0d11cb']
+   ]},
+   39:{frames:88,anchor:0,events:[
+    {kind:'sfx',id:1527,channel:1,target:14,start:0,raw:[1527,1,14,0,0,90,0,0,0]},
+    {kind:'sfx',id:1527,channel:1,target:14,start:35,raw:[1527,1,14,35,0,90,0,0,0]}
+   ],voices:[
+    [0,1527,1,14,0,35,true,'105850eb7a4f14a8555e','105850eb7a4f14a8555e','105850eb7a4f14a8555e','105850eb7a4f14a8555e'],
+    [1,1527,1,14,35,88,true,'105850eb7a4f14a8555e','105850eb7a4f14a8555e','105850eb7a4f14a8555e','105850eb7a4f14a8555e']
+   ]},
    205:{frames:112,anchor:41,events:[
     {kind:'sfx',id:1443,channel:1,target:14,start:0,raw:[1443,1,14,0,-400,120,0,0,0]},
     {kind:'sfx',id:1416,channel:2,target:14,start:11,raw:[1416,2,14,0,300,127,0,0,0]},
@@ -90,13 +146,15 @@
   };
   function validate(events,options){
    const species=options.cryIds?.[options.side],definition=contracts[options.moveId];
-   if(!definition||!([205,360].includes(options.moveId)&&species===500||options.moveId===16&&species===521)||options.frames!==126)throw Error('Unsupported native battle presentation audio');
+   const tail=options.moveId===39&&[500,503].includes(species)&&options.profileKind==='nativeTailWhipStatus064'&&options.profileMarker==='native500503TailWhip064';
+   const tynamo=species===602&&options.profileSpecies===602&&options.profileKind===({33:'bodyRam',86:'electricWave',209:'flameRush',451:'electricWave'}[options.moveId])&&[33,86,209,451].includes(options.moveId);
+   if(!definition||!([205,360].includes(options.moveId)&&species===500||options.moveId===16&&species===521||tail||tynamo)||options.frames!==126)throw Error('Unsupported native battle presentation audio');
    if(![.5,1].includes(options.playbackSpeed)||![1,2,4].includes(options.speed/options.playbackSpeed)||![.5,1,2,4].includes(options.speed))throw Error('Unsupported native battle presentation speed');
    if(!['p1','p2'].includes(options.side)||!['p1','p2'].includes(options.targetSide)||options.targetSide===options.side||!Array.isArray(options.requiredKeys)||options.requiredKeys.length>256||!Number.isInteger(options.variant??0)||(options.variant??0)<0)throw Error('Invalid native battle action contract');
    const keys=Object.freeze([...new Set([0,...options.requiredKeys,126])].sort((a,b)=>a-b));if(keys.some(k=>!Number.isFinite(k)||k<0||k>126))throw Error('Invalid native battle audio key');
    const plan=nativePlan(options.moveId,options.variant||0,options.side);if(!plan||plan.frames!==definition.frames||plan.voices?.length!==definition.voices.length)throw Error('Changed native battle voice plan');
    if(!Array.isArray(events)||events.length!==definition.events.length)throw Error('Changed native battle audio event count');
-   const mapped=t=>Math.max(0,Math.min(125,t<=definition.anchor?t/definition.anchor*60:60+(t-definition.anchor)/(definition.frames-definition.anchor)*66));
+   const mapped=t=>Math.max(0,Math.min(125,definition.anchor>0&&t<=definition.anchor?t/definition.anchor*60:60+(t-definition.anchor)/(definition.frames-definition.anchor)*66));
    for(let i=0;i<events.length;i++){
     const actual=events[i],original=definition.events[i];if(JSON.stringify(Object.keys(actual).sort())!==JSON.stringify(Object.keys(original).sort()))throw Error('Changed native battle event shape');
     for(const key of Object.keys(original)){const expected=key==='start'?mapped(original.start):original[key];if(key==='raw'?JSON.stringify(actual.raw)!==JSON.stringify(expected):actual[key]!==expected)throw Error('Changed native battle event/control binding');}
@@ -229,7 +287,7 @@
      }
      log({event:'finish-waits-native-tail',frame,at:context.currentTime,graceEnd:finishCutoff,activeNodes:nodes.size});checkFinish();return finishJob;
     },
-    status(){return{mode:'native-battle-presentation',policy:'mapped-onset-ACK/native-relative-window',frame,paused,awaitResumeDraw,cancelled,finished,finalizedKeys,silent:records.length===0,ownedEpoch,drawnKeys:[...drawn],backend:{closed:cancelled||finished,activeRecords:nodes.size,pausedVoices:records.filter(r=>r.state==='paused').length,cancellingFade:cancelCleanupTimer!==null},voices:records.map(r=>({order:r.order,id:r.id,state:r.state,onsetFrame:r.onsetFrame,nativeStart:r.nativeStart,nativeEnd:r.nativeEnd,windowSeconds:r.windowSeconds,legacyRelativeStopSeconds:r.legacyRelativeStopSeconds,src:r.src,rate:r.rate,gain:r.gain,pan:r.pan,mirror:r.mirror,generation:r.generation})),ledger:ledger.slice(),droppedLogs,limits:['Native500205/360 and exact normalized native52116 only; dynamic fallback/runtime automation and cries are deliberately rejected. Gust miss explicitly omits both target voices.','Only onsets follow visual ACK; an already-started native voice continues through unrelated body holds. Separate onset spacing may stretch.','Native-relative window replaces the old browser absolute-end policy after onset remapping.','Two-ms fades adapt explicit graphic pauses/resumes; waveform continuity at those interruptions needs real Web Audio tests.','Mute or an epoch change suppresses this entire action without replay, matching the original beginMove cancellation policy.','Running-context cancel retains35ms fade/stop45ms with60ms owned cleanup fallback; suspended or error disposal is immediate.']};}
+    status(){return{mode:'native-battle-presentation',policy:'mapped-onset-ACK/native-relative-window',frame,paused,awaitResumeDraw,cancelled,finished,finalizedKeys,silent:records.length===0,ownedEpoch,drawnKeys:[...drawn],backend:{closed:cancelled||finished,activeRecords:nodes.size,pausedVoices:records.filter(r=>r.state==='paused').length,cancellingFade:cancelCleanupTimer!==null},voices:records.map(r=>({order:r.order,id:r.id,state:r.state,onsetFrame:r.onsetFrame,nativeStart:r.nativeStart,nativeEnd:r.nativeEnd,windowSeconds:r.windowSeconds,legacyRelativeStopSeconds:r.legacyRelativeStopSeconds,src:r.src,rate:r.rate,gain:r.gain,pan:r.pan,mirror:r.mirror,generation:r.generation})),ledger:ledger.slice(),droppedLogs,limits:['Native500205/360, exact normalized native52116, guarded native500/50339 and original60233/86/209/451 only; dynamic fallback/runtime automation and cries are deliberately rejected. Native miss omits target voices; TailWhip keeps both original attacker voices.','Only onsets follow visual ACK; an already-started native voice continues through unrelated body holds. Separate onset spacing may stretch.','Native-relative window replaces the old browser absolute-end policy after onset remapping.','Two-ms fades adapt explicit graphic pauses/resumes; waveform continuity at those interruptions needs real Web Audio tests.','Mute or an epoch change suppresses this entire action without replay, matching the original beginMove cancellation policy.','Running-context cancel retains35ms fade/stop45ms with60ms owned cleanup fallback; suspended or error disposal is immediate.']};}
    };
    if(!initial.enabled||!context||context.state==='closed'){cancel('disabled-or-closed-at-prepare');return instance;}
    pendingPreparations.add(instance);

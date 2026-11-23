@@ -87,6 +87,18 @@ jobs:
           name: pages-phone057-browser-report
           path: test-results/phone057
           if-no-files-found: ignore
+      - name: Check native animation commands, audio and protected poses in all formats
+        timeout-minutes: 30
+        run: |
+          for viewport in portrait landscape desktop; do
+            node scripts/test-browser-headless.cjs _site "test-results/animation064-$viewport" --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports="$viewport" --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064,qaTynamoActions064
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pages-animation064-browser-report
+          path: test-results/animation064-*
+          if-no-files-found: ignore
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

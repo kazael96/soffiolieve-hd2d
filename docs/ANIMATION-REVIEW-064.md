@@ -1,5 +1,7 @@
 # Revisione estesa delle animazioni · in corso
 
+La ripresa del23 novembre, la disponibilità effettiva dei rapporti e le nuove candidate sono descritte in [ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md). I vecchi esiti sotto rimangono storici.
+
 Richiesta «fallo» del20 novembre2026: applicare il metodo di `ANIMATION-QUALITY.md` alle animazioni esistenti, oltre al lancio Aralia0.63. L'utente ha autorizzato esplicitamente più agenti. File, comandi e Chrome invisibile isolato; nessun controllo del browser personale o del desktop.
 
 ## Perimetro e prove

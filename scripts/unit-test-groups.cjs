@@ -6,7 +6,11 @@ function unitStages(files,{exe=process.execPath,windows=process.platform==='win3
  // These fixtures measure their entire owned process against400MiB. Sharing
  // it with unrelated VM inventories invalidates that resource measurement.
  const boundedNames=new Set(['battle-actor-framing064.test.cjs','emboar-contact064.test.cjs']),name=file=>file.split(/[\\/]/).at(-1);
- const ordered=[...files].sort(),bounded=ordered.filter(file=>boundedNames.has(name(file))),ordinary=ordered.filter(file=>!boundedNames.has(name(file)));
+ // Physical Route10 reunions replay whole native journeys in every season.
+ // Isolate their CPU cost after the combined group exceeded180s; this is not
+ // an assertion that this fixture measures the entire process RSS.
+ const dedicatedNames=new Set([...boundedNames,'league-journeys.test.cjs']);
+ const ordered=[...files].sort(),bounded=ordered.filter(file=>dedicatedNames.has(name(file))),ordinary=ordered.filter(file=>!dedicatedNames.has(name(file)));
  const buckets=Array.from({length:Math.min(groups,ordinary.length)},()=>[]);
  ordinary.forEach((file,index)=>buckets[index%buckets.length].push(file));
  const args=bucket=>['--test',...(windows?['--test-isolation=none']:['--test-concurrency=2']),...bucket];

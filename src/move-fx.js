@@ -57,7 +57,7 @@
    if(typeof window.AudioEngine?.preparePresentation!=='function')throw Error('Presentation audio bridge is unavailable');
    let preparedRate;do{
     preparedRate=window.GameSpeed?.rate||1;
-    try{presentationAudio=await window.AudioEngine.preparePresentation(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:profile.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),speed:speed*preparedRate,playbackSpeed:speed,cryIds:audioCryIds(options.cryIds),miss:options.miss,requiredKeys:presentationPlan.keys});}catch(error){if(token!==generation)return;throw error;}
+    try{presentationAudio=await window.AudioEngine.preparePresentation(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:profile.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),speed:speed*preparedRate,playbackSpeed:speed,cryIds:audioCryIds(options.cryIds),miss:options.miss,requiredKeys:presentationPlan.keys,...(moveId===39?{profileKind:profile.kind,profileMarker:profile.tailWhip064}:profile.species===602?{profileKind:profile.kind,profileSpecies:602}:{})});}catch(error){if(token!==generation)return;throw error;}
     if(token!==generation){presentationAudio?.cancel();return;}
     if(preparedRate!==(window.GameSpeed?.rate||1)){presentationAudio?.cancel();presentationAudio=null;}
    }while(!presentationAudio);
@@ -105,7 +105,13 @@
  function presentationEligibility(profile,options={}){
   const owners=(window.BattlePresentationOwners?.read?.()||{layoutSupported:false});
   if(!owners.layoutSupported)return 'UNSUPPORTED_NATIVE_LAYOUT';
-  if(!profile||![500,521].includes(profile.species))return 'UNSUPPORTED_PROFILE';
+  if(!profile||![500,503,521,602].includes(profile.species))return 'UNSUPPORTED_PROFILE';
+  const tail=profile.id===39&&[500,503].includes(profile.species);
+  const tynamo=profile.species===602&&[33,86,209,451].includes(profile.id);
+  if(profile.species===602&&(!tynamo||profile.kind!==({33:'bodyRam',86:'electricWave',209:'flameRush',451:'electricWave'}[profile.id])||profile.training!==true||profile.chapter!==true||profile.target!=='foe'||profile.damage!==(profile.id!==86)||profile.graphic!==undefined&&profile.graphic!==602))return 'UNVERIFIED_TYNAMO_NATIVE_RECIPE';
+  if(tynamo&&(data?.moves[profile.id]?.variants?.length!==1||window.NATIVE_AUDIO_BANK?.moves[profile.id]?.length!==1))return 'UNVERIFIED_TYNAMO_VARIANT_LAYOUT';
+  if(tail&&(profile.kind!=='nativeTailWhipStatus064'||profile.tailWhip064!=='native500503TailWhip064'||profile.damage!==false||profile.target!=='foe'))return 'UNVERIFIED_TAILWHIP_STATUS_PROFILE';
+  if(profile.species===503&&!tail)return 'UNSUPPORTED_PROFILE';
   if(!owners.available)return 'UNAVAILABLE_VISUAL_OWNERS';
   if(options.hiddenSides?.length)return 'UNVERIFIED_HIDDEN_SIDES';
   if(owners.nativeSpecies[options.side||'p1']!==profile.species)return 'UNVERIFIED_NATIVE_ACTOR';
@@ -114,7 +120,11 @@
    if(record.altered)return 'UNVERIFIED_ALTERED_VISUAL_BODY';
    if(record.graphic===undefined||String(record.graphic)!==String(options.cryIds?.[role]))return 'UNVERIFIED_VISIBLE_GRAPHIC';
    if(!record.bankReady)return 'UNPREPARED_VISIBLE_BANK';
-   if(profile.species===500&&owners.nativeSpecies[role]!==500)return 'UNVERIFIED_500_MIRROR';
+   if(profile.species===500&&!tail&&owners.nativeSpecies[role]!==500)return 'UNVERIFIED_500_MIRROR';
+   // TailWhip articulates only its attacker and has attacker-local sounds.
+   // Any unchanged native foe is valid; contact205/360 keep their mirror guard.
+   if(tail&&anatomicalId(record.graphic)!==owners.nativeSpecies[role])return 'UNVERIFIED_TAILWHIP_NATIVE_GRAPHIC';
+   if(tynamo&&anatomicalId(record.graphic)!==owners.nativeSpecies[role])return 'UNVERIFIED_TYNAMO_NATIVE_GRAPHIC';
   }
   return 'ELIGIBLE';
  }

@@ -55,6 +55,11 @@ class QAServerTests(unittest.TestCase):
             (overlay / 'field-regression057.js').write_bytes(field_script)
             hm_script = b'window.FieldHMRegression064={install(){}};'
             (overlay / 'field-hm-regression064.js').write_bytes(hm_script)
+            helpers = {name: ('window.' + name + '=true;').encode() for name in
+                       ('qa-gust064.js', 'qa-body-actions064.js', 'qa-tail-reference064.js', 'qa-tail-mixed064.js', 'qa-gust-reference064.js')}
+            for name, content in helpers.items():
+                (overlay / name).write_bytes(content)
+            (overlay / 'private-not-served.js').write_bytes(b'PRIVATE')
             qa_server.args = types.SimpleNamespace(qa=overlay, site=site, port=0)
             server = qa_server.QAServer(('127.0.0.1', 0), functools.partial(qa_server.Handler, directory=str(site)))
             worker = threading.Thread(target=server.serve_forever, daemon=True)
@@ -83,6 +88,12 @@ class QAServerTests(unittest.TestCase):
                 self.assertEqual(response.status, 200)
                 self.assertEqual(response.read(), hm_script)
                 self.assertIs(connection.sock, original_socket)
+                for name, content in helpers.items():
+                    connection.request('GET', '/__qa/' + name + '?v=frozen')
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, 200)
+                    self.assertEqual(response.read(), content)
+                    self.assertIs(connection.sock, original_socket)
                 connection.request('GET', '/app.js?v=two')
                 self.assertEqual(connection.getresponse().read(), payload)
                 self.assertIs(connection.sock, original_socket)
@@ -98,6 +109,10 @@ class QAServerTests(unittest.TestCase):
                 response = connection.getresponse()
                 self.assertEqual(response.status, 403)
                 response.read()
+                connection.request('GET', '/__qa/private-not-served.js')
+                response = connection.getresponse()
+                self.assertEqual(response.status, 404)
+                self.assertNotIn(b'PRIVATE', response.read())
             finally:
                 connection.close()
                 server.shutdown()
