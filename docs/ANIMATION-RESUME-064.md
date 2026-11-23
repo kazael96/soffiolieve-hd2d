@@ -306,3 +306,37 @@ base obbligatoria degli archivi,08 confronto verificato e09 candidata.
 Sorgenti, ROM, archivio base e rapporti sono preservati. Prima di una candidata
 successiva occorre rispettare nuovamente questo limite e conservare una
 sostituta verificata; nessun accumulo di copie generate è autorizzato.
+
+### Esito CI09/r1 e correzioni del banco
+
+La CI45198705537 sul checkpoint `f04e05dda24a39b923e1004121d01731d9a73fcb`
+ha concluso **50/52 fasi PASS**, con due gruppi unitari falliti. I gate browser
+successivi sono stati saltati: non risultano superati. Il rapporto originale,
+SHA256 `7d97afad90e5d7a729795f9ef9aa0d6b94974a089b89dddf00b15d203ee6ca84`,
+resta conservato in `outputs/animation-review064-resume-20261123/ci-45198705537`.
+
+Il quarto gruppo richiedeva ancora che Doppiasberla572/3 non conservasse la
+posa intermedia, comportamento deliberatamente aggiornato nella09. La nuova
+aspettativa misura esattamente i colpi nativi, il rilascio finale e la pulizia
+degli stati nei due ruoli; un controllo su Audino impedisce di estendere la
+nuova politica ad altre specie. Rimangono invariati i confronti di log,
+PS, PP, turno e aggiornamenti dell'interfaccia per ogni danno o cura.
+
+Il sesto gruppo si fermava prima della geometria: il pin del JSON di prova
+era stato calcolato sui byte CRLF locali, mentre Git distribuisce LF. Il
+confronto deve accettare esclusivamente quella normalizzazione e mantenere
+il pin esatto del contenuto, senza ignorare coordinate, spazi o altri byte.
+Queste sono modifiche dei test e non una nuova revisione del runtime09.
+
+La revisione CI `9a7de10e6601a193` è riconciliata con la locale
+`80b062d4e490b7bc` mediante22 differenze grezze CRLF→LF, confrontate con i
+blob Git effettivi del checkpoint. Non sono stati scaricati e verificati
+indipendentemente i byte dell'app remota. L'identità della revisione non
+trasforma il FAIL50/52 in un PASS: occorre l'esito della nuova suite completa.
+
+Le correzioni mirate passano78/78 controlli del replay multicolpo e6/6 del
+framing. Gli stessi78 controlli con la vecchia sola interfaccia08 producono
+76 PASS e i due FAIL attesi sulla posa intermedia572/3. Il pin geometrico
+accetta LF/CRLF e respinge cinque modifiche diverse, compresa una coordinata
+reale. Queste prove conservano runtime e asset09; la nuova CI completa resta
+necessaria prima di qualificare il checkpoint per il rilascio.

@@ -6,7 +6,10 @@ const c=require(path.join(repo,'tests/helpers/finale-moves-host.cjs')).setup({so
 const source=file=>fs.readFileSync(fs.existsSync(path.join(repo,'src',file))?path.join(repo,'src',file):path.join(site,file),'utf8');
 for(const file of['assets/move-fx-data.js','assets/visual-camera.js','native-visual.js','native-audio.js','battle-diorama.js','double-rules.js','move-fx.js'])vm.runInContext(source(file),c,{filename:file});
 const nativeBase=fs.readFileSync(path.join(__dirname,'fixtures/battle-ground064-before-paired-framing.js'),'utf8');assert.equal(hash(nativeBase),'0a29d25d1ead3d151108fbf6a141c94a7b5316ca9c7dc732026fc3701bf44bdd');vm.runInContext(source('battle-ground.js'),c,{filename:'battle-ground.js'});
-const geometryFile=path.resolve(__dirname,'fixtures/native-long-tail-alpha064.json');assert.equal(hash(fs.readFileSync(geometryFile)),'8a638cf92e826ea6172398e9019a7941de3dbbaaf97cdabc1e6c90642546a8f1');const geometry=JSON.parse(fs.readFileSync(geometryFile)),nativeBanks=new Map();
+const geometryFile=path.resolve(__dirname,'fixtures/native-long-tail-alpha064.json');
+// Git stores LF; only CRLF pairs may differ. Latin1 preserves every other byte before the pin check.
+const geometryLF=Buffer.from(fs.readFileSync(geometryFile).toString('latin1').replace(/\r\n/g,'\n'),'latin1');
+assert.equal(hash(geometryLF),'eb88e84ef63bdb233cbfe77d2783483c5a53e57cdb6ffc2af08a2e4f31c52c59');const geometry=JSON.parse(geometryLF),nativeBanks=new Map();
 const point=(x,y,f)=>{const a=f[2]*2*Math.PI/65536,xx=x*f[3]/4096,yy=y*f[4]/4096;return[f[5]+xx*Math.cos(a)-yy*Math.sin(a),f[6]+xx*Math.sin(a)+yy*Math.cos(a)];};
 function bounds(points){return points.reduce((b,p)=>[Math.min(b[0],p[0]),Math.min(b[1],p[1]),Math.max(b[2],p[0]),Math.max(b[3],p[1])],[Infinity,Infinity,-Infinity,-Infinity]);}
 function native(id,view){const key=id+'-'+view;if(nativeBanks.has(key))return nativeBanks.get(key);const jp=path.join(site,'assets/animated',key+'.json'),pp=jp.replace(/json$/,'png'),jb=fs.readFileSync(jp),pb=fs.readFileSync(pp),data=JSON.parse(jb),pin=geometry.banks[key];assert.equal(hash(jb),pin.jsonSHA256);assert.equal(hash(pb),pin.pngSHA256);assert.equal(JSON.stringify(data),pin.canonicalData);const image={width:pin.imageSize[0],height:pin.imageSize[1],naturalWidth:pin.imageSize[0],naturalHeight:pin.imageSize[1],CPU_DIMENSIONS_ONLY_NOT_RASTER:true};
