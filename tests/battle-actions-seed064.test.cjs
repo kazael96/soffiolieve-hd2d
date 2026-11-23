@@ -1,10 +1,29 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const c=require('./helpers/finale-moves-host.cjs').setup();
+// Native protocol timestamps are wall-clock data, independent of the RNG seed.
+// Freeze only this fixture's intrinsic VM Date; leave the host and other VMs alone.
+const fixtureNow064=1767225600000,seedClock064={now:fixtureNow064},hostDate064=Date,hostDateNow064=Date.now;
+c.seedClock064=seedClock064;
+vm.runInContext('Date.now=()=>seedClock064.now',c,{filename:'seed-fixture-clock064'});
 const scenarios=[['status','Snivy',43,'Tepig',39],...[1,3,47,541].map(id=>['contact-'+id,'Liepard',10,'Minccino',id]),['snatch','Purrloin',289,'Snivy',74]];
 function turn(spec,seed=[1,2,3,4]){const [name,p1,m1,p2,m2]=spec,team=(name,id)=>[{name,level:50,gender:'M',moves:[id]}],s=new c.GEN5.Session(team(p1,m1),team(p2,m2),{seed}),before=['p1','p2'].map(side=>s.active(side).hp),ppBefore=['p1','p2'].map(side=>s.active(side).moveSlots[0].pp);s.act('move 1');return{name,before,ppBefore,after:['p1','p2'].map(side=>({hp:s.active(side).hp,pp:s.active(side).moveSlots[0].pp,def:s.active(side).boosts.def,atk:s.active(side).boosts.atk,spa:s.active(side).boosts.spa})),log:[...s.battle.log]};}
 test('all six fixed native seeds reproduce the real command expectations without substituting accuracy or damage',()=>{
- for(const spec of scenarios){const row=turn(spec);assert.deepEqual(turn(spec),row,'Native RNG replay must be deterministic');assert.deepEqual(row.after.map(m=>m.pp),row.ppBefore.map(pp=>pp-1));if(row.name==='status'){assert.deepEqual(row.after.map(m=>m.hp),row.before);assert.ok(row.after.every(m=>m.def===-1));}else if(row.name==='snatch'){assert.equal(row.after[0].atk,1);assert.equal(row.after[0].spa,1);assert.equal(row.after[1].atk,0);}else{assert.ok(row.after[1].hp<row.before[1]);if(row.name==='contact-47'){assert.equal(row.after[0].hp,row.before[0]);assert.ok(row.log.some(line=>line.startsWith('|-miss|p2a: Minccino')),'The native Sing miss is preserved');}else assert.ok(row.after[0].hp<row.before[0]);}}
+ assert.notEqual(vm.runInContext('Date',c),hostDate064,'Fixture must own a separate intrinsic Date');
+ assert.equal(vm.runInContext('Date.now()',c),fixtureNow064);
+ assert.equal(Date,hostDate064);assert.equal(Date.now,hostDateNow064);
+ for(const spec of scenarios){const row=turn(spec);assert.deepEqual(turn(spec),row,'Native RNG replay must be deterministic');assert.ok(row.log.includes('|t:|'+fixtureNow064/1000),'Native protocol must read the fixture clock');for(const line of row.log)if(line.startsWith('|t:|'))assert.equal(line,'|t:|'+fixtureNow064/1000);assert.deepEqual(row.after.map(m=>m.pp),row.ppBefore.map(pp=>pp-1));if(row.name==='status'){assert.deepEqual(row.after.map(m=>m.hp),row.before);assert.ok(row.after.every(m=>m.def===-1));}else if(row.name==='snatch'){assert.equal(row.after[0].atk,1);assert.equal(row.after[0].spa,1);assert.equal(row.after[1].atk,0);}else{assert.ok(row.after[1].hp<row.before[1]);if(row.name==='contact-47'){assert.equal(row.after[0].hp,row.before[0]);assert.ok(row.log.some(line=>line.startsWith('|-miss|p2a: Minccino')),'The native Sing miss is preserved');}else assert.ok(row.after[0].hp<row.before[0]);}}
+ const original=turn(scenarios[0]);try{
+  seedClock064.now+=1000;const later=turn(scenarios[0]);
+  assert.ok(later.log.includes('|t:|'+(fixtureNow064/1000+1)),'Native protocol must follow a controlled one-second VM change');
+  assert.deepEqual(later.before,original.before);
+  assert.deepEqual(later.ppBefore,original.ppBefore);
+  assert.deepEqual(later.after,original.after,'A protocol timestamp change must not change seeded battle outcomes');
+  assert.notDeepEqual(later.log,original.log,'The integral raw log must retain its timestamp events');
+ }finally{seedClock064.now=fixtureNow064;}
+ assert.deepEqual(turn(scenarios[0]),original,'Restoring the fixture clock must reproduce the integral native result and raw log');
+ assert.equal(Date,hostDate064);assert.equal(Date.now,hostDateNow064);
+ assert.notEqual(Date.now(),fixtureNow064,'Host Date.now must still read real time through its original function');
 });
 test('the native simulator can genuinely miss Tail Slap; a seeded QA hit must not be an overridden result',()=>{
  const spec=scenarios.find(row=>row[0]==='contact-541');let missed=null;for(let n=2;n<=64&&!missed;n++){const row=turn(spec,[n,2,3,4]);if(row.log.some(line=>line.startsWith('|-miss|p2a: Minccino')))missed=row;}

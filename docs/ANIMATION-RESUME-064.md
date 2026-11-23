@@ -2,6 +2,33 @@
 
 ## Aggiornamento del collaudo e del controllo automatico
 
+Il run45174752181 sulla candidata08 ha concluso51 delle52 fasi con PASS.
+L'unico errore confrontava due log nativi integrali generati ai lati di un
+cambio di secondo: differivano soltanto le righe di timestamp `|t:|`.
+La correzione riguarda esclusivamente l'orologio della VM di quella fixture:
+il confronto integrale rimane, così come seed, precisione, danni e PP. Cinque
+test passano in1793ms; un avanzamento controllato di un secondo cambia il log
+ma conserva gli esiti, e il ripristino riproduce l'intero risultato.
+L'orologio del processo host rimane originale. Il vecchio FAIL è conservato
+in `outputs/animation-review064-resume-20261123/ci-seed-clock064-fix`;
+il nuovo controllo completo deve ancora concludersi.
+
+La matrice runtime dei tre profili protetti comprende54 celle
+(due lati, tre formati, tre velocità):39 provate direttamente sulla08 e15
+con il precedente trasporto privato, di cui sono verificati tutti i399
+moduli decodificati e gli asset identici. Sono81 azioni con tutte le chiavi
+confermate dal disegno concluso; non è una certificazione estetica globale.
+Quattro prove reali sulla08 superano sospensione audio, perdita e ripristino
+WebGL, annullamento e disattivazione audio. La revisione di tutte le immagini
+di questi ultimi lotti è ancora in corso; nessun confronto all'ascolto è
+stato eseguito.
+
+Il successivo run45169070659 del codice07 supera i primi17 casi nativi,
+ma Tynamo desktop raggiunge il proprio limite180s. Il limite cumulativo
+precedente è quindi risolto, mentre questo FAIL per singolo caso rimane
+distinto e richiede diagnosi. Non aumentare il timeout né trasferire alla08
+i PASS della07.
+
 Il run GitHub45157199563, sul commit120158159fdac3e65cd5616424c2614adff1a8a4,
 ha superato le52 fasi automatiche e i controlli di introduzione, titolo,
 salvataggi e regressioni telefono. Il blocco delle animazioni resta **FAIL**:
