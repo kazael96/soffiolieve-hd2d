@@ -30,11 +30,20 @@ function withActualLoader(metadata,fn){
  }
 }
 test('actual provider loader accepts identical metadata with LF, CRLF and optional UTF8 BOM',()=>{
+ const historicalRaw=fs.readFileSync(path.join(__dirname,'fixtures/liepard-protocol064/source-contract-v4-before-ambient064.json')),historicalLF=historicalRaw.toString('utf8').replace(/^\uFEFF/,'').replace(/\r\n/g,'\n');
+ assert.equal(require('node:crypto').createHash('sha256').update(historicalLF).digest('hex'),'0d8e384dcf67db3ff6199d23b5cafab647460b85bab68378649a3520df393b13','Preserved historical V4 contract canonicalLF integrity');
+ const historical=JSON.parse(historicalLF),migrated=JSON.parse(historicalLF);
+ assert.equal(historical.sourceLFHashes['battle-diorama.js'],'e36f3903827cedcb0ebced1d747d3ea1c21f79fa6c982a341e4ed77de57ead9f');
+ migrated.sourceLFHashes['battle-diorama.js']='56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7';
+ migrated.status='ACTUAL_V4_PLUS_AMBIENT064_SOURCE_CONTRACT_NOT_EXECUTION';
+ migrated.revision='coherent-v4-plus-ambient064';
+ migrated.basisSourceManifestSHA256=migrated.sourceManifestSHA256;delete migrated.sourceManifestSHA256;
+ assert.deepEqual(expected,migrated,'Only the reviewed Diorama source pin and explicit current-versus-historical provenance may migrate from V4');
  const variants=[Buffer.from(metadataLF),Buffer.from(metadataLF.replace(/\n/g,'\r\n')),Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),Buffer.from(metadataLF)])];assert(!variants[0].equals(variants[1]));
  for(const raw of variants)withActualLoader(raw,L=>{assert.deepEqual(L.contract,expected);assert.equal(L.contract.sourceLFHashes['liepard-moves.js'],expected.sourceLFHashes['liepard-moves.js']);});
 });
 test('actual provider loader rejects a substantive metadata change despite valid JSON',()=>{
- const changed=metadataLF.replace('"coherent-v4"','"coherent-v4-substantively-changed"');assert.notEqual(changed,metadataLF);assert.doesNotThrow(()=>JSON.parse(changed));let callbackReached=false;
+ const changed=metadataLF.replace('"coherent-v4-plus-ambient064"','"coherent-v4-plus-ambient064-substantively-changed"');assert.notEqual(changed,metadataLF);assert.doesNotThrow(()=>JSON.parse(changed));let callbackReached=false;
  assert.throws(()=>withActualLoader(Buffer.from(changed),()=>{callbackReached=true;}),/Frozen source contract metadata changed/);assert.equal(callbackReached,false);
 });
 test('actual provider host accepts the same derived geometry metadata with LF and CRLF',()=>{

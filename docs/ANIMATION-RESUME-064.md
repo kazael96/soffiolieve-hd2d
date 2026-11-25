@@ -815,3 +815,36 @@ Entrambi i FAIL sono conservati, con cleanup riuscito. Il banco viene
 corretto senza alzare i budget né eliminare i controlli. Restano da
 misurare la convenienza nell'app e la nuova suite completa; PR58 e
 versione pubblica0.63 non cambiano per queste sole prove locali.
+
+### Qualificazione nell'app e contratto dei protocolli · 25 novembre, seguito
+
+Il riferimentoR4 risolve i404 con un'icona incorporata nella sola
+fixture, dopo averne provato l'origine esatta tramite Network/Log.
+Restano attivi tutti i controlli a zero errori. Quattro owner isolati
+passano: C12/C13 di riferimento e C12/C13 profilati. Le399sorgenti,
+il delegato nativo e i binding sono verificati; nellaC13 i due attori
+504/506 usano realmente rettangoli ridotti. Root e un secondo revisore
+leggono tutti gli otto PNG dell'arena/HUD. I profili non hanno
+breakpoint, PNG o wrapperR/Species. Il confronto conserva i log grezzi
+e normalizza soltanto il valore numerico delle righe native `|t:|`,
+mantenendo posizione, quantità e ogni altro dato della lotta.
+
+L'area media letta scende da65536 a circa25960pixel, ma i tempi della
+prima coppia sono misti: peggiorano a freddo e migliorano al riuso.
+Non è ancora approvato un beneficio prestazionale complessivo; una
+coppia in ordine inverso verifica questo punto aperto. I rapporti
+sono in `outputs/ci064green/ambient-readback-actualapp-v4` e nella
+cartella separata del confronto dei timestamp. Nessun risultato FPS
+o qualità del movimento è implicito.
+
+La CI45675796534 sul commit353f123 esegue93fasi:54PASS e39FAIL.
+Il nuovo owner ambientale passa32passi/2340coppie in15534ms. Tutti
+i39FAIL dei protocolli avvengono sul vecchio pin Diorama, prima dei
+loro casi funzionali; i successivi cinque gruppi browser e18nativi
+sono saltati. Il contratto corrente diventa esplicitamente
+`coherent-v4-plus-ambient064`, preservando il contrattoV4 originale
+in una fixture storica. Cambiano solo il pin Diorama e i metadati
+che distinguono la base storica dal contratto corrente. I cinque
+controlli del loader passano in579ms; non sostituiscono la nuova
+esecuzione dei39casi o della suite completa. Runtime e budget restano
+invariati durante questa migrazione.
