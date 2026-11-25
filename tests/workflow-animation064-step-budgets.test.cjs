@@ -7,25 +7,25 @@ const readWorkflow=file=>fs.readFileSync(path.join(__dirname,'../.github/workflo
 function steps(source){const out=[];let current;for(const line of source.split(/\r?\n/)){if(/^      - /.test(line)){current={index:out.length,text:line+'\n'};out.push(current);}else if(current)current.text+=line+'\n';}return out;}
 function verify(source){
  source=source.replace(/\r\n/g,'\n');const all=steps(source),animation=all.filter(s=>/node scripts\/test-browser-headless\.cjs.*test-results\/animation064-/.test(s.text));
- assert.equal(animation.length,12,'Keep one core batch and three sequential Tynamo rate batches per viewport');
+ assert.equal(animation.length,18,'Keep three sequential core and three Tynamo rate batches per viewport');
  const inventory=[],outputs=new Set();
  for(const [index,step]of animation.entries()){
   const command=step.text.split('\n').find(l=>l.includes('node scripts/test-browser-headless.cjs'));
   assert.match(command,/^        run: node scripts\/test-browser-headless\.cjs _site /,'One bounded command per step');
   assert.equal((step.text.match(/node scripts\/test-browser-headless\.cjs/g)||[]).length,1);
   const args=command.trim().slice(5).split(/\s+/),options=Object.fromEntries(args.filter(a=>a.startsWith('--')).map(a=>{const p=a.indexOf('=');return[a.slice(2,p),a.slice(p+1)];}));
-  const format=formats[Math.floor(index/4)],part=index%4;
+  const format=formats[Math.floor(index/6)],part=index%6;
   assert.equal(options.viewports,format,'Keep the original serial viewport order');
-  const expectedCases=part===0?core:['qaTynamoActions064'],expectedRates=part===0?undefined:String(rates[part-1]);
+  const expectedCases=part<3?core:['qaTynamoActions064'],expectedRates=String(rates[part%3]);
   assert.deepEqual(options.cases.split(','),expectedCases,'Preserve the exact native case batch');
-  assert.equal(options.rates,expectedRates,'Tynamo must run each original rate exactly once');
+  assert.equal(options.rates,expectedRates,'Each batch must run its original rate exactly once');
   assert.equal(options.timeout,'180000','Do not raise the per-case budget');
   assert.equal(options['fail-fast'],'true');assert.equal(options.renderer,'software');assert.equal(options.browser,'/opt/google/chrome/chrome');
-  const output='test-results/animation064-'+format+(part===0?'':'-tynamo-x'+rates[part-1]);
+  const output='test-results/animation064-'+format+(part<3?'-core-x':'-tynamo-x')+rates[part%3];
   assert.ok(args.includes(output),'Keep independent report output');assert.ok(!outputs.has(output),'Do not overwrite a previous batch');outputs.add(output);
   assert.match(step.text,/^        timeout-minutes: 30$/m,'Retain the existing step deadline');
   assert.doesNotMatch(step.text,/continue-on-error:|^        if:|for viewport|\|\|\s*true|\&\s*$/m,'Runtime steps must retain default success/fail-fast');
-  for(const id of expectedCases)for(const rate of part===0?rates:[rates[part-1]])inventory.push(format+':'+id+':'+rate);
+  for(const id of expectedCases)inventory.push(format+':'+id+':'+Number(expectedRates));
  }
  const expected=formats.flatMap(format=>[...core,'qaTynamoActions064'].flatMap(id=>rates.map(rate=>format+':'+id+':'+rate))).sort();
  assert.deepEqual(inventory.slice().sort(),expected,'Keep all54 logical viewport/case/rate cells without omissions or duplicates');
@@ -43,7 +43,7 @@ test('inventory accepts Git LF and Windows CRLF',()=>assert.deepEqual(verify(sou
 test('inventory rejects a missing viewport, case, rate or duplicate rate',()=>{
  const block=steps(source).find(s=>s.text.includes('animation064-landscape-tynamo-x2')).text;
  assert.throws(()=>verify(source.replace(block,'')),/three sequential/);
- assert.throws(()=>verify(source.replace(',qaTailMixedActions064\n','\n')),/exact native case/);
+ assert.throws(()=>verify(source.replace(',qaTailMixedActions064 --rates=1\n',' --rates=1\n')),/exact native case/);
  assert.throws(()=>verify(source.replace('--rates=2','--rates=1')),/original rate exactly once/);
  assert.throws(()=>verify(source.replace('--rates=2','--rates=1,2')),/original rate exactly once/);
 });

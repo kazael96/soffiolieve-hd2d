@@ -449,3 +449,31 @@ senzaFAIL o skip. Il rapportoCI48/52 originale e il suo archivioSHA256
 `f35e0967a31cf4a49e032f1ae2d46a37595d734587602b470b9fc349f019ff12`
 restano conservati. Una nuova CI completa è richiesta dopo queste sole
 modifiche dei test; nessun precedenteFAIL diventaPASS per questo documento.
+
+### Isolamento delle velocità nel collaudo CI
+
+La successiva CI45584501483 sul commit60e9 conclude52/52 fasi CLI e i
+controlli browser di introduzione, titolo, lancio/transizioni, tre slot e
+regressioni telefono. Le prove native verticali e orizzontali passano;
+`qaBattleActions064` desktop supera nuovamente180s. Il rapporto conserva
+46PNG di azione:18 a×1,18 a×2 e10 a×4, fino al colpo54. Il log finale è
+Graffio/Doppiasberla; nessun erroreJavaScript o richiesta fallita è
+registrato. Questi dati non dimostrano la causa né un blocco del gioco.
+L'archivio originale haSHA256
+`f066cc3295819ab265523a6eace877e0c134dee44fc8d0638672c2c7ed62df37`.
+Il PNG di errore mostra soltanto la testa della paginaQA e non approva
+la scena di lotta. Gli altri PNGCI restano prove da esaminare, non una
+revisione visiva completata.
+
+I due workflow separano ora anche i cinque casi principali per velocità:
+tre processi sequenziali a×1/×2/×4 per ciascun formato, oltre ai tre già
+separati diTynamo. Le54 celle formato–caso–velocità sono identiche, senza
+duplicati o omissioni; restano180s per caso, fallimento immediato, rapporti
+distinti e conservazione degli artefatti anche in errore. Il runtime e la
+candidata10 non cambiano. I controlli mirati passano14/14 in1636ms,
+compresi inventario, negativi sui limiti, selezione delle velocità e turni
+GEN5 effettivi delle sei squadre. Il nuovo controllo di separazione
+fallisce sul workflow precedente. Sono conservati anche il mancato avvio
+`spawn EPERM` e il primo tentativo con percorso asset non dichiarato;
+il successivo usa esplicitamente la10. QuestoPASS statico non sostituisce
+la nuova esecuzioneCI né certifica un miglioramento del tempo complessivo.
