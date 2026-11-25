@@ -24,6 +24,8 @@ jobs:
         run: python3 scripts/build-site.py site.zip _site
       - name: Check source syntax
         run: for file in src/*.js; do node --check "$file"; done
+      - name: Install pinned native Canvas for CPU fixtures
+        run: npm install --no-save --ignore-scripts --package-lock=false @napi-rs/canvas@0.1.100
       - name: Run all automated regressions on the built site
         run: node scripts/test-deep.cjs _site test-results/deep --python=python3
       - uses: actions/upload-artifact@v4

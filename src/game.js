@@ -62,13 +62,14 @@ function syncBattleActorFraming(){
 }
 function drawArena(){
  syncBattleActorFraming();
+ if(window.MoveFX?.beforeArenaFrame?.(arena.width,arena.height)===false)return;
  const presentationRecord=window.MoveFX?.beginArenaFrame();let presentationDrawn=false;try{
  const W=arena.width,H=arena.height;
  ac.fillStyle='#17382f';ac.fillRect(0,0,W,H);ac.save();let native=window.MoveFX?.visualState(),camera=native?.camera||{x:0,y:0,zoom:1},background=native?.background||{},bs=Math.min(W/1000,H/650);
  ac.translate(W*.5+camera.x*bs,H*.5+camera.y*bs);ac.scale(camera.zoom,camera.zoom);ac.translate(-W*.5,-H*.5);
  BattleEnvironment.draw(ac,W,H,background,camera);
  if(background.worldTint>0){let col=background.worldColor;ac.fillStyle='rgba('+[(col&31)*255/31,(col>>5&31)*255/31,(col>>10&31)*255/31].join(',')+','+background.worldTint+')';ac.fillRect(-W,-H,W*3,H*3)}
- window.MoveFX?.drawBackground(ac,W,H);window.DoubleBattles?.drawIdle(ac,W,H);const support=BattleGround.layout(W,H);window.MoveFX?.drawSpecies(ac,W,H,'back');for(const side of ['p2','p1']){const p=support[side];combatant(ac,side==='p1'?partner.name:enemy.name,p.x,p.y,p.size,window.DoubleBattles?.backFor(side)??side==='p1',side,p);}window.MoveFX?.draw(ac,W,H);if(BattleEnvironment.context?.zone===326&&session?.battle.field.weather==='sandstorm')NIMBASA_FIELD.sand(ac,W,H,t);
+ window.MoveFX?.drawBackground(ac,W,H);window.DoubleBattles?.drawIdle(ac,W,H);const support=BattleGround.layout(W,H);window.MoveFX?.drawSpecies(ac,W,H,'back');for(const side of ['p2','p1']){const p=support[side];combatant(ac,side==='p1'?partner.name:enemy.name,p.x,p.y,p.size,window.DoubleBattles?.backFor(side)??side==='p1',side,p);}if(window.MoveFX?.draw(ac,W,H)===false){ac.restore();return;}if(BattleEnvironment.context?.zone===326&&session?.battle.field.weather==='sandstorm')NIMBASA_FIELD.sand(ac,W,H,t);
  ac.restore();for(let side of ['p1','p2']){let card=$(side==='p1'?'playerCard':'enemyCard'),hud=native?.hud?.[side];card.style.visibility=hud?.visible===false?'hidden':'';card.style.transform=hud?.x?'translateX('+(hud.x*Math.min(W/256,H/192))+'px)':''}arena.dataset.ground=JSON.stringify(Object.fromEntries(Object.entries(BattleGround.layout(W,H)).map(([side,p])=>[side,{x:p.x,y:p.y,height:p.height,world:p.world}])));arena.dataset.combatants=JSON.stringify(Object.fromEntries(['p1','p2'].map(side=>[side,{hidden:!!visualState[side].hidden,substitute:!!visualState[side].substitute,minimized:!!visualState[side].minimized}])));arena.dataset.visual=JSON.stringify({move:window.MoveFX?.active?.moveId,attacker:window.MoveFX?.active?.side,species:window.MoveFX?.active?.profile?.species,profile:window.MoveFX?.active?.profile?.key,camera,background});
  presentationDrawn=true;
  }finally{window.MoveFX?.presentedArenaFrame(presentationRecord,presentationDrawn&&!window.document?.hidden&&renderer.ready&&!renderer.battleRecovering&&!renderer.modelsRecovering&&!renderer.contextLost&&!renderer.gl.isContextLost()&&!ac.isContextLost?.());}

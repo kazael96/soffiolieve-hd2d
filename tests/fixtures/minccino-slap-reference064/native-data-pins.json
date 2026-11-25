@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "scope": "Immutable native program/audio/sprite data only. Runtime src is intentionally loaded from the checkout. No private build/CDP/absolute-manifest dependency.",
+  "files": {
+    "assets/move-fx-data.js": "4d6185f28404cec92f2e26078796aef3e88a3df0c02e03da19ff0ce311fc7b48",
+    "assets/native-audio-bank.js": "9b30888a34e0b386a64794db50f1c1494e5c227c4684ea5ca430c4e451a95af5",
+    "assets/visual-camera.js": "6748d199dc9863e53b61259062ee1813422e360322b412ee1fbd6354f39f87ac",
+    "assets/animated/495-front.json": "713cb97bc2d7fe8671a17c668fa7dcb53fe09611afaaf14f7d563c756222b749",
+    "assets/animated/495-back.json": "6a3a011f12f4ed0bc80b1e15a3c721c88f0c322e0d39a066fe62c615c5f09e01",
+    "assets/animated/510-front.json": "e48bdc0b385e10ed41880ed0221e2cdebfee3b613df4b40c06d4f2abed551ef5",
+    "assets/animated/510-back.json": "7abcecc0188a6f88064835b5d1177d3524c5c690d155c2b4c1d2630e0f3e6ee1",
+    "assets/animated/572-front.json": "fca062a9388a440881ff23f66519b438a5c1f12f4f6e35e49449b0399aa31767",
+    "assets/animated/572-back.json": "20b3fdd73888941c8db3065bfc767418a5b6f035e1920d09ce9e842555a4ea05"
+  }
+}

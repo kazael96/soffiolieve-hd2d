@@ -53,13 +53,16 @@ return{sample,maps};})();
   const S=root.SpeciesMoves,C=root.ChapterMoves,D=root.DemoMoves;
   if(installedOn===S)return true;
   if(!S?.part||!C?.sample||!D?.sample)return false;
-  const previousChapterSample=C.sample,previousDemoSample=D.sample,previousPart=S.part,previousAttachment=D.attachment,previousChapterSelect=C.select,previousDemoSelect=D.select;
+  const previousChapterSample=C.sample,previousDemoSample=D.sample,previousPart=S.part,previousAttachment=D.attachment,previousChapterSelect=C.select,previousDemoSelect=D.select,previousDemoDraw=D.draw;
   const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
   function curve(f,points){if(f<=points[0][0])return points[0][1];for(let i=1;i<points.length;i++)if(f<=points[i][0]){const[x,a]=points[i-1],[y,b]=points[i];return a+(b-a)*smooth((f-x)/(y-x));}return points.at(-1)[1];}
   const maps={front:{head:[0,1,2,3,4],armsA:[8],armsB:[9],feet:[6,7],tail:[10,11],headJoint:[3,-13],tailJoint:[5,-8]},back:{head:[0,1,2,3],armsA:[4],armsB:[5],feet:[10,11],tail:[7,8,9],headJoint:[-1,-15],tailJoint:[-1,-5]}};
 
   function withActualHitContext(p,context={}){
    if(p?.species!==572||p.id!==3||p.frames!==126)return p;
+   // Scope is acquired at selection, never recalculated to hide a later owner loss.
+   // With no game session this remains an explicit reference-preview profile.
+   try{const owner=typeof session==='undefined'?null:session;if(owner){if(owner.double||owner.multi||owner.battle?.gameType!=='singles')return p;const view=root.BattlePresentationOwners?.read?.();if(!view?.layoutSupported||!view.available||['p1','p2'].some(side=>!view.roles?.[side]||view.roles[side].altered))return p;}}catch{return p;}
    const n=context.hitCount,i=context.hitIndex;
    if(!Number.isInteger(n)||n<0||n>5||!Number.isInteger(i)||i<0||(n===0?i!==0:i>=n))return p;
    return{...p,minccinoNativeSlap064:'private-native-paw-SPA163',nativeSlapContext064:{hitIndex:i,hitCount:n}};
@@ -99,6 +102,12 @@ return{sample,maps};})();
   // chapter/demo routes are wrapped rather than only the public sample method.
   D.sample=function(p,f,side,miss){return author(previousDemoSample(p,f,side,miss),p,f,side,miss);};
   C.sample=function(p,f,side,miss){return author(previousChapterSample(p,f,side,miss),p,f,side,miss);};
+  // SPA163 is the contact mark. Generic damage rays otherwise appear
+  // aroundframe44, before native contact60, and mask its original symbol.
+  D.draw=function(c,W,H,x,f,layer){
+   if((x?.nativeSlapController064===true||x?.preview&&x.nativeSlapController064==='reference-preview')&&x?.profile?.species===572&&x.profile.id===3&&x.profile.minccinoNativeSlap064==='private-native-paw-SPA163'&&x.profile.kind==='palmFlurry'&&x.profile.frames===126&&x.profile.nativeEffects===true&&x.profile.damage===true&&x.profile.key==='training-572-3'&&x.profile.chapter===true&&x.profile.training===true&&x.profile.impact===60&&x.profile.target==='foe'&&x.profile.attachment==='hand'&&x.profile.nativeSlapContext064&&Object.keys(x.profile.nativeSlapContext064).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(x.profile.nativeSlapContext064.hitCount)&&x.profile.nativeSlapContext064.hitCount>=0&&x.profile.nativeSlapContext064.hitCount<=5&&Number.isInteger(x.profile.nativeSlapContext064.hitIndex)&&x.profile.nativeSlapContext064.hitIndex>=0&&(x.profile.nativeSlapContext064.hitCount===0?x.profile.nativeSlapContext064.hitIndex===0&&x.miss===true:x.profile.nativeSlapContext064.hitIndex<x.profile.nativeSlapContext064.hitCount))return;
+   return previousDemoDraw.call(this,c,W,H,x,f,layer);
+  };
   D.attachment=function(p,a,from,body,side){return p?.species===572&&p.id===47?mouthOrigin(a,from,body,side):previousAttachment(p,a,from,body,side);};
   S.part=function(track,back,a){
    if(a?.species===572&&a.minccinoSlap064)return a.minccinoSlap064.parts[track]??null;

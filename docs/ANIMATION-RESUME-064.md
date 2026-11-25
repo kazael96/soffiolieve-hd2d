@@ -340,3 +340,71 @@ framing. Gli stessi78 controlli con la vecchia sola interfaccia08 producono
 accetta LF/CRLF e respinge cinque modifiche diverse, compresa una coordinata
 reale. Queste prove conservano runtime e asset09; la nuova CI completa resta
 necessaria prima di qualificare il checkpoint per il rilascio.
+
+### Ripresa del25 novembre: risorse, proprietà e leggibilità
+
+La CI45204070028 su `a19017249745aa3c4b7461d0bb6b42a1171956f7` conclude
+52/52 fasi CLI e i cinque gate dell'indice originale. Le prove native
+verticali e orizzontali passano, ma `qaBattleActions064` desktop scade al
+budget180s: il risultato complessivo rimaneFAIL. Sono presenti54 immagini
+di azioni desktop,18 per velocità;62 è l'ultimo ordinale osservato, non il
+numero dei PNG. Dopo quell'azione resta Snatch a×4. Non è ancora distinta
+un'attesa bloccata da un costo aggregato eccessivo. Nessun timeout viene
+aumentato per ottenerePASS. Archivio originale SHA256
+`f2e221b164843e6272fd8bab52587ecba7dc25acae323a442308c05f8c9fb260`,
+in `outputs/animation-review064-resume-20261125/ci-45204070028`.
+
+Il nuovo gruppo corregge un caso non coperto dalla09: il percorso nativo
+di Doppiasberla572/3 viene selezionato soltanto nelle singole con i due
+proprietari originali disponibili. Doppie, multi e attori già alterati
+conservano il percorso precedente. Durante un caricamento non viene
+adottata silenziosamente una nuova sessione, un nuovo attore o bersaglio.
+Le risorse sono controllate prima di cancellare l'arena; il recupero usa
+il servizio originale di retry e pausa per rete assente o scheda nascosta,
+senza rieseguire il turno GEN5 o cambiare il caricatore globale del campo.
+Una vecchia azione non può rimuovere un pannello di un altro proprietario.
+
+Texture e sequenza SPA163 restano originali. L'adattamento HD-2D usa una
+densità0.55 dell'unità del bersaglio e un'origine condivisa fra emettitori
+principali e secondari abbassata di0.18 della sua altezza. È una scelta di
+messa in scena, non una misura dei pixelDS. Il solo overlay generico della
+coppia protetta viene escluso. I12 contatti CPU dei due colpi, nei due ruoli
+e nei tre formati, sono stati letti dall'autore, dal responsabile e da un
+revisore indipendente: il palmo lascia visibili occhio e muso. Questa prova
+statica non approva ancora naturalezza della sequenza o comando nel browser.
+
+L'interfaccia conserva la sessione proprietaria attraverso attese di turno,
+eventi, messaggi multipagina e riproduzione della mossa. Il completamento
+di una vecchia lotta non scrive reazioni, pose mantenute, caption o stato
+dei comandi della successiva. I test negativi riproducono i difetti con il
+codice precedente; restano i controlli di successo, errore e cancellazione.
+
+La ricerca dell'identità grafica restituisce subito0 per `undefined` e
+`null`, evitando scansioni ripetute di forme e specie per campi assenti.
+I confronti usano cataloghi reali e snapshotGEN5, comprese forme, sesso,
+stagioni e nomi. Non cambia il percorso degli altri valori. Le misureNode
+private rimangono distinte da una misura diFPS o dei tempi su Android.
+
+I sorgenti installati passano101/101 controlli mirati in41074ms:79 di
+protocollo e preparazione nativa,17 dell'interfaccia e5 dei cataloghi.
+Il primo tentativo non ha avviato il processo figlio per `spawn EPERM`;
+è preservato separatamente dall'avvio autorizzato. I loader portabili
+conservano le asserzioni e normalizzano soltanto CRLF→LF nelle due fixture
+di confronto sorgenti. I primi tentativi privati con import mancanti restano
+FAIL. Canvas0.1.100 viene installato prima della suite CLI nei due workflow.
+QuestiPASS non sostituiscono collaudo completo e rendering del codice nuovo.
+
+Graffio di Liepard e densità delle doppie602 restano proposte separate,
+non installate in questo gruppo. Il primo richiede ancora soluzione del
+miss, clipping, proprietà e prestazioni; il secondo richiede i quattro
+corpi effettivamente renderizzati. I controlli mirati non certificano la
+revisione globale delle4365 coppie e dei105 comandiMN. La PR58 resta bozza.
+
+La09 è stata archiviata secondoH.8 prima della10:32009 file ricostruiti e
+ricontrollati,31999 dipendenti dalla base04 e10 nel deltaZIP, SHA256
+`15e8a22a67c9335ca080969e9db99ad09b60f87c371abf78376f070cc18a7906`.
+È stata rimossa soltanto la directory generata09, dopo i controlli di
+percorso, Git, reparse e processi. Restano04 come base obbligatoria degli
+archivi e08 come confronto verificato; sorgenti, ROM e rapporti sono
+preservati. I test successivi usano gli asset08 con i32 pin nativi
+individualmente confrontati, senza dipendenze eseguibili dalla09 rimossa.

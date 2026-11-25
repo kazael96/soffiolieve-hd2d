@@ -1,10 +1,11 @@
 'use strict';
+const {repo,sourceRoot,sourcePath,site,fixturePath,readSourceBytes,readFixtureBytes}=require('./helpers/minccino-slap-paths064.cjs');
 // Production-source protocol regression. Synthetic actor/arena inputs, no renderer or real PCM claim.
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const repo=path.resolve(__dirname,'..'),site=process.env.SOFFIOLIEVE_TEST_SITE||path.join(repo,'_site'),source=fs.readFileSync(path.join(repo,'src/move-fx.js'),'utf8');
+const source=fs.readFileSync(sourcePath('move-fx.js'),'utf8');
 const d={Image:class{set src(v){}},window:null};d.window=d;vm.createContext(d);
 for(const file of ['assets/move-fx-data.js','assets/native-audio-bank.js'])vm.runInContext(fs.readFileSync(path.join(site,file),'utf8'),d,{filename:file});
-for(const file of ['native-visual.js','species-moves.js','move-fx.js'])vm.runInContext(fs.readFileSync(path.join(repo,'src',file),'utf8'),d,{filename:file});
+for(const file of ['native-visual.js','species-moves.js','move-fx.js'])vm.runInContext(fs.readFileSync(sourcePath(file),'utf8'),d,{filename:file});
 const reference={move:d.ROM_MOVE_FX.moves[3],spa:d.ROM_MOVE_FX.spas[163]},nativeProfile={species:572,id:3,frames:126,impact:60},contract={nativeAudioPlans:[{default:d.NATIVE_AUDIO_BANK.moves[3][0]}],timelines:['p1','p2'].map(side=>({side,nativeWaitGroups:false,mappedAudio:JSON.parse(JSON.stringify(d.SpeciesMoves.timeline(d.MoveFX.timeline(reference.move,0,0,side,{}),nativeProfile).audio))}))};
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};};
 async function settle(){for(let i=0;i<18;i++)await Promise.resolve();}

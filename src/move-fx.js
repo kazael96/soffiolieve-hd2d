@@ -62,6 +62,25 @@
   if(actors[side].species?.num!==572||String(cryIds[side])!=='572')return null;
   return{owner,reader,side,targetSide,actors,banks,cryIds:{...cryIds}};
  }
+ // Capture only native/visual identities before IO. Bank readiness and bank
+ // replacement belong to resource preparation, never to identity acquisition.
+ function slapAcquisition064(side,targetSide,cryIds){
+  const owner=typeof session==='undefined'?null:session,reader=window.BattlePresentationOwners?.read;
+  if(!owner?.battle||owner.double||owner.multi||owner.battle.gameType!=='singles'||typeof owner.active!=='function'||!['p1','p2'].includes(side)||!['p1','p2'].includes(targetSide)||side===targetSide||Object.keys(cryIds||{}).sort().join(',')!=='p1,p2')return null;
+  let view;try{view=reader?.();}catch{return null;}
+  if(!view?.layoutSupported||!view.available)return null;
+  const actors={},graphics={};for(const role of ['p1','p2']){
+   const actor=owner.active(role),visual=view.roles?.[role];
+   if(!actor||!visual||visual.altered||String(visual.graphic)!==String(cryIds[role])||view.nativeSpecies?.[role]!==actor.species?.num||anatomicalId(visual.graphic)!==actor.species?.num)return null;
+   actors[role]=actor;graphics[role]=visual.graphic;
+  }
+  if(actors[side].species?.num!==572||String(cryIds[side])!=='572')return null;
+  return{owner,reader,side,targetSide,actors,graphics,cryIds:{...cryIds}};
+ }
+ function sameSlapAcquisition064(a,b){return !!a&&!!b&&a.owner===b.owner&&a.reader===b.reader&&a.side===b.side&&a.targetSide===b.targetSide&&['p1','p2'].every(role=>a.actors[role]===b.actors[role]&&a.graphics[role]===b.graphics[role]&&a.cryIds[role]===b.cryIds[role]);}
+ function checkSlapAcquisition064(stamp,side,targetSide,cryIds,audio=null){
+  if(stamp&&!sameSlapAcquisition064(stamp,slapAcquisition064(side,targetSide,cryIds))){try{audio?.cancel();}finally{throw Error('Native Double Slap acquired owner changed during preparation');}}
+ }
  function sameSlapOwner064(a,b){return !!a&&!!b&&a.owner===b.owner&&a.reader===b.reader&&a.side===b.side&&a.targetSide===b.targetSide&&['p1','p2'].every(role=>a.actors[role]===b.actors[role]&&a.cryIds[role]===b.cryIds[role]&&a.banks[role].bank===b.banks[role].bank&&a.banks[role].data===b.banks[role].data&&a.banks[role].image===b.banks[role].image);}
  function isSlap064(x){return x?.moveId===3&&x.profile?.species===572&&x.profile?.id===3&&x.profile.minccinoNativeSlap064==='private-native-paw-SPA163';}
  function completedSlapHold064(x){const h=x?.nativeSlapContext064;return isSlap064(x)&&!!x.nativeSlapOwner064&&!x.miss&&Number.isInteger(h?.hitCount)&&h.hitCount>=2&&h.hitCount<=5&&Number.isInteger(h.hitIndex)&&h.hitIndex>=0&&h.hitIndex<h.hitCount-1;}
@@ -71,15 +90,17 @@
   return{...x,sequence:{...x.sequence,events:[],visual:[],clact:[],audio:[]},resolve(){},timer:null,presentationClock:null,presentationAudio:null,presentationRecord:null,presentationReject:null,presentationCompleting:false,preparationHold064:generation+1,nativeSlapCompletedHold064:false};
  }
  function guardColdSlap064(){const x=active;if(x?.preparationHold064!==undefined&&(x.preparationHold064!==generation||!sameSlapOwner064(x.nativeSlapOwner064,slapOwner064(x.side,x.targetSide,x.cryIds))))cancel();}
- function cancelAction064(visual=null){for(const ticket of pendingSlapPreparations064)ticket.cancel();pendingSlapPreparations064.clear();try{active?.presentationAudio?.cancel();}catch(error){failPresentation(active,error);visual=null;}if(visual)active?.presentationClock?.cancel();window.ParticleSPL?.clear();window.AudioEngine?.cancelMove();generation++;const old=active;if(old){if(window.GameSpeed)GameSpeed.cancel(old.timer);else clearTimeout(old.timer);old.resolve();}active=visual;window.GameSpeed?.flush();}
+ function cancelAction064(visual=null){stopSlapAssetRecovery064(active);for(const ticket of pendingSlapPreparations064)ticket.cancel();pendingSlapPreparations064.clear();try{active?.presentationAudio?.cancel();}catch(error){failPresentation(active,error);visual=null;}if(visual)active?.presentationClock?.cancel();window.ParticleSPL?.clear();window.AudioEngine?.cancelMove();generation++;const old=active;if(old){if(window.GameSpeed)GameSpeed.cancel(old.timer);else clearTimeout(old.timer);old.resolve();}active=visual;window.GameSpeed?.flush();}
  function cancel(){cancelAction064();}
  function preload(moveId,effect){let m=effect||data?.moves[moveId],pending=[];for(let variant of m?.variants||[])for(let [op,a]of variant.commands)if(op===36){let im=backgroundImage(a[0]);if(!im.complete)pending.push(new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}))}for(let id of m?.spas||[])for(let t of data.spas[id]?.textures||[]){let im=image(t);if(!im.complete)pending.push(new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true})}))}return Promise.race([Promise.all(pending),new Promise(resolve=>setTimeout(resolve,1000))])}
  async function play(moveId,side='p1',options={}){
   const retained=slapContinuation064(moveId,side,options);cancelAction064(retained);const token=generation,retainedWait=retained?slapPreparation064():null;try{const move=options.effect||data?.moves[moveId];if(!move){if(active===retained&&retained)cancel();return;}const choice=window.BattleContext?.choose(move,options.context||{});if(choice&&options.variant===undefined)options.variant=choice.variant;
   const profile=window.SpeciesMoves?.select(options.cryIds?.[side],moveId,{...options.context,phase:choice?.phase??options.context?.phase??0});let sequence=timeline(move,options.variant||0,0,side,options.context||{});if(profile)sequence=SpeciesMoves.timeline(sequence,profile);const speed=playbackSpeed;
+  const acquisitionTarget=options.targetSide||(side==='p1'?'p2':'p1'),acquisition=profile?.minccinoNativeSlap064==='private-native-paw-SPA163'?slapAcquisition064(side,acquisitionTarget,options.cryIds):null;
+  if(profile?.minccinoNativeSlap064==='private-native-paw-SPA163'&&!acquisition)throw Error('Native Double Slap initial acquisition ownership is unavailable');
   // Native slow/normal clips depend on the effective action speed. The player
   // can change the global rate while this cold preparation is still pending.
-  let loadedRate;do{loadedRate=window.GameSpeed?.rate||1;try{await waitSlapPreparation064(Promise.all([preload(moveId,options.effect),options.effect?window.NativeCapture?.preload(options.ball):null,options.effect?window.AudioEngine?.preloadEvents(sequence.audio,audioCryIds(options.cryIds)):window.AudioEngine?.preloadMove(moveId,audioCryIds(options.cryIds),options.variant||0,speed*loadedRate,side),profile?window.SpeciesMoves?.prepare?.(profile,{cryIds:options.cryIds,side}):null]),retainedWait,token);}catch(error){if(token!==generation)return;throw error;}if(token!==generation)return;}while(loadedRate!==(window.GameSpeed?.rate||1));
+  let loadedRate;do{loadedRate=window.GameSpeed?.rate||1;try{await waitSlapPreparation064(Promise.all([preload(moveId,options.effect),options.effect?window.NativeCapture?.preload(options.ball):null,options.effect?window.AudioEngine?.preloadEvents(sequence.audio,audioCryIds(options.cryIds)):window.AudioEngine?.preloadMove(moveId,audioCryIds(options.cryIds),options.variant||0,speed*loadedRate,side),profile?window.SpeciesMoves?.prepare?.(profile,{cryIds:options.cryIds,side}):null]),retainedWait,token);}catch(error){if(token!==generation)return;throw error;}if(token!==generation)return;checkSlapAcquisition064(acquisition,side,acquisitionTarget,options.cryIds);}while(loadedRate!==(window.GameSpeed?.rate||1));
   guardColdSlap064();if(token!==generation)return;
   const presentationEligible=presentationEligibility(profile,{...options,side})==='ELIGIBLE';
   if(profile?.minccinoNativeSlap064!==undefined&&!presentationEligible)throw Error('Private native Double Slap presentation ownership/contract unavailable');
@@ -92,6 +113,7 @@
     preparedRate=window.GameSpeed?.rate||1;
     try{presentationAudio=await waitSlapPreparation064(window.AudioEngine.preparePresentation(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:profile.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),speed:speed*preparedRate,playbackSpeed:speed,cryIds:audioCryIds(options.cryIds),miss:options.miss,requiredKeys:presentationPlan.keys,...(profile.minccinoNativeSlap064!==undefined?{profileSpecies:572,profileKey:profile.key,profileKind:profile.kind,profileMarker:profile.minccinoNativeSlap064,nativeSlapContext064:{...profile.nativeSlapContext064},nativeWaitGroups:options.context?.nativeWaitGroups===true}:([495,498].includes(profile.species)&&profile.key===({495:'snivy-43',498:'tepig-39'}[profile.species])||profile.species===510&&profile.id===10&&profile.key==='training-510-10')?{profileSpecies:profile.species,profileKey:profile.key}:moveId===39?{profileKind:profile.kind,profileMarker:profile.tailWhip064}:profile.species===602?{profileKind:profile.kind,profileSpecies:602}:{})}),retainedWait,token);}catch(error){if(token!==generation)return;throw error;}
     if(token!==generation){presentationAudio?.cancel();return;}
+    checkSlapAcquisition064(acquisition,side,acquisitionTarget,options.cryIds,presentationAudio);
     if(preparedRate!==(window.GameSpeed?.rate||1)){presentationAudio?.cancel();presentationAudio=null;}
    }while(!presentationAudio);
    for(const key of ['canPresent','acknowledge','pause','resume','cancel','finish'])if(typeof presentationAudio?.[key]!=='function'){presentationAudio?.cancel?.();throw Error('Incomplete presentation audio contract: '+key);}
@@ -99,11 +121,12 @@
    // a controller whose raw-identity marks can no longer be drawn.
    if(presentationEligibility(profile,{...options,side})!=='ELIGIBLE'){presentationAudio.cancel();presentationAudio=null;if(profile.minccinoNativeSlap064!==undefined)throw Error('Private native Double Slap visual owner changed during audio preparation');presentationPlan=null;}
   }
-  return new Promise((resolve,reject)=>{const x=active={profile,cryIds:options.cryIds,moveId,side,targetSide:profile?.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),miss:!!options.miss,hiddenSides:options.hiddenSides||[],sequence,speed,start:(window.GameSpeed?.now()??performance.now()),resolve,nativeSlapOwner064:profile?.minccinoNativeSlap064==='private-native-paw-SPA163'?slapOwner064(side,options.targetSide||(side==='p1'?'p2':'p1'),options.cryIds):null,nativeSlapContext064:moveId===3?{hitIndex:options.context?.hitIndex,hitCount:options.context?.hitCount}:null};if(presentationPlan){x.presentationClock=window.BattlePresentation.create({...presentationPlan,now:presentationNow(x)});x.presentationAudio=presentationAudio;x.presentationHold=!!options.hold;x.presentationReject=reject;return;}window.AudioEngine?.beginMove(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:x.targetSide,speed:speed*(window.GameSpeed?.rate||1),cryIds:audioCryIds(options.cryIds),miss:options.miss});x.timer=(window.GameSpeed?.schedule||setTimeout)(()=>{if(active===x){if(options.hold){x.preview=true;x.previewFrame=sequence.frames;x.nativeSlapCompletedHold064=completedSlapHold064(x)}else active=null;window.AudioEngine?.cancelMove();window.GameSpeed?.flush();resolve()}},sequence.frames/speed*1000/60+30)});
+  checkSlapAcquisition064(acquisition,side,acquisitionTarget,options.cryIds,presentationAudio);
+  return new Promise((resolve,reject)=>{const x=active={profile,cryIds:options.cryIds,moveId,side,targetSide:profile?.target==='self'?side:options.targetSide||(side==='p1'?'p2':'p1'),miss:!!options.miss,hiddenSides:options.hiddenSides||[],sequence,speed,start:(window.GameSpeed?.now()??performance.now()),resolve,nativeSlapController064:!!(presentationPlan&&profile?.minccinoNativeSlap064==='private-native-paw-SPA163'),...(profile?.minccinoNativeSlap064==='private-native-paw-SPA163'?{nativeSlapReject064:reject}:{}),nativeSlapOwner064:profile?.minccinoNativeSlap064==='private-native-paw-SPA163'?slapOwner064(side,options.targetSide||(side==='p1'?'p2':'p1'),options.cryIds):null,nativeSlapContext064:moveId===3?{hitIndex:options.context?.hitIndex,hitCount:options.context?.hitCount}:null};if(x.nativeSlapController064&&!x.nativeSlapOwner064){presentationAudio?.cancel();failSlapAssets064(x,Error('Native Double Slap initial native owner is unavailable'));return;}if(presentationPlan){x.presentationClock=window.BattlePresentation.create({...presentationPlan,now:presentationNow(x)});x.presentationAudio=presentationAudio;x.presentationHold=!!options.hold;x.presentationReject=reject;return;}window.AudioEngine?.beginMove(sequence.audio,{moveId,frames:sequence.frames,variant:options.variant||0,side,targetSide:x.targetSide,speed:speed*(window.GameSpeed?.rate||1),cryIds:audioCryIds(options.cryIds),miss:options.miss});x.timer=(window.GameSpeed?.schedule||setTimeout)(()=>{if(active===x){if(options.hold){x.preview=true;x.previewFrame=sequence.frames;x.nativeSlapCompletedHold064=completedSlapHold064(x)}else active=null;window.AudioEngine?.cancelMove();window.GameSpeed?.flush();resolve()}},sequence.frames/speed*1000/60+30)});
   }catch(error){if(retained&&active===retained&&generation===token)cancel();throw error;}finally{if(retainedWait)pendingSlapPreparations064.delete(retainedWait);}
  }
  function frame(){return active?(active.preview?active.previewFrame:active.presentationClock?active.presentationClock.value:((window.GameSpeed?.now()??performance.now())-active.start)*.06*active.speed):0}
- async function preview(moveId,side='p1',variant=0,options={}){cancel();const token=generation;await preload(moveId);if(token!==generation)return 0;const context=options.context||{phase:moveId===117?Math.max(0,(data.moves[moveId].phaseMap||[0,1]).indexOf(variant)):0};if(options.context&&window.BattleContext)variant=window.BattleContext.choose(data.moves[moveId],context).variant;let profile=window.SpeciesMoves?.select(options.cryIds?.[side],moveId,context),sequence=timeline(data.moves[moveId],variant,0,side,context);if(profile)sequence=SpeciesMoves.timeline(sequence,profile);try{if(profile)await window.SpeciesMoves?.prepare?.(profile,{cryIds:options.cryIds,side});}catch(error){if(token!==generation)return 0;throw error;}if(token!==generation)return 0;active={profile,cryIds:options.cryIds,hiddenSides:options.hiddenSides||[],miss:!!options.miss,moveId,side,targetSide:profile?.target==='self'?side:side==='p1'?'p2':'p1',sequence,preview:true,previewFrame:sequence.frames*.5,speed:1,resolve(){}};return sequence.frames}
+ async function preview(moveId,side='p1',variant=0,options={}){cancel();const token=generation;await preload(moveId);if(token!==generation)return 0;const context=options.context||{phase:moveId===117?Math.max(0,(data.moves[moveId].phaseMap||[0,1]).indexOf(variant)):0};if(options.context&&window.BattleContext)variant=window.BattleContext.choose(data.moves[moveId],context).variant;let profile=window.SpeciesMoves?.select(options.cryIds?.[side],moveId,context),sequence=timeline(data.moves[moveId],variant,0,side,context);if(profile)sequence=SpeciesMoves.timeline(sequence,profile);try{if(profile)await window.SpeciesMoves?.prepare?.(profile,{cryIds:options.cryIds,side});}catch(error){if(token!==generation)return 0;throw error;}if(token!==generation)return 0;active={profile,cryIds:options.cryIds,hiddenSides:options.hiddenSides||[],miss:!!options.miss,moveId,side,targetSide:profile?.target==='self'?side:side==='p1'?'p2':'p1',sequence,nativeSlapController064:profile?.minccinoNativeSlap064==='private-native-paw-SPA163'?'reference-preview':false,preview:true,previewFrame:sequence.frames*.5,speed:1,resolve(){}};return sequence.frames}
  function nativeFrame(){const x=active,f=frame();if(!x?.profile?.nativeEffects)return f;const q=x.sequence,a=q.nativeAnchor||0,i=q.customImpact;return a>0&&f<=i?f/i*a:a+(f-i)/Math.max(1,q.frames-i)*(q.nativeFrames-a);}
  function point(side,W,H){if(active?.profile?.nativeEffects&&side===active.side){const l=BattleGround.layout(W,H),p=active.profile,a=SpeciesMoves.sample(p,frame(),side,active.miss),b=SpeciesMoves.pose(p,frame(),side,side,active.miss,l);return DemoMoves.attachment(p,a,l[side],b,side);}let s=Math.min(W/1000,H/650),p=BattleGround.effect(side,W,H),pose=window.NativeVisual?.sprite(active?.sequence.visual||[],frame(),side,active?.side,active?.targetSide);if(pose){p.x+=pose.x*s;p.y+=pose.y*s}if(active?.profile?.nativeEffects&&active.miss&&side===active.targetSide)p.x+=(active.side==='p1'?1:-1)*BattleGround.layout(W,H)[side].height*.9;return p}
  function keys(values,t,times){if(!values)return 1;let a=times?.[0]??.15,b=times?.[1]??.8;if(t<a)return values[0]+(values[1]-values[0])*t/Math.max(.001,a);if(t>b)return values[1]+(values[2]-values[1])*(t-b)/Math.max(.001,1-b);return values[1]}
@@ -114,11 +137,116 @@
  }
  const tiled=new Map();
  const tints=new Map();function tint(im,tex,color){if(color===32767||color===undefined)return im;let key=tex.name+':'+color;if(tints.has(key))return tints.get(key);let cs=Array.isArray(color)?color:rgb(color),can=document.createElement('canvas');can.width=tex.w;can.height=tex.h;let cx=can.getContext('2d');cx.drawImage(im,0,0);let pixels=cx.getImageData(0,0,tex.w,tex.h);for(let i=0;i<pixels.data.length;i+=4)for(let j=0;j<3;j++)pixels.data[i+j]*=cs[j]/255;cx.putImageData(pixels,0,0);tints.set(key,can);if(tints.size>512)tints.delete(tints.keys().next().value);return can}
- function draw(c,W,H){guardColdSlap064();const x=active,S=window.ParticleSPL;if(!x||!S)return;if(x.profile){SpeciesMoves.draw(c,W,H,x,frame(),'front');if(!x.profile.nativeEffects)return;}const f=nativeFrame(),s=Math.min(W/1000,H/650),from=point(x.side,W,H),to=point(x.targetSide,W,H);window.NativeCapture?.draw(c,x.sequence.clact||[],f,W,H,code=>{const attached=[9,14,15].includes(code),p=attached?from:to,side=attached?x.side:x.targetSide;return{x:p.x,y:p.y+BattleGround.layout(W,H)[side].height*.55}});let total=0;
-  for(let n=0;n<x.sequence.events.length;n++){let ev=x.sequence.events[n];if(ev.pose||f<ev.start||f>ev.end)continue;let e=ev.e,attached=[9,14,15].includes(ev.target);if(x.miss&&!ev.travel&&!attached)continue;let ef=f-ev.start-e.delay,maxLife=e.life+1+(e.child?.life||0),interval=Math.max(1,e.interval||1),emitterLife=Math.max(1,e.emitterLife||1),rate=clamp(e.rate||0,0,48),first=Math.max(0,Math.ceil((ef-maxLife)/interval)),last=Math.min(Math.floor(ef/interval),Math.ceil(emitterLife/interval)-1),parents=[],children=[];
-   for(let b=first;b<=last&&total<2500;b++){let count=Math.floor((b+1)*rate)-Math.floor(b*rate);for(let i=0;i<count&&total<2500;i++){let age=ef-b*interval,index=n*100003+b*97+i,seed=index*19+x.moveId,duration=S.life(e,seed),birth=b*interval;if(age<0)continue;let origin=emitterPoint(ev,e.flags&32768?ef:birth,from,to,s),appearance=S.animation(e,Math.min(age,duration),duration,seed),motion=S.motion(e,Math.min(age,duration),seed);if(age<=duration&&!(e.flags&0x400000)){parents.push([e,appearance,motion,origin]);total++}
-    for(let cb of S.children(e,duration,age)){if(total>=2500)break;let pa=S.animation(e,cb.birth,duration,seed),pm=S.motion(e,cb.birth,seed),childSeed=seed+cb.birth*8191+cb.index*67+1,child=S.child(e,pm,pa,cb.birth,childSeed),resource=child.resource,ca=S.animation(resource,cb.age,Math.max(1,resource.life),childSeed),cm=S.motion(resource,cb.age,childSeed,child.initialState),co=emitterPoint(ev,resource.flags&32768?ef:birth+cb.birth,from,to,s);children.push([resource,ca,cm,co]);total++}
-   }}let layers=e.flags&0x200000?[children,parents]:[parents,children];for(let layer of layers)for(let [resource,appearance,motion,origin]of layer)renderParticle(c,resource,ev.spa,appearance,motion,origin,s,ev);
+ // Authored HD-2D calibration ONLY for native572/3 targetSPA163.
+ // One unit for quad, native offset and particle motion; keep the world
+ // target origin, source aspect/alpha/rotation, emitters and timing intact.
+ // PRIVATE572/3 only. Asset recovery never throws out of a render callback.
+ let slapAssetRecovery064=null,slapAssetSerial064=0,slapAssetError064=null,slapLoadingBox064=null,slapLoadingText064=null,slapLoadingButton064=null,slapLoadingExpected064=null;
+ const slapLoadingMessage064='Caricamento della lotta…';
+ function calibratedSlap064(x){const p=x?.profile,h=p?.nativeSlapContext064;return isSlap064(x)&&(x.nativeSlapController064===true||x.preview&&x.nativeSlapController064==='reference-preview')&&x.preparationHold064===undefined&&x.nativeSlapCompletedHold064!==true&&p.key==='training-572-3'&&p.kind==='palmFlurry'&&p.chapter===true&&p.training===true&&p.frames===126&&p.impact===60&&p.target==='foe'&&p.attachment==='hand'&&p.nativeEffects===true&&p.damage===true&&x.targetSide===(x.side==='p1'?'p2':'p1')&&Number(x.cryIds?.[x.side])===572&&h&&Object.keys(h).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(h.hitCount)&&h.hitCount>=0&&h.hitCount<=5&&Number.isInteger(h.hitIndex)&&h.hitIndex>=0&&(h.hitCount===0?h.hitIndex===0&&x.miss===true:h.hitIndex<h.hitCount);}
+ function ownsSlapLoading064(){return !!slapLoadingBox064&&window.document?.getElementById('loading')===slapLoadingBox064&&slapLoadingBox064.children?.length===2&&slapLoadingBox064.children[0]===slapLoadingText064&&slapLoadingBox064.children[1]===slapLoadingButton064&&slapLoadingText064.textContent===slapLoadingExpected064;}
+ function clearSlapLoading064(){if(ownsSlapLoading064())slapLoadingBox064.remove();slapLoadingBox064=slapLoadingText064=slapLoadingButton064=slapLoadingExpected064=null;}
+ function showSlapLoading064(r,phase='retrying',attempt=0){
+  if(slapAssetRecovery064!==r||r.cancelled)return;const sameState=r.phase===phase&&r.attempt===attempt;r.phase=phase;r.attempt=attempt;if(sameState&&ownsSlapLoading064())return;
+  const message=phase==='offline'?'Connessione assente. Il caricamento riprenderà automaticamente al ritorno della rete.':phase==='hidden'?'Il caricamento riprenderà automaticamente tornando al gioco.':phase==='manual'?'Risorse non disponibili. Controlla la connessione e riprova.':slapLoadingMessage064;
+  const doc=window.document;if(!doc?.createElement||!doc.body?.append)return;
+  if(!ownsSlapLoading064()){
+   slapLoadingBox064=slapLoadingText064=slapLoadingButton064=slapLoadingExpected064=null;if(doc.getElementById('loading'))return;
+   const box=doc.createElement('div'),text=doc.createElement('p'),button=doc.createElement('button');box.id='loading';box.className='resource-status';text.textContent=message;button.textContent='Riprova ora';button.onclick=()=>{if(slapAssetRecovery064===r&&!r.cancelled)void r.service.run(r.key,true);};box.append(text,button);
+   slapLoadingBox064=box;slapLoadingText064=text;slapLoadingButton064=button;slapLoadingExpected064=message;doc.body.append(box);if(!ownsSlapLoading064()){slapLoadingBox064=slapLoadingText064=slapLoadingButton064=slapLoadingExpected064=null;return;}
+  }
+  slapLoadingText064.textContent=message;slapLoadingExpected064=message;slapLoadingBox064.dataset.recovery=phase;slapLoadingButton064.disabled=phase==='retrying';slapLoadingButton064.textContent=phase==='manual'?'Riprova caricamento':'Riprova ora';
+ }
+ function nativeSlapLease064(x){
+  const stamp=x.nativeSlapOwner064;if(!stamp)return x.preview?{preview:true}:null;
+  const owner=typeof session==='undefined'?null:session,reader=window.BattlePresentationOwners?.read;let visible;try{visible=reader?.();}catch{return null;}
+  if(!owner||owner!==stamp.owner||owner.double||owner.multi||owner.battle?.gameType!=='singles'||reader!==stamp.reader||!visible?.layoutSupported||!visible.available)return null;
+  for(const side of ['p1','p2']){const a=visible.roles?.[side],native=owner.active?.(side);if(native!==stamp.actors[side]||x.cryIds?.[side]!==stamp.cryIds[side]||!a||a.altered||String(a.graphic)!==String(x.cryIds[side])||visible.nativeSpecies?.[side]!==native?.species?.num||anatomicalId(a.graphic)!==native?.species?.num)return null;}
+  return{owner,actors:stamp.actors,reader};
+ }
+ function slapBankOwners064(x){const stamp=x.nativeSlapOwner064;if(!stamp)return true;return ['p1','p2'].every(side=>{const b=window.ROM_SPRITE_ANIM?.cache[x.cryIds[side]+'-'+(side==='p1'?'back':'front')],old=stamp.banks[side];return b===old.bank&&b?.data===old.data&&b?.image===old.image;});}
+ function validSlapBank064(b){const im=b?.image,w=im?.naturalWidth??im?.width,h=im?.naturalHeight??im?.height,g=b?.groundBounds;return !!(b?.ready&&b.data&&im&&im.complete!==false&&im.closed!==true&&Number.isFinite(w)&&w>0&&Number.isFinite(h)&&h>0&&g&&g.length===4&&g.every(Number.isFinite)&&g[2]>g[0]&&g[3]>g[1]);}
+ function slapAssets064(x,W,H){
+  const R=window.ROM_SPRITE_ANIM,keys=['p1','p2'].map(side=>x.cryIds?.[side]+'-'+(side==='p1'?'back':'front'));
+  if(!Number.isFinite(W)||!Number.isFinite(H)||W<=0||H<=0)return{ready:false,reason:'Native Double Slap viewport is not prepared',keys};
+  for(const key of keys)if(!validSlapBank064(R?.cache[key]))return{ready:false,reason:'Native Double Slap source bank is not prepared',keys};
+  // A native zero-hit miss has no targetSPA. Body banks still need readiness,
+  // but no target effect scale may block that animation.
+  if(x.miss)return{ready:true,unit:1,keys};
+  let height;try{height=window.BattleGround?.layout(W,H)?.[x.targetSide]?.height;}catch(error){return{ready:false,reason:String(error?.message||error),keys};}
+  const bank=R.cache[x.cryIds[x.targetSide]+'-'+(x.targetSide==='p1'?'back':'front')],unit=height/(bank.groundBounds[3]-bank.groundBounds[1]);
+  return Number.isFinite(height)&&height>0&&Number.isFinite(unit)&&unit>0?{ready:true,unit,keys}:{ready:false,reason:'Native Double Slap target scale is not prepared',keys};
+ }
+ function stopSlapAssetRecovery064(x){
+  const r=slapAssetRecovery064;if(!r||x&&r.action!==x)return false;slapAssetRecovery064=null;r.cancelled=true;r.release(r.cancelValue);r.service.dispose();clearSlapLoading064();
+  return true;
+ }
+ function failSlapAssets064(x,error){
+  if(active!==x)return false;stopSlapAssetRecovery064(x);slapAssetError064=String(error?.stack||error);clearSlapLoading064();
+  if(x.presentationClock&&typeof x.presentationReject==='function'){failPresentation(x,error);return true;}
+  active=null;try{x.presentationClock?.cancel();}catch{}try{x.presentationAudio?.cancel();}catch{}try{if(window.GameSpeed)GameSpeed.cancel(x.timer);else clearTimeout(x.timer);}catch{}try{window.AudioEngine?.cancelMove();}catch{}try{window.ParticleSPL?.clear();}catch{}
+  // Legacy/nonpresentation play owns an explicit rejection slot; preview has
+  // no live native caller. Never resolve a failed native animation.
+  if(typeof x.nativeSlapReject064==='function')x.nativeSlapReject064(error);return true;
+ }
+ function recoverSlapAssets064(x,W,H,reason){
+  if(slapAssetRecovery064?.action===x){const r=slapAssetRecovery064;showSlapLoading064(r,r.phase,r.attempt);return;}
+  if(!x.presentationClock||!x.presentationAudio||typeof window.RuntimeAssets?.Recovery!=='function'){failSlapAssets064(x,Error('Native Double Slap asset recovery needs its protected controller and Recovery service'));return;}
+  pauseArenaFrame();
+  if(active!==x)return;
+  const R=window.ROM_SPRITE_ANIM,keys=['p1','p2'].map(side=>x.cryIds[side]+'-'+(side==='p1'?'back':'front'));
+  const r={action:x,generation,key:'native-slap-assets064:'+generation+':'+(++slapAssetSerial064),service:new window.RuntimeAssets.Recovery(),captured:new Map(keys.map(key=>[key,R?.cache[key]])),cancelled:false,cancelValue:{cancelled:true},W,H};r.cancelPromise=new Promise(done=>r.release=done);slapAssetRecovery064=r;
+  const owned=()=>!r.cancelled&&active===x&&generation===r.generation;
+  const valid=()=>{if(!owned())return false;if(!nativeSlapLease064(x)){failSlapAssets064(x,Error('Native Double Slap actor owner changed during asset recovery'));return false;}return true;};
+  const task=async()=>{
+   if(!owned())return r.cancelValue;
+   if(!nativeSlapLease064(x)){failSlapAssets064(x,Error('Native Double Slap actor owner changed during asset recovery'));return r.cancelValue;}
+   if(typeof R?.prepare!=='function')throw Error('Native Double Slap source preparation is unavailable');
+   // Native loader reuses ready cache entries even if corrupted. Drop only an
+   // exact captured ready/nonpending actor bank; RuntimeAssets still owns the
+   // shared image and no image.close or unrelated eviction is performed.
+   for(const key of keys){const bank=R.cache[key];if(bank===r.captured.get(key)&&bank?.ready&&!bank.pending&&!validSlapBank064(bank))delete R.cache[key];}
+   const loading=Promise.resolve().then(()=>owned()?R.prepare(keys,{gate:false}):r.cancelValue);const value=await Promise.race([loading,r.cancelPromise]);
+   if(value===r.cancelValue||!owned())return r.cancelValue;
+   if(!nativeSlapLease064(x)){failSlapAssets064(x,Error('Native Double Slap actor owner changed during source loading'));return r.cancelValue;}
+   const a=typeof arena==='undefined'?window.arena:arena,state=slapAssets064(x,a?.width??W,a?.height??H);
+   if(!state.ready)throw Error(state.reason);
+   if(x.nativeSlapOwner064){const renewed=slapOwner064(x.side,x.targetSide,x.cryIds);if(!renewed){failSlapAssets064(x,Error('Native Double Slap renewed owner is unavailable'));return r.cancelValue;}x.nativeSlapOwner064=renewed;}
+   if(slapAssetRecovery064===r&&owned()){slapAssetRecovery064=null;r.service.dispose();clearSlapLoading064();try{window.GameSpeed?.flush();}catch(error){failSlapAssets064(x,error);return r.cancelValue;}}
+   return true;
+  };
+  r.service.register(r.key,task,{valid,report:(phase,attempt)=>showSlapLoading064(r,phase,attempt)});
+  if(r.service.online()&&r.service.visible())void r.service.run(r.key,true);
+ }
+ function beforeArenaFrame(W,H){
+  guardColdSlap064();const x=active;if(!calibratedSlap064(x)){if(slapAssetRecovery064&&slapAssetRecovery064.action!==x)stopSlapAssetRecovery064();return true;}
+  try{
+   if(!nativeSlapLease064(x)){failSlapAssets064(x,Error('Native Double Slap actor owner changed'));return false;}
+   const state=slapAssets064(x,W,H);
+   if(!state.ready||!slapBankOwners064(x)){recoverSlapAssets064(x,W,H,state.reason||'Native Double Slap prepared source owner changed');return false;}
+   if(slapAssetRecovery064?.action===x){const r=slapAssetRecovery064;showSlapLoading064(r,r.phase,r.attempt);return false;}
+   x.nativeSlapUnit064={W,H,unit:state.unit,generation,drawConsumed:false};return true;
+  }catch(error){failSlapAssets064(x,error);return false;}
+ }
+
+ function nativeParticleUnit064(x,ev,W,H,fallback){
+  if(!calibratedSlap064(x)||ev.spa!==data.spas[163]||ev.travel||ev.target!==11)return fallback;
+  const unit=x.nativeSlapUnit064;
+  if(!unit||unit.W!==W||unit.H!==H){failSlapAssets064(x,Error('Native Double Slap spatial preflight was not completed'));return null;}
+  return unit.unit*.55;
+ }
+
+ function nativeParticleTarget064(x,ev,W,H,to){
+  if(!calibratedSlap064(x)||ev.spa!==data.spas[163]||ev.travel||ev.target!==11)return to;
+  // HD-2D contact on the torso; one shared origin for parents and children.
+  return{...to,y:to.y+BattleGround.layout(W,H)[x.targetSide].height*.18};
+ }
+
+ function draw(c,W,H){guardColdSlap064();const x=active;if(calibratedSlap064(x)){const u=x.nativeSlapUnit064;if((!u||u.W!==W||u.H!==H||u.generation!==generation||u.drawConsumed)&&!beforeArenaFrame(W,H))return false;x.nativeSlapUnit064.drawConsumed=true;}const S=window.ParticleSPL;if(!x||!S)return;if(x.profile){SpeciesMoves.draw(c,W,H,x,frame(),'front');if(!x.profile.nativeEffects)return;}const f=nativeFrame(),s=Math.min(W/1000,H/650),from=point(x.side,W,H),to=point(x.targetSide,W,H);window.NativeCapture?.draw(c,x.sequence.clact||[],f,W,H,code=>{const attached=[9,14,15].includes(code),p=attached?from:to,side=attached?x.side:x.targetSide;return{x:p.x,y:p.y+BattleGround.layout(W,H)[side].height*.55}});let total=0;
+  for(let n=0;n<x.sequence.events.length;n++){let ev=x.sequence.events[n];if(ev.pose||f<ev.start||f>ev.end)continue;let e=ev.e,attached=[9,14,15].includes(ev.target);if(x.miss&&!ev.travel&&!attached)continue;const particleUnit=nativeParticleUnit064(x,ev,W,H,s);if(particleUnit===null)return false;const particleTo=nativeParticleTarget064(x,ev,W,H,to);let ef=f-ev.start-e.delay,maxLife=e.life+1+(e.child?.life||0),interval=Math.max(1,e.interval||1),emitterLife=Math.max(1,e.emitterLife||1),rate=clamp(e.rate||0,0,48),first=Math.max(0,Math.ceil((ef-maxLife)/interval)),last=Math.min(Math.floor(ef/interval),Math.ceil(emitterLife/interval)-1),parents=[],children=[];
+   for(let b=first;b<=last&&total<2500;b++){let count=Math.floor((b+1)*rate)-Math.floor(b*rate);for(let i=0;i<count&&total<2500;i++){let age=ef-b*interval,index=n*100003+b*97+i,seed=index*19+x.moveId,duration=S.life(e,seed),birth=b*interval;if(age<0)continue;let origin=emitterPoint(ev,e.flags&32768?ef:birth,from,particleTo,particleUnit),appearance=S.animation(e,Math.min(age,duration),duration,seed),motion=S.motion(e,Math.min(age,duration),seed);if(age<=duration&&!(e.flags&0x400000)){parents.push([e,appearance,motion,origin]);total++}
+    for(let cb of S.children(e,duration,age)){if(total>=2500)break;let pa=S.animation(e,cb.birth,duration,seed),pm=S.motion(e,cb.birth,seed),childSeed=seed+cb.birth*8191+cb.index*67+1,child=S.child(e,pm,pa,cb.birth,childSeed),resource=child.resource,ca=S.animation(resource,cb.age,Math.max(1,resource.life),childSeed),cm=S.motion(resource,cb.age,childSeed,child.initialState),co=emitterPoint(ev,resource.flags&32768?ef:birth+cb.birth,from,particleTo,particleUnit);children.push([resource,ca,cm,co]);total++}
+   }}let layers=e.flags&0x200000?[children,parents]:[parents,children];for(let layer of layers)for(let [resource,appearance,motion,origin]of layer)renderParticle(c,resource,ev.spa,appearance,motion,origin,particleUnit,ev);
   }
  }
  const anatomicalId=id=>window.PokemonVisuals?.speciesId(id)||Object.values(window.ROM_FORM_SPRITES||{}).find(f=>f.graphic===+id)?.species||+id;
@@ -180,7 +308,7 @@
   return 'ELIGIBLE';
  }
  function failPresentation(x,error){
-  if(!x||active!==x)return;active=null;
+  if(!x||active!==x)return;stopSlapAssetRecovery064(x);active=null;
   try{x.presentationClock?.cancel();}catch{}try{x.presentationAudio?.cancel();}catch{}
   try{window.GameSpeed?.flush();}catch{}x.presentationReject(error);
  }
@@ -213,5 +341,5 @@
   }catch(error){failPresentation(x,error);return false;}
  }
  window.document?.addEventListener?.('visibilitychange',()=>{if(window.document.hidden)pauseArenaFrame();});
- window.MoveFX={presentationEligibility,beginArenaFrame,presentedArenaFrame,pauseArenaFrame,markArenaActor,presentationState(){const x=active;return x?.presentationClock?{clock:x.presentationClock.snapshot(),paused:!!x.presentationPaused,completing:!!x.presentationCompleting,audio:x.presentationAudio.status?.()}:null;},play,speciesPose(side,id){guardColdSlap064();const r=reaction(side,id);if(r)return r;return active?.profile&&active.side===side&&anatomicalId(id)===active.profile.species?SpeciesMoves.sample(active.profile,frame(),side,active.miss):window.PatratMoves?.idlePose(side,id)||null},drawSpecies(c,w,h,layer){guardColdSlap064();if(active?.profile)SpeciesMoves.draw(c,w,h,active,frame(),layer)},capture(options={}){const effect=window.NativeCapture.compile(window.CAPTURE_DATA,data.spas,options);return play(effect.id,'p1',{...options,effect,context:{nativeWaitGroups:true},hold:!!options.caught})},draw,pose,cancel,preload,visualState,drawBackground,preview,idleTick(side){guardColdSlap064();return active?.preview?window.NativeVisual?.idleTick(active.sequence.visual,frame(),side,active.side,active.targetSide):null},setPreviewFrame(f){if(active?.preview)active.previewFrame=clamp(+f,0,active.sequence.frames)},get speed(){return playbackSpeed},set speed(v){playbackSpeed=v===.5?.5:1},get active(){guardColdSlap064();return active},get generation(){return generation},get coverage(){return data?.coverage},timeline};
+ window.MoveFX={beforeArenaFrame,visualReadinessStatus064(){return{pending:!!slapAssetRecovery064,error:slapAssetError064,gateKey:slapAssetRecovery064?.key||null,recovery:slapAssetRecovery064?{attempts:slapAssetRecovery064.service.attempts,phase:slapAssetRecovery064.phase,attempt:slapAssetRecovery064.attempt}:null};},presentationEligibility,beginArenaFrame,presentedArenaFrame,pauseArenaFrame,markArenaActor,presentationState(){const x=active;return x?.presentationClock?{clock:x.presentationClock.snapshot(),paused:!!x.presentationPaused,completing:!!x.presentationCompleting,audio:x.presentationAudio.status?.()}:null;},play,speciesPose(side,id){guardColdSlap064();const r=reaction(side,id);if(r)return r;return active?.profile&&active.side===side&&anatomicalId(id)===active.profile.species?SpeciesMoves.sample(active.profile,frame(),side,active.miss):window.PatratMoves?.idlePose(side,id)||null},drawSpecies(c,w,h,layer){guardColdSlap064();if(active?.profile)SpeciesMoves.draw(c,w,h,active,frame(),layer)},capture(options={}){const effect=window.NativeCapture.compile(window.CAPTURE_DATA,data.spas,options);return play(effect.id,'p1',{...options,effect,context:{nativeWaitGroups:true},hold:!!options.caught})},draw,pose,cancel,preload,visualState,drawBackground,preview,idleTick(side){guardColdSlap064();return active?.preview?window.NativeVisual?.idleTick(active.sequence.visual,frame(),side,active.side,active.targetSide):null},setPreviewFrame(f){if(active?.preview)active.previewFrame=clamp(+f,0,active.sequence.frames)},get speed(){return playbackSpeed},set speed(v){playbackSpeed=v===.5?.5:1},get active(){guardColdSlap064();return active},get generation(){return generation},get coverage(){return data?.coverage},timeline};
 })();
