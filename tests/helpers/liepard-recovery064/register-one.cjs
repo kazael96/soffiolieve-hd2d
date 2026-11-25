@@ -1,9 +1,10 @@
 'use strict';
+const {assertDirectTestInvocation}=require('../../../scripts/node-test-options.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),L=require('../liepard-protocol064/strict-loader.cjs'),collector=require('../liepard-protocol064/registration-collector.cjs'),catalog=require('../../fixtures/liepard-recovery064/catalog.json');
 let registered=false;
 function register(group,index,id){
  assert.equal(registered,false,'Recovery/G7 wrappers require one directly owned top-level process each');registered=true;
- assert(process.execArgv.includes('--test-isolation=none'),'Do not spawn hidden Node isolation children for heavyRecovery');assert(['recovery','g7fixed'].includes(group));L.ensureLedger(id);
+ assertDirectTestInvocation(process.execArgv,process.versions.node);assert(['recovery','g7fixed'].includes(group));L.ensureLedger(id);
  require(group==='recovery'?'./resource-recovery.cases.cjs':'./g7-fixed.cases.cjs');
  const expected=catalog[group];assert.equal(expected.length,group==='recovery'?16:2);assert.deepEqual(collector.entries.map(e=>e.name),expected.map(e=>e.name),'Complete HOSTR3 callback inventory must match exactly');
  const entry=expected[index],selected=collector.entries[index];assert(entry&&selected);assert.equal(entry.id,id);assert.equal(entry.index,index);assert.equal(entry.name,selected.name);process.env.LIEPARD_RECOVERY_CASE_LABEL=selected.name;

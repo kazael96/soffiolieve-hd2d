@@ -604,3 +604,44 @@ sequenza. Due console HTTP404 compaiono nei rapporti, senza URL conservati:
 la causa deve essere identificata, senza attribuirli arbitrariamente alla
 favicon o dichiarare assenti gli errori di rete. Pubblicazione e chiusura
 artistica globale restano separate da questi PASS mirati.
+
+### Compatibilità Node e diagnostica desktop del25 novembre
+
+La suite GitHub45621297400 sul commit1f81 conclude52 fasi CLI con PASS;
+le40 fasi dedicate nuove falliscono prima dei callback perché Node22.23.5
+non accetta il nome stabile `--test-isolation=none`. I gruppi browser
+rimangono non eseguiti: questo run non è una suite completa riuscita.
+Il FAIL e il relativo archivio sono conservati. La correzione seleziona
+`--experimental-test-isolation=none` per22.8 e prime23, e il nome stabile
+da23.6. Non cambia la versione CI, i callback funzionali o i budget.
+
+I due controlli privati effettivi con Node22.23.5 e24.22.3 passano entrambi
+12 casi: cinque regressioni del raggruppatore, sei nuove verifiche di
+versione/guardie e un test privato del PID. Sono gli stessi12 casi su due
+versioni, non24 casi diversi. Il PID osservato dal parent coincide con
+quello scritto indipendentemente dal callback e il PPID con il launcher.
+L'inventario passa a424 file, sempre51 fasi unitarie e92 CLI complessive.
+Questo gate non esegue i39 callback funzionali né i quattro controlli602;
+la loro nuova prova con il runtime22 e la suite completa restano distinte.
+
+Il caso GraffioP2 passa anche in orizzontale e desktop, con le stesse
+sei battaglie reali e i quattro shot originali selezionati per formato.
+Le quattro immagini di ciascun formato sono lette da root; quelle del
+telefono anche da un revisore indipendente. Nessun taglio è osservato in
+questi campioni, senza approvazione implicita del movimento o dell'HUD.
+Nel desktop il raccoglitore passivo, installato prima della navigazione,
+identifica entrambi i console404 come richieste a `/favicon.ico`, tramite
+location e Log CDP. Non risultano risorse di gioco mancanti in questa
+prova. Il listener response non osserva quei due errori: il solo suo
+elenco vuoto non avrebbe autorizzato questa conclusione. Cleanup dei
+listener/CDP e dei processi proprietari verificato; nessun browser personale.
+
+Il successivo lotto sul checkout integrato esegue con il vero Node22.23.5
+tutti i40 processi dedicati e passa43 casi senza skip:21 lifecycle,18
+risorse/recupero e quattro602. Usa gli argv restituiti dal raggruppatore
+reale, senza wrapper, preload o argomenti aggiuntivi; il runner originario
+conserva180s, heap400MiB e output8MiB per fase. Durate sommate: 145365ms.
+Tutti i pin restano invariati e i39 sidecar confermano un callback per
+processo. Questo PASS locale non sostituisce la nuova suite GitHub.
+I quattro PNG desktop sono ora letti anche dal revisore indipendente;
+restano le stesse limitazioni del giudizio su fermiimmagine.

@@ -250,7 +250,7 @@ Conservare gli otto gruppi ordinari bilanciati, ogni file eseguito esattamente u
 
 Il nuovo inventario integra21 casi del ciclo di vita di Graffio e18 casi
 di risorse/recupero in39 processi sequenziali dedicati, con un callback
-per wrapper. Questi processi usano `--test-isolation=none` anche su Linux:
+per wrapper. Questi processi disattivano l'isolamento anche su Linux:
 il processo controllato dal runner deve essere quello che esegue il caso,
 senza un ulteriore figlio Node lasciato fuori dal controllo del timeout.
 Conservare180s per fase, heap V8 massimo400MiB, output massimo8MiB e
@@ -258,7 +258,7 @@ zero casi saltati. Un limite dell'heap non misura il picco RSS del sistema.
 
 I quattro controlli602 condividono un solo processo dedicato. Rimangono
 anche i tre processi storici e gli otto gruppi ordinari bilanciati; i28
-casi leggeri del controller restano ordinari. L'inventario attuale di423
+casi leggeri del controller restano ordinari. L'inventario attuale di424
 file produce51 fasi unitarie, più il builder e40 controlli runtime, per92
 fasi totali. Verificare inventario completo e unico, ordine deterministico,
 cataloghi incompleti rifiutati e flag effettivi su Windows/Linux. I piccoli
@@ -274,3 +274,15 @@ Conservare il FAIL del providerR1 che confrontava il pin raw del metadato
 con il testo normalizzato. Le regressioni devono accettare LF/CRLF per i
 metadati equivalenti e rifiutare sia modifiche sostanziali sia variazioni
 dei byte nativi, anche se il JSON risultante contiene gli stessi valori.
+
+La forma del flag dipende dalla versione effettiva di Node: da22.8 e
+nelle prime23 usare `--experimental-test-isolation=none`; da23.6 e nelle
+24 successive usare `--test-isolation=none`. Il modulo condiviso
+`scripts/node-test-options.cjs` seleziona il nome e rifiuta versioni
+precedenti o non riconosciute. Gli otto gruppi ordinari Linux mantengono
+`--test-concurrency=2`; i39 processi di protocollo e quello602 eseguono
+direttamente i callback nel processo controllato, su entrambi i sistemi.
+Non cambiare Node su CI o i budget per aggirare un'opzione incompatibile.
+Conservare la suite45621297400:52 fasi PASS e40 avvii falliti prima dei
+callback su Node22.23.5. Le prove di compatibilità dei flag e del PID non
+sostituiscono i casi funzionali o la successiva suite completa.
