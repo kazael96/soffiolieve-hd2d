@@ -645,3 +645,143 @@ Tutti i pin restano invariati e i39 sidecar confermano un callback per
 processo. Questo PASS locale non sostituisce la nuova suite GitHub.
 I quattro PNG desktop sono ora letti anche dal revisore indipendente;
 restano le stesse limitazioni del giudizio su fermiimmagine.
+
+### Suite completa e revisione delle immagini · 25 novembre
+
+Il run GitHub45630901928 sul commit1da93bfbef579a4943b829f03881b3a8cf941f0c
+conclude con SUCCESS:92/92 fasi CLI, cinque gruppi browser e18 lotti
+nativi nei tre formati a×1/×2/×4. La somma delle durate CLI è775426ms;
+non è una misura del caricamento sul telefono. Il build CI è
+e493acd6c1ef87ac, distinto dalla revisione locale9e0e68b0e1468f60.
+La correzione dei flag Node non modifica il runtime del gioco.
+
+Gli archivi e i rapporti sono conservati fuori dalle build in
+`outputs/animation-review064-resume-20261125/ci-45630901928`.
+L'archivio nativo408738306byte ha SHA256
+1e6aaddbd5dff6ee6cb1c04895d6244632b8dd5730f0fbe078868421cd711640.
+La prima estrazione supera il limite di percorso Windows; l'estrazione
+verificata nel percorso breve `outputs/ci064green/native` riesce.
+Questo errore di estrazione non è un errore del gioco o della suite.
+
+Il manifest delle292 tavole conserva1410 PNG originali a scala1:1,
+con didascalie esterne ai pixel. La generazione delle tavole non ne
+certifica la lettura. Il revisore ausiliario ha effettivamente aperto
+tutte le79 tavole dei330 PNG di introduzione, titolo, slot, lancio e
+regressioni telefono; non osserva nuovi blocchi concreti su nomi,
+ritratti, tagli o menu in questi campioni. Le immagini dell'arena prive
+di HUD e i cataloghi QA restano distinti dalle schermate giocabili.
+
+La revisione dei1080 PNG nativi è conclusa:177 tavole/720 PNG desktop e
+orizzontali da un revisore,36 tavole/360 PNG verticali da un altro.
+Con le79 tavole ausiliarie, l'aggregazione verifica292 tavole/1410
+originali unici, senza omissioni o sovrapposizioni di assegnazione.
+Letture e hash sono documentati separatamente nei ledger esterni;
+root ha inoltre riletto16 tavole/84 campioni nativi indipendentemente.
+Non risultano nuovi tagli evidenti dei corpi nei campioni; alcuni impatti
+riusciti di Tynamo restano densi e richiedono giudizio in movimento.
+Una seconda lettura
+del campione desktop205/P1/MISS/contact60 segnala un'ambiguità: il corpo
+ruotato di Emboar appare unito al guanto del bersaglio nonostante il
+colpo fallito. Non è una misura di sovrapposizione alpha. Il caso richiede
+diagnosi e controllo visivo prima di chiudere il rilascio correttivo.
+La CI verde non approva il movimento completo né chiude le pose nuove
+di Minccino, gli effetti SPL15 o la revisione artistica dell'inventario.
+La PR58 resta bozza; nessun merge o aggiornamento pubblico è implicito.
+
+Una proposta privata cambia soltanto i due margini MISS da3 a8 pixel
+nativi, conservando i byte del riferimento storico e tutti gli HIT.
+Il primo gate si ferma dopo5408ms: sei controlli PASS e uno FAIL, zero
+skip e pin invariati. Prima di campionare il primo MISS205/P1 verticale,
+il test misura13,8171px di headroom contro16,6986px richiesti; soltanto
+127 pose HIT sono quindi confrontate, nessuna posa MISS approvata.
+L'esito resta FAIL. La variante non è installata e non ha prodotto PNG.
+Occorre rivedere il contratto della traiettoria prima di proseguire:
+questo esito non autorizza un'affermazione di separazione visiva corretta.
+
+Il diagnostico successivo misura12 contesti sul modulo originale senza
+modificarlo:1848ms di processo,45 pin invariati e picco RSS194,066MiB.
+Nel primo MISS il coseno con il vettore dei centri è0,980595: l'ipotesi
+della normale quasi tangente non è confermata. Il riposo tick0 ha10,0691
+pixel nativi di gap sullo stesso asse, contro6,6195 dell'inviluppo
+conservativo. Nei due MISS P2 verticali il gap conservativo5 è il clamp
+del modello, mentre il riposo corrente misura16,3265. Una seconda
+proposta della sola normale di approccio resta non sigillata e non viene
+eseguita. Questi numeri non certificano la sicurezza di8 pixel in movimento.
+
+Sono estratte separatamente le superfici visibili native complete di
+Emboar:45 CEL,130 OAM, inclusi coda e fiamme. Il processo termina in468ms,
+con pixel originali alla risoluzione nativa, nessun ridimensionamento e
+pin invariati. La geometria108304byte e il ledger38007byte rimangono
+privati; non modificano i supporti fisici o il runtime. Un correttore
+istantaneo basato su coppie AABB selezionate da un filtro Y booleano
+può introdurre salti: il controesempio statico è conservato. Non è
+approvato come traiettoria continua dal solo min/max dei supporti.
+
+Un nuovo pilot della zampa vicina BACK di Minccino usa una sola edit
+Imagegen, preservata con prompt e riferimenti. Il raw non è pixel art
+nativa già pronta. L'importer originale resta byte identico e fallisce
+ancora sullo stencil dei sette campioni, prima di R.prepare/R.draw.
+Un diagnostico distinto conserva esplicitamente FAIL/REJECTED e produce
+sette PNG mediante due R.prepare e due R.draw originali. Con i due PNG
+STRICT sono nove immagini, tutte lette da root: il palmo si estende
+più chiaramente oltre il collo, ma il gesto rimane piccolo a scala
+nativa e non prova il contatto animato. Corpo49px, piedi e pixel fuori
+dall'OAM restano invariati;37 pixel cambiano nella sola parte. Nessun
+nuovo cel, asset o profilo di Minccino è installato.
+Anche un revisore indipendente legge tutte le nove immagini: considera
+il palmo un concetto di contatto utile per un futuro pilot, mantenendo
+esplicitamente FAIL/REJECTED e la mancata approvazione a scala nativa.
+
+### Correzione Emboar e nuove prove locali · 25 novembre, seguito
+
+Il difetto concreto dei MISS205 è corretto nel modulo di contatto,
+senza modificare il ramo HIT o i dati grafici originali. La correzione
+usa tutta la sagoma nativa, comprese coda e fiamme, e un piano fisso
+che comprende tutte le fasi idle raggiungibili del bersaglio. Aggiunge
+soltanto l'arretramento necessario alla posa MISS breve originale;
+non la porta fino al piano del contatto riuscito. La preparazione
+rifiuta un riposo non separabile. La variante privata V3 conserva
+il FAIL sul segno dello zero; V3r2 preserva esattamente x/groundX
+quando l'arretramento vale zero e passa7/7controlli in10396ms.
+
+Nel checkout integrato la prova portabile passa di nuovo7/7 in11711ms:
+1524pose HIT identiche al riferimento storico,1524MISS con canali non
+orizzontali identici, geometria/piano indipendenti, recupero e riposo,
+identità delle banche e sei mutazioni in-place rifiutate. Il controllo
+storico del rotolamento passa in3590ms. Riferimento storico e budget
+restano invariati; i due loader delle fixture non forniscono pose
+precalcolate al runtime. Questa prova CPU non disegna immagini.
+
+La candidata12 è compilata con revisione4ed37d9fe9a925f8, appSHA256
+631d24411695ca2325b80a23c850a863fece75bbdcbac7949f73a543357bfab9.
+Il replay effettivo LOTTA/mossa/GEN5 passa nei tre formati a×1/×2/×4:
+36turni e72esecuzioni complessive, comprese18MISS205 sui due lati;
+il MISS360 è verificato qui dalla prova CPU, non da questi turni.
+Esporta216PNG dell'arena e quattro cataloghi QA. Il backend rilevato
+è Chrome158/ANGLE/Intel HD630/D3D11, non una GPU Android fisica.
+I quattro lotti terminano con zero processi proprietari residui.
+Le immagini e i rapporti sono in `outputs/ci064green/candidate12`.
+
+Un revisore indipendente apre tutti i25PNG verticali a×1 e tutti
+i73orizzontali alle tre velocità. Non osserva nuovi tagli; nei MISS
+lo sfondo separa l'intera appendice dal guanto/corpo avversario.
+Root rilegge le otto tavole verticali dei24campioni e i due originali
+MISS al contatto. La lettura degli altri lotti continua separatamente;
+le immagini dell'arena senza HUD non approvano tutta l'interfaccia,
+il movimento continuo o l'audio. Il dettaglio della correzione è in
+[QA-064-EMBOAR-MISS-FULL-PLANE.md](QA-064-EMBOAR-MISS-FULL-PLANE.md).
+
+Il nuovo pilot BACK di Minccino arriva ora al renderer originale:
+due preparazioni,64disegni e40PNG. Conserva FAIL in2852ms per34rilievi,
+tra cui copertura della testa e attacco al corpo; alcune carenze
+del socket sono presenti anche nel riferimento nativo con il rig
+corrente. Nessun nuovo CEL è installato. La prima prova di una lettura
+rettangolare dei pixel ambientali conserva FAIL4453ms sul budget RSS
+400MiB del banco CPU; nessuna ottimizzazione è installata. Prima di
+attribuire quel costo al gioco va verificata la vita dei buffer del
+banco. Questi due FAIL non vengono promossi a PASS dal successo Emboar.
+
+La nuova suite completa è ancora necessaria sul commit che include
+questa modifica del runtime. Il PASS CI1da93bf resta riferito al suo
+codice esatto. La PR58 resta bozza e la versione pubblica0.63 non è
+stata aggiornata da questi collaudi locali.
