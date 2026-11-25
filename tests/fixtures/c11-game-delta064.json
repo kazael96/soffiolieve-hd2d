@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "scope": "Exact inverse of4 coherent Game additions plus1 native602 dispatch addition; original Game fixture preserved",
+  "candidateLF_SHA256": "93c897a8b47c589b859c5aea8993463a6e8b89407219f87933f29767c4cbe047",
+  "intermediate602LF_SHA256": "259977dfca5f718b973109a9e6990325580a26af1e54368cd132e4a5bd181dc3",
+  "baselineLF_SHA256": "3b1a8610e90ca91838c0037bc7d6753adf6eee9d984029d7d8c5bdb233af5a23",
+  "steps": [
+    {
+      "group": "coherent",
+      "purpose": "Original ACK remains sole completion authority",
+      "remove": "}finally{const drawable=presentationDrawn&&!window.document?.hidden&&renderer.ready&&!renderer.battleRecovering&&!renderer.modelsRecovering&&!renderer.contextLost&&!renderer.gl.isContextLost()&&!ac.isContextLost?.(),ack=window.MoveFX?.presentedArenaFrame(presentationRecord,drawable);window.SpeciesMoves?.afterArenaFrame?.({record:presentationRecord,completed:presentationDrawn,drawable,ack});}",
+      "restore": "}finally{window.MoveFX?.presentedArenaFrame(presentationRecord,presentationDrawn&&!window.document?.hidden&&renderer.ready&&!renderer.battleRecovering&&!renderer.modelsRecovering&&!renderer.contextLost&&!renderer.gl.isContextLost()&&!ac.isContextLost?.());}",
+      "outputLF_SHA256": "789130241cdadd9db62c544adc065cee074cfbf02685289a57fa0ce2f09d234c"
+    },
+    {
+      "group": "coherent",
+      "purpose": "Preserve existing MoveFX preclear gate; chain SpeciesMoves preclear gate",
+      "remove": " if(window.MoveFX?.beforeArenaFrame?.(arena.width,arena.height)===false)return;\n if(window.SpeciesMoves?.beforeArenaFrame?.(arena.width,arena.height)===false)return;",
+      "restore": " if(window.MoveFX?.beforeArenaFrame?.(arena.width,arena.height)===false)return;",
+      "outputLF_SHA256": "2569705e2f14322607ed4203cda1b2d39edee30cddb2e39a2c281c6288bed419"
+    },
+    {
+      "group": "coherent",
+      "purpose": "Post-resize barrier in finally",
+      "remove": "ac.imageSmoothingEnabled=false}finally{window.SpeciesMoves?.afterArenaResize?.();}}addEventListener('resize',resize);",
+      "restore": "ac.imageSmoothingEnabled=false}addEventListener('resize',resize);",
+      "outputLF_SHA256": "15aa3782fc828db9543ba3feb5603af663dda8486541d538e04b6801bc4f4283"
+    },
+    {
+      "group": "coherent",
+      "purpose": "Capture original completed arena before resize",
+      "remove": "function resize(){window.SpeciesMoves?.beforeArenaResize?.();try{W=",
+      "restore": "function resize(){W=",
+      "outputLF_SHA256": "259977dfca5f718b973109a9e6990325580a26af1e54368cd132e4a5bd181dc3"
+    },
+    {
+      "group": "density602",
+      "purpose": "Declared602 dispatch",
+      "remove": " if(!ground?.setActorFraming||!current?.battle)return;\n if(current.double&&window.DoubleBattles?.framingActors)return ground.setSlotActorFraming?.({owner:current,actors:DoubleBattles.framingActors()});",
+      "restore": " if(!ground?.setActorFraming||!current?.battle)return;",
+      "outputLF_SHA256": "3b1a8610e90ca91838c0037bc7d6753adf6eee9d984029d7d8c5bdb233af5a23"
+    }
+  ]
+}

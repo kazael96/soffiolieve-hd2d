@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "scope": "Only declared602 feature removal/common-K replacement; retain identical current full510/572 helpers in all variants",
+  "slotStart": " function slotLayout(base){",
+  "slotEnd": " function setActors(",
+  "fullStart": " const nativeCoreSupport064=",
+  "fullEnd": " function createActorFraming(",
+  "operations": [
+    {
+      "file": "battle-ground.js",
+      "before": " function createActorFraming(",
+      "after": " const native500DensityReference={\"front\":{\"jsonSHA256\":\"8ea23b2229636e1c710130a3920268b863b27cee79d593f1bbea6b0cb7a8b4fc\",\"pngSHA256\":\"0c974285cc883e43ceb35bf43602499387fb13a80f769c3e671eee8391cd49ce\",\"groundBounds\":[-37,-73,43,0]},\"back\":{\"jsonSHA256\":\"0ed04f265eb27169f0500ba29c14593b44e60862151aafc46e3548c444293adf\",\"pngSHA256\":\"7f90ceb11ebb09dbc0c734bf788bcf78322ede69a3456cf8adc00bf555ec76c4\",\"groundBounds\":[-35,-71,42,0]}};\n function createActorFraming(",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": "function cameraDomain(actors){",
+      "after": "function cameraDomain(actors,includeSelf=false){",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": "const c=NativeVisual.camera(q.visual,f,side,side==='p1'?'p2':'p1');if(![c.x,c.y,c.zoom].every(Number.isFinite)||c.zoom<=0)throw Error('INVALID_CAMERA_STATE');found.set([c.x,c.y,c.zoom].join(','),{x:c.x,y:c.y,zoom:c.zoom});",
+      "after": "for(const target of includeSelf?['p1','p2']:[side==='p1'?'p2':'p1']){if(includeSelf&&target==='p2'&&++evaluated>32768)throw Error('CAMERA_PLAN_BUDGET');const c=NativeVisual.camera(q.visual,f,side,target);if(![c.x,c.y,c.zoom].every(Number.isFinite)||c.zoom<=0)throw Error('INVALID_CAMERA_STATE');found.set([c.x,c.y,c.zoom].join(','),{x:c.x,y:c.y,zoom:c.zoom});}",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": " function setActors({owner,actors}){",
+      "after": "\n let lastSlotAttempt=null;\n const slotSpecs=owner=>owner.multi?[['p1a','p1',0,'p1',0],['p3b','p3',0,'p1',1],['p2a','p2',0,'p2',0],['p4b','p4',0,'p2',1]]:[['p1a','p1',0,'p1',0],['p1b','p1',1,'p1',1],['p2a','p2',0,'p2',0],['p2b','p2',1,'p2',1]];\n function slotIdentity(owner,actors,previous){return slotSpecs(owner).every(([key,side,index,group,position])=>{const a=actors[key],p=previous[key],n=owner.battle[side]?.active?.[index];return a&&p&&a.nativeMon===n&&n===p.nativeMon&&n.getSlot()===key&&n.species.num===p.nativeSpecies&&a.slot===key&&a.supportSide===group&&a.supportIndex===position&&a.back===(group==='p1')&&a.graphic===p.graphic&&a.bank===p.bank&&a.bank===R.cache[a.graphic+'-'+(a.back?'back':'front')]&&a.bank?.ready&&a.bank.data===p.dataOwner&&a.bank.image===p.imageOwner&&sameBounds(a.bank,p)&&n.moveSlots.map(m=>m.id).join(',')===p.nativeMovesSignature;});}\n function setSlotActors({owner,actors}){\n  if(!owner||owner!==currentOwner())return{supported:false,status:'STALE_SESSION_OWNER'};\n  if(plan?.format==='slots'&&plan.owner===owner&&plan.multi===!!owner.multi&&Object.keys(actors||{}).length===4&&slotIdentity(owner,actors,plan.actors)){stats.identicalRegistrations++;return lastStatus;}\n  const attempt=[owner,owner.battle,owner.double,owner.multi,Object.keys(actors||{}).join(','),...slotSpecs(owner).flatMap(([key,side,index])=>{const a=actors?.[key],n=owner.battle?.[side]?.active?.[index];return[n,n?.species?.num,n?.moveSlots?.map(m=>m.id).join(','),a?.nativeMon,a?.graphic,a?.slot,a?.supportSide,a?.supportIndex,a?.back,a?.visible,a?.hidden,a?.substitute,a?.minimized,a?.faint,a?.bank,a?.bank?.ready,a?.bank?.data,a?.bank?.image,...(a?.bank?.groundBounds||[])];})];\n  if(!lastStatus.supported&&lastSlotAttempt?.length===attempt.length&&attempt.every((x,i)=>x===lastSlotAttempt[i])){stats.unsupportedCacheHits++;return lastStatus;}lastSlotAttempt=attempt;\n  try{\n   if(!owner.double||!['doubles','multi'].includes(owner.battle?.gameType)||owner.battle.getAllActive().length!==4||Object.keys(actors||{}).length!==4)throw Error('UNSUPPORTED_SLOT_FORMAT');\n   const specs=slotSpecs(owner);if(!specs.some(([,s,i])=>owner.battle[s]?.active?.[i]?.species?.num===602))throw Error('UNSUPPORTED_SLOT_NO602');\n   const prepared={},union={p1:{moveIds:[]},p2:{moveIds:[]}},envelopes={};\n   for(const[key,side,index,group,position]of specs){const a=actors[key],native=owner.battle[side]?.active?.[index],view=group==='p1'?'back':'front';\n    if(!a||a.nativeMon!==native||native.getSlot()!==key||a.slot!==key||a.supportSide!==group||a.supportIndex!==position||a.back!==(group==='p1')||a.graphic!==nativeGraphic(native)||!a.visible||a.hidden||a.substitute||a.minimized||a.faint)throw Error('UNSUPPORTED_SLOT_ACTOR_STATE');\n    if(!a.bank?.ready||a.bank!==R.cache[a.graphic+'-'+view]||!a.bank.data||!a.bank.image||a.bank.groundBounds?.length!==4||!a.bank.groundBounds.every(Number.isFinite)||a.bank.groundBounds[2]<=a.bank.groundBounds[0]||a.bank.groundBounds[3]<=a.bank.groundBounds[1])throw Error('UNPREPARED_SLOT_NATIVE_OWNER');\n    const moveIds=native.moveSlots.map(m=>root.GEN5.dex.moves.get(m.id).num);if(!moveIds.length||!moveIds.every(Number.isInteger))throw Error('UNAVAILABLE_SLOT_MOVESET');\n    prepared[key]={...a,nativeSpecies:native.species.num,groundBounds:a.bank.groundBounds.slice(),moveIds,nativeMovesSignature:native.moveSlots.map(m=>m.id).join(','),dataOwner:a.bank.data,imageOwner:a.bank.image};union[group].moveIds.push(...moveIds);envelopes[key]=envelope(a.bank,view,a.graphic);\n   }\n   for(const side of['p1','p2'])union[side].moveIds=[...new Set(union[side].moveIds)];\n   plan={format:'slots',owner,multi:!!owner.multi,actors:prepared,specs,cameras:cameraDomain(union,true),envelopes,cache:new WeakMap()};\n   lastStatus={supported:true,status:'PRIVATE_NATIVE602_SLOT_IDLE_CAMERA_FRAMING',actorSlots:specs.map(s=>s[0]),cameraStates:plan.cameras.states.length,evaluatedCameraTimes:plan.cameras.evaluated,scope:'Private native idle alpha plus conservative both-target-role camera envelope only; no authored pose/contact/dynamic-outcome proof.'};return lastStatus;\n  }catch(error){plan=null;lastStatus={supported:false,status:error.message};return lastStatus;}\n }\n function slotLayout(base){\n  if(plan?.format!=='slots')return base;\n  if(currentOwner()!==plan.owner||!plan.owner.double||plan.multi!==!!plan.owner.multi||!slotIdentity(plan.owner,plan.actors,plan.actors))return invalid(base,'SLOT_NATIVE_OWNER_CHANGED');\n  if(plan.cache.has(base)){const cached=plan.cache.get(base);lastStatus={...lastStatus,factor:cached.factor,limiting:cached.limiting,sizePolicy:cached.sizePolicy};return cached.value;}\n  if(!base||!Array.isArray(base.p1)||!Array.isArray(base.p2)||base.p1.length!==2||base.p2.length!==2)return invalid(base,'INVALID_SLOT_SUPPORT');\n  let factor=1,limiting=null;const first=base.p1[0],w=first?.w,h=first?.h,padding=2.01,unit=Math.min(w/1000,h/650);if(!(w>0&&h>0&&Number.isFinite(w)&&Number.isFinite(h)))return invalid(base,'INVALID_SLOT_SUPPORT');\n  // Explicit only for an established four-owner602 plan. Source pixel density\n  // is normalized to the verified500 bank for the same view BEFORE common K.\n  // This is shared layout policy, never an invisible adjustment in R.draw.\n  const density={p1:[],p2:[]},slotPolicy={};\n  for(const[key,,,group,index]of plan.specs){const a=plan.actors[key],g=base[group][index],b=a.bank.groundBounds,ref=native500DensityReference[a.back?'back':'front'].groundBounds,pixelRatio=(b[3]-b[1])/(ref[3]-ref[1]);\n   if(!g||![g.x,g.y,g.height,g.size,g.w,g.h,pixelRatio].every(Number.isFinite)||g.w!==w||g.h!==h||g.size<=0||pixelRatio<=0||Math.abs(g.height-g.size*80)>Math.max(1,Math.abs(g.height))*1e-12)return invalid(base,'INVALID_SLOT_SUPPORT');\n   density[group][index]={...g,height:g.height*pixelRatio,size:g.size*pixelRatio};slotPolicy[key]={graphic:a.graphic,back:a.back,sourceGroundHeight:b[3]-b[1],reference500GroundHeight:ref[3]-ref[1],nativePixelDensityRatio:pixelRatio};\n  }\n  for(const[key,,,group,index]of plan.specs){const a=plan.actors[key],g=density[group][index],b=a.bank.groundBounds,env=plan.envelopes[key],cx=(b[0]+b[2])/2,pixel=g.height/(b[3]-b[1]);\n   for(const c of plan.cameras.states){const origin=[w*.5+c.x*unit+c.zoom*(g.x-w*.5),h*.5+c.y*unit+c.zoom*(g.y-h*.5)];if(origin.some((v,i)=>v<padding||v>[w,h][i]-padding))return invalid(base,'INFEASIBLE_SLOT_ANCHOR');\n    for(const x of[env[0],env[2]])for(const y of[env[1],env[3]]){const delta=[(x-cx)*pixel*c.zoom,(y-b[3])*pixel*c.zoom];for(const[axis,size]of[[0,w],[1,h]]){const k=delta[axis]>0?(size-padding-origin[axis])/delta[axis]:delta[axis]<0?(padding-origin[axis])/delta[axis]:1;if(k<factor){factor=Math.max(0,k);limiting={slot:key,axis,camera:c};}}}\n   }\n  }\n  if(!(factor>0))return invalid(base,'INFEASIBLE_SLOT_ANCHOR');\n  const value=factor===1?density:{p1:density.p1.map(g=>({...g,height:g.height*factor,size:g.size*factor})),p2:density.p2.map(g=>({...g,height:g.height*factor,size:g.size*factor}))};\n  const sizePolicy={name:'PRIVATE_NATIVE_PIXEL_DENSITY_500_REFERENCE_ONLY_602_SLOTS',slots:slotPolicy,commonFramingFactor:factor,scope:'Four actual602 double/multi owners only. Same world/ground/PPU; body, FX and shadow consume one fitted layout. Not custom-action or visual readability approval.'};\n  plan.cache.set(base,{value,factor,limiting,sizePolicy});lastStatus={...lastStatus,factor,limiting,sizePolicy};return value;\n }\n\n function setActors({owner,actors}){",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": "function layout(base){if(!plan)return base;",
+      "after": "function layout(base){if(!plan||plan.format==='slots')return base;",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": "return{setActors,clearActors,layout,stats,",
+      "after": "return{setActors,setSlotActors,slotLayout,clearActors,layout,stats,",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": "lastAttempt=null;lastStatus=",
+      "after": "lastAttempt=null;lastSlotAttempt=null;lastStatus=",
+      "count": 2
+    },
+    {
+      "file": "battle-ground.js",
+      "before": " function clearActorFraming(owner){",
+      "after": " function setSlotActorFraming(input){if(!actorFraming){const status=setActorFraming(input);if(!actorFraming)return status;}return actorFraming.setSlotActors(input);}\n function frameSlots(base){return actorFraming?.slotLayout(base)??base;}\n function clearActorFraming(owner){",
+      "count": 1
+    },
+    {
+      "file": "battle-ground.js",
+      "before": "shadow,setActorFraming,clearActorFraming,",
+      "after": "shadow,setActorFraming,setSlotActorFraming,frameSlots,clearActorFraming,",
+      "count": 1
+    },
+    {
+      "file": "game.js",
+      "before": " if(!ground?.setActorFraming||!current?.battle)return;",
+      "after": " if(!ground?.setActorFraming||!current?.battle)return;\n if(current.double&&window.DoubleBattles?.framingActors)return ground.setSlotActorFraming?.({owner:current,actors:DoubleBattles.framingActors()});",
+      "count": 1
+    },
+    {
+      "file": "double-battles.js",
+      "before": " function slots(w,h){const normal=baseLayout(w,h),out={};",
+      "after": " const rawSlotCache=new WeakMap();\n function slots(w,h){const normal=baseLayout(w,h);let out=rawSlotCache.get(normal);if(out)return BattleGround.frameSlots?.(out)??out;out={};",
+      "count": 1
+    },
+    {
+      "file": "double-battles.js",
+      "before": "base.pixelsPerUnit};});return out;",
+      "after": "base.pixelsPerUnit};});rawSlotCache.set(normal,out);return BattleGround.frameSlots?.(out)??out;",
+      "count": 1
+    },
+    {
+      "file": "double-battles.js",
+      "before": " function prepareInput(){",
+      "after": "\n function framingActors(){if(!enabled())return null;const actors={};for(const side of['p1','p2'])for(let index=0;index<2;index++){const key=ref(side,index),nativeMon=mon(key),view=views[key],role=Object.keys(refs).find(r=>refs[r]===key),state=(role?visualState[role]:poses[key])||{},graphic=window.PokemonVisuals?.graphic?.(view)??view?.spriteId,back=side==='p1';actors[key]={nativeMon,slot:key,supportSide:side,supportIndex:index,graphic,back,visible:!!view&&!state.hidden&&!state.faint,bank:window.ROM_SPRITE_ANIM?.cache[graphic+'-'+(back?'back':'front')],hidden:!!state.hidden,substitute:!!state.substitute,minimized:!!state.minimized,faint:!!state.faint};}return actors;}\n\n function prepareInput(){",
+      "count": 1
+    },
+    {
+      "file": "double-battles.js",
+      "before": "window.DoubleBattles={",
+      "after": "window.DoubleBattles={framingActors,",
+      "count": 1
+    }
+  ],
+  "densitySlot": " function slotLayout(base){\n  if(plan?.format!=='slots')return base;\n  if(currentOwner()!==plan.owner||!plan.owner.double||plan.multi!==!!plan.owner.multi||!slotIdentity(plan.owner,plan.actors,plan.actors))return invalid(base,'SLOT_NATIVE_OWNER_CHANGED');\n  if(plan.cache.has(base)){const cached=plan.cache.get(base);lastStatus={...lastStatus,factor:cached.factor,limiting:cached.limiting,sizePolicy:cached.sizePolicy};return cached.value;}\n  if(!base||!Array.isArray(base.p1)||!Array.isArray(base.p2)||base.p1.length!==2||base.p2.length!==2)return invalid(base,'INVALID_SLOT_SUPPORT');\n  let factor=1,limiting=null;const first=base.p1[0],w=first?.w,h=first?.h,padding=2.01,unit=Math.min(w/1000,h/650);if(!(w>0&&h>0&&Number.isFinite(w)&&Number.isFinite(h)))return invalid(base,'INVALID_SLOT_SUPPORT');\n  // Explicit only for an established four-owner602 plan. Source pixel density\n  // is normalized to the verified500 bank for the same view BEFORE common K.\n  // This is shared layout policy, never an invisible adjustment in R.draw.\n  const density={p1:[],p2:[]},slotPolicy={};\n  for(const[key,,,group,index]of plan.specs){const a=plan.actors[key],g=base[group][index],b=a.bank.groundBounds,ref=native500DensityReference[a.back?'back':'front'].groundBounds,pixelRatio=(b[3]-b[1])/(ref[3]-ref[1]);\n   if(!g||![g.x,g.y,g.height,g.size,g.w,g.h,pixelRatio].every(Number.isFinite)||g.w!==w||g.h!==h||g.size<=0||pixelRatio<=0||Math.abs(g.height-g.size*80)>Math.max(1,Math.abs(g.height))*1e-12)return invalid(base,'INVALID_SLOT_SUPPORT');\n   density[group][index]={...g,height:g.height*pixelRatio,size:g.size*pixelRatio};slotPolicy[key]={graphic:a.graphic,back:a.back,sourceGroundHeight:b[3]-b[1],reference500GroundHeight:ref[3]-ref[1],nativePixelDensityRatio:pixelRatio};\n  }\n  for(const[key,,,group,index]of plan.specs){const a=plan.actors[key],g=density[group][index],b=a.bank.groundBounds,env=plan.envelopes[key],cx=(b[0]+b[2])/2,pixel=g.height/(b[3]-b[1]);\n   for(const c of plan.cameras.states){const origin=[w*.5+c.x*unit+c.zoom*(g.x-w*.5),h*.5+c.y*unit+c.zoom*(g.y-h*.5)];if(origin.some((v,i)=>v<padding||v>[w,h][i]-padding))return invalid(base,'INFEASIBLE_SLOT_ANCHOR');\n    for(const x of[env[0],env[2]])for(const y of[env[1],env[3]]){const delta=[(x-cx)*pixel*c.zoom,(y-b[3])*pixel*c.zoom];for(const[axis,size]of[[0,w],[1,h]]){const k=delta[axis]>0?(size-padding-origin[axis])/delta[axis]:delta[axis]<0?(padding-origin[axis])/delta[axis]:1;if(k<factor){factor=Math.max(0,k);limiting={slot:key,axis,camera:c};}}}\n   }\n  }\n  if(!(factor>0))return invalid(base,'INFEASIBLE_SLOT_ANCHOR');\n  const value=factor===1?density:{p1:density.p1.map(g=>({...g,height:g.height*factor,size:g.size*factor})),p2:density.p2.map(g=>({...g,height:g.height*factor,size:g.size*factor}))};\n  const sizePolicy={name:'PRIVATE_NATIVE_PIXEL_DENSITY_500_REFERENCE_ONLY_602_SLOTS',slots:slotPolicy,commonFramingFactor:factor,scope:'Four actual602 double/multi owners only. Same world/ground/PPU; body, FX and shadow consume one fitted layout. Not custom-action or visual readability approval.'};\n  plan.cache.set(base,{value,factor,limiting,sizePolicy});lastStatus={...lastStatus,factor,limiting,sizePolicy};return value;\n }\n\n",
+  "commonSlot": " function slotLayout(base){\n  if(plan?.format!=='slots')return base;\n  if(currentOwner()!==plan.owner||!plan.owner.double||plan.multi!==!!plan.owner.multi||!slotIdentity(plan.owner,plan.actors,plan.actors))return invalid(base,'SLOT_NATIVE_OWNER_CHANGED');\n  if(plan.cache.has(base)){const cached=plan.cache.get(base);lastStatus={...lastStatus,factor:cached.factor,limiting:cached.limiting};return cached.value;}\n  if(!base||!Array.isArray(base.p1)||!Array.isArray(base.p2)||base.p1.length!==2||base.p2.length!==2)return invalid(base,'INVALID_SLOT_SUPPORT');\n  let factor=1,limiting=null;const first=base.p1[0],w=first?.w,h=first?.h,padding=2.01,unit=Math.min(w/1000,h/650);if(!(w>0&&h>0&&Number.isFinite(w)&&Number.isFinite(h)))return invalid(base,'INVALID_SLOT_SUPPORT');\n  for(const[key,,,group,index]of plan.specs){const a=plan.actors[key],g=base[group][index],b=a.bank.groundBounds,env=plan.envelopes[key],cx=(b[0]+b[2])/2,pixel=g?.height/(b[3]-b[1]);if(!g||![g.x,g.y,g.height,g.size,g.w,g.h].every(Number.isFinite)||g.w!==w||g.h!==h||g.size<=0||!Number.isFinite(pixel)||pixel<=0||Math.abs(g.height-g.size*80)>Math.max(1,Math.abs(g.height))*1e-12)return invalid(base,'INVALID_SLOT_SUPPORT');\n   for(const c of plan.cameras.states){const origin=[w*.5+c.x*unit+c.zoom*(g.x-w*.5),h*.5+c.y*unit+c.zoom*(g.y-h*.5)];if(origin.some((v,i)=>v<padding||v>[w,h][i]-padding))return invalid(base,'INFEASIBLE_SLOT_ANCHOR');\n    for(const x of[env[0],env[2]])for(const y of[env[1],env[3]]){const delta=[(x-cx)*pixel*c.zoom,(y-b[3])*pixel*c.zoom];for(const[axis,size]of[[0,w],[1,h]]){const k=delta[axis]>0?(size-padding-origin[axis])/delta[axis]:delta[axis]<0?(padding-origin[axis])/delta[axis]:1;if(k<factor){factor=Math.max(0,k);limiting={slot:key,axis,camera:c};}}}\n   }\n  }\n  if(!(factor>0))return invalid(base,'INFEASIBLE_SLOT_ANCHOR');const value=factor===1?base:{p1:base.p1.map(g=>({...g,height:g.height*factor,size:g.size*factor})),p2:base.p2.map(g=>({...g,height:g.height*factor,size:g.size*factor}))};plan.cache.set(base,{value,factor,limiting});lastStatus={...lastStatus,factor,limiting};return value;\n }\n\n"
+}

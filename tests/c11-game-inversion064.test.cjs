@@ -1,0 +1,4 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),{readSourceBytes,readFixtureBytes}=require('./helpers/minccino-slap-paths064.cjs'),{assertInvertsToBaseline}=require('./helpers/c11-game-inversion064.cjs');
+test('declared coherent and602 Game deltas invert exactly to the untouched C10 preclear baseline',()=>{assert.equal(assertInvertsToBaseline(assert,readSourceBytes('game.js'),readFixtureBytes('game-preclear064.js')),true);});
+test('an unrelated actual body rotation change is rejected by the exact Game inverse contract',()=>{const original=readSourceBytes('game.js').toString('utf8'),before='c.rotate(pose.rotation||0);',after='c.rotate((pose.rotation||0)+.001);';assert.equal(original.split(before).length-1,1);const changed=Buffer.from(original.replace(before,after));assert.throws(()=>assertInvertsToBaseline(assert,changed,readFixtureBytes('game-preclear064.js')),assert.AssertionError);});

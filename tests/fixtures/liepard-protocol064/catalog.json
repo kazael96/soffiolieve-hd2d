@@ -1,0 +1,332 @@
+{
+  "schema": 1,
+  "status": "CONCRETE_V4_PORT_NOT_EXECUTED",
+  "lifecycle": [
+    {
+      "id": "lifecycle-01",
+      "index": 0,
+      "name": "real acquisition marks only initially supported native singles even while banks are cold; selection stays unmarked and lazy",
+      "wrapper": "tests/liepard-lifecycle064-01.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-02",
+      "index": 1,
+      "name": "preview uses actual previous preparation/pose with no marker or lazy barrier installation",
+      "wrapper": "tests/liepard-lifecycle064-02.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-03",
+      "index": 2,
+      "name": "initial unsupported double preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-03.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-04",
+      "index": 3,
+      "name": "initial unsupported multi preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-04.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-05",
+      "index": 4,
+      "name": "initial unsupported altered preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-05.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-06",
+      "index": 5,
+      "name": "initial unsupported targetSide preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-06.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-07",
+      "index": 6,
+      "name": "initial unsupported cryIds preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-07.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-08",
+      "index": 7,
+      "name": "initial unsupported species preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-08.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-09",
+      "index": 8,
+      "name": "initial unsupported missing-owner preserves previous profile/preparation/pose instead of opting in",
+      "wrapper": "tests/liepard-lifecycle064-09.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-10",
+      "index": 9,
+      "name": "actual M.play passes original early lease into real stage hit/miss preparation and active commit, with hot pose ready",
+      "wrapper": "tests/liepard-lifecycle064-10.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-11",
+      "index": 10,
+      "name": "cold bank await keeps the original M.play owner lease; same-species target replacement cannot be reacquired by prepareInitial",
+      "wrapper": "tests/liepard-lifecycle064-11.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-12",
+      "index": 11,
+      "name": "real marked active Session loss is rejected before clear and old pose never falls back",
+      "wrapper": "tests/liepard-lifecycle064-12.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-13",
+      "index": 12,
+      "name": "real marked active actor loss is rejected before clear and old pose never falls back",
+      "wrapper": "tests/liepard-lifecycle064-13.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-14",
+      "index": 13,
+      "name": "real marked active target loss is rejected before clear and old pose never falls back",
+      "wrapper": "tests/liepard-lifecycle064-14.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-15",
+      "index": 14,
+      "name": "real resize pending without completed protocol snapshot owns its loading/cache; canonical cancel stops pending stage",
+      "wrapper": "tests/liepard-lifecycle064-15.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-16",
+      "index": 15,
+      "name": "real resize pending with completed protocol snapshot owns its loading/cache; canonical cancel stops pending stage",
+      "wrapper": "tests/liepard-lifecycle064-16.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-17",
+      "index": 16,
+      "name": "real resized current stage error without cache rejects owner once, closes owned loading, and never resumes",
+      "wrapper": "tests/liepard-lifecycle064-17.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-18",
+      "index": 17,
+      "name": "real resized current stage error with cache rejects owner once, closes owned loading, and never resumes",
+      "wrapper": "tests/liepard-lifecycle064-18.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-19",
+      "index": 18,
+      "name": "real successive rotations retain one original snapshot; stale layout stage job cannot overwrite the newest plan",
+      "wrapper": "tests/liepard-lifecycle064-19.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-20",
+      "index": 19,
+      "name": "canonical cancel survives a throwing layout callback and preserves callback error on old action",
+      "wrapper": "tests/liepard-lifecycle064-20.test.cjs",
+      "sourceGroup": "real-stage"
+    },
+    {
+      "id": "lifecycle-21",
+      "index": 20,
+      "name": "canonical owner failure survives a throwing layout callback and preserves original failure reason",
+      "wrapper": "tests/liepard-lifecycle064-21.test.cjs",
+      "sourceGroup": "real-stage"
+    }
+  ],
+  "legacy": [
+    {
+      "id": "legacy-01",
+      "index": 0,
+      "name": "layout readiness never resumes actual native PCM until original MoveFX begin plus real clock-protocol ACK",
+      "source": "audio-boundary.test.cjs"
+    },
+    {
+      "id": "legacy-02",
+      "index": 1,
+      "name": "ready preflight never begins a clock, prepares, captures or copies per ACK",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-03",
+      "index": 2,
+      "name": "cold preflight coalesces repeated RAF requests into one job outside the callback",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-04",
+      "index": 3,
+      "name": "resize keeps one original completed image; newer signatures win over stale preparation",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-05",
+      "index": 4,
+      "name": "cancel settles controller ownership and late job cannot wake/resume or resurrect image",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-06",
+      "index": 5,
+      "name": "same action cannot rebind to changed session and rejects only its original owner lease",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-07",
+      "index": 6,
+      "name": "same action cannot rebind to changed native and rejects only its original owner lease",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-08",
+      "index": 7,
+      "name": "same action cannot rebind to changed generation and rejects only its original owner lease",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-09",
+      "index": 8,
+      "name": "a genuinely new action/session lease can replace an old job without receiving its failure",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-10",
+      "index": 9,
+      "name": "new bank under the same native action requires preparation and invalidates only old data lease",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-11",
+      "index": 10,
+      "name": "current preparation error rejects through the owner fail bridge and does not retry-loop or claim READY",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-12",
+      "index": 11,
+      "name": "failed/stale drawing cannot become an eligible snapshot; explicit unsafe state is reported",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-13",
+      "index": 12,
+      "name": "pending resized frame without a valid cache reasserts missing status after external UI removal, without image copies",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-14",
+      "index": 13,
+      "name": "contain compositor always uses original cache and one resize copy; no stretch or readback",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-15",
+      "index": 14,
+      "name": "private Game bridge calls sync/preflight before exactly one original begin and clear",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-16",
+      "index": 15,
+      "name": "private MoveFX failure bridge rejects once and stale/wrong scope cannot resolve/cancel another owner",
+      "source": "controller.test.cjs"
+    },
+    {
+      "id": "legacy-17",
+      "index": 16,
+      "name": "all runtime proposals are strict UTF8 and preserve the actual Italian ellipsis",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-18",
+      "index": 17,
+      "name": "late same-script lexical Game arena/session do not cause TDZ reads at library registration",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-19",
+      "index": 18,
+      "name": "a detached owned box is recreated on the next required missing-cache status",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-20",
+      "index": 19,
+      "name": "reentrant foreign replacement cannot become the layout message owner",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-21",
+      "index": 20,
+      "name": "in-place foreign text and external renderer.ready remain outside layout ownership",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-22",
+      "index": 21,
+      "name": "owned pending status is idempotent and never calls renderer.status/recovery.refresh",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-23",
+      "index": 22,
+      "name": "pending predecessor generation replacement rejects before initial IO/geometry on an already installed stable barrier",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-24",
+      "index": 23,
+      "name": "pending predecessor session replacement rejects before initial IO/geometry on an already installed stable barrier",
+      "source": "review.test.cjs"
+    },
+    {
+      "id": "legacy-25",
+      "index": 24,
+      "name": "library registration is lazy and outside-pair preparation delegates unchanged",
+      "source": "wiring.test.cjs"
+    },
+    {
+      "id": "legacy-26",
+      "index": 25,
+      "name": "own pair registers once and preserves viewport/session-aware initial preparation callbacks",
+      "source": "wiring.test.cjs"
+    },
+    {
+      "id": "legacy-27",
+      "index": 26,
+      "name": "cleanup cannot remove a later resource message using the same existing loading element",
+      "source": "wiring.test.cjs"
+    },
+    {
+      "id": "legacy-28",
+      "index": 27,
+      "name": "missing private MoveFX bridge rejects own prepare and leaves optional draw hooks uninstalled",
+      "source": "wiring.test.cjs"
+    }
+  ],
+  "legacyWrapper": "tests/liepard-controller-legacy064.test.cjs",
+  "counts": {
+    "lifecycle": 21,
+    "plannedLegacyFiles": 1,
+    "totalCallbacks": 49,
+    "plannedLifecycleFiles": 21,
+    "legacy": 28
+  },
+  "scope": "Names copied from frozen21inventory and historical28TAP; no registration/callback/VM/program executed"
+}

@@ -245,3 +245,32 @@ Il naming deve misurare anche i tasti effettivi, il campo del nome e la leggibil
 La suite completa C7/r1 conserva il FAIL del terzo gruppo unitario, terminato dopo180788ms contro il budget180000ms. Quel gruppo comprendeva anche `league-journeys.test.cjs`: i replay completi di Belle e Komor sul Percorso10, nelle diverse stagioni, attraversano controller, terreno e portali nativi e hanno un costo CPU significativo. Separare questo file in un processo sequenziale dedicato, oltre ai due processi già riservati alle fixture native che misurano la memoria. L'isolamento dei percorsi riguarda il budget di esecuzione: non attribuirgli una misura RSS che non effettua.
 
 Conservare gli otto gruppi ordinari bilanciati, ogni file eseguito esattamente una volta, ordinamento deterministico e nessun gruppo vuoto o test saltato. Rimangono invariati180s per fase, limiti di memoria, asserzioni e flag Windows `--test-isolation=none` / Linux `--test-concurrency=2`. Il registro completo passa da51 a52 fasi perché si aggiunge un processo, non perché siano aumentati i file o sia stata ridotta la copertura. Le regressioni del raggruppatore devono coprire anche l'inventario minimo con tutti e tre i file isolati e i due sistemi operativi. Un PASS mirato del raggruppatore o dei percorsi non sostituisce la nuova suite completa; conservare il rapporto C7/r1 fallito e non affermare una riduzione del tempo totale prima della misura.
+
+### Processi dei protocolli di lotta · candidata0.64/11
+
+Il nuovo inventario integra21 casi del ciclo di vita di Graffio e18 casi
+di risorse/recupero in39 processi sequenziali dedicati, con un callback
+per wrapper. Questi processi usano `--test-isolation=none` anche su Linux:
+il processo controllato dal runner deve essere quello che esegue il caso,
+senza un ulteriore figlio Node lasciato fuori dal controllo del timeout.
+Conservare180s per fase, heap V8 massimo400MiB, output massimo8MiB e
+zero casi saltati. Un limite dell'heap non misura il picco RSS del sistema.
+
+I quattro controlli602 condividono un solo processo dedicato. Rimangono
+anche i tre processi storici e gli otto gruppi ordinari bilanciati; i28
+casi leggeri del controller restano ordinari. L'inventario attuale di423
+file produce51 fasi unitarie, più il builder e40 controlli runtime, per92
+fasi totali. Verificare inventario completo e unico, ordine deterministico,
+cataloghi incompleti rifiutati e flag effettivi su Windows/Linux. I piccoli
+inventari dei test del raggruppatore conservano il comportamento storico.
+Il PASS dei cinque controlli di distribuzione non sostituisce l'esecuzione
+delle92 fasi e non certifica da solo velocità o memoria complessive.
+
+Le fixture derivate di questo protocollo usano pin canonical LF per i soli
+metadati, conservando separatamente hash e byte originali di provenienza.
+I programmi compilati registrano i propri byte reali e i frammenti il
+parent effettivo; i JSON/PNG/DATA nativi restano controllati sui byte raw.
+Conservare il FAIL del providerR1 che confrontava il pin raw del metadato
+con il testo normalizzato. Le regressioni devono accettare LF/CRLF per i
+metadati equivalenti e rifiutare sia modifiche sostanziali sia variazioni
+dei byte nativi, anche se il JSON risultante contiene gli stessi valori.

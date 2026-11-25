@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "scope": "Original native JSON and PNG bytes; never line-ending-normalize these asset bytes",
+  "files": {
+    "assets/animated/495-front.json": "713cb97bc2d7fe8671a17c668fa7dcb53fe09611afaaf14f7d563c756222b749",
+    "assets/animated/495-front.png": "5cb55d05c96786116afd455fa9f1120d466382d0fc935c2504dd54c58af1e890",
+    "assets/animated/495-back.json": "6a3a011f12f4ed0bc80b1e15a3c721c88f0c322e0d39a066fe62c615c5f09e01",
+    "assets/animated/495-back.png": "26f05bafce961011b3b9350c5146d9f1042e1c78e24b841df2e02cc3742d8fd3",
+    "assets/animated/500-front.json": "8ea23b2229636e1c710130a3920268b863b27cee79d593f1bbea6b0cb7a8b4fc",
+    "assets/animated/500-front.png": "0c974285cc883e43ceb35bf43602499387fb13a80f769c3e671eee8391cd49ce",
+    "assets/animated/500-back.json": "0ed04f265eb27169f0500ba29c14593b44e60862151aafc46e3548c444293adf",
+    "assets/animated/500-back.png": "7f90ceb11ebb09dbc0c734bf788bcf78322ede69a3456cf8adc00bf555ec76c4",
+    "assets/animated/510-front.json": "e48bdc0b385e10ed41880ed0221e2cdebfee3b613df4b40c06d4f2abed551ef5",
+    "assets/animated/510-front.png": "e1575ee02d29d4257dd19953115d2d09d2539ba73ea71c94ff415072b85fe946",
+    "assets/animated/510-back.json": "7abcecc0188a6f88064835b5d1177d3524c5c690d155c2b4c1d2630e0f3e6ee1",
+    "assets/animated/510-back.png": "c355796c3e6a6ea6994eb0a506e8814359ce273dbab2f2be72236ec1092205bf",
+    "assets/animated/572-front.json": "fca062a9388a440881ff23f66519b438a5c1f12f4f6e35e49449b0399aa31767",
+    "assets/animated/572-front.png": "578893250125ee8ed35b7094369aa36f3ea1f40bb1f5f6b1f658ee997c902bd6",
+    "assets/animated/572-back.json": "20b3fdd73888941c8db3065bfc767418a5b6f035e1920d09ce9e842555a4ea05",
+    "assets/animated/572-back.png": "6c353c250af5711ad4bd49117867fd692932ef1cec47013d58edd2cac7c00063",
+    "assets/animated/602-front.json": "4ca56c8b8b34df686d75257a2c868f8fc0f4e5875cbd6588c952a84302a64c44",
+    "assets/animated/602-front.png": "e3abd7ab3433d4bd05938764ac78bc78cc83b2c5227ac77d8c9234f15fd908c8",
+    "assets/animated/602-back.json": "0facb1743ecd6568d68b444c2b51c020ad5423c23bd41a19f7a8d6710f0995cd",
+    "assets/animated/602-back.png": "33a2198aca93839885a2f22c5c6c28859c50eb3c421547f7a9714be7a8cf7467"
+  }
+}

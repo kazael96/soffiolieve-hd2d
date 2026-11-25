@@ -477,3 +477,130 @@ fallisce sul workflow precedente. Sono conservati anche il mancato avvio
 `spawn EPERM` e il primo tentativo con percorso asset non dichiarato;
 il successivo usa esplicitamente la10. QuestoPASS statico non sostituisce
 la nuova esecuzioneCI né certifica un miglioramento del tempo complessivo.
+
+La CI45595363257 sul commitd12671d concludeSUCCESS:52/52 fasi CLI,
+i cinque gruppi browser dell'indice e tutte le18 esecuzioni native.
+Il controllo indipendente dei rapporti verifica54 celle uniche
+formato–caso–velocità e198 record di turni nativi, senza duplicati o
+omissioni e con cleanup riuscito in ciascun processo. Il build remoto è
+`96f796fbd1851aa7`. L'archivio grafico completo è preservato conSHA256
+`9537efa270c837428ffe007a09f7dd5021f67655e6be1657874bf964524c137f`;
+contiene1080PNG. La verifica dei rapporti non costituisce una lettura
+visiva di quei1080PNG né una nuova approvazione estetica. I timeout
+precedenti restanoFAIL storici; la causa generale delle differenze di
+prestazioni fra le esecuzioni non è dimostrata.
+
+Un ulteriore pilot desktop della10 misura i componenti durante due turni
+reali di Doppiasberla, senza PNG, WebM o copie di canvas dell'osservatore.
+Passano i quattro clip, con132 conferme protette e16 avvii audio,
+399 programmi effettivamente eseguiti e sette binding ripristinati.
+Il caso richiede26490ms; il picco precedente620ms non si riproduce.
+Nei quattro intervalli associati alla mossa, il massimo di drawArena è
+26,9–34,8ms e quello del fondale animato25,4–33,9ms; i record comprendono
+anche la preparazione precedente ad active. Nel turno completo, inclusa
+la risposta avversaria, drawArena raggiunge82,3ms. Non sono misure di
+FPS né di CPU esclusiva, e non certificano Android, confronto udibile,
+causalità delle catture o la futura candidata11. Il precedente controllo
+senza registratore conservava quattro PNG a f60: non era una prova priva
+di catture e non isola da solo il costo della registrazione.
+
+### Recupero di Graffio e integrazione locale successiva
+
+Il batch successivo introduce una preparazione proprietaria di Graffio
+di Liepard: controlla Session, lotta, attori e generazione prima delle
+risorse e dopo le attese; una preparazione annullata non può proseguire
+sulla nuova azione. Gli errori del caricamento nativo consentono tentativi
+automatici limitati e un nuovo tentativo manuale, con sospensione quando
+la scheda è nascosta o manca la rete. Il fotogramma concluso resta valido
+soltanto per il proprietario originario. Il ripristino degli hook avviene
+in ordine inverso e non sovrascrive callback installate da altri sistemi.
+
+Sul batch V4 congelato passano67 casi CPU in40 processi separati,
+in118103ms sommati:16 recuperi con I/O,21 controlli dello stage,28
+regressioni precedenti e due casi G7 corretti. Passano separatamente
+anche i due test F1 di identità degli hook, in429ms. Nessun caso saltato,
+nessuna differenza fra testo compilato e sorgente attestata, nessun
+processo proprietario residuo. Le fotografie RSS dei41 processi
+strumentati, incluse le due baseline, sono213,82–321,50MiB; non sono
+il picco del sistema operativo. Il gruppo leggero da28 non misura RSS.
+
+Sono preservate due baseline qualificate: il caricamento iniziale V2
+fallisce realmente dopo i due tentativi del loader; il secondo caso V2
+passa già quando il banco pronto viene ripristinato e si richiama la
+preparazione. Quest'ultimo PASS non prova tentativi automatici, riprova
+manuale o continuità del fotogramma. Restano conservati anche i FAIL
+delle fixture prive della sincronizzazione reale dell'inquadratura e
+dell'asserzione che richiedeva metadati identici a due rami legittimi.
+La correzione di queste fixture non cambia geometria, tolleranze,
+runtime o budget.
+
+Le cinque sorgenti del batch sono integrate soltanto nel checkout locale;
+il rapporto aggregato haSHA256
+`9dd37ea430b201fd11a5351fe1d4e76b8e32e51f5bd9f5f8cb1cfeb5d21c7661`.
+I test portabili e la suite completa sul codice finale, i comandi reali
+nel browser invisibile, la revisione grafica e le prestazioni della nuova
+build restano da concludere. Questi PASS di protocollo non certificano
+movimento continuo, audio udibile, Android o il catalogo artistico globale.
+
+La candidata locale11 è `9e0e68b0e1468f60`, appSHA256
+`3ac317c88c2e8f36ea2a1aee09446236563579fddbade700ce11aaee803156c2`.
+La10 è stata rimossa soltanto dopo la ricostruzione verificata dei32009
+file e i controlli di percorso, collegamenti, Git e processi; restano
+base04, confronto verificato08 e candidata11. I rapporti e l'archivio
+della10 sono conservati. Sul checkout finale passano124/124 regressioni
+precedenti in41419ms e16/16 nuovi casi portabili in6451ms. Il primo
+avvio dei16, impedito da `spawn EPERM`, resta documentato; il secondo
+usa un rapporto distinto. Nessun PASS della copia privata V2 è trasferito.
+
+Il primo profilo strumentato della11 conclude due turni effettivi di
+Doppiasberla, quattro clip,132 conferme e16 avvii audio, senza PNG, WebM,
+copie di canvas o fotogrammi forzati dell'osservatore. Sono verificati i399
+programmi e il ripristino dei binding. Il caso richiede30567ms. Sul quarto
+clip si osservano567,9ms fra due disegni,524ms dentro drawArena e512,2ms
+nell'intervallo di drawAmbient. Questo rallentamento resta aperto: tempi
+inclusivi non identificano CPU, attesa del driver o una causa specifica.
+La prova usa Chrome158 e Intel HD630/D3D11; non misura Android o audio
+all'ascolto. Il profilo riguarda Minccino e non attiva lo stage di Liepard.
+
+Il primo F1 portabile fallisce prima dei casi: il loader normalizza i
+metadati CRLF ma li confronta erroneamente con il pin raw del JSON.
+Il FAIL è conservato; il nuovo provider deve distinguere esplicitamente
+pin LF dei metadati e pin raw degli asset, con regressioni dedicate.
+Questo errore della suite non è corretto alterando i byte dei dati nativi
+o le asserzioni funzionali. La suite completa e il rilascio restano aperti.
+
+Il providerR2 corregge i due pin dei metadati derivati, conservandone i
+byte originari e tutti i pin raw nativi. Passano cinque regressioni del
+loader in663ms e i due F1 portabili in525ms. Seguono18/18 casi di
+risorse/recupero in52723ms sommati e49/49 casi del controller/ciclo di vita
+in22 processi separati, senza skip o processi residui. I corpi originari
+e le asserzioni funzionali restano intatti. Dopo l'integrazione dei65 file
+condivisi e dell'unico raggruppatore, passano anche i12 controlli di loader,
+hook e distribuzione in715ms. L'inventario reale assegna423 file una sola
+volta alle51 fasi unitarie; il registro completo ne prevede92, ancora da
+eseguire prima di dichiarare la suite completa riuscita.
+
+Passano due prove effettive di `qaBattleActions064` in verticale: il caso
+originale e una fixture con le quattro squadre di contatto invertite,
+che porta Graffio di Liepard sul lato avversario. La seconda conserva
+tutti i sei scenari, i comandi touch, i risultati GEN5 e le asserzioni;
+traspone soltanto squadre e corrispondenti ruoli nel controllo dei danni,
+inclusa l'eccezione di Canto. Non fornisce pose, PS o risultati della lotta.
+I due controlli della trasposizione, compreso un danno mancante nel caso
+Canto, passano in436ms. La prova nativa P2 richiede74717ms e osserva2104
+chiamate di posa con associazione esatta a proprietario, corpo e fotogramma,
+zero associazioni invalide e ripristino dei binding originali. Non sono
+2104 fotogrammi distinti. Sorgenti effettivi399 e cleanup sono verificati.
+
+Sono letti da root e da un revisore indipendente tutti i19 PNG del caso
+originale e i quattro PNG originali selezionati di Graffio avversario.
+Sagome e sfondo risultano leggibili nei campioni; i14 shot non esportati
+del secondo caso conservano le asserzioni pixel, ma non una lettura visiva.
+I PNG contengono soltanto l'arena: non certificano HUD o movimento completo.
+Il vecchio Spazzasberla541 sovrappone Minccino alla testa/spalle di Liepard
+nel campione14; le nuove coreografie1/541 restano escluse. Il palmo di
+Doppiasberla rimane sottile nei campioni e richiede ancora giudizio della
+sequenza. Due console HTTP404 compaiono nei rapporti, senza URL conservati:
+la causa deve essere identificata, senza attribuirli arbitrariamente alla
+favicon o dichiarare assenti gli errori di rete. Pubblicazione e chiusura
+artistica globale restano separate da questi PASS mirati.

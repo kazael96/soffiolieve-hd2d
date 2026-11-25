@@ -1,0 +1,6 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),canonical=b=>(Buffer.isBuffer(b)?b.toString('utf8'):String(b)).replace(/\r\n/g,'\n');
+const raw=canonical(fs.readFileSync(path.join(__dirname,'../fixtures/c11-game-delta064.json')));if(sha(raw)!=='5f884b37535f898ab828194190fc201f96257b7a5d6d544eb7ef033a625b3ed2')throw Error('Declared C11 Game delta fixture changed');const contract=JSON.parse(raw);
+function assertInvertsToBaseline(assert,currentBytes,baselineBytes){let current=canonical(currentBytes);const baseline=canonical(baselineBytes);assert.equal(sha(current),contract.candidateLF_SHA256,'Undeclared Game changes are not permitted');assert.equal(sha(baseline),contract.baselineLF_SHA256,'Original Game baseline must be preserved');for(const step of contract.steps){assert.equal(current.split(step.remove).length-1,step.count??1,'Declared inverse must have one exact source match: '+step.group);current=current.split(step.remove).join(step.restore);assert.equal(sha(current),step.outputLF_SHA256,'Each inverse stage must restore its declared bytes');}assert.equal(current,baseline,'All Game bytes after the named inverse must equal the original C10/preclear fixture');return true;}
+module.exports={assertInvertsToBaseline};
