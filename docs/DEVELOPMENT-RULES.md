@@ -286,3 +286,29 @@ Non cambiare Node su CI o i budget per aggirare un'opzione incompatibile.
 Conservare la suite45621297400:52 fasi PASS e40 avvii falliti prima dei
 callback su Node22.23.5. Le prove di compatibilità dei flag e del PID non
 sostituiscono i casi funzionali o la successiva suite completa.
+
+### Letture dei pixel ambientali · candidata0.64/13
+
+Il confronto nativo di `ambient-readback064.test.cjs` ha un processo
+sequenziale dedicato: un owner esegue32passi, i cicli completi e il riuso,
+confrontando tutti i byte RGBA del frame e della superficie finale,
+metriche, fallback e proprietà delle risorse. Il nuovo inventario ha
+425file,52fasi unitarie e93fasi totali; gli altri51argv/callback unitari
+rimangono invariati. Soltanto il nuovo owner riceve `--expose-gc`,
+heap400MiB e il flag di isolamento corretto per Node22/24 anche su Linux.
+
+Conservare i FAIL dei primi banchi sincroni: la sola raccolta GC non
+rilasciava i buffer nativi entro il ciclo. Il banco restituisce il
+controllo all'event loop ogni32coppie e a fine passo, mantenendo gli
+stessi guard prima e dopo GC/yield,170s/RSS400MiB interni e180s per fase.
+Non trasferire queste misure alla memoria, ai caricamenti o agli FPS
+del gioco. La prova Chrome separata conserva tutti32casi logici in tre
+processi limitati, dopo il FAIL80s del lotto unico; non alzare i timeout.
+
+I programmi e i metadati ammettono soltanto l'equivalenza CRLF→LF;
+JSON/PNG nativi restano verificati sui byte RAW. Il riferimento storico
+ambientPose867byte è immutabile; il nuovo helper viene estratto dal
+sorgente corrente, con lo stesso renderer nativo per A/B. Il test CPU
+e il confronto Canvas in Chrome non certificano da soli l'app completa:
+verificare ordine/proprietà effettivi, binding intatti, rettangolo
+ridotto realmente attivo e beneficio misurato nell'app prima del rilascio.

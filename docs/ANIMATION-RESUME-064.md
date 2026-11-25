@@ -785,3 +785,33 @@ La nuova suite completa è ancora necessaria sul commit che include
 questa modifica del runtime. Il PASS CI1da93bf resta riferito al suo
 codice esatto. La PR58 resta bozza e la versione pubblica0.63 non è
 stata aggiornata da questi collaudi locali.
+
+### Letture ambientali e candidata13 · 25 novembre, seguito
+
+I primi FAIL del banco CPU restano conservati. Restituendo il controllo
+all'event loop per il rilascio dei buffer nativi, il confronto completa
+32passi e2340coppie senza cambiare confrontoRGBA, fallback, ownership
+o limiti. Il port integrato passa in30698ms, piccoRSS125604KiB e pin
+invariati; i cinque casi del registro passano in461ms. La prova Canvas
+Chrome separata completa gli stessi32casi logici in tre processi
+limitati, dopo il FAIL del precedente lotto unico. Sono prove del
+componente, non misure degli FPS o della memoria del gioco.
+
+Il checkout comprende425file,52fasi unitarie e93fasi CLI. Solo il nuovo
+owner ambientale riceve GC esplicito, mantenendo170s/RSS400MiB interni
+e180s/heap400MiB/output8MiB esterni. La CI45661390800 sul commit
+ec208305db65663f0953f0a887e26dc51a1db7d4 passa92/92fasi precedenti;
+non comprende questa nuova fase. Il report CLI marca browser NOT_RUN:
+i risultati dei gruppi browser appartengono ai rispettivi artifact.
+
+La candidata13, revisione2fdac51b57c70626, include la proposta locale
+DioramaSHA25656bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7.
+La qualificazione nell'app è ancora aperta. Il primo riferimentoC12
+fallisce prima della navigazione per breakpoint CDP duplicati. Il
+secondo esegue il comando GEN5 e le due fasi, ma fallisce alla chiusura
+per due errori console404 non attribuiti; i quattro PNG mostrano il
+catalogo QA invece della partita e non sono prove visive dell'arena.
+Entrambi i FAIL sono conservati, con cleanup riuscito. Il banco viene
+corretto senza alzare i budget né eliminare i controlli. Restano da
+misurare la convenienza nell'app e la nuova suite completa; PR58 e
+versione pubblica0.63 non cambiano per queste sole prove locali.

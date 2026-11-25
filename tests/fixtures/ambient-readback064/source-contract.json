@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "hashPolicy": "Program/metadata: ONLY CRLF toLF beforeSHA; rawUTF8 returned forVM. NativeJSON/PNG: rawSHA, no normalization.",
+  "canvasVersion": "0.1.100",
+  "programs": {
+    "renderer": {
+      "file": "pokemon-anim.js",
+      "canonicalLFSHA256": "bde5a3f22260afc2002de9cdd4c82f32f4246dc80b3b3a528f1b062ed88df395"
+    },
+    "species": {
+      "file": "species-moves.js",
+      "canonicalLFSHA256": "d23bd08b7db75103eb1fe311b8f56b3cdd4abea14d29f3010b4c63073e23515a"
+    },
+    "diorama": {
+      "file": "battle-diorama.js",
+      "canonicalLFSHA256": "56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7"
+    },
+    "unfezant": {
+      "file": "unfezant-moves.js",
+      "canonicalLFSHA256": "b9f7b4ce7505a08aa077c681a57de4d4772702be62c0def8409926ca5c8aed45"
+    },
+    "index": {
+      "file": "index.html",
+      "canonicalLFSHA256": "581eda8db8420492ae5395b556d92cc93be25a2590a7c140877f8f8ca982d4ff"
+    }
+  },
+  "fragments": {
+    "ambientHelper": {
+      "program": "diorama",
+      "start": " const ambientReadbackOwners=",
+      "end": " function ambientPose(",
+      "includeEnd": false,
+      "canonicalLFSHA256": "fb9d8e842a5f391ded6d80cdb6b03a6739ec35883b9430dc06f14a0a862849b4",
+      "canonicalLFBytes": 4804
+    },
+    "ambientPose": {
+      "program": "diorama",
+      "start": " function ambientPose(",
+      "end": " function auditAmbient(",
+      "includeEnd": false,
+      "canonicalLFSHA256": "13956225f975c0929e5f283855c2006d8da224ca0647fc4e709702e5e40caba5",
+      "canonicalLFBytes": 859
+    },
+    "ambientCanvas": {
+      "program": "diorama",
+      "start": "const ambientCanvas=",
+      "end": ";",
+      "includeEnd": true,
+      "canonicalLFSHA256": "db9c04527cd3eaa95fa5a41a251c24898e438e1f24d96103a5ab20cdfbebd62d",
+      "canonicalLFBytes": 63
+    },
+    "wingWrapper": {
+      "program": "unfezant",
+      "start": "R.draw=function(",
+      "lineFunction": true,
+      "removePrefix": "R.draw=",
+      "canonicalLFSHA256": "cb277736e79d9beae2794ca04f965202ac2dd7844ab93496cee190d5562c1031",
+      "canonicalLFBytes": 1390
+    }
+  },
+  "baseline": {
+    "file": "ambientPose-before064.js",
+    "canonicalLFSHA256": "45f10a5517c0c20798b66b776669756df4bc8c6aac41cce1a3c8eaefd71adc5c",
+    "canonicalLFBytes": 867,
+    "originFullProgramRawSHA256": "e36f3903827cedcb0ebced1d747d3ea1c21f79fa6c982a341e4ed77de57ead9f"
+  },
+  "nativeAssets": [
+    {
+      "relative": "assets/animated/504-front.json",
+      "sha256": "60ff547d29ca6b4ca2b0a53339fbb974a543802e79cff90bd4fdb6906a25ed31",
+      "bytes": 10423
+    },
+    {
+      "relative": "assets/animated/504-front.png",
+      "sha256": "45609c2e2d38a2fe1fc060492cbee0b89ac5f2930c997affbfca9f349bd463dc",
+      "bytes": 1988
+    },
+    {
+      "relative": "assets/animated/506-front.json",
+      "sha256": "3a03ce918a3bb5c484151f8471ca3014e71b6c1599995c3978fa52b30bd296be",
+      "bytes": 9377
+    },
+    {
+      "relative": "assets/animated/506-front.png",
+      "sha256": "2cd1f8ff5eba126c2a641a203cfc8a8833c27a2af1d04419e0f520bbf17d0b7f",
+      "bytes": 1576
+    },
+    {
+      "relative": "assets/pokemon/504-front.png",
+      "sha256": "8e2c60d9497ad8cab9448e21d94f6ec0a636c5211c94d79aac9e98b8f52c4c86",
+      "bytes": 712
+    },
+    {
+      "relative": "assets/pokemon/506-front.png",
+      "sha256": "fdf8d62c34f60a1a9330866f49b7809c110c9d40106e34971b188dc9397b97b7",
+      "bytes": 685
+    }
+  ],
+  "scope": "Native504/506front only; same current original native rendererA/B. A frozen historicambientPose; B current src helper/ambientPose/canvas.32stepCPU geometry/fullRGBA/metrics/fallback/owner comparison, not real app/browser certification.",
+  "limits": {
+    "stageMs": 180000,
+    "heapMiB": 400,
+    "RSSMiB": 400,
+    "PNG": 0,
+    "reportBytes": 1048576
+  }
+}
