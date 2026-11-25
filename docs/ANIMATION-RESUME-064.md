@@ -408,3 +408,44 @@ percorso, Git, reparse e processi. Restano04 come base obbligatoria degli
 archivi e08 come confronto verificato; sorgenti, ROM e rapporti sono
 preservati. I test successivi usano gli asset08 con i32 pin nativi
 individualmente confrontati, senza dipendenze eseguibili dalla09 rimossa.
+
+### Candidata10 e compatibilità dei test
+
+La10 locale `fe54a7ae6c478b40`, appSHA256
+`679a696ac968bb1e6b750f421f733681ff7c9bab2657c3d697c075f4a941ccc4`,
+passa il primo pilot effettivo di Doppiasberla nei tre formati:6 turni
+nativi,12 clip di colpo,396 conferme protette e48 avvii delle voci originali.
+Ogni turno usa i pulsanti LOTTA/mossa e i due colpi realmente risolti dal
+motore. Sono verificati399 moduli effettivamente eseguiti e il ripristino
+dei12 hook osservati. Tutti i12 PNG di contatto sono stati letti dal
+responsabile; i quattro verticali hanno anche revisione indipendente.
+Il renderer osservato è IntelHD630/D3D11 suWindows: non è Android.
+
+Il primo pilot fallito resta preservato. Il suo osservatore registrava i
+clear anche durante la preparazione, ma ometteva le vere chiamate R.draw
+quando MoveFX non era ancora attivo. La regressione sul raccoglitore usa
+R.prepare/R.draw originali, accetta due corpi realmente disegnati e rifiuta
+zero/uno, alpha0 o disegni su un altro canvas. La nuova raccolta conserva
+l'asserzione integrale e salva anche i diagnostici prima dei controlli.
+Il replay nuovo passa; il witness storico incompleto non viene ricostruito
+retroattivamente. I sei WebM rimangono disponibili per l'esame del movimento.
+Questi risultati non coprono ancora miss, KO precoce,3–5 colpi,×2/×4,
+guasti o sospensioni nel renderer, né l'approvazione visiva globale.
+
+La CI45579984976 conclude48/52 fasi CLI; i successivi gate browser sono
+saltati. I quattro gruppi falliti comprendono un pin grezzo della nuova
+fixture `png-pins.json`, trasformata daCRLF aLF daGit. La correzione
+normalizza solo quei terminatori prima del pin canonico, verificato contro
+il blobGit originale; PNG e dati nativi mantengono SHA sui byte grezzi.
+Il test di accettazioneLF fallisce con il vecchio helper; tutti i cinque
+controlli passano con quello nuovo, inclusi i negativi sui veri hash e dati.
+
+Le vecchie fixture isolate di Patrat e Unfezant non dichiaravano una
+Session, ora necessaria al contratto dell'interfaccia. Ricevono un
+proprietario stabile esplicito, mantenendo ogni asserzione su eventi,
+preparazione, danni, cancellazioni e reazioni. Il codice del gioco resta
+identico alla10. L'intero gruppo mirato aggiornato passa124/124 in43155ms,
+senzaFAIL o skip. Il rapportoCI48/52 originale e il suo archivioSHA256
+`f35e0967a31cf4a49e032f1ae2d46a37595d734587602b470b9fc349f019ff12`
+restano conservati. Una nuova CI completa è richiesta dopo queste sole
+modifiche dei test; nessun precedenteFAIL diventaPASS per questo documento.

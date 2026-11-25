@@ -7,6 +7,9 @@ const root=path.resolve(__dirname,'..'),site=process.env.SOFFIOLIEVE_TEST_SITE||
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};}
 function composed(graphic=521,side='p1'){
  const h=host(),c=h.c,ArtImage=c.Image,timers=new Map(),completion=new Set(),preloads=[],begins=[];let wall=0,next=0;
+ // Preserve the production UI's Session identity contract in this otherwise
+ // isolated preparation/clock fixture; outcomes still come from its tests.
+ c.session={};
  c.Image=class extends ArtImage{set src(value){if(!value||value.startsWith('data:')){super.src=value;return;}this.source=value;const p=fs.readFileSync(path.join(site,value));this.width=this.naturalWidth=p.readUInt32BE(16);this.height=this.naturalHeight=p.readUInt32BE(20);this.complete=true;queueMicrotask(()=>this.onload?.());}};
  c.performance={now:()=>wall};c.setTimeout=(fn,ms=0)=>{const id=++next;timers.set(id,{fn,at:wall+Math.max(0,ms)});return id;};c.clearTimeout=id=>timers.delete(id);c.localStorage={getItem:()=>null,setItem(){}};c.document.hidden=false;c.document.addEventListener=()=>{};c.document.documentElement={setAttribute(){}};
  vm.runInContext(read('game-speed.js'),c,{filename:'game-speed.js'});const schedule=c.GameSpeed.schedule,cancel=c.GameSpeed.cancel;c.GameSpeed.schedule=(fn,ms)=>{let id;id=schedule(()=>{completion.delete(id);fn();},ms);completion.add(id);return id;};c.GameSpeed.cancel=id=>{completion.delete(id);cancel(id);};

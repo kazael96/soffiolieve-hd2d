@@ -3,7 +3,8 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
 const {repo,sourceRoot,sourcePath,site,fixturePath,read}=require('./minccino-slap-paths064.cjs');
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),plain=x=>JSON.parse(JSON.stringify(x)),decode=require(path.join(repo,'tests/helpers/native-png.cjs'));
-const assets=new Map(),pins=new Map(),pngRaw=fs.readFileSync(fixturePath('png-pins.json'));if(sha(pngRaw)!=='4a165a57975dd97f29e081ee1bf2bd4ebee21c47581534e9140276894fd7fd26')throw Error('Native PNG pin metadata changed');const assetManifest=JSON.parse(pngRaw).files;
+// Git normalizes this JSON fixture; the PNG and native-data checks below stay raw.
+const assets=new Map(),pins=new Map(),pngRaw=fs.readFileSync(fixturePath('png-pins.json')),pngMetadata=pngRaw.toString('utf8').replace(/\r\n/g,'\n');if(sha(pngMetadata)!=='0ec766ffae646912028cfd1ac703c7339a730c07903d5f7ff3570209ffd1ec7e')throw Error('Native PNG pin metadata changed');const assetManifest=JSON.parse(pngMetadata).files;
 let verifiedBaseline=false;
 function verifyBaseline(){if(verifiedBaseline)return;const contract=JSON.parse(fs.readFileSync(fixturePath('native-data-pins.json'),'utf8'));for(const[file,pin]of Object.entries(contract.files)){const raw=fs.readFileSync(path.join(site,file));if(sha(raw)!==pin)throw Error('Native data contract changed: '+file);}verifiedBaseline=true;}
 function asset(file){if(!assets.has(file)){const raw=fs.readFileSync(path.join(site,file));if(sha(raw)!==assetManifest[file])throw Error('Original PNG asset mismatch: '+file);const d=decode(raw),h=d.pixels.length/d.width/4;assets.set(file,{width:d.width,height:h,data:d.pixels,__texture:file});pins.set(file,sha(raw));}return assets.get(file);}
