@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "ACTUAL_V4_PLUS_AMBIENT064_SOURCE_CONTRACT_NOT_EXECUTION",
-  "revision": "coherent-v4-plus-ambient064",
+  "status": "ACTUAL_V4_ORIGINAL_FULL_RESTORED_SOURCE_CONTRACT_NOT_EXECUTION",
+  "revision": "coherent-v4-original-full-restored",
   "basisSourceManifestSHA256": "d8558489faa963bd032067b2436d697c34615bac1772762dc9b67601f482ba53",
   "sourceLFHashes": {
     "training-data.js": "8d20396f42cc664d5d404e317be97c672ccfcfad88290a36c0a17d73f40eed75",
@@ -28,7 +28,7 @@
     "battle-reactions.js": "7a3522373866e8b644716448beb6db6f4d596c3428edfb542948f8e5ac114064",
     "native-visual.js": "9dc52f843e1829204832e6c31b83601dcca98bbfa51500d84d0a9467e58422ff",
     "native-audio.js": "56f3c872b42108212ecfe6f180df119a2e1c76741f6caab46bfb217c791403b7",
-    "battle-diorama.js": "56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7",
+    "battle-diorama.js": "e36f3903827cedcb0ebced1d747d3ea1c21f79fa6c982a341e4ed77de57ead9f",
     "double-rules.js": "949e8f7d170d9d0990fa5cc74e3165731a0c4179f8b554803e6d7b7b890e3184",
     "battle-presentation.js": "3adc5eecd3335c0232bfbc424e9f25fef3fd1cc608c4f74debfec4550f02f446",
     "audio-engine.js": "7a18b9245a11a61e02556dafec71f1611809a491fdf9f8362318c268c47d76ab",
@@ -75,5 +75,7 @@
     "included": false,
     "caseCount": null,
     "sourcePins": null
-  }
+  },
+  "previousAmbientContractCanonicalLFSHA256": "e11f3856e7d5870fcdf3378f7507f022996d6844257121b073fc463387c5893e",
+  "originalFullContractCanonicalLFSHA256": "0d8e384dcf67db3ff6199d23b5cafab647460b85bab68378649a3520df393b13"
 }

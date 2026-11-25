@@ -1,0 +1,1 @@
+const ambientCanvas=Object.freeze({size:256,foot:192,body:64});

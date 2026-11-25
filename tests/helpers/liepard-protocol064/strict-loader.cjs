@@ -4,7 +4,7 @@ const repo=path.resolve(process.env.SOFFIOLIEVE_TEST_REPO||path.join(__dirname,'
 const records=[],sha=b=>crypto.createHash('sha256').update(b).digest('hex'),LF=text=>text.replace(/\r\n/g,'\n');
 function decode(raw,file){const text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(raw);assert(Buffer.from(text,'utf8').equals(raw),'strict UTF8 raw roundtrip '+file);return text;}
 const contractRaw=fs.readFileSync(path.join(fixtures,'source-contract.json')),contractText=decode(contractRaw,'source-contract.json');
-assert.equal(sha(Buffer.from(LF(contractText.replace(/^\uFEFF/,'')))),'e11f3856e7d5870fcdf3378f7507f022996d6844257121b073fc463387c5893e','Frozen source contract metadata changed');
+assert.equal(sha(Buffer.from(LF(contractText.replace(/^\uFEFF/,'')))),'04ebfc3ac16f327fbb00efaed6d8f3948de84df53c32b78c87567ebb087711fc','Frozen source contract metadata changed');
 const contract=JSON.parse(contractText.replace(/^\uFEFF/,''));assert.equal(contract.schema,1);
 function within(root,file){const relative=path.relative(root,file);return relative===''||(!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative));}
 function sourcePath(file){assert(typeof file==='string'&&!path.isAbsolute(file)&&!file.split(/[\\/]/).includes('..'),'Relative source name required');if(file.startsWith('assets/')||Object.hasOwn(contract.buildProgramRawSHA256,file))return path.join(site,file);assert(Object.hasOwn(contract.sourceLFHashes,file),'Unlisted actual source '+file);const selected=path.join(target,file);return fs.existsSync(selected)?selected:path.join(repo,'src',file);}

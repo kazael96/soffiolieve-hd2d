@@ -1,9 +1,9 @@
 'use strict';
-// Portable transport/source loader; native host body below is preserved from R3.
+// Portable FULL runtime / immutable historical ROI oracle. Native R and raster host remain shared.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const sha=raw=>crypto.createHash('sha256').update(raw).digest('hex'),canonicalLF=raw=>Buffer.from(raw.toString('utf8').replace(/\r\n/g,'\n'),'utf8');
 const repo=process.env.SOFFIOLIEVE_TEST_REPO||path.resolve(__dirname,'../..'),site=process.env.SOFFIOLIEVE_TEST_SITE||path.join(repo,'_site'),fixture=path.resolve(__dirname,'../fixtures/ambient-readback064'),metadata=path.join(fixture,'source-contract.json'),metadataBytes=fs.readFileSync(metadata);
-assert.equal(sha(canonicalLF(metadataBytes)),'3d5569d077f5ae816beccfb5fdf74a82a115e55c30f5ab2caed4bce48ca42d3b','Ambient source metadata canonicalLF integrity');
+assert.equal(sha(canonicalLF(metadataBytes)),'4397a241a0c3586128e21de65623a14cd4930b7ccfed60b7bd6750295d2b2706','Ambient source metadata canonicalLF integrity');
 const contract=JSON.parse(metadataBytes.toString('utf8'));
 function source(file){const override=process.env.SOFFIOLIEVE_TEST_SOURCE&&path.join(process.env.SOFFIOLIEVE_TEST_SOURCE,file);return override&&fs.existsSync(override)?override:path.join(repo,'src',file);}
 function program(key,fragment=null){const p=contract.programs[key],slice=fragment&&contract.fragments[fragment];return{path:source(p.file),sha256:slice?slice.canonicalLFSHA256:p.canonicalLFSHA256,domain:'program',parentSHA256:p.canonicalLFSHA256,...(slice?{slice}:{})};}
@@ -17,9 +17,14 @@ function pinned(p){
  }
  return result;
 }
-const renderer=program('renderer'),speciesSource=program('species'),ambientCanvas=program('diorama','ambientCanvas'),ambientHelper=program('diorama','ambientHelper'),ambientA={path:path.join(fixture,contract.baseline.file),sha256:contract.baseline.canonicalLFSHA256,domain:'program'},ambientB=program('diorama','ambientPose'),wingWrapper=program('unfezant','wingWrapper');
+function historical(key){const h=contract.historicalROI.fragments[key];return{path:path.join(fixture,h.file),sha256:h.canonicalLFSHA256,domain:'program'};}
+const historicalContract={path:path.join(fixture,contract.historicalROI.contract.file),sha256:contract.historicalROI.contract.canonicalLFSHA256,domain:'program'},history=JSON.parse(pinned(historicalContract).toString('utf8'));
+for(const [key,h]of Object.entries(contract.historicalROI.fragments)){assert.equal(h.originProgramCanonicalLFSHA256,history.programs.diorama.canonicalLFSHA256);assert.equal(h.canonicalLFSHA256,history.fragments[key].canonicalLFSHA256);assert.equal(h.canonicalLFBytes,history.fragments[key].canonicalLFBytes);}
+assert.equal(contract.programs.diorama.canonicalLFSHA256,contract.baseline.originFullProgramRawSHA256,'Qualified FULL parent required');
+assert.equal(contract.fragments.ambientPose.canonicalLFSHA256,contract.baseline.canonicalLFSHA256,'Current FULL pose must match immutable original FULL fixture');
+const renderer=program('renderer'),speciesSource=program('species'),ambientCanvas=program('diorama','ambientCanvas'),ambientHistoricalCanvas=historical('ambientCanvas'),ambientHelper=historical('ambientHelper'),ambientA=historical('ambientPose'),ambientB=program('diorama','ambientPose'),immutableFullPose={path:path.join(fixture,contract.baseline.file),sha256:contract.baseline.canonicalLFSHA256,domain:'program'},wingWrapper=program('unfezant','wingWrapper');
 const nativeAssets=contract.nativeAssets.map(p=>({...p,path:path.join(site,p.relative),domain:'raw'}));
-const plan={schema:1,scope:contract.scope,programs:{A:renderer,B:renderer},speciesSource,ambientCanvas,ambientHelper,ambientPose:{A:ambientA,B:ambientB},wingWrapper,canvasModule:process.env.SOFFIOLIEVE_CANVAS_MODULE||'@napi-rs/canvas',nativeAssets,limits:contract.limits,inputs:[renderer,speciesSource,program('diorama'),program('unfezant'),program('index'),ambientCanvas,ambientHelper,ambientA,ambientB,wingWrapper,...nativeAssets,{path:metadata,sha256:'3d5569d077f5ae816beccfb5fdf74a82a115e55c30f5ab2caed4bce48ca42d3b',domain:'program'}]};
+const plan={schema:1,scope:contract.scope,programs:{A:renderer,B:renderer},speciesSource,ambientCanvas,ambientHelper,ambientPose:{A:ambientA,B:ambientB},wingWrapper,canvasModule:process.env.SOFFIOLIEVE_CANVAS_MODULE||'@napi-rs/canvas',nativeAssets,limits:contract.limits,inputs:[renderer,speciesSource,program('diorama'),program('unfezant'),program('index'),ambientCanvas,ambientHistoricalCanvas,ambientHelper,ambientA,ambientB,immutableFullPose,historicalContract,wingWrapper,...nativeAssets,{path:metadata,sha256:'4397a241a0c3586128e21de65623a14cd4930b7ccfed60b7bd6750295d2b2706',domain:'program'}]};
 assert.equal(require(path.join(plan.canvasModule,'package.json')).version,contract.canvasVersion,'Native canvas version');
 const native=require(plan.canvasModule);
 const assets=new Map(plan.nativeAssets.map(p=>[p.relative,p]));
@@ -49,11 +54,11 @@ function host(label){
  }};c.window=c;vm.createContext(c);
  vm.runInContext(pinned(plan.speciesSource).toString('utf8'),c,{filename:plan.speciesSource.path});
  vm.runInContext(pinned(plan.programs[label]).toString('utf8'),c,{filename:plan.programs[label].path});
- vm.runInContext(pinned(plan.ambientCanvas).toString('utf8')+'\n'+(label==='B'?pinned(plan.ambientHelper).toString('utf8')+'\n':'')+pinned(plan.ambientPose[label]).toString('utf8')+'\nthis.OriginalAmbientPose064=ambientPose;'+(label==='B'?'this.BindAmbientReadback064=bindAmbientReadback;':''),c,{filename:'EXACT_AMBIENT_SUBSTRINGS_'+label});
+ vm.runInContext(pinned(label==='A'?ambientHistoricalCanvas:plan.ambientCanvas).toString('utf8')+'\n'+(label==='A'?pinned(plan.ambientHelper).toString('utf8')+'\n':'')+pinned(plan.ambientPose[label]).toString('utf8')+'\nthis.OriginalAmbientPose064=ambientPose;'+(label==='A'?'this.BindAmbientReadback064=bindAmbientReadback;':''),c,{filename:'EXACT_AMBIENT_SUBSTRINGS_'+label});
  const R=c.ROM_SPRITE_ANIM,original={draw:R.draw,frame:R.frame,parts:R.parts,bounds:R.bounds,batches:R.batches,prepare:R.prepare,alphaBounds:R.alphaBounds};
  function stable(){for(const [key,value]of Object.entries(original))if(!allowedBindingFaults.has(key))assert.equal(R[key],value,'Real original API changed: '+key);}
  function target(role,hint){const surface=canvas(role);surface.width=surface.height=256;const context=surface.getContext('2d',{willReadFrequently:hint});context.imageSmoothingEnabled=false;return{canvas:surface,context};}
- async function actor(id,hint){if(!originalImages.has(id))originalImages.set(id,decode('assets/pokemon/'+id+'-front.png'));const image=await originalImages.get(id),frame=target('ambient-frame',hint),source=target('ambient-source',false);const actor={id,frame:frame.canvas,frameContext:frame.context,source:source.canvas,ctx:source.context,original:{image}};if(label==='B')c.BindAmbientReadback064(actor);return actor;}
+ async function actor(id,hint){if(!originalImages.has(id))originalImages.set(id,decode('assets/pokemon/'+id+'-front.png'));const image=await originalImages.get(id),frame=target('ambient-frame',hint),source=target('ambient-source',false);const actor={id,frame:frame.canvas,frameContext:frame.context,source:source.canvas,ctx:source.context,original:{image}};if(label==='A')c.BindAmbientReadback064(actor);return actor;}
  function read(context){const meta=contexts.get(context);assert(meta,'Owned actual context required');counts.oracleReadbacks++;const value=Reflect.apply(meta.getData,context,[0,0,256,256]);return Buffer.from(value.data.buffer,value.data.byteOffset,value.data.byteLength);}
  function bounds(rgba){const value=R.alphaBounds(rgba,256,256);return value?Array.from(value):null;}
  function render(key,tick,surface,isActor){

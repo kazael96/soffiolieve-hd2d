@@ -24,6 +24,7 @@ async function main(){
  await step('01-original-R-source-and-native-assets',async()=>{
   for(const p of plan.inputs)pinned(p);assert.equal(plan.programs.A.path,plan.programs.B.path);assert.equal(plan.programs.A.sha256,'bde5a3f22260afc2002de9cdd4c82f32f4246dc80b3b3a528f1b062ed88df395');assert(pinned(plan.programs.A).equals(pinned(plan.programs.B)));
   for(const p of [plan.programs.A,plan.programs.B,plan.speciesSource,plan.ambientCanvas,plan.ambientHelper,plan.ambientPose.A,plan.ambientPose.B,plan.wingWrapper,...plan.nativeAssets.filter(p=>p.relative.endsWith('.json'))]){const raw=pinned(p);assert(raw.equals(Buffer.from(raw.toString('utf8'),'utf8')),'Compiled/decoded UTF8 must equal raw pinned bytes: '+p.path);}
+  assert.equal(plan.ambientPose.B.sha256,'45f10a5517c0c20798b66b776669756df4bc8c6aac41cce1a3c8eaefd71adc5c','Current FULL pose must be extracted from qualified parent');assert.notEqual(plan.ambientPose.A.sha256,plan.ambientPose.B.sha256,'Historical ROI vs current FULL must remain a non-tautological oracle');
   A=host('A');B=host('B');await A.R.prepare(keys,{gate:false});await B.R.prepare(keys,{gate:false});actors={A:{},B:{}};periods={};
   for(const key of keys){periods[key]=period(A.R.cache[key].data);assert.equal(period(B.R.cache[key].data),periods[key]);assert(periods[key]>0&&periods[key]<=4096);for(const h of [A,B])actors[h.label][key]=await h.actor(+key.split('-')[0],true);}
   return{nativeOriginalSHA256:plan.programs.A.sha256,compiledTextUTF8RoundtripRawExact:true,periods,framesHint:true,rendererLayerHintChanges:false,sourceHintChanges:false,APIA:A.audit().APIBindingsOriginal,APIB:B.audit().APIBindingsOriginal};
@@ -35,7 +36,7 @@ async function main(){
    const sig=JSON.stringify(A.R.parts(A.R.cache[key].data,tick).map(p=>[p.r,p.f,p.pf,p.o]));states.add(sig);samples++;
   }jointStates[key]=states.size;}
   const after=[A.audit(),B.audit()],calls=after.map((a,i)=>a.counts.ambientReadbacks-before[i].counts.ambientReadbacks),pixels=after.map((a,i)=>a.counts.ambientPixels-before[i].counts.ambientPixels),returned=after.map((a,i)=>a.counts.ambientReturnedPixels-before[i].counts.ambientReturnedPixels),returnedBytes=after.map((a,i)=>a.counts.ambientReturnedBytes-before[i].counts.ambientReturnedBytes);
-  assert.equal(calls[0],samples);assert.equal(calls[1],samples);assert.equal(pixels[0],samples*65536);assert(pixels[1]<pixels[0],'Candidate must reduce requested frame readback area');
+  assert.equal(calls[0],samples);assert.equal(calls[1],samples);assert.equal(pixels[1],samples*65536,'Current FULL runtime must read all65536 pixels per update');assert(pixels[0]<pixels[1],'Historical ROI oracle must retain its independently pinned cropped reads');
   assert.deepEqual(returned,pixels,'Actual ImageData dimensions must match requested rectangle');assert.deepEqual(returnedBytes,returned.map(p=>p*4),'Actual RGBA byte lengths');
   return{pairedSamples:samples,jointStates,fullRGBAAndMetricsExact:true,ambientReadbackCalls:calls,requestedPixels:pixels,actualReturnedPixels:returned,actualReturnedBytes:returnedBytes,digestSHA256:digest.digest('hex'),A:after[0],B:after[1]};
  });
@@ -82,8 +83,8 @@ async function main(){
    if(name==='OAM-coordinate'){const p=h.R.parts(bank.data,0)[0];p.o[0]+=21;}
    if(name==='groundBounds')bank.groundBounds=bank.groundBounds.map((v,i)=>v+(i===3?7:0));
   }
-  const after=await renderPair(hs.A,hs.B,as,'504-front',0);if(name==='groundBounds')assert.notDeepEqual(after.rectB,before.rectB,'Current registration must alter rectangle; no stale token');assert(after.rectB[2]*after.rectB[3]<65536);
-  return{before:before.rectB,after:after.rectB,frameSourceMetricsExact:true,currentDataReadEachFrame:true};
+  const after=await renderPair(hs.A,hs.B,as,'504-front',0);if(name==='groundBounds')assert.notDeepEqual(after.rectA,before.rectA,'Historical ROI current registration must alter rectangle; no stale token');assert(after.rectA[2]*after.rectA[3]<65536);assert.deepEqual(after.rectB,[0,0,256,256],'Current FULL must not adopt a stale or cropped rectangle');
+  return{before:before.rectA,after:after.rectA,currentFullRect:after.rectB,frameSourceMetricsExact:true,currentDataReadEachFrame:true};
  });
  await step('06-added-Rbounds-reference-cost-not-browser-profile',async()=>{
   let calls=0;const t=performance.now();for(const key of keys)for(let tick=0;tick<periods[key];tick++){if(tick%32===0)budget();const b=B.R.bounds(B.R.cache[key].data,tick);assert(b.every(Number.isFinite));calls++;}
@@ -93,12 +94,12 @@ async function main(){
  for(const present of [true,false])await step('08-exact-Unfezant-birth-wrapper-'+present,async()=>{
   const hs={A:host('A'),B:host('B')},as={},calls={A:0,B:0},vm=require('node:vm');
   for(const h of Object.values(hs)){await h.R.prepare(['504-front'],{gate:false});const native=h.R.draw,original={draw:function(...args){calls[h.label]++;return Reflect.apply(native,this,args);}};const factory=vm.runInContext('(function(original,R){return '+pinned(plan.wingWrapper).toString('utf8')+';})',h.c);h.allowBindingFault('draw');h.R.draw=factory(original,h.R);if(present)h.c.UnfezantMoves={fixtureExactWrapperOnly:true};as[h.label]=await h.actor(504,true);}
-  const pair=await renderPair(hs.A,hs.B,as,'504-front',0);assert.equal(calls.A,1);assert.equal(calls.B,1);if(present)assert(pair.rectB[2]*pair.rectB[3]<65536);else assert.deepEqual(pair.rectB,[0,0,256,256]);
+  const pair=await renderPair(hs.A,hs.B,as,'504-front',0);assert.equal(calls.A,1);assert.equal(calls.B,1);if(present)assert(pair.rectA[2]*pair.rectA[3]<65536);else assert.deepEqual(pair.rectA,[0,0,256,256]);assert.deepEqual(pair.rectB,[0,0,256,256]);
   return{approvedWrapperExactText:true,UnfezantAPIPresent:present,nativeDelegateCalls:calls,candidateRect:pair.rectB,frameSourceMetricsExact:true,scope:'Exact isolated native delegate branch for504, not full399 app/source-order proof or Chrome profile'};
  });
  await step('09-new-actor-context-after-sticky-clip',async()=>{
   const hs={A:host('A'),B:host('B')},old={},fresh={};for(const h of Object.values(hs)){await h.R.prepare(['504-front'],{gate:false});old[h.label]=await h.actor(504,true);const c=old[h.label].frameContext;c.save();c.beginPath();c.rect(0,0,1,1);c.clip();c.restore();}
-  const first=await renderPair(hs.A,hs.B,old,'504-front',0);assert.deepEqual(first.rectB,[0,0,256,256]);for(const h of Object.values(hs))fresh[h.label]=await h.actor(504,true);const second=await renderPair(hs.A,hs.B,fresh,'504-front',0);assert(second.rectB[2]*second.rectB[3]<65536);return{stickyOldContextFull:true,newActorOwnedContextEligible:true,exactRGBA:true};
+  const first=await renderPair(hs.A,hs.B,old,'504-front',0);assert.deepEqual(first.rectA,[0,0,256,256],'Historical ROI sticky old context must use FULL before a fresh owner becomes eligible');assert.deepEqual(first.rectB,[0,0,256,256]);for(const h of Object.values(hs))fresh[h.label]=await h.actor(504,true);const second=await renderPair(hs.A,hs.B,fresh,'504-front',0);assert(second.rectA[2]*second.rectA[3]<65536);assert.deepEqual(second.rectB,[0,0,256,256]);return{stickyOldContextFull:true,newHistoricalROIContextEligible:true,currentRuntimeAlwaysFull:true,exactRGBA:true};
  });
  A.stable();B.stable();for(const pin of plan.inputs)pinned(pin);report.status='CPU_EXACT_EQUIVALENCE_ONLY_CHROME_REQUIRED';report.sourceUnchanged=true;report.durationMs=performance.now()-started;report.peakRSSKiB=process.resourceUsage().maxRSS;save();console.log(report.status+' '+report.durationMs+'ms');
 }

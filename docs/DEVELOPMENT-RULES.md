@@ -312,3 +312,24 @@ sorgente corrente, con lo stesso renderer nativo per A/B. Il test CPU
 e il confronto Canvas in Chrome non certificano da soli l'app completa:
 verificare ordine/proprietà effettivi, binding intatti, rettangolo
 ridotto realmente attivo e beneficio misurato nell'app prima del rilascio.
+
+### Esito del confronto ambientale · 25 novembre2026
+
+Il readback rettangolare e la successiva alpha memo sono respinti per
+utilità prestazionale; i rispettivi PASS funzionali e tutti i FAIL
+rimangono storici. Il runtime torna alla FULL originale e36. L'owner
+portabile conserva32casi/2340coppie: A è la ROI storica immutabile,
+B è la FULL estratta dal runtime corrente, con lo stesso rendererR6c.
+Trasporre esplicitamente le aspettative ai rispettivi lati: B legge
+sempre65536pixel; A conserva riduzioni positive e fallback FULL,
+compreso il vecchio contesto avvelenato prima di crearne uno nuovo.
+Non eliminare assert ROI o applicare assert memo a un runtime FULL.
+Restano invariati inventario425/52/93, budget, GC/yield e oracoli RGBA.
+
+Conservare separatamente i contratti V4 e V4+ROI; il contratto attuale
+`coherent-v4-original-full-restored` dichiara entrambe le provenienze e
+ripristina tutti i pin sorgente originali. Una minore area letta o una
+mediana migliore non certifica un vantaggio se peggiora la coda: nel
+giudizio mantenere tutti i campioni e gli estremi, distinguere costo
+per aggiornamento dalle chiamate riusate e non dedurre FPS. Il seguito
+di questa decisione non apre un'altra ottimizzazione esplorativa.

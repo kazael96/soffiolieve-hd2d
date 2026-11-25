@@ -848,3 +848,34 @@ che distinguono la base storica dal contratto corrente. I cinque
 controlli del loader passano in579ms; non sostituiscono la nuova
 esecuzione dei39casi o della suite completa. Runtime e budget restano
 invariati durante questa migrazione.
+
+### Decisione prestazionale e ritorno alla FULL · 25 novembre, seguito
+
+La CI45679530895 del commit405f7ca completa93fasi CLI, cinque gruppi
+browser e18nativi con successo. I39casi precedentemente fermati dal pin
+sono rieseguiti PASS; resta il solo skip Windows-only previsto suLinux.
+Le immagini di quella CI non sono state revisionate e non trasferiscono
+un'approvazione artistica.
+
+Il successivo ordine inverso R5 conferma il peggioramento del readback
+rettangolare: C13 è respinta. Anche la diversa alpha memo privata supera
+correttezza e riuso ma non il giudizio di utilità dopo una sola ABBA:
+la mediana migliora, mentre la coda cold peggiora ripetutamente. Non si
+eliminano gli estremi né si apre una terza ottimizzazione. Il runtime
+torna alla FULL originale e36; storiaV4 e V4+ROI rimangono distinte e il
+contratto corrente dichiara esplicitamente il ripristino.
+
+I nuovi controlli mirati passano32casi/2340coppie ambientali in30311ms e
+cinque casi provider in600ms, con limiti e guard mantenuti. Fonte,
+decisione, dati e limiti sono in
+[QA-064-AMBIENT-FULL-RESTORE.md](QA-064-AMBIENT-FULL-RESTORE.md).
+La suite completa del nuovo commit e il rilascio restano da concludere.
+C13 è stata archiviata, ricostruita/hash-verificata e rimossa secondoH.8;
+04,08e12 sono preservate.
+
+Minccino ha cinque nuove pose BACK-near private e un primo pilot della
+mossa3 reale: due colpi GEN5 completi,33ACK percolpo, SPA/audio originali,
+stato/esiti coincidenti con una Session nativa indipendente e tutte le
+sette immagini lette da due revisori. Il GO riguarda soltanto il primo
+near osservato; far/front, movimento continuo, handoff e produzione
+rimangono aperti. Nessun nuovo asset è installato da questo ripristino.

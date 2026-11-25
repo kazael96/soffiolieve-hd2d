@@ -13,7 +13,7 @@
     },
     "diorama": {
       "file": "battle-diorama.js",
-      "canonicalLFSHA256": "56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7"
+      "canonicalLFSHA256": "e36f3903827cedcb0ebced1d747d3ea1c21f79fa6c982a341e4ed77de57ead9f"
     },
     "unfezant": {
       "file": "unfezant-moves.js",
@@ -25,21 +25,13 @@
     }
   },
   "fragments": {
-    "ambientHelper": {
-      "program": "diorama",
-      "start": " const ambientReadbackOwners=",
-      "end": " function ambientPose(",
-      "includeEnd": false,
-      "canonicalLFSHA256": "fb9d8e842a5f391ded6d80cdb6b03a6739ec35883b9430dc06f14a0a862849b4",
-      "canonicalLFBytes": 4804
-    },
     "ambientPose": {
       "program": "diorama",
       "start": " function ambientPose(",
       "end": " function auditAmbient(",
       "includeEnd": false,
-      "canonicalLFSHA256": "13956225f975c0929e5f283855c2006d8da224ca0647fc4e709702e5e40caba5",
-      "canonicalLFBytes": 859
+      "canonicalLFSHA256": "45f10a5517c0c20798b66b776669756df4bc8c6aac41cce1a3c8eaefd71adc5c",
+      "canonicalLFBytes": 867
     },
     "ambientCanvas": {
       "program": "diorama",
@@ -96,12 +88,43 @@
       "bytes": 685
     }
   ],
-  "scope": "Native504/506front only; same current original native rendererA/B. A frozen historicambientPose; B current src helper/ambientPose/canvas.32stepCPU geometry/fullRGBA/metrics/fallback/owner comparison, not real app/browser certification.",
+  "scope": "Native504/506front only; same current original R6c renderer A/B. A frozen historical ROI56 canvas/helper/pose; B current FULL runtime e36 canvas/pose extracted at execution.32 CPU steps/2340 paired full RGBA+metrics/cold+warm/fallback/ownership; no performance, art, app or browser approval.",
   "limits": {
     "stageMs": 180000,
     "heapMiB": 400,
     "RSSMiB": 400,
     "PNG": 0,
     "reportBytes": 1048576
-  }
+  },
+  "historicalROI": {
+    "contract": {
+      "file": "source-contract-roi-before-full064.json",
+      "canonicalLFSHA256": "3d5569d077f5ae816beccfb5fdf74a82a115e55c30f5ab2caed4bce48ca42d3b"
+    },
+    "fragments": {
+      "ambientCanvas": {
+        "file": "ambientCanvas-roi064.js",
+        "canonicalLFSHA256": "db9c04527cd3eaa95fa5a41a251c24898e438e1f24d96103a5ab20cdfbebd62d",
+        "canonicalLFBytes": 63,
+        "originProgramCanonicalLFSHA256": "56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7",
+        "originFragment": "ambientCanvas"
+      },
+      "ambientHelper": {
+        "file": "ambientHelper-roi064.js",
+        "canonicalLFSHA256": "fb9d8e842a5f391ded6d80cdb6b03a6739ec35883b9430dc06f14a0a862849b4",
+        "canonicalLFBytes": 4804,
+        "originProgramCanonicalLFSHA256": "56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7",
+        "originFragment": "ambientHelper"
+      },
+      "ambientPose": {
+        "file": "ambientPose-roi064.js",
+        "canonicalLFSHA256": "13956225f975c0929e5f283855c2006d8da224ca0647fc4e709702e5e40caba5",
+        "canonicalLFBytes": 859,
+        "originProgramCanonicalLFSHA256": "56bccd637d8e48cbe409c832ac48ae5de379e58b178701261c8ea2c5efdbf0d7",
+        "originFragment": "ambientPose"
+      }
+    },
+    "role": "A immutable historical ROI oracle, not current runtime or approved performance optimization"
+  },
+  "status": "FULL_RUNTIME_WITH_IMMUTABLE_HISTORICAL_ROI_ORACLE"
 }
