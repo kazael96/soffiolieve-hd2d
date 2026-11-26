@@ -4,8 +4,8 @@
   "metadataPolicy": "UTF8 exact; metadata/program CRLF to LF only; native PNG/JSON/FLAC RAW",
   "sourceContract": {
     "relative": "tests/fixtures/liepard-protocol064/source-contract.json",
-    "canonicalLFSHA256": "a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e",
-    "revision": "coherent-v4-closed541-m3-native-tail-whiff"
+    "canonicalLFSHA256": "891ac3550f34f5602e82032f784ed299dec052d50be9c3df586a60f331f9f0a8",
+    "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe"
   },
   "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
   "sourceOrder": [

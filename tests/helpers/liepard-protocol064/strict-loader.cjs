@@ -4,7 +4,7 @@ const repo=path.resolve(process.env.SOFFIOLIEVE_TEST_REPO||path.join(__dirname,'
 const records=[],sha=b=>crypto.createHash('sha256').update(b).digest('hex'),LF=text=>text.replace(/\r\n/g,'\n');
 function decode(raw,file){const text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(raw);assert(Buffer.from(text,'utf8').equals(raw),'strict UTF8 raw roundtrip '+file);return text;}
 const contractRaw=fs.readFileSync(path.join(fixtures,'source-contract.json')),contractText=decode(contractRaw,'source-contract.json');
-assert.equal(sha(Buffer.from(LF(contractText.replace(/^\uFEFF/,'')))),'a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e','Frozen source contract metadata changed');
+assert.equal(sha(Buffer.from(LF(contractText.replace(/^\uFEFF/,'')))),'891ac3550f34f5602e82032f784ed299dec052d50be9c3df586a60f331f9f0a8','Frozen source contract metadata changed');
 const contract=JSON.parse(contractText.replace(/^\uFEFF/,''));assert.equal(contract.schema,1);
 const native572Module=require('../native572-assets064.cjs'),native572=native572Module.create({repo,site,sourceRoot:target});
 function within(root,file){const relative=path.relative(root,file);return relative===''||(!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative));}
@@ -47,7 +47,7 @@ function controller(){
  assert.equal(typeof controllerModule.create,'function');assert.equal(typeof controllerModule.canvasCache,'function');return controllerModule;
 }
 function gameFragments(c){
- const bpo=extract('game.js','window.BattlePresentationOwners=','function syncBattleActorFraming(){',{label:'Game.BattlePresentationOwners'}),sync=extract('game.js','function syncBattleActorFraming(){','function drawArena(){',{label:'Game.syncBattleActorFraming'});
+ const bpo=extract('game.js','function acquireTynamo33Render064(','function syncBattleActorFraming(){',{label:'Game.acquireTynamo33Render064-and-BattlePresentationOwners'}),sync=extract('game.js','function syncBattleActorFraming(){','function drawArena(){',{label:'Game.syncBattleActorFraming'});
  runFragment(c,bpo);runFragment(c,sync);return{BPO:{...fragmentRecord(bpo,'vm.runInContext')},sync:{...fragmentRecord(sync,'vm.runInContext')}};
 }
 function json(file){const raw=fs.readFileSync(file),text=decode(raw,file);return JSON.parse(text.replace(/^\uFEFF/,''));}

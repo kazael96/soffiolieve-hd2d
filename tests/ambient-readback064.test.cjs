@@ -1,5 +1,5 @@
 'use strict';
-const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{host,plan,pinned,sha}=require('./helpers/ambient-readback064-host.cjs');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{host,plan,pinned,sha,validateSourceMigration,sourceContract}=require('./helpers/ambient-readback064-host.cjs');
 const test=require('node:test'),os=require('node:os');
 const started=performance.now(),file=process.env.SOFFIOLIEVE_RECT_CPU_RESULT||path.join(fs.mkdtempSync(path.join(os.tmpdir(),'soffiolieve-ambient064-')),'result.json');
 assert(file&&path.isAbsolute(file)&&!fs.existsSync(file),'Fresh explicit result required');
@@ -22,6 +22,10 @@ function period(data){const channels=[...data.parent,...data.animations];assert(
 const keys=['504-front','506-front'];let A,B,actors,periods;
 async function main(){
  await step('01-original-R-source-and-native-assets',async()=>{
+  assert.equal(validateSourceMigration(sourceContract),sourceContract);
+  for(const mutate of [c=>{c.programs.species.canonicalLFSHA256='d23bd08b7db75103eb1fe311b8f56b3cdd4abea14d29f3010b4c63073e23515a';},c=>{c.programs.renderer.canonicalLFSHA256='0'.repeat(64);},c=>{c.nativeAssets[0].sha256='0'.repeat(64);},c=>{c.fragments.ambientPose.canonicalLFSHA256='0'.repeat(64);},c=>{c.limits.RSSMiB++;}]){
+   const changed=JSON.parse(JSON.stringify(sourceContract));mutate(changed);assert.throws(()=>validateSourceMigration(changed),/Ambient migration permits only/);
+  }
   for(const p of plan.inputs)pinned(p);assert.equal(plan.programs.A.path,plan.programs.B.path);assert.equal(plan.programs.A.sha256,'bde5a3f22260afc2002de9cdd4c82f32f4246dc80b3b3a528f1b062ed88df395');assert(pinned(plan.programs.A).equals(pinned(plan.programs.B)));
   for(const p of [plan.programs.A,plan.programs.B,plan.speciesSource,plan.ambientCanvas,plan.ambientHelper,plan.ambientPose.A,plan.ambientPose.B,plan.wingWrapper,...plan.nativeAssets.filter(p=>p.relative.endsWith('.json'))]){const raw=pinned(p);assert(raw.equals(Buffer.from(raw.toString('utf8'),'utf8')),'Compiled/decoded UTF8 must equal raw pinned bytes: '+p.path);}
   assert.equal(plan.ambientPose.B.sha256,'45f10a5517c0c20798b66b776669756df4bc8c6aac41cce1a3c8eaefd71adc5c','Current FULL pose must be extracted from qualified parent');assert.notEqual(plan.ambientPose.A.sha256,plan.ambientPose.B.sha256,'Historical ROI vs current FULL must remain a non-tautological oracle');

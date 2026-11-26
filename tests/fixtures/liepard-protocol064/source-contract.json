@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "ACTUAL_V4_CLOSED541_M3_NATIVE_TAIL_WHIFF_SOURCE_CONTRACT_NOT_EXECUTION",
-  "revision": "coherent-v4-closed541-m3-native-tail-whiff",
+  "status": "ACTUAL_V4_CLOSED541_M3_TAIL_TYNAMO33_NATIVE_FOE_SOURCE_CONTRACT_NOT_EXECUTION",
+  "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe",
   "basisSourceManifestSHA256": "d8558489faa963bd032067b2436d697c34615bac1772762dc9b67601f482ba53",
   "sourceLFHashes": {
     "training-data.js": "8d20396f42cc664d5d404e317be97c672ccfcfad88290a36c0a17d73f40eed75",
@@ -14,7 +14,7 @@
     "demo-moves.js": "ad481c28635e0844a883de044f0da5f85c3f2bf5f606851ab667ebab68ea16e3",
     "chapter-moves.js": "a138d50df7aec766843e64f8f3dfb58025d94cbedb921caaa767e93f92d1544a",
     "route3-moves.js": "89d9b01bfa5b18bb08ad9256374cdb79b4b60fa3eebdb65447eb09ff3f8d2111",
-    "species-moves.js": "d23bd08b7db75103eb1fe311b8f56b3cdd4abea14d29f3010b4c63073e23515a",
+    "species-moves.js": "149445824000e0bbd6f4dc17fe9207a10474c4cc2d00c5568c6c517b6ad6fc37",
     "tepig-moves.js": "d300a263fe8ac77896dc0c69be840344354990ac24ab3e0d21dcd54a8a49fb68",
     "oshawott-moves.js": "5ca68634c416af079328aecd1910bafa88d63269f17cfeb7b12bba593bbc8ad2",
     "patrat-moves.js": "6e3a77b8bb4156b89775e529f23dbbcfd25c9ec0d59e264b636730212450e4fe",
@@ -34,8 +34,8 @@
     "audio-engine.js": "460ced92795986c9de3b0ea41eed6438b642c44ed318b6a6ce8de1b8f72ae6e4",
     "liepard-moves.js": "07c57c2cb21eb740731ea37c88dcb63cff5bde34bcc2d2d70a911b917bebabfe",
     "battle-ground.js": "a4c669c000a34bd7c2d4584b5fc810d29191e6b39bfae48e83db478d4e2cefbb",
-    "game.js": "93c897a8b47c589b859c5aea8993463a6e8b89407219f87933f29767c4cbe047",
-    "move-fx.js": "7498fdce199c87cd6678d9d6b49acd0828dc72421d47d853737cdbebd6e38606",
+    "game.js": "c5e14ea5afdca2f9f975476a9077a6f61c64cfd76b042a243775286546e98a13",
+    "move-fx.js": "1f0e563be80263b4263332f89266aad8266ded2a196ed9a6ce9a0c48615887c9",
     "double-battles.js": "b1bc07758b48bc1e1f94b84b87e691f9f3ea48f41020ff49d21af3583df3d38a",
     "runtime-assets.js": "e7130d01eb54b1f7b72ecb889db5c708778e32975b866e904373ce43291568c9",
     "world3d.js": "97d6606ba2dee3e08062924d1b73647e457b9e1d54b36246f3af48dbeee87924"
@@ -128,5 +128,28 @@
     "requiredBuildFlag": "--native572-tail-partition064",
     "rawAssetPinsRetainOriginalMeaning": true,
     "scope": "Declared M3 tail/whiff source only; no Game/movement/contact approval"
+  },
+  "previousM3TailContractCanonicalLFSHA256": "a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e",
+  "tynamo33NativeFoeLineage": {
+    "schema": 1,
+    "sourceLFHashChanges": [
+      "species-moves.js",
+      "move-fx.js",
+      "game.js"
+    ],
+    "sourceLFHashes": {
+      "species-moves.js": "149445824000e0bbd6f4dc17fe9207a10474c4cc2d00c5568c6c517b6ad6fc37",
+      "move-fx.js": "1f0e563be80263b4263332f89266aad8266ded2a196ed9a6ce9a0c48615887c9",
+      "game.js": "c5e14ea5afdca2f9f975476a9077a6f61c64cfd76b042a243775286546e98a13"
+    },
+    "defaultNativeMetadata": {
+      "relative": "assets/native-alpha-rle-v1/",
+      "indexSHA256": "032f32995bf3ab3d4477f3af4aca88b90fd04b61aa973679b8e04a9a32a9b0f9",
+      "inventorySHA256": "5f0269fb8c59b663a929c367f44c2f8a14b26bccea693b1d7219f3b2d3fcf5c6"
+    },
+    "libraryBoundary": "Absent BattleGround keeps base API; a later host does not auto-install; malformed supplied host rejects",
+    "renderHost": "Original index has BattleGround before SpeciesMoves; default native602/33 integration is installed there",
+    "rawAssetPinsRetainOriginalMeaning": true,
+    "scope": "Declared shared source migration only; no new541 execution/Game/motion/PCM/Android approval"
   }
 }

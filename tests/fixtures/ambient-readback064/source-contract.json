@@ -9,7 +9,7 @@
     },
     "species": {
       "file": "species-moves.js",
-      "canonicalLFSHA256": "d23bd08b7db75103eb1fe311b8f56b3cdd4abea14d29f3010b4c63073e23515a"
+      "canonicalLFSHA256": "149445824000e0bbd6f4dc17fe9207a10474c4cc2d00c5568c6c517b6ad6fc37"
     },
     "diorama": {
       "file": "battle-diorama.js",
@@ -126,5 +126,15 @@
     },
     "role": "A immutable historical ROI oracle, not current runtime or approved performance optimization"
   },
-  "status": "FULL_RUNTIME_WITH_IMMUTABLE_HISTORICAL_ROI_ORACLE"
+  "status": "FULL_RUNTIME_WITH_IMMUTABLE_HISTORICAL_ROI_ORACLE",
+  "speciesHostMigration": {
+    "historicalContract": {
+      "file": "source-contract-full-before-native-foe064.json",
+      "canonicalLFSHA256": "4397a241a0c3586128e21de65623a14cd4930b7ccfed60b7bd6750295d2b2706"
+    },
+    "changedPrograms": [
+      "species"
+    ],
+    "scope": "Pure library host without BattleGround retains the base Species API. FULL/ROI fragments, native inputs and32case budgets unchanged; no historical raster PASS transfer."
+  }
 }

@@ -3,7 +3,7 @@
 // no Game, R.draw, PCM or turn simulation is claimed by these tests.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),Module=require('node:module'),assert=require('node:assert/strict'),L=require('./liepard-protocol064/strict-loader.cjs');
 const cfg={repo:L.repo,site:L.site},closed541Names=['minccino-moves.js','demo-moves.js','battle-presentation.js','audio-engine.js','move-fx.js'];
-assert.equal(L.contract.revision,'coherent-v4-closed541-m3-native-tail-whiff');
+assert.equal(L.contract.revision,'coherent-v4-closed541-m3-tail-tynamo33-native-foe');
 assert.deepEqual(L.contract.closed541Lineage?.sourceLFHashChanges,closed541Names,'Only the explicitly migrated five-source contract is accepted');
 // Explicit current revision; immutable pre-M3 closed541 basis stays distinct.
 const historical541File=path.join(L.fixtures,'source-contract-v4-closed541-before-m3tail064.json'),historical541Text=L.decode(fs.readFileSync(historical541File),historical541File);
@@ -12,6 +12,10 @@ const historical541=JSON.parse(historical541Text);assert.equal(historical541.rev
 assert.equal(L.contract.previousClosed541ContractCanonicalLFSHA256,'b73ec24834acde208c73da44239fbd2d199d70930b7c5248b601c1b346a8e2a9');
 assert.deepEqual(L.contract.closed541Lineage,historical541.closed541Lineage,'All five declared541 lineage fields remain exact');assert.deepEqual(L.contract.native572Lineage,historical541.native572Lineage,'Typed native572 contract unchanged');assert.deepEqual(L.contract.rawAssetSHA256,historical541.rawAssetSHA256,'Original native RAW roles/pins unchanged');
 assert.deepEqual(L.contract.nativeM3TailLineage.sourceLFHashChanges,['minccino-moves.js','move-fx.js','battle-presentation.js','audio-engine.js'],'Only the four explicit M3 program changes are admitted by current strict contract');
+// Current shared Tynamo migration does not upgrade this non/late-render-host fixture.
+assert.equal(L.contract.previousM3TailContractCanonicalLFSHA256,'a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e');
+assert.deepEqual(L.contract.tynamo33NativeFoeLineage.sourceLFHashChanges,['species-moves.js','move-fx.js','game.js']);
+
 
 
 for(const file of closed541Names){assert(Object.hasOwn(L.contract.sourceLFHashes,file));assert(fs.existsSync(path.join(L.target,file)),'Explicit closed541 source missing');L.validate(file);}
@@ -29,7 +33,7 @@ function host({side='p1',original=false}={}){
  function transport(){const t={cancelled:false,canPresent(){return true;},acknowledge(f,next){events.push(['ack',f,next]);},pause(f){events.push(['pause',f]);},resume(f){events.push(['resume',f]);},cancel(){this.cancelled=true;events.push(['ownAudioCancel',transports.indexOf(this)]);},finish(){events.push('finish');return finishGate?.promise||Promise.resolve({cancelled:false});}};transports.push(t);return t;}
  c.AudioEngine={cancelMove(){events.push('globalCancel');},async preloadMove(){},beginMove(){events.push('legacyBegin');},async preparePresentation(audio,options){events.push(['audioPrepare',JSON.parse(JSON.stringify(options))]);const t=transport(),gate=audioGate;audioGate=null;if(gate){await gate.promise;return t;}return t;}};
  for(const f of ['assets/move-fx-data.js','assets/native-audio-bank.js','native-audio.js','native-visual.js','battle-ground.js'])L.run(c,f);
- const game=L.extract('game.js','window.BattlePresentationOwners=Object.freeze','\nfunction syncBattleActorFraming',{label:'actual Game owner-reader only'});L.runFragment(c,game);
+ const game=L.extract('game.js','function acquireTynamo33Render064(','\nfunction syncBattleActorFraming',{label:'actual Game acquisition declaration and owner-reader'});L.runFragment(c,game);
  candidate(c,'battle-presentation.js');candidate(c,'move-fx.js');
  function start(context={hitIndex:0,hitCount:2},options={}){const rawOptions={cryIds:{p1:572,p2:572},targetSide:side==='p1'?'p2':'p1',context,...options},promise=c.MoveFX.play(541,side,rawOptions),settled=promise.then(value=>({value}),error=>({error}));return{promise,settled,options:rawOptions};}
  async function drawAll(){const M=c.MoveFX,keys=Array.from(M.presentationState().clock.required),seen=[];for(const expected of keys){now+=10000;assert.equal(M.beforeArenaFrame(1280,720),true);const token=M.beginArenaFrame();assert(token);assert.equal(token.token.frame,expected);M.speciesPose(side,572);M.markArenaActor('p1',572);M.markArenaActor('p2',572);const ack=M.presentedArenaFrame(token,true);assert(ack);seen.push(ack.frame);}await drain();return seen;}

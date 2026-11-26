@@ -13,8 +13,8 @@ function host({deferredPrepare=false}={}){
  const site=process.env.SOFFIOLIEVE_TEST_SITE||path.join(repo,'_site');
  vm.runInContext(fs.readFileSync(path.join(site,'assets/move-fx-data.js'),'utf8'),c,{filename:'assets/move-fx-data.js'});
  vm.runInContext(read('native-visual.js'),c,{filename:'native-visual.js'});
- const game=read('game.js'),start=game.indexOf('window.BattlePresentationOwners=Object.freeze'),end=game.indexOf('\nfunction drawArena(){',start);
- assert(start>=0&&end>start);vm.runInContext(game.slice(start,end),c,{filename:'game-owner-reader.js'});
+ const game=read('game.js'),startMarker='function acquireTynamo33Render064(',endMarker='\nfunction drawArena(){',start=game.indexOf(startMarker),end=game.indexOf(endMarker,start);assert(start>=0&&end>start);assert.equal(game.indexOf(startMarker,start+startMarker.length),-1,'Unique actual acquisition start');assert.equal(game.indexOf(endMarker,end+endMarker.length),-1,'Unique actual owner/framing end');
+ assert(start>=0&&end>start);vm.runInContext(game.slice(start,end),c,{filename:'game-acquisition-owner-framing.js'});
  vm.runInContext(read('battle-presentation.js'),c,{filename:'battle-presentation.js'});
  vm.runInContext(read('move-fx.js'),c,{filename:'move-fx.js'});
  return{c,timers,events,transport,listeners,setNow:v=>now=v,setBlocked:v=>blocked=v,prepareReady:()=>resolvePrepare?.(transport),tailReady:()=>resolveTail?.()};

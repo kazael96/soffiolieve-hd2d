@@ -1,7 +1,7 @@
 /* One qualified Windows owner, using the existing bounded browser runner. */
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
-const FIXTURE_LF='e2c632f8b2c9b1e7a7a620864bce672b812844919658ef7d5428a3f7c11f8fc8';
+const FIXTURE_LF='5f71cc021464f64209b9b096f9a348462b7eb9f32658c9e7066f19f137adfd9e';
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 function utf8(raw,label){const s=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(raw);assert(Buffer.from(s).equals(raw),'Exact UTF8 roundtrip: '+label);return s;}
 const lf=s=>s.replace(/\r\n/g,'\n');
@@ -21,11 +21,18 @@ function options(argv,{repo=path.resolve(__dirname,'..'),env=process.env}={}){
 function metadata(file,expected){const raw=fs.readFileSync(file),text=utf8(raw,file);assert.equal(sha(Buffer.from(lf(text))),expected,'Metadata canonicalLF changed: '+file);return JSON.parse(text);}
 function validateFixtureMigration(fixture,repo){
  const historical=metadata(path.join(repo,'tests/fixtures/native-tail541-actual-pre-m3tail064.json'),'ba957688c66173899d9e83e101961fa370ddf36fb5f28a1f3b65e621c84e68ff');
- const expected={...historical,sourceContract:{...historical.sourceContract,canonicalLFSHA256:'a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e',revision:'coherent-v4-closed541-m3-native-tail-whiff'}};
+ const expected={...historical,sourceContract:{...historical.sourceContract,canonicalLFSHA256:'891ac3550f34f5602e82032f784ed299dec052d50be9c3df586a60f331f9f0a8',revision:'coherent-v4-closed541-m3-tail-tynamo33-native-foe'}};
  assert.deepEqual(fixture,expected,'Actual541 fixture migration admits only the two explicit current source-contract fields; native/order/timing/limits stay historical');
  return fixture;
 }
 
+
+function validateSourceContractMigration(contract,repo){
+ const previous=metadata(path.join(repo,'tests/fixtures/liepard-protocol064/source-contract-v4-m3tail-before-tynamo33064.json'),'a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e');
+ const changes={"species-moves.js":"149445824000e0bbd6f4dc17fe9207a10474c4cc2d00c5568c6c517b6ad6fc37","move-fx.js":"1f0e563be80263b4263332f89266aad8266ded2a196ed9a6ce9a0c48615887c9","game.js":"c5e14ea5afdca2f9f975476a9077a6f61c64cfd76b042a243775286546e98a13"},lineage={"schema":1,"sourceLFHashChanges":["species-moves.js","move-fx.js","game.js"],"sourceLFHashes":{"species-moves.js":"149445824000e0bbd6f4dc17fe9207a10474c4cc2d00c5568c6c517b6ad6fc37","move-fx.js":"1f0e563be80263b4263332f89266aad8266ded2a196ed9a6ce9a0c48615887c9","game.js":"c5e14ea5afdca2f9f975476a9077a6f61c64cfd76b042a243775286546e98a13"},"defaultNativeMetadata":{"relative":"assets/native-alpha-rle-v1/","indexSHA256":"032f32995bf3ab3d4477f3af4aca88b90fd04b61aa973679b8e04a9a32a9b0f9","inventorySHA256":"5f0269fb8c59b663a929c367f44c2f8a14b26bccea693b1d7219f3b2d3fcf5c6"},"libraryBoundary":"Absent BattleGround keeps base API; a later host does not auto-install; malformed supplied host rejects","renderHost":"Original index has BattleGround before SpeciesMoves; default native602/33 integration is installed there","rawAssetPinsRetainOriginalMeaning":true,"scope":"Declared shared source migration only; no new541 execution/Game/motion/PCM/Android approval"};
+ const expected={...previous,status:'ACTUAL_V4_CLOSED541_M3_TAIL_TYNAMO33_NATIVE_FOE_SOURCE_CONTRACT_NOT_EXECUTION',revision:'coherent-v4-closed541-m3-tail-tynamo33-native-foe',sourceLFHashes:{...previous.sourceLFHashes,...changes},previousM3TailContractCanonicalLFSHA256:'a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e',tynamo33NativeFoeLineage:lineage};
+ assert.deepEqual(contract,expected,'Current shared source-contract migration admits only three qualified Tynamo runtime pins and explicit lineage; native/541/M3 fields stay historical');return contract;
+}
 
 function compiledSource(raw,label){return Buffer.from(lf(utf8(raw,label)));}
 function verify399({repo,site,sourceRoot},fixture,build){
@@ -56,7 +63,7 @@ function nativeAssets(o,fixture,build){
  assert.equal(Object.keys(assets).length,10);return assets;
 }
 function prepare(o){
- const fixtureFile=path.join(o.repo,'tests/fixtures/native-tail541-actual064.json'),fixture=validateFixtureMigration(metadata(fixtureFile,FIXTURE_LF),o.repo),contractFile=path.join(o.repo,fixture.sourceContract.relative),contract=metadata(contractFile,fixture.sourceContract.canonicalLFSHA256);assert.equal(contract.revision,fixture.sourceContract.revision);
+ const fixtureFile=path.join(o.repo,'tests/fixtures/native-tail541-actual064.json'),fixture=validateFixtureMigration(metadata(fixtureFile,FIXTURE_LF),o.repo),contractFile=path.join(o.repo,fixture.sourceContract.relative),contract=validateSourceContractMigration(metadata(contractFile,fixture.sourceContract.canonicalLFSHA256),o.repo);assert.equal(contract.revision,fixture.sourceContract.revision);
  // Explicit selected source is mandatory. Never fall back from an incomplete override.
  assert(fs.statSync(o.sourceRoot).isDirectory());for(const[file,digest]of Object.entries(contract.sourceLFHashes)){const source=path.join(o.sourceRoot,file),raw=fs.readFileSync(source);assert.equal(sha(compiledSource(raw,source)),digest,'Qualified runtime source differs: '+file);}
  const buildFile=path.join(o.site,'build.json'),build=JSON.parse(utf8(fs.readFileSync(buildFile),buildFile));assert.match(build.revision,/^[a-f0-9]{16}$/);
@@ -67,7 +74,7 @@ function prepare(o){
  const recovery=o.mode==='recovery',scope=recovery?'ONE_COMMITTED_UI_SWITCH2_WITH_REAL572BACK503_RETRY_AND_REMAINING_541P2_NOT_DIRECT_PREPARE_FAILURE':'FOUR_ORIGINAL_GEN5_UI_TURNS_BOTH_ROLES_COLD_WARM_NO_MOTION_OR_LISTENING_APPROVAL';
  const caseConfig={enabled:true,mode:recovery?'native541-recovery':'native541-nominal',candidateRevision:build.revision,scope,marker:fixture.marker,kinds:fixture.kinds,nativeVoiceSources:fixture.nativeVoiceSources,viewport:o.viewport,rate:o.rate};
  const dependencies=['scripts/test-native-tail541-actual064.cjs','scripts/observe-native-tail541064.cjs','scripts/helpers/native-tail541-fault064.cjs','scripts/observe-native-qa064.cjs','scripts/run-bounded-qa.cjs','scripts/limit-owned-qa.ps1','scripts/close-owned-browser.cjs','scripts/test-browser-headless.cjs','scripts/serve-browser-qa.py','scripts/build-browser-qa.cjs','scripts/native572_tail064.py','scripts/gym-preview052.cjs','scripts/finale-preview053.cjs','tests/browser-qa.js','tests/qa-tail-actual064.js','tests/qa-artifact-queue.js','tests/qa-input-health.js','tests/ambient-audit.js','tests/field-regression057.js','tests/field-hm-regression064.js','tests/qa-gust064.js','tests/qa-body-actions064.js','tests/qa-tail-reference064.js','tests/qa-tail-mixed064.js','tests/qa-gust-reference064.js','tests/fixtures/brycen-input-route.json','tests/fixtures/drayden-field-input.json','tests/helpers/native572-assets064.cjs','tests/fixtures/native572-original064/manifest.json'];
- const inputs=[...proof.inputs,...dependencies.map(f=>({path:path.join(o.repo,f)})),{path:fixtureFile},{path:path.join(o.repo,'tests/fixtures/native-tail541-actual-pre-m3tail064.json')},{path:contractFile},{path:buildFile},{path:path.join(o.site,'app.js')},{path:expected399}];
+ const inputs=[...proof.inputs,...dependencies.map(f=>({path:path.join(o.repo,f)})),{path:fixtureFile},{path:path.join(o.repo,'tests/fixtures/native-tail541-actual-pre-m3tail064.json')},{path:contractFile},{path:path.join(o.repo,'tests/fixtures/liepard-protocol064/source-contract-v4-m3tail-before-tynamo33064.json')},{path:buildFile},{path:path.join(o.site,'app.js')},{path:expected399}];
  for(const key of Object.keys(assets))inputs.push({path:path.join(o.site,key.slice(1))});inputs.push({path:path.join(o.site,'assets/animated/572-tail-partition064.provenance.json')});
  for(const view of ['back','front'])for(const ext of ['json','png'])inputs.push({path:path.join(o.repo,'tests/fixtures/native572-original064/assets/animated/572-'+view+'.'+ext)});
  const unique=[...new Map(inputs.map(p=>[path.resolve(p.path),{path:path.resolve(p.path),sha256:sha(fs.readFileSync(p.path))}])).values()];
@@ -89,4 +96,4 @@ async function main(argv){
  assert(['PASS','REQUESTED_PASS'].includes(report.result),'Bounded actual541 owner failed; preserve the full report');return report;
 }
 if(require.main===module)main(process.argv.slice(2)).then(r=>console.log(r.result+' actual541 Windows owner; full receipts remain external')).catch(e=>{console.error(e);process.exitCode=1;});
-module.exports={options,metadata,validateFixtureMigration,compiledSource,verify399,nativeAssets,prepare,tools,main,FIXTURE_LF};
+module.exports={options,metadata,validateFixtureMigration,validateSourceContractMigration,compiledSource,verify399,nativeAssets,prepare,tools,main,FIXTURE_LF};

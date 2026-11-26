@@ -1589,3 +1589,78 @@ con coda sul fianco è leggibile in P1, mentre P2 taglia il capo al bordo
 sinistro. La camera e l'avvicinamento devono essere corretti prima di
 integrare questa coreografia. Nessuna nuova build, merge o pubblicazione;
 la PR58 resta DRAFT e il sito verificato rimane0.63.
+
+### Qualificazione delle fixture dopo l'integrazione Tynamo · 27novembre
+
+CI112 sulla HEAD350ab6d resta **FAIL**, conservata integralmente. Il job
+Windows541 si ferma prima del Game: il contratto ammetteva ancora il
+vecchio Speciesd23. L'audit dei53log unitari identifica168righe TAP
+fallite:120per dichiarazione Game mancante nelle fixture,45per il
+contratto condiviso precedente,1per il contratto ambientale precedente
+e2per l'inversione esatta del vecchio Game. Le168righe riconducono a
+quattro cause nelle fixture.
+ZIP dei rapporti251098byte, SHA527df47b43dfa187c86f6506e73ecdc13af17fa9e1fa279f2ce6b4f53384417e;
+219file estratti e controllati in
+`outputs/ci064green/ci112-deep-failure-artifact-v1`.
+
+Il contratto condiviso conserva una copia immutabile del precedentea4af
+e ammette soltanto i tre programmi già integrati; gli altri32pin,
+asset nativi, frammenti, ordine399, limiti e scenari restano identici.
+Runner541 e relativi consumer verificano migrazione e provenienza;
+i negativi respingono modifiche estranee. Il contratto ambientale conserva
+il precedente4397 e ammette solo Species149 più la provenienza dichiarata.
+L'host ambientale verifica realmente che BattleGround e l'estensione
+nativa siano assenti: è un consumatore dell'API base.
+
+Una prima esecuzione locale della coppia541 conclude con OOM400MiB dopo
+tre PASS audio, prima del primo risultato di protocollo. Il successivo
+diagnostico che cattura solo nome e messaggio rileva in costruzione
+`ReferenceError: acquireTynamo33Render064 is not defined`.
+L'estrazione delle fixture ometteva la dichiarazione usata dal nuovo
+oggetto BattlePresentationOwners. Otto consumer includono ora anche la
+dichiarazione originale, con confini unici; nessuna funzione finta viene
+aggiunta. Questo dato non dimostra che il formatter abbia causato l'OOM.
+
+I contratti originali di inversione Game e la baseline C10 restano intatti.
+Una ricetta supplementare di cinque operazioni esatte riconduce il Game
+attuale al precedente93c; le cinque operazioni storiche riconducono poi
+alla stessa baseline. Hash intermedi, corrispondenze uniche e negativi
+proteggono anche modifiche non dichiarate a rotazione e dispatch.
+
+Nuove esecuzioni mirate, Node22.23.5, zero skip/cancel:
+
+- 18test metadati/provider PASS2216.3898ms dopo la correzione dei consumer;
+- 16protocollo/audio541 PASS85197ms, stesso owner/GC/heap400 e180s,
+ RSS massimo osservato328888KiB sotto409600KiB;
+- 47test di presentazione PASS40939ms;
+- 11test inversione/recupero PASS8469.3356ms. Il primo run10PASS/1FAIL per modulo
+ Canvas non selezionato è preservato; il secondo seleziona esplicitamente
+ il modulo0.1.100 già disponibile, senza cambiare i casi;
+- 32casi ambientali/2340coppie RGBA PASS34189ms, RSS massimo117364KiB,
+ sorgenti invariati. È confronto CPU, con verifica Chrome distinta.
+
+Rapporti in `outputs/ci064green/native541-current-source-targeted-v1`,
+`game-owner-slice-targeted-v1`, `c11-game-inverse-current-source-targeted-v1`
+e `ambient-native-foe-boundary-v1`. Nessun limite è aumentato e nessun
+assert funzionale è rimosso. Inventario428/53/94 invariato. Una nuova
+CI completa e Windows541 effettivo restano necessari; i PASS di CI111
+non si trasferiscono a questa revisione delle fixture.
+
+H.8 completata per C15: verificata ricostruzione di tutti32010file,
+1136618530byte, ricontrollati tutti gli hash sorgente e31990dipendenze
+della C04. Archivio delta9003953byte,20file; SHA
+dbafcd98da0eff21a8bf11822f730c6814f5efc798aee4811d749c8f65a4ff52.
+Dopo dry-run e nuovi guard C15 è rimossa; restano C04base obbligatoria,
+C08verificata e C16confronto. ROM, ZIP base e rapporti sono conservati.
+Nessuna C17 è ancora costruita.
+
+Minccino: la singola posa locale con camera riproiettata mostra entrambe
+le figure complete; è ancora una tavola sorgente, non il Game. Il pilot
+con piedi ruotati è respinto anche dopo sei draw e neutri RGBA esatti:
+la raccolta dell'intero corpo resta poco leggibile. Il nuovo studio di
+pose autoriali tramite Imagegen non produce immagini:400
+moderation_blocked/output/other, richiesta d02f0f2f-5962-4355-ab51-6202fd6883af.
+Nessun asset è installato e il percorso API alternativo non è avviato.
+La proposta di camera condivisa rimane privata, disabilitata e senza
+produttore M3; non risolve da sola il movimento. Restano distinti Botta1,
+Emboar, ombre e revisione completa. PR58DRAFT, nessun merge o deploy.
