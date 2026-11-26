@@ -5,8 +5,9 @@ const core=['qaBattleActions064','qaEmboarActions064','qaGustActions064','qaTail
 const workflows=['pages.yml','qa.yml'];
 const readWorkflow=file=>fs.readFileSync(path.join(__dirname,'../.github/workflows',file),'utf8').replace(/\r\n/g,'\n');
 function steps(source){const out=[];let current;for(const line of source.split(/\r?\n/)){if(/^      - /.test(line)){current={index:out.length,text:line+'\n'};out.push(current);}else if(current)current.text+=line+'\n';}return out;}
+function job(source,name){const match=source.match(new RegExp('^  '+name+':\\n([\\s\\S]*?)(?=^  [a-zA-Z_][\\w-]*:|$(?![\\s\\S]))','m'));assert.ok(match,'Missing separate '+name+' job');return match[1];}
 function verify(source){
- source=source.replace(/\r\n/g,'\n');const all=steps(source),animation=all.filter(s=>/node scripts\/test-browser-headless\.cjs.*test-results\/animation064-/.test(s.text));
+ source=source.replace(/\r\n/g,'\n');source=job(source,source.includes('\n  regression:')?'regression':'build');const all=steps(source),animation=all.filter(s=>/node scripts\/test-browser-headless\.cjs.*test-results\/animation064-/.test(s.text));
  assert.equal(animation.length,18,'Keep three sequential core and three Tynamo rate batches per viewport');
  const inventory=[],outputs=new Set();
  for(const [index,step]of animation.entries()){
@@ -39,6 +40,12 @@ function verify(source){
 }
 for(const file of workflows)test(file+' retains54 logical animation cells and unchanged per-case budgets',()=>assert.equal(verify(readWorkflow(file)).length,54));
 const source=readWorkflow('qa.yml');
+test('Windows actual541 has its own single native build and two serial software commands; Linux still rejects duplicate preparation',()=>{
+ const windows=job(source,'native541-windows');assert.match(windows,/runs-on: windows-latest/);assert.equal((windows.match(/releases\/download\/v0\.8\/soffiolieve-demo-v08\.zip/g)||[]).length,1);assert.equal((windows.match(/run: python scripts\/build-site\.py site\.zip _site --native572-tail-partition064/g)||[]).length,1);
+ const commands=windows.split('\n').filter(line=>line.includes('run: node --max-old-space-size=400 scripts/test-native-tail541-actual064.cjs'));assert.equal(commands.length,2);for(const[index,mode]of['nominal','recovery'].entries()){const line=commands[index];for(const flag of['--mode='+mode,'--viewport=desktop','--rate=1','--renderer=software'])assert.ok(line.includes(flag));assert.ok(line.includes('test-results/native541-'+mode));}assert.doesNotMatch(windows,/continue-on-error:|--headed|--timeout=/);
+ const build='run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064';assert.throws(()=>verify(source.replace(build,build+'\n        '+build)),/Do not repeat the build/);
+ const url='https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip';assert.throws(()=>verify(source.replace(url,url+' '+url)),/Do not repeat the base download/);
+});
 test('inventory accepts Git LF and Windows CRLF',()=>assert.deepEqual(verify(source.replace(/\n/g,'\r\n')),verify(source)));
 test('inventory rejects a missing viewport, case, rate or duplicate rate',()=>{
  const block=steps(source).find(s=>s.text.includes('animation064-landscape-tynamo-x2')).text;

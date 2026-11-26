@@ -56,7 +56,7 @@ class QAServerTests(unittest.TestCase):
             hm_script = b'window.FieldHMRegression064={install(){}};'
             (overlay / 'field-hm-regression064.js').write_bytes(hm_script)
             helpers = {name: ('window.' + name + '=true;').encode() for name in
-                       ('qa-gust064.js', 'qa-body-actions064.js', 'qa-tail-reference064.js', 'qa-tail-mixed064.js', 'qa-gust-reference064.js')}
+                       ('qa-gust064.js', 'qa-body-actions064.js', 'qa-tail-reference064.js', 'qa-tail-mixed064.js', 'qa-gust-reference064.js', 'qa-tail-actual064.js')}
             for name, content in helpers.items():
                 (overlay / name).write_bytes(content)
             (overlay / 'private-not-served.js').write_bytes(b'PRIVATE')

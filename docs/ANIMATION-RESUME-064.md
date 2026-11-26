@@ -1,4 +1,9 @@
-# Ripresa della revisione064 · 23 novembre2026
+# Ripresa della revisione064 · stato del port541
+
+Il documento conserva la cronologia e i FAIL delle revisioni precedenti.
+Lo stato corrente541 e del controllo automatico è consolidato nelle sezioni
+«Raccordo541, comandi reali e limiti attuali» e «Port automatico actual541 su
+Windows». I vecchi PENDING descrivono i rispettivi checkpoint storici.
 
 ## Aggiornamento del collaudo e del controllo automatico
 
@@ -1045,7 +1050,7 @@ locale descritto sotto non trasferisce i PASS delle sorgenti al comando
 effettivo. Il vecchio CI del commit807d788c resta storico e non certifica
 il runtime modificato.
 
-### Raccordo locale541 e verifica del comando ancora aperta
+### Raccordo541, comandi reali e limiti attuali
 
 La candidata14, revisione1f321a517cf3aaa0, contiene le due partizioni ma
 non il nuovo controller541. Il controllo di coerenza legge tutti399moduli
@@ -1100,11 +1105,11 @@ Gli otto test del registro passano e verificano427file,53fasi unitarie e
 ha un processo dedicato con GC esposto e la medesima soglia RSS osservata.
 Il PASS privato14 rimane distinto da questa esecuzione del port16.
 
-L'audit del caricamento conferma che R.prepare541 usa il vero resourceGate
-del Game: un503 interno mantiene la promessa in attesa e offre il recupero,
-senza richiamare GEN5. Il test con R.prepare simulato che rigetta non
-certifica questo percorso: il recupero effettivo della stessa azione deve
-ancora essere provato con guasto reale, tentativi contati e input UI.
+L'audit del caricamento collega R.prepare al resourceGate reale del Game.
+La prova con R.prepare simulato che rigetta resta distinta dal recupero UI
+reale descritto sotto. Quest'ultimo riguarda lo switch2 che richiede572-back
+uncached e il restante replay541; non dimostra un guasto dentro la prepare
+diretta nativeTail541, il cui banco è già disponibile dopo lo switch.
 
 La candidata15 coerente, revisione `b3b66a0b19856770`, supera la verifica
 dei399moduli effettivi, delle due derivazioni e degli atlanti RAW invariati.
@@ -1114,24 +1119,121 @@ letti integralmente da root e da un revisore indipendente. Sorgenti e asset
 restano invariati e i processi vengono chiusi. È un PASS tecnico del caso
 singolo572/541 supportato, non l'approvazione del movimento continuo.
 
+La matrice privata V4 supera tutte le nove combinazioni dei tre formati a
+×1/×2/×4:18casi,36turni GEN5,72presentazioni MFX e3456ACK. Tutti108PNG
+sono letti dal revisore B; root esamina anche sei campioni di picco. Le
+sorgenti restano invariate e la chiusura lascia zero processi. È copertura
+tecnica dei comandi e di quei fermiimmagine, non visione continua del moto,
+contatto fisico approvato o ascolto. Il FAIL V3 della lineage texture a×4
+e il primo avvio EPERM restano conservati; V4 condivide solo il WeakMap
+dell'observer tra P1/P2, senza cambiare il gioco.
+
 La suite completa Windows precedente resta FAIL:69fasi passate e25fallite,
-con builder e40controlli runtime passati. Le cause individuate riguardano
-quattro file di fixture: il blocco CLOSED541 mancante nell'estrazione del
-test audio, il vecchio hash Demo nel test602 e il vecchio pin BG in due
-host LIFE/G7. Le correzioni conservano le inverse e tutti gli assert;
-il successivo target di25processi supera59callback senza skip. La verifica
-prima/dopo attesta22139input identici e i soli quattro file test modificati,
-con389sorgenti e399moduli C15 invariati. La nuova suite integrata94 su CI
-è ancora **PENDING**: i PASS mirati non sostituiscono quella prova e non
-riscrivono i FAIL conservati.
+con builder e40controlli runtime passati. Le quattro fixture corrette
+conservano inverse e assert; il target25processi supera59callback senza
+skip, con22139input identici e389sorgenti/399moduli C15 invariati.
+La successiva CI107 del commit6e8b60abdb809ddb3c7367ffd6b56d3ea14c7a39
+(run45767542695) conclude il workflow con SUCCESS e43step riusciti:
+94CLI, cinque gruppi browser e18lotti nativi. Il deep report conserva
+separatamente NOT_RUN per il browser, eseguito nei suoi step successivi.
+Un solo helper Windows è escluso per piattaforma nella CI Linux; la sua
+esecuzione Windows storica è documentata e non rende PASS l'intera vecchia
+suite Windows fallita. Nessun FAIL storico viene riscritto.
 
-Il primo replay recovery503 resta FAIL in32,959s: l'adapter diagnostico
-rifiuta asset_retry1/2 e satura il limite16KiB dei metadati. Zero PNG,
-chiusura riuscita e sorgenti invariati; non è dimostrato un difetto del
-gioco e il recupero effettivo della stessa azione rimane aperto.
+I recovery R1/R2 restano FAIL preservati. R1,32,959s, rifiuta i retry
+asset_retry1/2 del loader e supera il budget diagnostico16KiB. R2 osserva
+24 risposte503 reali ma fallisce il controllo di raggiungibilità del retry;
+la correzione successiva nasconde e ripristina il pannello QA. R2 non aveva
+raccolto una misura DOM-hit che dimostrasse il bersaglio effettivo: tale
+evidenza appartiene alla fixture corretta. Non è una prova di guasto del gioco.
+V5 actualR3 passa in57,782s:24 risposte503 possedute, poi una risposta200
+RAW verificata della stessa risorsa revisionata, con i soli retry1/2 del
+loader. Non si afferma che tutte le stringhe URL fossero identiche.
+Una sola azione UI/GEN5, medesima promessa resourceGate e due presentazioni541
+restanti; il retry usa il pulsante originale con input Playwright e hitguard,
+senza rieseguire GEN5. Root e C leggono entrambi i due PNG; sorgenti invariate
+e cleanup0processi. Il routing disabilita la cache HTTP di Playwright:
+non è un benchmark cold. La verifica software del port è separata, sotto.
 
-Restano da qualificare il movimento continuo, i recuperi con guasti reali,
-gli altri formati e le velocità richieste; restano aperti i limiti M3 e la
-revisione estetica complessiva del catalogo e delle MN. Queste prove non
-certificano4K, GPU Android fisica o confronto udibile con la cartuccia.
-Nessuna nuova pubblicazione o approvazione estetica globale è attestata.
+Restano aperti movimento continuo, qualità completa della541 e revisione
+artistica globale del catalogo/MN. Il componente M3 V2 aveva soltanto una
+lettura RAW visiva preliminare: il gate sorgente eseguito una volta fallisce
+per tre pixel alpha trasparenti nel core, non per i colori RGB. Sono21pixel,
+bounds[5,5,12,10] e una componente; i due PNG sono letti da root e C.
+Il run2,06s conserva gli input e non esegue R.prepare, R.draw o Game.
+La sorgente è quindi NON QUALIFICATA e non integrata. Le prove non certificano
+4K, GPU Android fisica o confronto udibile con la cartuccia. PR58 resta bozza,
+senza merge o deploy; la versione pubblica rimane0.63.
+
+
+### Port automatico actual541 su Windows
+
+Il batch del port conta15file: agli11iniziali si aggiungono la allowlist
+Python del server QA, il relativo test HTTP e due fixture dei workflow
+aggiornate per i proprietari Linux e Windows distinti. Gli otto programmi JS superano
+la sintassi Node22. Il primo target passa28callback con i17gruppi puri
+dell'adapter. Un nuovo negativo del vero observer, in un contesto dichiarato
+simulato, produce prima28PASS/1FAIL; la correzione dei due catch conserva la
+causa primaria, con quattro edit letterali e inversa esatta al c620.
+Il target successivo passa29callback senza skip, con tutti i17gruppi
+preservati. Queste unit non sono prove Game o raster.
+
+Il controllo dei workflow conserva tutti54casi logici e18step nativi del
+proprietario Linux, con un solo download e una sola build dentro quel job.
+Il nuovo proprietario Windows prepara separatamente la stessa base
+autenticata: il controllo del builder ora pretende esplicitamente entrambi
+i comandi con il flag nativo. I vecchi assert globali falliscono prima
+dell'adeguamento; i13controlli Node dei workflow e i6test Python del builder
+passano dopo. La regressione rifiuta ancora build e download duplicati nel
+medesimo job. I due errori precedenti di accesso alla cartella temporanea
+del sandbox restano conservati, distinti dai fallimenti funzionali.
+
+Il primo nominale software del port resta FAIL in46,158s: il nuovo helper
+non era nella allowlist HTTP della fixture e risponde404. Nessun comando
+Game è qualificato da quel run; un PNG è letto da root, sorgenti invariate
+e cleanup0processi. Il controllo HTTP fallisce prima404!=200; aggiungendo
+il solo nome canonico, i due test Python passano senza cambiare il runtime.
+
+Il nominale software R2 passa in223,645s con Node22.23.5 e SwiftShader
+effettivamente registrato: P1 106,848s, P2 93,297s. Sorgenti invariate e
+zero processi residui. Root legge tutti i12PNG; B conclude il riesame dei
+12PNG e sei gzip integrali, con399sorgenti CDP e dieci asset verificati.
+
+Il recovery software del port passa in99,394s, caso70,542s, con sorgenti
+invariate, SwiftShader e zero processi residui. Root e B leggono entrambi
+i due PNG; B verifica anche i due gzip completi. Le24risposte503 possedute
+si dividono8/8/8 tra richiesta senza asset_retry e retry1/2; segue una
+risposta200 normale della stessa risorsa revisionata, JSON derivato
+53cd4d6c/10678byte. Una sola azione UI/GEN5, la medesima promessa risolta
+una volta e cursore18→34; due presentazioni541,96ACK e quattro onset audio.
+Verificati399sorgenti CDP, dieci asset, hitguard del pulsante Playwright,
+possesso/ripristino QA e route, source-after vero e cleanup0processi.
+Non restano audit B aperti su questi due run.
+
+La nuova CI successiva al batch è ancora **PENDING**. La CI107 verde
+precede questo port e non ne sostituisce le verifiche automatiche.
+L'inventario resta427file/53fasi unitarie/94CLI, senza nuovi `.test.cjs`.
+Il job `native541-windows` riusa il proprietario Windows, renderer software
+esplicito e240s/180s/heap400. I due step sono desktop×1 nominale nei due
+ruoli con freddo/riuso e recovery dello switch2 con503 reale/stessa promessa.
+Il collaudo locale riusa la C15 immutata con una fixture QA nuova: nessuna
+ricompilazione inutile del trasporto del gioco. La futura CI deve qualificare
+anche il proprio Chromium installato, senza trasferirgli i PASS locali.
+
+La factory verifica399 programmi realmente compilati, i389sorgenti correnti,
+dieci programmi della base autenticata e dieci risorse native reali. Le due
+JSON572 derivano dalla ricetta qualificata e dalla build corrente; gli
+originali RAW restano oracoli separati. I programmi/metadati ammettono solo
+CRLF→LF; PNG/JSON/FLAC nativi mantengono i pin RAW. Nessun percorso privato o
+eseguibile Windows è fissato nel test.
+
+Il nominale conserva i `.click()` DOM originali con otto controlli di
+raggiungibilità; il recovery usa un pointer Playwright sul retry originale,
+verificato con `elementFromPoint`. Non sono prove equivalenti di trustedtouch.
+Il routing recovery disabilita la cache HTTP di Playwright e non certifica
+prestazioni di avvio. Dodici PNG nominali e due recovery richiedono lettura
+umana;48chiavi/SPA704/audio1651+1427 non certificano contatto fisico, ascolto,
+movimento continuo, GPU Android o qualità completa della541. La matrice
+privata V4 è9/9 PASS nel proprio ambito; nominale e recovery software del
+port hanno PASS separati e revisione delle rispettive ricevute conclusa.
+Resta PENDING la nuova CI del batch, senza trasferimento dei PASS precedenti.

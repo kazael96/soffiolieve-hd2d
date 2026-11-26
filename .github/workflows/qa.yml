@@ -141,3 +141,48 @@ jobs:
           name: animation064-browser-report
           path: test-results/animation064-*
           if-no-files-found: ignore
+
+  native541-windows:
+    # The existing owned-process/PowerShell browser backend is Windows-qualified.
+    # This adds browser steps, not a95th CLI stage or a Linux owner emulation.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Download verified base assets
+        shell: pwsh
+        run: curl.exe --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
+      - name: Build exact sources with the qualified native572 partition
+        shell: pwsh
+        run: python scripts/build-site.py site.zip _site --native572-tail-partition064
+      - name: Install the pinned isolated browser driver
+        shell: pwsh
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false playwright@1.62.1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npx --no-install playwright install chromium
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $qaPython = (python -c "import sys; print(sys.executable)").Trim()
+          $qaBrowser = (node -p "require('playwright').chromium.executablePath()").Trim()
+          if (!(Test-Path -LiteralPath $qaPython -PathType Leaf) -or !(Test-Path -LiteralPath $qaBrowser -PathType Leaf)) { throw 'Missing resolved owner executable' }
+          python --version
+          & $qaBrowser --version
+          "TAIL541_PYTHON=$qaPython" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "TAIL541_BROWSER=$qaBrowser" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Check actual541 original commands in desktop at x1
+        shell: pwsh
+        run: node --max-old-space-size=400 scripts/test-native-tail541-actual064.cjs _site test-results/native541-nominal --mode=nominal --viewport=desktop --rate=1 --renderer=software "--python=$env:TAIL541_PYTHON" "--browser=$env:TAIL541_BROWSER"
+      - name: Check one real503 original UI switch and remaining541 replay
+        shell: pwsh
+        run: node --max-old-space-size=400 scripts/test-native-tail541-actual064.cjs _site test-results/native541-recovery --mode=recovery --viewport=desktop --rate=1 --renderer=software "--python=$env:TAIL541_PYTHON" "--browser=$env:TAIL541_BROWSER"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native541-windows-report
+          path: test-results/native541-*
+          if-no-files-found: ignore

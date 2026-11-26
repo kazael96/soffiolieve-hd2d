@@ -2030,5 +2030,9 @@
  window.FieldRegression057.install({case049,seed049,enter049,auto049,hold049,release049,until,check,shot,wait});
  if(!window.FieldHMRegression064)throw Error('Authored HM regression script was not loaded');
  window.FieldHMRegression064.install({case049,seed049,enter049,auto049,until,check,shot,fieldHMAudio054,fieldHMFrameSnapshots055,observeFieldHMDraw055,surfAction050,flyAction049,femaleHM056});
+ const tailActualUtilities064={check,ready,until,qa049AudioEnable,shot,pixels};
+ case049('qaTail541ActualP1064','Minccino541 comando GEN5 p1 cold/warm','native541-actual-command-p1',()=>QATailActual064.nominal(tailActualUtilities064,'p1'));
+ case049('qaTail541ActualP2064','Minccino541 comando GEN5 p2 cold/warm','native541-actual-command-p2',()=>QATailActual064.nominal(tailActualUtilities064,'p2'));
+ case049('qaTail541RecoverySwitchP1064','Minccino541 recovery UI switch2 con503 reale','native541-recovery-switch-p1',()=>QATailActual064.recovery(tailActualUtilities064));
  status.textContent='Pronto. Esegui prima i controlli, poi il ripristino GPU.';publish();
 })();

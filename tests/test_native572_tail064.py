@@ -49,11 +49,12 @@ class Native572DerivationTests(unittest.TestCase):
         # A working local flagged build is insufficient when CI or Pages would
         # silently deploy the original unpartitioned native banks instead.
         expected = 'run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064'
+        windows_expected = 'run: python scripts/build-site.py site.zip _site --native572-tail-partition064'
         for name in ['qa.yml', 'pages.yml']:
             with self.subTest(workflow=name):
                 text = (ROOT / '.github/workflows' / name).read_text(encoding='utf-8')
                 commands = [line.strip() for line in text.splitlines() if 'run:' in line and 'scripts/build-site.py' in line]
-                self.assertEqual(commands, [expected])
+                self.assertEqual(commands, [expected, windows_expected] if name == 'qa.yml' else [expected])
 
     def test_exact_prefix_inverse_all_oam_and_png_bytes(self):
         for view, (raw, png) in originals().items():
