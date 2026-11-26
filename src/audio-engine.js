@@ -175,7 +175,7 @@
   function validate(events,options){
    const species=options.cryIds?.[options.side],definition=contracts[options.moveId];
    const openingStatus=(species===495&&options.moveId===43&&options.profileSpecies===495&&options.profileKey==='snivy-43')||(species===498&&options.moveId===39&&options.profileSpecies===498&&options.profileKey==='tepig-39'),duration=openingStatus?(species===495?100:108):126,impact=openingStatus?(species===495?46:51):60;
-   const q=options.nativeSlapContext064,slap=species===572&&options.moveId===3&&options.profileSpecies===572&&options.profileKey==='training-572-3'&&options.profileKind==='palmFlurry'&&options.profileMarker==='private-native-paw-SPA163';
+   const q=options.nativeSlapContext064,slap=species===572&&options.moveId===3&&options.profileSpecies===572&&options.profileKey==='training-572-3'&&options.profileKind==='palmFlurry'&&options.profileMarker==='private-native-tail-SPA163/v1';
    if(slap&&(!q||Object.keys(q).sort().join(',')!=='hitCount,hitIndex'||!Number.isInteger(q.hitCount)||q.hitCount<0||q.hitCount>5||!Number.isInteger(q.hitIndex)||q.hitIndex<0||(q.hitCount===0?q.hitIndex!==0:q.hitIndex>=q.hitCount)||q.hitCount===0&&options.miss!==true||(options.variant??0)!==0||options.nativeWaitGroups!==false))throw Error('Invalid private native slap audio context');
    if(slap&&(window.NATIVE_AUDIO_BANK?.moves[3]?.length!==1||!window.NATIVE_AUDIO_BANK.moves[3][0].p2))throw Error('Changed private native slap variant bank');
    const native541=species===572&&options.moveId===541&&options.profileSpecies===572&&options.profileKey==='training-572-541'&&options.profileKind==='tailSlam'&&options.profileMarker==='native572-tail541-oam-partition/v1';

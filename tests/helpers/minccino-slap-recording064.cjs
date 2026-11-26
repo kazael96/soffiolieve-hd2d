@@ -6,9 +6,13 @@ const native572=require('./native572-assets064.cjs').create({repo,site,sourceRoo
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),plain=x=>JSON.parse(JSON.stringify(x)),decode=require(path.join(repo,'tests/helpers/native-png.cjs'));
 // Git normalizes this JSON fixture; the PNG and native-data checks below stay raw.
 const assets=new Map(),pins=new Map(),pngRaw=fs.readFileSync(fixturePath('png-pins.json')),pngMetadata=pngRaw.toString('utf8').replace(/\r\n/g,'\n');if(sha(pngMetadata)!=='0ec766ffae646912028cfd1ac703c7339a730c07903d5f7ff3570209ffd1ec7e')throw Error('Native PNG pin metadata changed');const assetManifest=JSON.parse(pngMetadata).files;
+// Separate closed supplement: original move10/SPA170 transport only. The
+// historical original PNG metadata/hash remains byte-for-byte unchanged.
+const native170Raw=fs.readFileSync(fixturePath('png-pins-native170.json')),native170Text=native170Raw.toString('utf8').replace(/\r\n/g,'\n');if(sha(native170Text)!=='1e63d99e8ed00f325df53628ec6ba770f797ea6456f45f9f5fdfedd39682ce0b')throw Error('Native170 PNG pin metadata changed');const assetSupplement170=JSON.parse(native170Text).files;
+if(Object.keys(assetSupplement170).sort().join(',')!==[0,1,2,3].map(n=>'assets/move-fx/170-'+n+'.png').join(','))throw Error('Native170 PNG whitelist changed');
 let verifiedBaseline=false;
 function verifyBaseline(){if(!verifiedBaseline){const contract=JSON.parse(fs.readFileSync(fixturePath('native-data-pins.json'),'utf8'));for(const[file,pin]of Object.entries(contract.files)){const raw=/^assets\/animated\/572-(?:back|front)\.json$/.test(file)?native572.originalAsset(file):fs.readFileSync(path.join(site,file));if(sha(raw)!==pin)throw Error('Native data contract changed: '+file);}verifiedBaseline=true;}for(const view of['back','front'])native572.candidate(view);}
-function asset(file){if(!assets.has(file)){const raw=fs.readFileSync(path.join(site,file));if(sha(raw)!==assetManifest[file])throw Error('Original PNG asset mismatch: '+file);const d=decode(raw),h=d.pixels.length/d.width/4;assets.set(file,{width:d.width,height:h,data:d.pixels,__texture:file});pins.set(file,sha(raw));}return assets.get(file);}
+function asset(file){if(!assets.has(file)){const raw=fs.readFileSync(path.join(site,file));const expected=Object.hasOwn(assetManifest,file)?assetManifest[file]:/^assets\/move-fx\/170-[0-3]\.png$/.test(file)?assetSupplement170[file]:undefined;if(!expected||sha(raw)!==expected)throw Error('Original PNG asset mismatch: '+file);const d=decode(raw),h=d.pixels.length/d.width/4;assets.set(file,{width:d.width,height:h,data:d.pixels,__texture:file});pins.set(file,sha(raw));}return assets.get(file);}
 const mul=(a,b)=>[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];
 const pos=(m,x,y)=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];
 class Recorder{
@@ -22,7 +26,7 @@ class Recorder{
  drawImage(im,...args){if(args.length!==4)throw Error('Unexpected arena drawImage overload');const[x,y,w,h]=args,pixels=im.data||im.getContext('2d').getImageData(0,0,im.width,im.height).data;this.rows.push({op:'drawImage',texture:im.__texture,rgbaSHA256:sha(pixels),sourceSize:[im.width,im.height],rect:args,matrix:this.m.slice(),alpha:this.globalAlpha,corners:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]].map(p=>pos(this.m,...p))});}
 }
 for(const name of['beginPath','closePath','moveTo','lineTo','bezierCurveTo','quadraticCurveTo','ellipse','arc','stroke','fill','fillRect','strokeRect'])Recorder.prototype[name]=function(...args){this.rows.push([name,...args]);};
-function host(candidate=false){
+function host(candidate=false,{beforeMinInstall}={}){
  verifyBaseline();
  const c=require(path.join(repo,'tests/helpers/finale-moves-host.cjs')).setup({sourceRoot:path.join(repo,'src'),withoutMinccino:true});
  const baseDocument=require(path.join(repo,'tests/helpers/pixel-canvas.cjs')).document2d();let serial=0;
@@ -35,14 +39,14 @@ function host(candidate=false){
  const bg=read('battle-ground.js'),support=JSON.parse(bg.match(/const native602CompanionSupport=(.*);\n/)[1]),tail=JSON.parse(bg.match(/const nativeLongTailSupport=(.*);\n/)[1]);
  for(const id of[495,510,572])for(const view of['front','back']){const key=id+'-'+view,image=asset('assets/animated/'+key+'.png'),data=JSON.parse(read('assets/animated/'+key+'.json')),bounds=(id===495?support.species[id].views[view]:tail[key]).groundBounds.slice();c.ROM_SPRITE_ANIM.cache[key]={ready:true,data,image:{...image,naturalWidth:image.width,naturalHeight:image.height,complete:true},groundBounds:bounds,bounds:bounds.slice()};}
  const delegated=[],originalDemo=c.DemoMoves.draw;c.DemoMoves.draw=function(...a){delegated.push({species:a[3]?.profile?.species,id:a[3]?.profile?.id,frame:a[4],layer:a[5]});return originalDemo.apply(this,a);};
- for(const file of['minccino-moves.js','move-fx.js'])vm.runInContext(fs.readFileSync(sourcePath(file),'utf8'),c,{filename:'src/'+file});
+ for(const file of['minccino-moves.js','move-fx.js']){if(file==='minccino-moves.js'&&beforeMinInstall!==undefined){if(typeof beforeMinInstall!=='function')throw Error('beforeMinInstall must be a declared test hook');beforeMinInstall(c);}vm.runInContext(fs.readFileSync(sourcePath(file),'utf8'),c,{filename:'src/'+file});}
  const game=read('game.js'),from=game.indexOf('window.BattlePresentationOwners='),to=game.indexOf('\nfunction syncBattleActorFraming',from);if(from<0||to<from)throw Error('Original owner reader absent');vm.runInContext(game.slice(from,to),c,{filename:'src/game.js:owner-reader'});
  const nativeProgram=plain(c.ROM_MOVE_FX.moves[3]),nativeSPA=plain(c.ROM_MOVE_FX.spas[163]),nativeFunctions={...c.ParticleSPL};
  const h={c,delegated,nativeProgram,nativeSPA,nativeFunctions,site,sourceRoot,async preview({side='p1',id=3,actor=572,target=495,miss=false,owner=false}={}){
   if(owner){const a={name:actor===572?'Minccino':actor===510?'Liepard':'Snivy',level:25,moves:[id]},t={name:target===495?'Snivy':'Liepard',level:25,moves:[33]};c.session=new c.GEN5.Session([side==='p1'?a:t],[side==='p2'?a:t],{seed:[1,2,3,4]});c.partner=c.session.snapshot('p1');c.enemy=c.session.snapshot('p2');}else{delete c.session;delete c.partner;delete c.enemy;}
   const cryIds={p1:side==='p1'?actor:target,p2:side==='p2'?actor:target},options={cryIds,miss,context:{hitIndex:0,hitCount:miss?0:2}};
   await c.MoveFX.preview(id,side,0,options);return c.MoveFX.active;
- },async owned(side,extra={}){
+ },async owned(side,extra={},fromStart=false){
   await this.preview({side,owner:true});const cryIds={...c.MoveFX.active.cryIds},audioRows=[];
   // Declared recording audio bridge, no PCM or audible-playback claim.
   c.AudioEngine={cancelMove(){},preloadMove:async()=>{},async preparePresentation(events,options){audioRows.push({events:plain(events),options:plain(options)});return{canPresent:()=>true,acknowledge(...args){audioRows.push({op:'acknowledge',args});},pause(...args){audioRows.push({op:'pause',args});},resume(...args){audioRows.push({op:'resume',args});},cancel(){audioRows.push({op:'cancel'});},async finish(){audioRows.push({op:'finish'});}};}};
@@ -50,8 +54,10 @@ function host(candidate=false){
   for(let n=0;n<40&&!c.MoveFX.active?.presentationClock&&!failure;n++)await Promise.resolve();if(failure)throw failure;
   const action=c.MoveFX.active;if(!action?.presentationClock||!action.nativeSlapOwner064)throw Error('Original play did not register its real owner and source clock');
   // Clock API unit driver: synthetic visibility acknowledgements are NOT arena ACK evidence.
+  if(!fromStart){
   while(action.presentationClock.value<64){now+=1000;const token=action.presentationClock.begin(now);if(!token)throw Error('Original clock stopped before required source sample');action.presentationClock.presented(token,now,{drawable:true,visible:true});}
   if(action.presentationClock.value!==64)throw Error('Expected original protected64 key');
+  }
   return{audioRows,job,failure:()=>failure,advance(ms=17){now+=ms;},dispose:async()=>{c.MoveFX.cancel();await job.catch(()=>{});}};
  },draw(frame,w=390,hh=490){c.MoveFX.setPreviewFrame(frame);delegated.length=0;const context=new Recorder(w,hh);c.MoveFX.draw(context,w,hh);if(context.stack.length)throw Error('Unbalanced source draw');return{rows:plain(context.rows),images:plain(context.rows.filter(r=>r.op==='drawImage')),delegated:plain(delegated),active:c.MoveFX.active};},assertUnchanged(assert){assert.deepEqual(plain(c.ROM_MOVE_FX.moves[3]),nativeProgram);assert.deepEqual(plain(c.ROM_MOVE_FX.spas[163]),nativeSPA);for(const[k,v]of Object.entries(nativeFunctions))assert.equal(c.ParticleSPL[k],v,'Original ParticleSPL function replaced: '+k);}};
  return h;

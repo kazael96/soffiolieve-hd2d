@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "ACTUAL_V4_TYPED_NATIVE572_PARTITIONS_CLOSED541_SINGLES_SOURCE_CONTRACT_NOT_EXECUTION",
-  "revision": "coherent-v4-typed-native572-partitions-closed541-singles",
+  "status": "ACTUAL_V4_CLOSED541_M3_NATIVE_TAIL_WHIFF_SOURCE_CONTRACT_NOT_EXECUTION",
+  "revision": "coherent-v4-closed541-m3-native-tail-whiff",
   "basisSourceManifestSHA256": "d8558489faa963bd032067b2436d697c34615bac1772762dc9b67601f482ba53",
   "sourceLFHashes": {
     "training-data.js": "8d20396f42cc664d5d404e317be97c672ccfcfad88290a36c0a17d73f40eed75",
@@ -23,19 +23,19 @@
     "league-moves.js": "362eb7bcc7427dcd09ee9ecaf0c1ada58d574a3c6303a4d3c4d372a7daec16de",
     "finale-moves.js": "231e0a37d6c392b0655a2e7afd3146f5bb367ae317571304b000879a64a35031",
     "training-moves.js": "75a6f63a1fb7a20cdde48568a8ef3df2246385b094843b310484fc960c079cf9",
-    "minccino-moves.js": "95f67de5d655da88dd17c58b236bd92fc2989acecc00c2c15a49f2d2622c1211",
+    "minccino-moves.js": "176d399569133988304a3410dd271013285cfb07714d15b8c1abecdd7aa17dd2",
     "emboar-moves.js": "5ce4bc8bab7237c771e0392b686272dee848f1a9effcdde99a075bdadae90a3e",
     "battle-reactions.js": "7a3522373866e8b644716448beb6db6f4d596c3428edfb542948f8e5ac114064",
     "native-visual.js": "9dc52f843e1829204832e6c31b83601dcca98bbfa51500d84d0a9467e58422ff",
     "native-audio.js": "56f3c872b42108212ecfe6f180df119a2e1c76741f6caab46bfb217c791403b7",
     "battle-diorama.js": "e36f3903827cedcb0ebced1d747d3ea1c21f79fa6c982a341e4ed77de57ead9f",
     "double-rules.js": "949e8f7d170d9d0990fa5cc74e3165731a0c4179f8b554803e6d7b7b890e3184",
-    "battle-presentation.js": "7fa21597be35dca499052f06a2e64313d3c82cb38f3f8b1d474436d74c41469f",
-    "audio-engine.js": "64d93fca0a55b9762737df79c5da5cecf8629020a7b4c12f14fe02c693c8447d",
+    "battle-presentation.js": "67437581445a1dafc1df388d1a3df2fd172beaec99b1ccaab58e37f3cf56dc86",
+    "audio-engine.js": "460ced92795986c9de3b0ea41eed6438b642c44ed318b6a6ce8de1b8f72ae6e4",
     "liepard-moves.js": "07c57c2cb21eb740731ea37c88dcb63cff5bde34bcc2d2d70a911b917bebabfe",
     "battle-ground.js": "a4c669c000a34bd7c2d4584b5fc810d29191e6b39bfae48e83db478d4e2cefbb",
     "game.js": "93c897a8b47c589b859c5aea8993463a6e8b89407219f87933f29767c4cbe047",
-    "move-fx.js": "9e90b67ae12a1999a04f6a0c27b5b08316400bdf1a2f76d541024843e8330efe",
+    "move-fx.js": "7498fdce199c87cd6678d9d6b49acd0828dc72421d47d853737cdbebd6e38606",
     "double-battles.js": "b1bc07758b48bc1e1f94b84b87e691f9f3ea48f41020ff49d21af3583df3d38a",
     "runtime-assets.js": "e7130d01eb54b1f7b72ecb889db5c708778e32975b866e904373ce43291568c9",
     "world3d.js": "97d6606ba2dee3e08062924d1b73647e457b9e1d54b36246f3af48dbeee87924"
@@ -110,5 +110,23 @@
     "minccinoOperationsFixtureCanonicalLFSHA256": "b6a4d97585961a075542689bfd035b0ab013cf4d14377ab8b19afc7d9af7e1e6",
     "scope": "Declared native singles572/541 only;metadata is not execution/motion/contact approval",
     "rawAssetPinsRetainOriginalMeaning": true
+  },
+  "previousClosed541ContractCanonicalLFSHA256": "b73ec24834acde208c73da44239fbd2d199d70930b7c5248b601c1b346a8e2a9",
+  "nativeM3TailLineage": {
+    "schema": 1,
+    "runtimeManifestSHA256": "efe0f5058929d6480f9483a8e0d6589282e80f4c82c02c56c7bff0cf125a8b3a",
+    "sourceSamplerSHA256": "6ce09b1c2147465170b11564bed94f3b8f353e1bd5ad5938de398ffb59554b10",
+    "sourceLFHashChanges": [
+      "minccino-moves.js",
+      "move-fx.js",
+      "battle-presentation.js",
+      "audio-engine.js"
+    ],
+    "minccinoOperationsFixture": "tests/fixtures/minccino-slap-reference064/m3-tail-minccino-operations.json",
+    "minccinoOperationsFixtureCanonicalLFSHA256": "2ac9ab3193f095de3ccdc3cee0730e4fd266e5a79a1dffe8d8baf693cf9c1682",
+    "nativeParentMap": 2,
+    "requiredBuildFlag": "--native572-tail-partition064",
+    "rawAssetPinsRetainOriginalMeaning": true,
+    "scope": "Declared M3 tail/whiff source only; no Game/movement/contact approval"
   }
 }

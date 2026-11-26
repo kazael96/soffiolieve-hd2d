@@ -136,3 +136,23 @@ interventi separati. Nessuno promuove implicitamente le vecchie54 mappe,
 l'intero corpus di4.365 coppie o i pilot mancanti. La suite completa r2 e i
 nuovi replay sono ancora da concludere secondo il registro della ripresa;
 non viene dichiarata una certificazione estetica globale o una pubblicazione.
+
+## Delta privato del26 novembre2026
+
+Doppiasberla di Minccino572/3 adotta il gesto della coda sui gruppi nativi
+9/11 e24 delle due viste; testa, torso, braccia, piedi e parte25 restano
+neutri. Il marker è `private-native-tail-SPA163/v1`. Il gesto senza colpo
+mantiene l'animazione senza produrre un impatto o cambiare hitCount0.
+Il confronto sorgente verifica762frame RGBA:508positivi e254senza colpo.
+Le38chiavi di presentazione mantengono le33precedenti; SPA163 e onset60
+restano invariati. Queste prove non certificano il contatto in Game o
+il movimento completo a velocità normale e rallentata.
+
+Il replay effettivo della C15 rileva sovrapposizioni al contatto per
+Tynamo602/Azione33 e Minccino572/Botta1. Tutti i12PNG del lotto sono stati
+letti dal principale e da un revisore indipendente. I campioni di impatto
+condividono rispettivamente2978 e2024pixel opachi: il difetto resta aperto.
+Botta1 è un controller distinto da Doppiasberla3 e Spazzasberla541;
+le loro prove non ne correggono implicitamente anatomia o avvicinamento.
+Il registro aggiornato delle regressioni è in
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).

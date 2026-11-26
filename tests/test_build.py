@@ -139,7 +139,7 @@ class BuildTests(unittest.TestCase):
             archive = Path(folder)/'bad.zip'
             archive.write_bytes(b'wrong release')
             with self.assertRaisesRegex(ValueError, 'SHA-256'):
-                builder.build(archive,Path(folder)/'site')
+                builder.build(archive,Path(folder)/'site',native572_tail_partition=True)
             self.assertFalse((Path(folder)/'site').exists())
 
     def test_build_and_cache_version(self):
@@ -149,12 +149,24 @@ class BuildTests(unittest.TestCase):
                 with zipfile.ZipFile(archive,'w') as z:
                     z.writestr('soffiolieve/assets/animated/800-front.png',b'test asset')
                     z.writestr('soffiolieve/game.js','OLD RELEASE CODE')
+                    # The current M3 runtime requires these exact native inputs;
+                    # SRC deliberately does not duplicate the immutable RAW fixture.
+                    native_fixture = Path(__file__).resolve().parent / 'fixtures/native572-original064'
+                    native_text = (native_fixture / 'manifest.json').read_text(encoding='utf-8').replace('\r\n', '\n')
+                    self.assertEqual(hashlib.sha256(native_text.encode('utf-8')).hexdigest(), 'bc24c2741b0eb20de24323d9033912d31c60917bbe7ecb64cf7b129d836dc253')
+                    native_files = json.loads(native_text)['files']
+                    self.assertEqual([row['relative'] for row in native_files], ['assets/animated/572-' + view + '.' + ext for view in ['back', 'front'] for ext in ['json', 'png']])
+                    for row in native_files:
+                        raw = (native_fixture / row['relative']).read_bytes()
+                        self.assertEqual(hashlib.sha256(raw).hexdigest(), row['rawSHA256'])
+                        self.assertEqual(len(raw), row['bytes'])
+                        z.writestr('soffiolieve/' + row['relative'], raw)
                     for name in re.findall(r'<script\s+src="([^"]+)"', (builder.ROOT/'src/index.html').read_text(encoding='utf8')):
                         if not (builder.ROOT/'src'/name).exists():z.writestr('soffiolieve/'+name,'/* base fixture */')
                 original=builder.ARCHIVE_SHA256
                 try:
                     builder.ARCHIVE_SHA256=hashlib.sha256(archive.read_bytes()).hexdigest()
-                    target=folder/'site';builder.build(archive,target)
+                    target=folder/'site';builder.build(archive,target,native572_tail_partition=True)
                     self.assertEqual((target/'game.js').read_bytes(),(builder.ROOT/'src/game.js').read_bytes())
                     manifest=json.loads((target/'build.json').read_text())
                     html=(target/'index.html').read_text(encoding='utf-8')
@@ -171,7 +183,7 @@ class BuildTests(unittest.TestCase):
                     for name, digest in manifest['assets'].items():
                         self.assertEqual(hashlib.sha256((target/name).read_bytes()).hexdigest(),digest)
                     with self.assertRaisesRegex(ValueError,'already exists'):
-                        builder.build(archive,target)
+                        builder.build(archive,target,native572_tail_partition=True)
                 finally:builder.ARCHIVE_SHA256=original
 
     def test_unsafe_archive(self):
@@ -182,6 +194,6 @@ class BuildTests(unittest.TestCase):
             try:
                 builder.ARCHIVE_SHA256=hashlib.sha256(archive.read_bytes()).hexdigest()
                 with self.assertRaisesRegex(ValueError,'Unsafe archive'):
-                    builder.build(archive,folder/'site')
+                    builder.build(archive,folder/'site',native572_tail_partition=True)
                 self.assertFalse((folder/'escape').exists())
             finally:builder.ARCHIVE_SHA256=original

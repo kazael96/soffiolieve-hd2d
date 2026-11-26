@@ -4,7 +4,7 @@ const repo=path.resolve(process.env.SOFFIOLIEVE_TEST_REPO||path.join(__dirname,'
 const records=[],sha=b=>crypto.createHash('sha256').update(b).digest('hex'),LF=text=>text.replace(/\r\n/g,'\n');
 function decode(raw,file){const text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(raw);assert(Buffer.from(text,'utf8').equals(raw),'strict UTF8 raw roundtrip '+file);return text;}
 const contractRaw=fs.readFileSync(path.join(fixtures,'source-contract.json')),contractText=decode(contractRaw,'source-contract.json');
-assert.equal(sha(Buffer.from(LF(contractText.replace(/^\uFEFF/,'')))),'b73ec24834acde208c73da44239fbd2d199d70930b7c5248b601c1b346a8e2a9','Frozen source contract metadata changed');
+assert.equal(sha(Buffer.from(LF(contractText.replace(/^\uFEFF/,'')))),'a4af68356acbb8a7a335dbd1c93d23c7b55a62a361b9de8833b66b7300be747e','Frozen source contract metadata changed');
 const contract=JSON.parse(contractText.replace(/^\uFEFF/,''));assert.equal(contract.schema,1);
 const native572Module=require('../native572-assets064.cjs'),native572=native572Module.create({repo,site,sourceRoot:target});
 function within(root,file){const relative=path.relative(root,file);return relative===''||(!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative));}

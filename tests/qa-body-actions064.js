@@ -19,7 +19,7 @@
    const row=rows.get(token);rows.delete(token);if(!row||!success||!activeMatches||!visible||!row.bodies.p1||!row.bodies.p2)return false;
    const frame=row.bodies[attacker].frame,duration=row.bodies[attacker].duration;if(!Number.isFinite(frame)||!Number.isFinite(duration)||duration<=0||frame<0||frame>duration)return false;
    const phase=phases.find(p=>!captured.has(p.label)&&frame/duration>=p.from&&frame/duration<=p.to);if(!phase)return false;
-   captured.add(phase.label);onCapture({phase:phase.label,window:[phase.from*duration,phase.to*duration],approximateFrame:frame,normalizedFrame:frame/duration,bodies:row.bodies,audit:typeof audit==='function'?audit():audit,completedOriginalArena:true,exactProtectedFrame:false});return true;
+   captured.add(phase.label);onCapture({phase:phase.label,window:[phase.from*duration,phase.to*duration],approximateFrame:frame,normalizedFrame:frame/duration,actionFrame:frame,actionFrameSource:row.bodies[attacker].frameSource??null,bodies:row.bodies,audit:typeof audit==='function'?audit():audit,completedOriginalArena:true,exactProtectedFrame:false});return true;
   }
   return{observe,complete,get phases(){return[...captured];}};
  }
@@ -56,10 +56,10 @@
    R.draw=function(c,id,back,x,y,size,tick,grounded,a){
     const result=sprite.apply(this,arguments),row=current,active=MoveFX.active,side=back?'p1':'p2';
     if(row&&active&&arenaToken){
-     const p=active.profile,duration=p?.frames,frame=side===row.side&&Number.isFinite(a?.t)?a.t*duration:((GameSpeed.now()-active.start)*.06*active.speed),tail=kind!=='tail'||side!==row.side||a?.nativeTailWhip===spec.species&&a.nativeTick===0&&a.nativeParentMap===0;
+     const p=active.profile,duration=p?.frames,frame=side===row.side&&Number.isFinite(a?.t)?a.t*duration:null,tail=kind!=='tail'||side!==row.side||a?.nativeTailWhip===spec.species&&a.nativeTick===0&&a.nativeParentMap===0;
      row.profile={species:p?.species,id:p?.id,kind:p?.kind,frames:duration};
      const contextMatches=active.side===row.side&&active.moveId===spec.id&&row.id===spec.id&&p?.species===spec.species&&p?.id===spec.id&&String(active.cryIds?.[side])===String(id)&&tail&&(kind!=='tail'||p.kind==='nativeTailWhipStatus064');
-     row.gate.observe(arenaToken,{success:result===true,graphic:id,side,back,x,y,size,grounded:!!grounded,visible:(c.globalAlpha??1)>0,contextMatches,frame,duration,effectiveTick:a?(Number.isFinite(a.nativeTick)?a.nativeTick:0):tick,pose:a?{species:a.species,t:a.t??null,nativeTailWhip:a.nativeTailWhip??null,nativeTick:a.nativeTick??null,nativeParentMap:a.nativeParentMap??null,tail:a.tail??null}:null});
+     row.gate.observe(arenaToken,{success:result===true,graphic:id,side,back,x,y,size,grounded:!!grounded,visible:(c.globalAlpha??1)>0,contextMatches,frame,frameSource:frame===null?null:'attacker-pose.t*profile.frames',duration,effectiveTick:a?(Number.isFinite(a.nativeTick)?a.nativeTick:0):tick,pose:a?{species:a.species,t:a.t??null,nativeTailWhip:a.nativeTailWhip??null,nativeTick:a.nativeTick??null,nativeParentMap:a.nativeParentMap??null,tail:a.tail??null}:null});
      arenaToken.surface=c.canvas;
     }
     return result;

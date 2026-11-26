@@ -172,6 +172,10 @@ def derive_native572_tail(site):
 
 
 def build(archive, target, *, native572_tail_partition=False):
+    minccino = ROOT / 'src/minccino-moves.js'
+    if (not native572_tail_partition and minccino.is_file()
+            and 'private-native-tail-SPA163/v1' in minccino.read_text(encoding='utf-8')):
+        raise ValueError('Native M3 tail requires --native572-tail-partition064 before build output')
     with archive.open("rb") as stream:
         digest = hashlib.file_digest(stream, "sha256").hexdigest()
     if digest != ARCHIVE_SHA256:

@@ -165,6 +165,23 @@ class Native572DerivationTests(unittest.TestCase):
                 self.assertEqual(helper.sha((on / name).read_bytes()), digest)
             self.assertEqual((off / 'assets/field-pack.bin').read_bytes(), (on / 'assets/field-pack.bin').read_bytes())
             self.assertEqual((off / 'assets/battle-ui-pack.bin').read_bytes(), (on / 'assets/battle-ui-pack.bin').read_bytes())
+            # Use the ACTUAL selected runtime, not a fabricated marker/proof.
+            runtime_minccino = (ROOT / 'src/minccino-moves.js').read_text(encoding='utf-8')
+            self.assertIn('private-native-tail-SPA163/v1', runtime_minccino)
+            (source / 'minccino-moves.js').write_text(runtime_minccino, encoding='utf-8', newline='\n')
+            with mock.patch.object(builder, 'ROOT', root), mock.patch.object(builder, 'ARCHIVE_SHA256', helper.sha(archive.read_bytes())):
+                with mock.patch.object(builder.hashlib, 'file_digest', wraps=builder.hashlib.file_digest) as archive_hash, mock.patch.object(builder, 'build_staging', wraps=builder.build_staging) as staging:
+                    with self.assertRaisesRegex(ValueError, 'Native M3 tail requires --native572-tail-partition064'):
+                        builder.build(archive, root / 'tail-without-flag')
+                    archive_hash.assert_not_called()
+                    staging.assert_not_called()
+                self.assertFalse((root / 'tail-without-flag').exists())
+                builder.build(archive, root / 'tail-with-flag', native572_tail_partition=True)
+            tail = json.loads((root / 'tail-with-flag/build.json').read_text(encoding='utf-8'))
+            self.assertIn('native572TailPartition', tail)
+            for view, (raw, png) in inputs.items():
+                self.assertEqual((root / ('tail-with-flag/assets/animated/572-' + view + '.json')).read_bytes(), helper.derive(view, raw, png)[0])
+                self.assertEqual((root / ('tail-with-flag/assets/animated/572-' + view + '.png')).read_bytes(), png)
             # The real builder must fail a flagged missing/corrupt input, no skip.
             for fault in ['missing', 'corrupt']:
                 bad = root / (fault + '.zip')

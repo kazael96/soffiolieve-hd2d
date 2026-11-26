@@ -1237,3 +1237,59 @@ movimento continuo, GPU Android o qualità completa della541. La matrice
 privata V4 è9/9 PASS nel proprio ambito; nominale e recovery software del
 port hanno PASS separati e revisione delle rispettive ricevute conclusa.
 Resta PENDING la nuova CI del batch, senza trasferimento dei PASS precedenti.
+
+## Ripresa del26 novembre2026 · coda di Minccino e regressioni
+
+La CI108 del commit `c19ca6bdc638078925459771f3a84e94b6d22f02` è conclusa
+con successo, compreso il job Windows del port541. Le letture degli artefatti
+sono terminate:330PNG delle interfacce e1080PNG del lotto nativo18, oltre
+ai14PNG del job Windows541. Questi risultati qualificano quel commit;
+non certificano le modifiche private successive o la pubblicazione0.64.
+
+Il controller privato di Doppiasberla572/3 usa ora le parti native della
+coda e il marker `private-native-tail-SPA163/v1`. Le due viste conservano
+tick nativo, appoggi e corpo neutro ai confini. Il mancato colpo mantiene
+il gesto senza inventare un impatto: hitCount0 e effectiveImpactFrame null.
+Il confronto sorgente verifica762frame RGBA esatti,508positivi e254senza
+colpo. Non è una prova del comando Game o del contatto fisico sul bersaglio.
+
+Il target provider/rig/builder passa25test; audio5 e protocollo3 hanno
+risultati separati nei propri budget, senza confronto all'ascolto.
+Il builder completo passa95test in170,388s, entro180s, dopo la qualificazione
+immutabile della C15. Tutti i32010file della C15 sono ReadOnly e tornano
+a un solo hardlink dopo il collaudo; i sorgenti restano scrivibili e distinti.
+Il precedente timeout180s e le prove fallite restano conservati.
+
+Il primo target delle45regressioni legacy passa43casi e fallisce due fixture
+UI che perdevano i getter p1/p2 copiando la Battle. La correzione conserva
+il prototipo nativo e tutti gli assert precedenti. Il nuovo target limitato
+ai due file UI passa9/9casi, zero skip, in8561ms, con115pin invariati e
+processi posseduti chiusi. Metadata5, acquisizione9 e caricamenti27 erano già
+passati e non vengono ripetuti. I50casi risultano così coperti da esecuzioni
+distinte; il vecchio rapporto43/45 resta FAIL. Questi processi ordinari
+non misurano un limite RSS400MiB e non sostituiscono la nuova suite completa.
+
+Ricevute esterne: `outputs/ci064green/m3-python-full-discovery-readonly-v1`,
+`m3-legacy50-canonical-target-v1` e `m3-ui9-canonical-target-v1`.
+Restano aperti il contatto di Tynamo/Azione e Minccino/Botta osservato nei
+replay effettivi, il movimento normale/rallentato e l'integrazione Game
+della nuova coda. C15 contiene ancora il controller precedente; nessun
+PASS della sua grafica viene trasferito ai quattro sorgenti runtime cambiati.
+Nessuna nuova build pubblica, merge o consegna0.64 è dichiarata.
+
+La migrazione esplicita dei consumatori541 conserva il contratto e la
+fixture actual precedenti come riferimenti immutabili. La fixture corrente
+cambia soltanto i due campi del contratto sorgente; il confronto storico
+rifiuta variazioni a risorse native, ordine, tempi o limiti. Il target
+canonico `unit-native-tail541` passa16/16casi in83560ms con il suo guard
+RSS originario:333728KiB osservati contro409600KiB. Il file completo dei
+controlli headless passa10/10callback in1613ms, mantenendo i17gruppi interni.
+Tutti139pin restano invariati e i processi posseduti sono chiusi. Le prove
+sono di protocollo/metadati/audio simulato, senza Game, raster o ascolto;
+la nuova CI completa rimane da eseguire sul batch corrente.
+
+La pulizia H.8 della C14 ricostruisce e ricontrolla32010file/1136580701byte
+prima della rimozione, con19file nel delta e31991dipendenze dalla C04.
+Archivio, prova, dry-run e ricevuta di rimozione restano esterni alle build
+in `outputs/ci064green/h8-c14-preparation-v1`. Rimangono C04 base obbligatoria,
+C08 verificata e C15 confronto ReadOnly; la C16 è ancora da compilare.

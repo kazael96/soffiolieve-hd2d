@@ -2,10 +2,30 @@
 // Production-source contract/transport tests. No browser, real PCM decode or supplied
 // GEN5 outcomes; actual native timeline and src audio code run.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const repo=path.resolve(__dirname,'..'),site=process.env.SOFFIOLIEVE_TEST_SITE||path.join(repo,'_site'),src=path.join(repo,'src'),plain=x=>JSON.parse(JSON.stringify(x)),read=n=>fs.readFileSync(path.join(n.startsWith('assets/')?site:src,n),'utf8');
+const repo=path.resolve(process.env.SOFFIOLIEVE_TEST_REPO||path.join(__dirname,'..')),site=process.env.SOFFIOLIEVE_TEST_SITE||path.join(repo,'_site'),src=process.env.SOFFIOLIEVE_TEST_SOURCE||path.join(repo,'src'),sourcePath=require('./helpers/minccino-slap-paths064.cjs').sourcePath,plain=x=>JSON.parse(JSON.stringify(x)),read=n=>fs.readFileSync(n.startsWith('assets/')?path.join(site,n):sourcePath(n),'utf8');
+// Acquire32 profiles ONCE through real S.select and real typed-bank cold prepare.
+// Return ONLY outer-realm JSON: no VM/function/bank/image/proof reference escapes.
+const selectedProfileSeeds=(()=>{
+ const h=require('./helpers/minccino-slap-recording064.cjs').host(true),profiles={},coldAttestations=[];
+ try{
+  for(const side of ['p1','p2'])for(let hitCount=0;hitCount<=5;hitCount++)for(let hitIndex=0;hitIndex<Math.max(1,hitCount);hitIndex++){
+   const p=h.c.SpeciesMoves.select(572,3,{hitIndex,hitCount}),proof=h.c.MinccinoMoves.prepareSlapSource064(p,side),view=side==='p1'?'back':'front';
+   assert.equal(p.minccinoNativeSlap064,'private-native-tail-SPA163/v1');assert.equal(proof.kind,view==='back'?'native572-back-cell7-oam-partition/v1':'native572-front-cell12-oam-partition/v1');
+   assert.equal(proof.bank,h.c.ROM_SPRITE_ANIM.cache['572-'+view]);assert.equal(proof.data,proof.bank.data);assert.equal(proof.image,proof.bank.image);
+   profiles[side+'/'+hitCount+'/'+hitIndex]=p;coldAttestations.push({side,hitCount,hitIndex,kind:proof.kind,groundBounds:[...proof.groundBounds],coldOnlyNotWarmCloneProof:true});
+  }
+  // JSON.parse executes in the outer Node realm, not the source VM.
+  return JSON.parse(JSON.stringify({profiles,coldAttestations}));
+ }finally{h.c.MoveFX.cancel();}
+})();
+assert.equal(Object.keys(selectedProfileSeeds.profiles).length,32);assert.equal(selectedProfileSeeds.coldAttestations.length,32);
+for(const p of Object.values(selectedProfileSeeds.profiles)){Object.freeze(p.nativeSlapContext064);Object.freeze(p);}Object.freeze(selectedProfileSeeds.profiles);Object.freeze(selectedProfileSeeds);
+// The full finale-host local variable is now unreachable; collection is optional.
+// Cloned profiles below are audio metadata, NEVER passed as live Min warm proofs.
+global.gc?.();
 const data={Image:class{complete=true;naturalWidth=1;set src(v){}},window:null};data.window=data;vm.createContext(data);
 for(const n of ['assets/native-audio-bank.js','assets/move-fx-data.js','native-visual.js','species-moves.js','battle-presentation.js','move-fx.js'])vm.runInContext(read(n),data,{filename:n});
-function model(side='p1',hitCount=2,hitIndex=0,miss=false){const p={species:572,id:3,name:'Doppiasberla',kind:'palmFlurry',chapter:true,training:true,nativeEffects:true,key:'training-572-3',frames:126,impact:60,attachment:'hand',target:'foe',damage:true,minccinoNativeSlap064:'private-native-paw-SPA163',nativeSlapContext064:{hitIndex,hitCount}},q=plain(data.SpeciesMoves.timeline(data.MoveFX.timeline(data.ROM_MOVE_FX.moves[3],0,0,side,{}),p));return{p,q,plan:data.BattlePresentation.plan(p,q),side,miss};}
+function model(side='p1',hitCount=2,hitIndex=0,miss=false){const seed=selectedProfileSeeds.profiles[side+'/'+hitCount+'/'+hitIndex];assert(seed,'Profile must originate from the32 real selected/cold-verified seeds');const p=plain(seed),q=plain(data.SpeciesMoves.timeline(data.MoveFX.timeline(data.ROM_MOVE_FX.moves[3],0,0,side,{}),p));return{p,q,plan:data.BattlePresentation.plan(p,q),side,miss};}
 function audio(side='p1',speed=1,playbackSpeed=1,hitCount=2,hitIndex=0,miss=false){
  const fixtureFile=path.join(repo,'tests/helpers/audio-engine-fixture.cjs'),shim=Object.create(fs);shim.readFileSync=(p,...args)=>String(p).replaceAll('\\','/')==='src/audio-engine.js'?read('audio-engine.js'):String(p).replaceAll('\\','/')==='src/pokemon-visuals.js'?fs.readFileSync(path.join(repo,'src/pokemon-visuals.js'),...args):fs.readFileSync(p,...args);
  const m={exports:{}};Function('require','module','exports',fs.readFileSync(fixtureFile,'utf8'))(n=>n==='node:fs'?shim:require(n),m,m.exports);const f=m.exports.fixture(),c=f.c,intervals=new Map();let serial=0;c.setInterval=fn=>{intervals.set(++serial,fn);return serial;};c.clearInterval=id=>intervals.delete(id);c.setTimeout=()=>0;c.clearTimeout=()=>{};c.performance={now:()=>0};c.NATIVE_AUDIO_BANK=plain(data.NATIVE_AUDIO_BANK);
@@ -14,7 +34,7 @@ function audio(side='p1',speed=1,playbackSpeed=1,hitCount=2,hitIndex=0,miss=fals
  return{...f,...x,options,prepare:()=>f.api.preparePresentation(x.q.audio,options),advance(s){c.AudioEngine.context.currentTime+=s;for(const fn of intervals.values())fn();},dispose(){f.api.cancelMove();f.api.disable();for(const s of f.sources)s.finish();}};
 }
 test('private marked572/3 protects source body/SPAtarget landmarks and both paired native onsets; unmarked stays unsupported',()=>{
- for(const side of ['p1','p2'])for(let n=0;n<=5;n++)for(let i=0;i<Math.max(1,n);i++){const x=model(side,n,i,n===0);assert.ok(x.plan,'Marked572/3 requires its strict clock');assert.equal(x.plan.duration,126);assert.deepEqual([x.q.nativeFrames,x.q.nativeAnchor,x.q.customImpact],[129,0,60]);for(const f of [0,20,24,42,44,56,58,60,62,64,66,70,78,80,84,88,92,96,126,...[0,5,10,15,20,22,25,28,33,38,43,47,52,56,100,129].map(n=>60+n/129*66)])assert.ok(x.plan.keys.includes(f));assert.ok(x.plan.keys.length<256);assert.deepEqual(x.q.audio.map(v=>v.start),[60,60,60+25/129*66,60+25/129*66]);const original={...x.p};delete original.minccinoNativeSlap064;delete original.nativeSlapContext064;assert.equal(data.BattlePresentation.plan(original,x.q),null);}
+ for(const side of ['p1','p2'])for(let n=0;n<=5;n++)for(let i=0;i<Math.max(1,n);i++){const x=model(side,n,i,n===0);assert.ok(x.plan,'Marked572/3 requires its strict clock');assert.equal(x.plan.duration,126);assert.deepEqual([x.q.nativeFrames,x.q.nativeAnchor,x.q.customImpact],[129,0,60]);for(const f of [0,12,20,24,42,44,56,58,60,62,64,66,70,72,78,80,84,88,90,92,96,108,118,126,...[0,5,10,15,20,22,25,28,33,38,43,47,52,56,100,129].map(n=>60+n/129*66)])assert.ok(x.plan.keys.includes(f));assert.equal(x.plan.keys.length,38);assert.deepEqual(x.q.audio.map(v=>v.start),[60,60,60+25/129*66,60+25/129*66]);const original={...x.p};delete original.minccinoNativeSlap064;delete original.nativeSlapContext064;assert.equal(data.BattlePresentation.plan(original,x.q),null);}
 });
 test('changed native clock/profile/SPA/cue fails closed rather than accepting131/anchor1 or another body',()=>{
  const good=model();for(const change of [x=>x.p.minccinoNativeSlap064='changed',x=>x.p.kind='impact',x=>x.p.nativeSlapContext064.hitCount=6,x=>x.p.nativeSlapContext064.extra=true,x=>x.q.nativeFrames=131,x=>x.q.nativeAnchor=1,x=>x.q.customImpact=61,x=>x.q.events[0].target=14,x=>x.q.events.reverse(),x=>x.q.audio[0].raw[5]++,x=>x.q.audio[2].start++]){const x={p:plain(good.p),q:plain(good.q)};change(x);assert.throws(()=>data.BattlePresentation.plan(x.p,x.q),/Minccino|timing/);}

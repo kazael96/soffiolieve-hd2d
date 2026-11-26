@@ -33,37 +33,56 @@
   return Object.freeze({kind,bank,data:d,image:im,groundBounds:Object.freeze(bank.groundBounds.slice()),referenceJSONSHA256:reference.jsonSHA256,referencePNGSHA256:reference.pngSHA256});
  }
 
- // PRIVATE572/3: original cells and OAM order, planted SPA163-mediated paw beat.
- const slapRig=(function(){
-const maps={front:{head:[0,1,2,3,4],torso:[5],feet:[6,7],near:8,far:9,tail:[10,11],neck:[3,-13],hip:[1,-3],tailJoint:[5,-8],nearSign:1,farSign:-1},back:{head:[0,1,2,3],torso:[6],feet:[10,11],near:5,far:4,tail:[7,8,9],neck:[-1,-15],hip:[1,-3],tailJoint:[-1,-5],nearSign:-1,farSign:1}};
+ // EXTERNAL CANDIDATE ONLY:572/3 native tail OAM articulation; no target-contact claim.
+ // Raw qualified source sampler is retained verbatim inside this local module.
+ const slapRig=((module)=>{
+'use strict';
+// New source-only3 choreography. Frozen artistic choice, not a541 sampler or Game controller.
+const TAG='private-native572-doubleslap-tail-source/v1',IMPACT=60,END=126;
+const V={
+ back:{kind:'native572-back-cell7-oam-partition/v1',middle:9,p:[-19,-6],d:[-27,-13],world:[45,94],keys:{
+  even:[[0,0,0],[12,-.015,-.035],[24,-.030,-.080],[42,-.025,-.055],[60,-.045,.230],[72,-.075,.120],[90,-.045,.025],[108,-.015,0],[118,0,0],[126,0,0]],
+  odd:[[0,0,0],[12,.010,.035],[24,.025,.070],[42,.020,.045],[60,.040,-.230],[72,.070,-.120],[90,.035,-.025],[108,.010,0],[118,0,0],[126,0,0]]}},
+ front:{kind:'native572-front-cell12-oam-partition/v1',middle:11,p:[18,-5],d:[26,-12],world:[82,95],keys:{
+  even:[[0,0,0],[12,.010,.030],[24,.020,.065],[42,.025,.040],[60,.035,-.200],[72,.065,-.100],[90,.030,-.025],[108,.010,0],[118,0,0],[126,0,0]],
+  odd:[[0,0,0],[12,-.010,-.030],[24,-.025,-.060],[42,-.020,-.035],[60,-.035,.200],[72,-.060,.100],[90,-.030,.020],[108,-.010,0],[118,0,0],[126,0,0]]}}
+};
+function freeze(v){if(v&&typeof v==='object'){Object.freeze(v);for(const x of Object.values(v))freeze(x);}return v;}freeze(V);
+// Same affine multiplication/pivot convention as the qualified native partition source.
 const I=()=>[1,0,0,1,0,0],T=(x,y)=>[1,0,0,1,x,y],R=a=>[Math.cos(a),Math.sin(a),-Math.sin(a),Math.cos(a),0,0];
-function mul(a,b){return[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];}
+const mul=(a,b)=>[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];
 const around=(p,a)=>mul(T(...p),mul(R(a),T(-p[0],-p[1]))),point=(m,p)=>[m[0]*p[0]+m[2]*p[1]+m[4],m[1]*p[0]+m[3]*p[1]+m[5]];
-function curve(f,keys){if(f<=keys[0][0])return keys[0][1];for(let i=1;i<keys.length;i++)if(f<=keys[i][0]){const[x,a]=keys[i-1],[y,b]=keys[i];let t=(f-x)/(y-x);t=t*t*(3-2*t);return a+(b-a)*t;}return keys.at(-1)[1];}
-function sample(bank,view,f,{hitIndex,hitCount,miss=false,species=572,move=3}={}){
- if(species!==572||move!==3)throw Error('Private pilot supports only Minccino572/Doppiasberla3');
- if(miss&&hitCount===0&&hitIndex===0)hitCount=1;
- if(!maps[view]||!Number.isInteger(hitCount)||hitCount<1||hitCount>5||!Number.isInteger(hitIndex)||hitIndex<0||hitIndex>=hitCount||!Number.isFinite(f))throw Error('Invalid native hit/view context');
- f=Math.max(0,Math.min(126,f));const m=maps[view],rowByTrack=new Map(bank.batches.map(g=>[g[0].r[0],g[0].r]));
- for(const track of[...m.head,...m.torso,...m.feet,m.near,m.far,...m.tail])if(!rowByTrack.has(track))throw Error('Original native0 part ownership changed');
- const first=hitIndex===0,last=miss||hitIndex===hitCount-1,farBeat=hitIndex%2===1,direction=view==='back'?1:-1;
- let base=first?curve(f,[[0,0],[20,.18],[126,.18]]):.18;if(last)base*=curve(f,[[0,1],[92,1],[126,0]]);
- const nearStroke=curve(f,[[0,0],[20,.44],[42,.44],[56,.10],[64,-.30],[78,-.12],[96,0],[126,0]]),farStroke=curve(f,[[0,0],[24,.34],[44,.46],[58,.05],[66,-.22],[80,-.09],[96,0],[126,0]]);
- const strokeScale=miss?.52:1,nearAngle=m.nearSign*(base+(!farBeat?nearStroke*strokeScale:0)),farAngle=m.farSign*(base+(farBeat?farStroke*strokeScale:0));
- const torsoAngle=direction*(farBeat?-1:1)*curve(f,[[0,0],[24,-.018],[44,-.018],[58,.027],[70,.012],[88,0],[126,0]]);
- const headWorld=direction*curve(f,[[0,0],[24,-.020],[44,-.020],[62,.012],[84,0],[126,0]]),tailRelative=-direction*curve(f,[[0,0],[24,.035],[44,.035],[64,-.020],[88,0],[126,0]]);
- const torso=around(m.hip,torsoAngle),head=mul(torso,around(m.neck,headWorld-torsoAngle)),tail=mul(torso,around(m.tailJoint,tailRelative)),global={},parts={};
- for(const track of m.torso)global[track]=torso;
- for(const track of m.head)global[track]=head;
- for(const track of m.tail)global[track]=tail;
- for(const[track,a]of[[m.near,nearAngle],[m.far,farAngle]])global[track]=mul(torso,around(rowByTrack.get(track).slice(1,3),a));
- for(const[track,row]of rowByTrack){const g=global[track]||I(),local=mul(T(-row[1],-row[2]),mul(g,T(row[1],row[2])));parts[track]=m.feet.includes(track)?null:{rotation:Math.atan2(local[1],local[0]),x:local[4],y:local[5]};}
- return{frame:f,view,hitIndex,hitCount,first,last,miss,activePaw:farBeat?'far':'near',nearAngle,farAngle,torsoAngle,headWorld,tailRelative,parts,global,footTracks:m.feet,root:{x:0,y:0,scale:1,scaleX:1,scaleY:1,rotation:0,groundX:0,groundY:0,groundLift:0},nativeTick:0,
-  scope:'Original native cells/ordering only; rigid anchored hierarchy, planted source feet. Original targetSPA163 is not rendered or altered by this source-only score.'};
+function context(c){
+ if(!c||c.species!==572||c.move!==3||!Object.hasOwn(V,c.view)||c.side!==(c.view==='back'?'p1':'p2')||!Number.isInteger(c.hitIndex)||!Number.isInteger(c.hitCount)||c.hitIndex<0||c.hitCount<0||c.hitCount>5||typeof c.miss!=='boolean'||(c.hitCount===0?c.hitIndex!==0:c.hitIndex>=c.hitCount)||c.hitCount>0&&c.miss)throw Error('Invalid explicit source3 context');
+ return{species:c.species,move:c.move,view:c.view,side:c.side,hitIndex:c.hitIndex,hitCount:c.hitCount,miss:c.miss};
 }
+function value(keys,f,k){if(f<=keys[0][0])return keys[0][k];for(let i=1;i<keys.length;i++)if(f<=keys[i][0]){const a=keys[i-1],b=keys[i];let t=(f-a[0])/(b[0]-a[0]);t=t*t*(3-2*t);return a[k]+(b[k]-a[k])*t;}return keys.at(-1)[k];}
+function sample(f,proof,original){
+ if(!Number.isFinite(f)||f<0||f>END)throw Error('Source3 frame outside0..126');
+ const c=context(original),v=V[c.view];if(proof?.kind!==v.kind||proof.bank?.data!==proof.data||proof.bank?.image!==proof.image||!proof.bank.ready)throw Error('Current qualified partition bank required');
+ const rows=proof.data.maps[2];for(const t of[v.middle,24,25])if(rows.filter(r=>r[0]===t).length!==1)throw Error('Missing exact source partition row');
+ const keys=v.keys[c.hitIndex%2?'odd':'even'],noHit=c.hitCount===0,m=value(keys,f,1),t=value(keys,f,2),g9=around(v.p,m),gd=mul(g9,around(v.d,t)),parts={};
+ for(const[track,g]of[[v.middle,g9],[24,gd]]){const row=rows.find(r=>r[0]===track),local=mul(T(-row[1],-row[2]),mul(g,T(row[1],row[2])));parts[track]={rotation:Math.atan2(local[1],local[0]),x:local[4],y:local[5]};}
+ return{nativeTail3Source:TAG,species:572,move:3,view:c.view,originalContext:c,nativeTick:0,nativeParentMap:2,frame:f,parity:c.hitIndex%2,m,t,parts,g9,gd,proximalPivotWorld:[...v.world],distalPivotWorld:point(g9,v.d).map((n,i)=>n+[64,100][i]),effectiveImpactFrame:noHit?null:IMPACT,sourceOnlyNotDamageOrACK:true,root:{x:0,y:0,groundX:0,groundY:0,scale:1,scaleX:1,scaleY:1,rotation:0,lift:0,crouch:0}};
+}
+function part(track,back,a){if(!a)return null;if(a.nativeTail3Source!==TAG||a.move!==3||a.view!==(back?'back':'front'))throw Error('Source3 part/view ownership mismatch');return a.parts[track]||null;}
+module.exports={TAG,IMPACT,END,V,I,mul,around,point,context,sample,part};
 
-return{sample,maps};})();
-
+ return module.exports;
+ })({exports:{}});
+ const slapSourceMarker064='private-native-tail-SPA163/v1',slapSourceProofs064=new WeakMap();
+ function prepareSlapSource064(p,side){
+  if(p?.minccinoNativeSlap064!==slapSourceMarker064)return null;
+  if(!['p1','p2'].includes(side))throw Error('Tail3 source side is invalid');
+  const view=side==='p1'?'back':'front',R=root.ROM_SPRITE_ANIM,bank=R?.cache['572-'+view],proof=verifyNativeBank064(bank,view);
+  if(proof.kind!==slapRig.V[view].kind)throw Error('Tail3 requires the exact qualified native OAM partition');
+  slapSourceProofs064.set(p,{view,R,proof});return proof;
+ }
+ function currentSlapSource064(p,side){
+  const stamp=slapSourceProofs064.get(p),view=side==='p1'?'back':side==='p2'?'front':null,R=root.ROM_SPRITE_ANIM,proof=stamp?.proof,bank=R?.cache['572-'+view],im=bank?.image,g=bank?.groundBounds;
+  if(!stamp||view!==stamp.view||R!==stamp.R||bank!==proof.bank||!bank.ready||bank.pending||bank.error||bank.data!==proof.data||im!==proof.image||im.closed||im.complete===false||(im.naturalWidth??im.width)!==512||(im.naturalHeight??im.height)!==256||!Array.isArray(g)||g.length!==4||g.some((n,i)=>n!==proof.groundBounds[i]))throw Error('Tail3 cold proof or live source owner changed');
+  return proof;
+ }
  // Native572-front track13, four ticks per cel. Only the mouth CEL is used;
  // the seventeen whole-body affine keys of native parentmap1 are not applied.
  const mouthCells=[1,1,1,1,2,3,3,3,2,1,1,1,1,1,1,1,1];
@@ -179,23 +198,22 @@ return{sample,maps};})();
    try{const owner=typeof session==='undefined'?null:session;if(owner){if(owner.double||owner.multi||owner.battle?.gameType!=='singles')return p;const view=root.BattlePresentationOwners?.read?.();if(!view?.layoutSupported||!view.available||['p1','p2'].some(side=>!view.roles?.[side]||view.roles[side].altered))return p;}}catch{return p;}
    const n=context.hitCount,i=context.hitIndex;
    if(!Number.isInteger(n)||n<0||n>5||!Number.isInteger(i)||i<0||(n===0?i!==0:i>=n))return p;
-   return{...p,minccinoNativeSlap064:'private-native-paw-SPA163',nativeSlapContext064:{hitIndex:i,hitCount:n}};
+   return{...p,minccinoNativeSlap064:'private-native-tail-SPA163/v1',minccinoSlapAnatomy064:'tail',minccinoSlapScore064:slapRig.TAG,nativeSlapContext064:{hitIndex:i,hitCount:n}};
   }
   C.select=function(sid,id,context){return withActualHitContext(previousChapterSelect.call(this,sid,id,context),context);};
   D.select=function(sid,id,context){return withActualHitContext(previousDemoSelect.call(this,sid,id,context),context);};
   function nativeSlap(a,p,f,side,miss){
-   if(p.minccinoNativeSlap064!=='private-native-paw-SPA163')return a;
-   const view=side==='p1'?'back':'front',bank=root.ROM_SPRITE_ANIM?.cache['572-'+view],data=bank?.data;
-   if(!bank?.ready||!data?.maps?.[0])throw Error('Private native Double Slap bank is not prepared');
+   if(p.minccinoNativeSlap064!==slapSourceMarker064)return a;
    const context=p.nativeSlapContext064;
+   // The UI preserves event kinds, but its miss boolean aggregates all zero-impact outcomes.
+   // Retain the existing protected runtime contract; do not reclassify0/false as MISS.
    if(!miss&&context.hitCount===0)throw Error('Zero native hits require a real failed attempt');
-   const score=slapRig.sample({batches:data.maps[0].map(r=>[{r}])},view,f,{...context,miss:!!miss});
-   // Body root remains planted. Original target SPA163 is solely responsible
-   // for target contact; no invented projectile or disembodied opaque hand.
-   for(const key of ['head','tail','arms','feet','lean','lift','crouch','reach','breath','hip','ears','cheeks','jaw','coil'])a[key]=0;
-   delete a.roll;delete a.nativeCells;a.nativeTick=0;a.nativeParentMap=0;
-   a.minccinoSlap064={parts:score.parts,hitIndex:context.hitIndex,hitCount:context.hitCount,activePaw:score.activePaw,first:score.first,last:score.last,miss:!!miss,controllerPoseOnly:true,renderAcknowledgement:false};
-   return a;
+   const view=side==='p1'?'back':'front',proof=currentSlapSource064(p,side),score=slapRig.sample(f,proof,{species:572,move:3,view,side,...context,miss:!!miss});
+   const copy={...a};for(const key of ['head','tail','arms','feet','lean','lift','crouch','reach','breath','hip','ears','cheeks','jaw','coil'])copy[key]=0;
+   delete copy.roll;delete copy.nativeCells;copy.nativeTick=0;copy.nativeParentMap=2;
+   // a.t is source TIME; score.t is an ANGLE and stays nested. The original sampler object is untouched.
+   copy.minccinoSlap064={anatomy:'tail',score,parts:score.parts,hitIndex:context.hitIndex,hitCount:context.hitCount,first:context.hitIndex===0,last:context.hitCount===0||context.hitIndex===context.hitCount-1,miss:!!miss,controllerPoseOnly:true,renderAcknowledgement:false};
+   return copy;
   }
   function author(a,p,f,side='p1',miss=false){
    if(p?.nativeTail541064!==undefined)return nativeTail541.sample(a,p,f,side,miss);
@@ -220,13 +238,13 @@ return{sample,maps};})();
   // SPA163 is the contact mark. Generic damage rays otherwise appear
   // aroundframe44, before native contact60, and mask its original symbol.
   D.draw=function(c,W,H,x,f,layer){
-   if((x?.nativeSlapController064===true||x?.preview&&x.nativeSlapController064==='reference-preview')&&x?.profile?.species===572&&x.profile.id===3&&x.profile.minccinoNativeSlap064==='private-native-paw-SPA163'&&x.profile.kind==='palmFlurry'&&x.profile.frames===126&&x.profile.nativeEffects===true&&x.profile.damage===true&&x.profile.key==='training-572-3'&&x.profile.chapter===true&&x.profile.training===true&&x.profile.impact===60&&x.profile.target==='foe'&&x.profile.attachment==='hand'&&x.profile.nativeSlapContext064&&Object.keys(x.profile.nativeSlapContext064).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(x.profile.nativeSlapContext064.hitCount)&&x.profile.nativeSlapContext064.hitCount>=0&&x.profile.nativeSlapContext064.hitCount<=5&&Number.isInteger(x.profile.nativeSlapContext064.hitIndex)&&x.profile.nativeSlapContext064.hitIndex>=0&&(x.profile.nativeSlapContext064.hitCount===0?x.profile.nativeSlapContext064.hitIndex===0&&x.miss===true:x.profile.nativeSlapContext064.hitIndex<x.profile.nativeSlapContext064.hitCount))return;
+   if((x?.nativeSlapController064===true||x?.preview&&x.nativeSlapController064==='reference-preview')&&x?.profile?.species===572&&x.profile.id===3&&x.profile.minccinoNativeSlap064==='private-native-tail-SPA163/v1'&&x.profile.kind==='palmFlurry'&&x.profile.frames===126&&x.profile.nativeEffects===true&&x.profile.damage===true&&x.profile.key==='training-572-3'&&x.profile.chapter===true&&x.profile.training===true&&x.profile.impact===60&&x.profile.target==='foe'&&x.profile.attachment==='hand'&&x.profile.nativeSlapContext064&&Object.keys(x.profile.nativeSlapContext064).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(x.profile.nativeSlapContext064.hitCount)&&x.profile.nativeSlapContext064.hitCount>=0&&x.profile.nativeSlapContext064.hitCount<=5&&Number.isInteger(x.profile.nativeSlapContext064.hitIndex)&&x.profile.nativeSlapContext064.hitIndex>=0&&(x.profile.nativeSlapContext064.hitCount===0?x.profile.nativeSlapContext064.hitIndex===0&&x.miss===true:x.profile.nativeSlapContext064.hitIndex<x.profile.nativeSlapContext064.hitCount))return;
    return previousDemoDraw.call(this,c,W,H,x,f,layer);
   };
   D.attachment=function(p,a,from,body,side){if(p?.nativeTail541064!==undefined)return nativeTail541.attachment(p,a,from,body,side);return p?.species===572&&p.id===47?mouthOrigin(a,from,body,side):previousAttachment(p,a,from,body,side);};
   S.part=function(track,back,a){
    if(a?.tailRig541Source064)return nativeTail541.part(track,back,a);
-   if(a?.species===572&&a.minccinoSlap064)return a.minccinoSlap064.parts[track]??null;
+   if(a?.species===572&&a.minccinoSlap064?.anatomy==='tail')return slapRig.part(track,back,a.minccinoSlap064.score);
    if(a?.species!==572||!a.minccinoPose)return previousPart(track,back,a);
    const m=maps[back?'back':'front'],pose=a.minccinoPose,dir=back?1:-1,data=root.ROM_SPRITE_ANIM?.cache['572-'+(back?'back':'front')]?.data;
    if(!data)return null;
@@ -279,7 +297,7 @@ function part(track,back,a){if(!a||a.nativeTail541!==TAG||a.view!==(back?'back':
 module.exports={sampleSource,sampleFromProof,part,context};
  return module.exports;
  })({exports:{}});
-root.MinccinoMoves={install,verifyNativeBank064,tailRig541,nativeTail541,mouthReferences,mouthCells,scope:'PRIVATE: unchanged572/47 plus bounded native572/3paw gesture with actual hit context; SPA163/mechanics/audio/timeline unchanged; not visually approved or installed'};
+root.MinccinoMoves={install,verifyNativeBank064,prepareSlapSource064,tailRig541,nativeTail541,mouthReferences,mouthCells,scope:'PRIVATE: unchanged572/47 plus bounded native572/3TAIL OAM articulation with actual hit context; SPA163/mechanics/audio/timeline unchanged; not visually approved or installed'};
  install();
  if(typeof module!=='undefined')module.exports=root.MinccinoMoves;
 })(typeof window!=='undefined'?window:globalThis);

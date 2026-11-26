@@ -11,8 +11,8 @@ function dom(base){
  doc.body=new Node('body');doc.createElement=tag=>tag==='canvas'?base.createElement(tag):new Node(tag);
  doc.getElementById=id=>{const find=n=>n.id===id?n:n.children.map(find).find(Boolean);return find(doc.body);};doc.querySelector=()=>null;return doc;
 }
-function make(candidate=true){
- const h=host(candidate),c=h.c,source=fs.readFileSync(sourcePath('game.js'),'utf8');
+function make(candidate=true,options={}){
+ const h=host(candidate,options),c=h.c,source=fs.readFileSync(sourcePath('game.js'),'utf8');
  c.document=dom(c.document);c.arena={width:390,height:490,dataset:{}};c.canvas={dataset:{}};c.ac=new Recorder(390,490);c.ac.isContextLost=()=>false;
  const eventBindings=new Map(),bind=(name,fn)=>{if(!eventBindings.has(name))eventBindings.set(name,new Set());eventBindings.get(name).add(fn);},unbind=(name,fn)=>eventBindings.get(name)?.delete(fn);c.addEventListener=bind;c.removeEventListener=unbind;c.document.addEventListener=bind;c.document.removeEventListener=unbind;
  const metrics={begin:0,completed:0,clear:0,bodies:0,rafError:[],status:[],prepare:[],ownerRead:0};

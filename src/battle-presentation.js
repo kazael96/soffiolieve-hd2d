@@ -28,8 +28,8 @@
  // Colpocoda has no target-impact sound. Native attacker cues map to60 and
  //86.25; retain those onsets while protecting both authored tail gestures.
  const tailDefinition=Object.freeze({nativeFrames:88,nativeAnchor:0,cues:[],keys:[0,12.6,21.42,25.2,31.5,42.84,45.36,56.7,60,69.3,75.6,78.12,88.2,99.54,100.8,109.62,110.88,117.18,126]});
- // Private572/3: preserve the original planted body score and target SPA163.
- const nativeSlapKeys064=Object.freeze([...new Set([0,20,24,42,44,56,58,60,62,64,66,70,78,80,84,88,92,96,126,...[0,5,10,15,20,22,25,28,33,38,43,47,52,56,100,129].map(n=>60+n/129*66)])].sort((a,b)=>a-b));
+ // Private572/3: protect the exact source-tail key poses and retain every old SPA163 key.
+ const nativeSlapKeys064=Object.freeze([...new Set([0,12,20,24,42,44,56,58,60,62,64,66,70,72,78,80,84,88,90,92,96,108,118,126,...[0,5,10,15,20,22,25,28,33,38,43,47,52,56,100,129].map(n=>60+n/129*66)])].sort((a,b)=>a-b));
  const nativeSlapContext064=q=>!!q&&Object.keys(q).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(q.hitCount)&&q.hitCount>=0&&q.hitCount<=5&&Number.isInteger(q.hitIndex)&&q.hitIndex>=0&&(q.hitCount===0?q.hitIndex===0:q.hitIndex<q.hitCount);
  const definitions=Object.freeze({
   '572:541':Object.freeze({privateTail541:true,nativeFrames:39,nativeAnchor:0,cues:[],keys:[...new Set([0,12,24,38,48,60,72,96,118,126,...Array.from({length:40},(_,n)=>60+n/39*66)])].sort((a,b)=>a-b)}),
@@ -64,7 +64,7 @@
    if(!Array.isArray(sequence.events)||sequence.events.length!==3||sequence.events.some((e,i)=>e.spa?.id!==704||e.emitterIndex!==[2,1,0][i]||e.target!==11||e.travel!==false||e.start!==0||e.end!==[30,25,39][i]))throw Error('Native541 SPA704 changed');
   }
   if(definition.privateSlap){
-   if(profile.minccinoNativeSlap064!=='private-native-paw-SPA163'||!nativeSlapContext064(profile.nativeSlapContext064)||profile.key!=='training-572-3'||profile.kind!=='palmFlurry'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='hand'||profile.damage!==true||profile.graphic!==undefined&&profile.graphic!==572||sequence.customImpact!==60)throw Error('Private Minccino presentation requires its exact native slap profile/context');
+   if(profile.minccinoNativeSlap064!=='private-native-tail-SPA163/v1'||!nativeSlapContext064(profile.nativeSlapContext064)||profile.key!=='training-572-3'||profile.kind!=='palmFlurry'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='hand'||profile.damage!==true||profile.graphic!==undefined&&profile.graphic!==572||sequence.customImpact!==60)throw Error('Private Minccino presentation requires its exact native slap profile/context');
    const expected=[[1422,1,16,60],[1420,2,16,60],[1422,1,16,60+25/129*66],[1420,2,16,60+25/129*66]];
    if(sequence.audio.length!==4||sequence.audio.some((e,i)=>e.kind!=='sfx'||[e.id,e.channel,e.target,e.start].some((v,j)=>v!==expected[i][j])||JSON.stringify(e.raw)!==JSON.stringify([expected[i][0],expected[i][1],16,i<2?0:25,0,expected[i][0]===1422?125:35,0,0,0])))throw Error('Private Minccino native cue changed');
    if(!Array.isArray(sequence.events)||sequence.events.length!==4||sequence.events.some((e,i)=>e.spa?.id!==163||e.emitterIndex!==[1,3,4,2][i]||e.target!==11||e.travel!==false||e.start!==0||e.end!==[100,58,27,129][i]))throw Error('Private Minccino native SPA163 order changed');

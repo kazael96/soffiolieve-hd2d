@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "scope": "Only move10 nativeSPA170 texture transport for the existing other-move negative; not M3 art or runtime",
+  "lineage": {
+    "qualification": "RAW C15 equals member of builder-authenticated ZIP; independent ROM extraction NOT asserted",
+    "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+    "candidateRevision": "b3b66a0b19856770",
+    "moveProgramRawSHA256": "4d6185f28404cec92f2e26078796aef3e88a3df0c02e03da19ff0ce311fc7b48",
+    "moveId": 10,
+    "spa": 170,
+    "moveScriptSHA256": "995c0d39dd9ea29510114f17538bb114617ad2e1968b7f2fcae913ec4a56173c"
+  },
+  "files": {
+    "assets/move-fx/170-0.png": "dacc05f949cc122d234205618b6aa495505e332e13842804dab1d4d0bffb956c",
+    "assets/move-fx/170-1.png": "97849988b3e812e92f315b4b8b966e9db34dd976c4d25776a67f7b9058f9fb92",
+    "assets/move-fx/170-2.png": "94b1d078911b958fb9f4abdb33863a96e056069fe5ae3c3abf60a74723fbf7f6",
+    "assets/move-fx/170-3.png": "2149afa51e022a66864b220fcef3570707f844f7394056b7737e571d772f77ec"
+  }
+}
