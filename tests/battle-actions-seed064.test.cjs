@@ -34,36 +34,40 @@ const qa=fs.readFileSync(path.join(__dirname,'browser-qa.js'),'utf8'),begin=qa.i
 const coverage=block.slice(block.indexOf('  function minccinoCoverage064('),block.indexOf('  const cases=['));
 const observer=block.slice(block.indexOf('  ROM_SPRITE_ANIM.draw=function('),block.indexOf('  drawArena=function('));
 
-test('the actual QA observer distinguishes native bodies, authored song and the new native paw gesture',()=>{
+test('the actual QA observer distinguishes native bodies, authored song and the new native tail gesture',()=>{
  assert.ok(coverage.startsWith('  function minccinoCoverage064('),'Production observer coverage function missing');
  const site=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site'),R=c.ROM_SPRITE_ANIM;
  let nativeDrawImages=0;const context=()=>({save(){},restore(){},translate(){},rotate(){},scale(){},drawImage(){nativeDrawImages++;}});
  c.document={createElement(){return{width:0,height:0,getContext:context};}};
- for(const view of ['front','back']){const data=JSON.parse(fs.readFileSync(path.join(site,'assets/animated/572-'+view+'.json')));R.cache['572-'+view]={ready:true,data,image:{},bounds:R.bounds(data),groundBounds:R.bounds(data)};}
+ // Policy image dimensions and qualified neutral opaque bounds accompany the
+ // real derived bank. R.bounds is the wider animation envelope; Game computes
+ // groundBounds from opaque reference pixels. This counter does not rasterize.
+ for(const view of ['front','back']){const data=JSON.parse(fs.readFileSync(path.join(site,'assets/animated/572-'+view+'.json')));R.cache['572-'+view]={ready:true,pending:false,error:null,data,image:{complete:true,naturalWidth:512,naturalHeight:256,width:512,height:256},bounds:R.bounds(data),groundBounds:view==='back'?[-35,-49,23,0]:[-21,-49,36,0]};}
  const draw=R.draw;c.sprite=draw;c.check=(value,message)=>assert.ok(value,message);c.GameSpeed={rate:1};c.pendingShot=null;
  vm.runInContext(coverage+observer,c,{filename:'actual-browser-qa-Minccino-observer'});
  try{
   const layout={p1:{x:200,y:400,w:1000,h:650,height:130},p2:{x:700,y:180,w:1000,h:650,height:90}};
   for(const id of [1,3,47,541])for(const side of ['p1','p2']){
    const p=c.SpeciesMoves.select(572,id,id===3?{hitIndex:0,hitCount:2}:{}),row={id,side,profile:{species:572},bodySamples:0,minccinoBodySamples:0,authoredMinccinoSamples:0,authoredNativeSlapSamples:0,reactionSamples:0,maxForepaw:0,frames:[],captured:false};c.current=row;c.pendingShot=null;
+   if(id===3){const proof=c.MinccinoMoves.prepareSlapSource064(p,side),bank=R.cache['572-'+(side==='p1'?'back':'front')];assert.equal(proof.bank,bank);assert.equal(proof.image,bank.image);assert.equal(proof.kind,side==='p1'?'native572-back-cell7-oam-partition/v1':'native572-front-cell12-oam-partition/v1');}
    for(let f=0;f<=p.frames;f++){const a=c.SpeciesMoves.pose(p,f,side,side,false,layout).speciesPose;assert.equal(R.draw(context(),572,side==='p1',160,200,1.3,a.nativeTick||0,true,a),true);}
    assert.equal(row.bodySamples,p.frames+1);assert.equal(row.minccinoBodySamples,p.frames+1);assert.ok(c.pendingShot,'Actual native Minccino body never becomes eligible for an arena capture');
    const evidence=c.minccinoCoverage064([row],id);assert.equal(evidence.bodySamples,p.frames+1);assert.equal(evidence.visualApproval,false);
    if(id===47){assert.equal(evidence.mode,'authored-song');assert.equal(row.authoredMinccinoSamples,p.frames+1);}
-   else if(id===3){assert.equal(evidence.mode,'native-paw-double-slap');assert.equal(row.authoredNativeSlapSamples,p.frames+1);assert.equal(row.authoredMinccinoSamples,0);}
+   else if(id===3){assert.equal(evidence.mode,'native-tail-double-slap');assert.equal(evidence.nativeTailSamples,p.frames+1);assert.equal(row.authoredNativeSlapSamples,p.frames+1);assert.equal(row.authoredMinccinoSamples,0);const a=c.SpeciesMoves.pose(p,60,side,side,false,layout).speciesPose,bad={...a,minccinoSlap064:{...a.minccinoSlap064,anatomy:'paw'}};assert.throws(()=>R.draw(context(),572,side==='p1',160,200,1.3,0,true,bad),/native tail source/);}
    else{assert.equal(evidence.mode,'preceding-contact-baseline-withheld');assert.equal(row.authoredMinccinoSamples,0);assert.equal(row.authoredMinccinoSamples>0,false,'The former blanket authored-pose assertion must reject this legitimate withheld baseline');}
   }
   assert.ok(nativeDrawImages>1000,'The original native composite renderer did not draw its real OAM layers');
  }finally{R.draw=draw;delete c.current;delete c.pendingShot;delete c.sprite;}
 });
 
-test('the production Minccino coverage gate rejects missing bodies, leaked withheld poses and missing song/paw gestures',()=>{
+test('the production Minccino coverage gate rejects missing bodies, leaked withheld poses and missing song/tail gestures',()=>{
  const check=c.minccinoCoverage064;assert.equal(typeof check,'function');
  const row=(id,body=1,authored=id===47?1:0)=>({id,profile:{species:572},minccinoBodySamples:body,authoredMinccinoSamples:authored,authoredNativeSlapSamples:id===3?1:0});
  for(const id of [1,3,47,541]){assert.throws(()=>check([],id),/real native body/);assert.throws(()=>check([row(id,0)],id),/real native body/);}
  for(const id of [1,541]){assert.throws(()=>check([row(id,1,1)],id),/withheld/);assert.throws(()=>check([{...row(id),authoredNativeSlapSamples:1}],id),/withheld/);}
- assert.throws(()=>check([{...row(3),authoredNativeSlapSamples:0}],3),/native paw choreography/);
- assert.throws(()=>check([{...row(3),authoredMinccinoSamples:1}],3),/native paw choreography/);
+ assert.throws(()=>check([{...row(3),authoredNativeSlapSamples:0}],3),/native tail choreography/);
+ assert.throws(()=>check([{...row(3),authoredMinccinoSamples:1}],3),/native tail choreography/);
  assert.throws(()=>check([row(47,1,0)],47),/authored pose/);
  assert.throws(()=>check([row(10)],10),/unexpected/);
  assert.throws(()=>check([{...row(1),profile:{species:510}}],1),/real native body/);

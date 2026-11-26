@@ -1293,3 +1293,28 @@ prima della rimozione, con19file nel delta e31991dipendenze dalla C04.
 Archivio, prova, dry-run e ricevuta di rimozione restano esterni alle build
 in `outputs/ci064green/h8-c14-preparation-v1`. Rimangono C04 base obbligatoria,
 C08 verificata e C15 confronto ReadOnly; la C16 è ancora da compilare.
+
+La C16 è poi compilata una sola volta: revisione `ce0d0dc3894405ea`,
+131250ms nel worker/131738ms nel proprietario e328794112byte di picco,
+entro175/180s e400MiB. I399programmi, le due derivazioni572 e i PNG
+originali sono verificati; gli input restano invariati e il proprietario
+è chiuso. È una prova di build/provenienza, senza nuova approvazione Game
+o visiva. La voce C16Game nei limiti del template precedente resta storica:
+la compilazione è conclusa, il collaudo Game rimane aperto.
+
+La CI109 di `f6903835` passa il job Windows541, ma fallisce due delle94fasi
+CLI, `unit-2-of-8` e `unit-6-of-8`; gli altri replay grafici non vengono
+eseguiti. Il rapporto resta FAIL. Le cause sono due fixture rimaste sul
+precedente contratto: campionamento senza preparazione del banco e vecchio
+identificatore della zampa. Il banco del contatore ora usa dimensioni e
+contorno opaco neutro qualificati, distinti dall'ingombro dell'animazione,
+prima della vera API di preparazione. L'osservatore richiede anatomia tail,
+riporta nativeTailSamples e rifiuta la classificazione paw.
+
+Il primo target26 passa25casi e conserva un FAIL sui bounds della fixture;
+dopo la correzione passa l'intero file seed5/5 in2041ms. I21layout erano
+già passati e rimangono invariati; non sono ripetuti. Tutti gli assert
+precedenti sono conservati, con un negativo aggiuntivo sulla classificazione.
+Le prove sono in `outputs/ci064green/ci109-failed-tests-target-v1` e
+`ci109-seed-fixture-target-v2`. Nuova CI completa ancora necessaria;
+nessun PASS globale o nuova pubblicazione è dedotto dai target.

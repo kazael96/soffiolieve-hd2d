@@ -179,7 +179,7 @@
   ROM_SPRITE_ANIM.draw=function(c,id,back,x,y,size,tick,grounded,a){
    const result=sprite.apply(this,arguments),row=current,side=back?'p1':'p2';
    if(result&&row&&a){
-    if(side===row.side&&!a.reaction){row.bodySamples++;row.maxForepaw=Math.max(row.maxForepaw,Math.abs(a.liepardClawPose?.foreA||0));if(Number(id)===572&&a.species===572){row.minccinoBodySamples++;if(a.minccinoPose)row.authoredMinccinoSamples++;if(a.minccinoSlap064)row.authoredNativeSlapSamples++;}if(row.frames.length<8)row.frames.push({t:a.t??null,graphic:id,side});}
+    if(side===row.side&&!a.reaction){row.bodySamples++;row.maxForepaw=Math.max(row.maxForepaw,Math.abs(a.liepardClawPose?.foreA||0));if(Number(id)===572&&a.species===572){row.minccinoBodySamples++;if(a.minccinoPose)row.authoredMinccinoSamples++;if(a.minccinoSlap064){check(a.minccinoSlap064.anatomy==='tail','064 native tail source was replaced by another gesture');row.authoredNativeSlapSamples++;}}if(row.frames.length<8)row.frames.push({t:a.t??null,graphic:id,side});}
     if(a.reaction){row.reactionSamples++;if(['intimidated','distracted','alert'].includes(a.kind))check(a.recoil===0&&a.rotation===0,'064 status move applied a physical recoil in the actual sprite renderer');}
     const readable=a.reaction?(a.wind||0)>.15:Number(id)===572&&a.species===572?a.t>.3&&a.t<.8:(a.liepardClawPose?.foreA||0)>.35;
     if(readable&&!row.captured&&!pendingShot)pendingShot={row,label:'064 actual '+row.id+' '+row.side+' '+GameSpeed.rate+'x step '+row.ordinal};
@@ -191,9 +191,9 @@
    const samples=played.filter(r=>r.profile?.species===572&&r.id===id);
    check(samples.length>0&&samples.every(r=>r.minccinoBodySamples>0),'064 actual Minccino command did not render its real native body');
    if(id===47)check(samples.every(r=>r.authoredMinccinoSamples>0),'064 actual Minccino song did not render its authored pose');
-   else if(id===3)check(samples.every(r=>r.authoredNativeSlapSamples>0&&r.authoredMinccinoSamples===0),'064 actual Minccino Double Slap did not render its native paw choreography');
+   else if(id===3)check(samples.every(r=>r.authoredNativeSlapSamples>0&&r.authoredMinccinoSamples===0),'064 actual Minccino Double Slap did not render its native tail choreography');
    else{check([1,541].includes(id),'064 unexpected Minccino coverage contract');check(samples.every(r=>r.authoredMinccinoSamples===0&&r.authoredNativeSlapSamples===0),'064 withheld Minccino contact choreography was installed');}
-   return {mode:id===47?'authored-song':id===3?'native-paw-double-slap':'preceding-contact-baseline-withheld',move:id,bodySamples:samples.reduce((n,r)=>n+r.minccinoBodySamples,0),authoredSamples:samples.reduce((n,r)=>n+r.authoredMinccinoSamples,0),nativePawSamples:samples.reduce((n,r)=>n+r.authoredNativeSlapSamples,0),visualApproval:false};
+   return {mode:id===47?'authored-song':id===3?'native-tail-double-slap':'preceding-contact-baseline-withheld',move:id,bodySamples:samples.reduce((n,r)=>n+r.minccinoBodySamples,0),authoredSamples:samples.reduce((n,r)=>n+r.authoredMinccinoSamples,0),nativeTailSamples:samples.reduce((n,r)=>n+r.authoredNativeSlapSamples,0),visualApproval:false};
   }
   const cases=[
    {name:'status',p1:{name:'Snivy',level:50,gender:'M',moves:[43]},p2:{name:'Tepig',level:50,gender:'M',moves:[39]}},
