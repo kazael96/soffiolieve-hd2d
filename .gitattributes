@@ -7,3 +7,6 @@
 *.md text eol=lf
 *.yml text eol=lf
 *.json text eol=lf
+
+# Immutable native reference inputs retain RAW JSON/PNG bytes.
+tests/fixtures/native572-original064/assets/animated/* -text

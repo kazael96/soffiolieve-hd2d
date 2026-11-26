@@ -879,3 +879,259 @@ stato/esiti coincidenti con una Session nativa indipendente e tutte le
 sette immagini lette da due revisori. Il GO riguarda soltanto il primo
 near osservato; far/front, movimento continuo, handoff e produzione
 rimangono aperti. Nessun nuovo asset è installato da questo ripristino.
+
+### Esito del ripristino e nuovi pilot privati · 25 novembre, seguito
+
+La CI45704666787 del commit807d788c6d221541999a4a93f27e18f2e15c6de8
+conclude con successo93fasi CLI, cinque gruppi browser e18lotti nativi.
+I39casi lifecycle/recovery passano senza skip; resta lo skip Windows-only
+storicamente previsto su Ubuntu. Il banco ambientale passa32passi e2340
+coppie in18424ms. I sei artifact grafici della CI non sono stati scaricati
+né letti: il risultato tecnico non costituisce una nuova revisione estetica.
+PR58 resta draft; nessun merge o rilascio deriva da questi soli risultati.
+
+Il pilot BACK-far di Minccino conserva le pose autoriali già esaminate, ma
+il ponte intermedio con il rig originale cambia bruscamente corpo e palmi.
+La decodifica integrale del filmato,361fotogrammi in cinque tavole tutte
+lette da root e da un secondo revisore, conferma questo difetto. Il secondo
+pilot elimina il ponte e trattiene l'anticipazione: tutte le188immagini
+codificate, esportate in tre tavole, sono state lette da root. Non mostra
+tagli o frammenti evidenti, ma l'attesa è troppo lunga e il recupero cambia
+ancora sagoma. Anche questa variante resta privata, senza approvazione del
+ritmo, del comando o dell'audio. I filmati non sono una misura degli FPS.
+
+Nel FRONT, PASSING e CONTACT near hanno superato i rispettivi controlli
+sorgente e composizione con i piedi originali. PASSING usa una registrazione
+anatomica documentata: traslazione intera del centro degli appoggi, senza
+riscalare o correggere singoli pixel. Il precedente FAIL di registrazione
+rimane conservato. Le pose dipinte GATHER e FAR sono ancora mancanti o
+respinte. Il confronto alternativo con il rig FRONT-far originale passa
+dieci campioni e venti draw; entrambe le tavole sono state lette da due
+revisori. Mano collegata e volto leggibile consentono soltanto una futura
+preview in movimento: il gesto piccolo sotto la mandibola non è ancora
+approvato come coreografia finale.
+
+Per Spazzasberla541, il primo criterio di separazione orizzontale richiedeva
+uno spostamento già a riposo in due dei dodici contesti e resta respinto.
+Il nuovo piano geometrico fisso considera l'intera sagoma dell'attore e
+l'inviluppo conservativo completo di idle e reazione del bersaglio. Il
+controllo freddo passa12/12contesti, con spostamento esattamente nullo a
+riposo e ritorno, senza modificare sorgenti o runtime. Non verifica ancora
+gli intermedi, il renderer o il comando. Separare anche la coda non prova
+il contatto fisico della coda, la cui articolazione resta un lavoro distinto.
+
+Il successivo controllo della traiettoria privata valuta6252campioni con
+tempi frazionari. Cinque contesti superano il criterio strict e sette lo
+falliscono per residui di riproiezione nell'ordine di10^-13pixel; nessun
+FAIL viene convertito in PASS con una tolleranza. Non emerge una
+compenetrazione delle hull non espanse nei campioni, ma il ritiro arriva
+a108pixel e non ha un'approvazione grafica. I difetti preliminari della
+fixture sono conservati: invocazione anticipata della funzione shadow,
+ordine del signed zero nella rotazione e precedenza del rig. Il profilo
+base572/541, senza `graphic`, usa effettivamente Demo572 (reach.69), mentre
+il valore.8 di Chapter572 è nominale. Il controllo delle ombre conserva
+il fallback reale del gioco quando `groundX` è assente; omettere quella
+proprietà non costituisce da solo un errore.
+
+Un esperimento distinto articola il gruppo coda nativo sul posto. Tutti
+i24draw e le due tavole sono stati esaminati da due revisori: il primo
+arco scende sotto gli appoggi nell'anticipazione e attraversa la testa
+nel colpo. Resta respinto, senza modifiche al gioco. Il nuovo metodo
+richiede una traiettoria leggibile e verificata, non il solo superamento
+del vincolo di separazione fra avversari.
+
+Anche la singola revisione con arco sollevato resta respinta: risolve il
+passaggio sotto il terreno, ma la coda copre ancora la testa. Il metodo
+di rotazione rigida viene fermato, senza una terza ricerca di angoli.
+Una nuova CONTACT completa disegnata appositamente curva invece la coda
+verso l'esterno. Tre PNG sorgente e tre della composizione R sono letti
+integralmente da root e revisori separati. Il pilot passa2prepare/2draw,
+con prefisso nativo immutato,43pixel dei piedi originali, sei raccordi,
+una componente e zero mismatch o tagli. La posa isolata è una candidata
+plausibile, non un'animazione completa: la figura risultante è alta54px
+contro49 del riposo. Testa rialzata, torso più diritto ed esposizione dei
+piedi richiedono passaggi disegnati e una nuova verifica del movimento.
+Nessuna nuova posa è installata da queste sole prove private.
+
+La preview FRONT nativa ha inoltre351fotogrammi decodificati in quattro
+tavole, tutte lette da due revisori. Corpo integro, ma gesto minuto e
+alternanza poco leggibile; nessuna promozione a coreografia finale. Alcuni
+pannelli mostrano uno spostamento isolato dell'intera scena, di causa
+non dimostrata. Mossa3 non contiene comandi di camera; la fixture aggiorna
+il frame durante il disegno del personaggio, dopo lo sfondo, e richiede
+un clock coerente prima di eventuali nuove acquisizioni. Questo difetto
+del banco non viene attribuito automaticamente al gioco pubblicato.
+
+Le prove e i candidati rifiutati restano in `outputs/ci064green`, fuori dal
+sito. Nessuno di questi pilot estende l'approvazione alle4365coppie o alle
+105MN. Il blocco temporaneo dello standby rimane attivo durante il lavoro
+autorizzato e viene rilasciato alla sua effettiva conclusione.
+
+Le quattro pose dipinte successive per541 (GATHER, PASSING, FOLLOW e
+RECOVER) sono conservate con prompt, riferimenti e ricevute reali. Due
+prime generazioni non hanno restituito un'immagine; i singoli tentativi
+invariati successivi sono riusciti. Root e un revisore indipendente hanno
+letto tutti e quattro gli originali. La famiglia resta respinta prima del
+pack: anticipazione e recupero non seguono la progressione della testa,
+gli appoggi sembrano rialzati e FOLLOW restringe troppo la radice della
+coda. I quattro config preparati non sono eseguiti; nessun nuovo PNG di
+pack, draw, sequenza o asset installato deriva da questa famiglia. Le
+misure mancanti non vengono inventate né il difetto corretto con fit o
+traslazioni. Il seguito valuta separatamente la completezza delle parti
+native della coda per una vera articolazione a due giunti, mantenendo
+corpo e piedi originali; non riapre la rotazione rigida già respinta.
+
+La copia privata della fixture FRONT passa ora il clock al guard iniziale
+dell'arena, prima di sfondo e personaggi; il campionatore del Pokémon non
+lo modifica. Dodici regressioni CPU sugli hook estratti passano in36ms:
+ordine temporale, estremi0/126, proprietari estranei, errori e ripristino
+delle identità. Il negativo precedente mostra il guard al frame0 e la
+posa successiva al90; la copia nuova mantiene60 per guard, campionatori e mark,
+avanzando a108 soltanto all'arena seguente. Il test usa stub espliciti,
+non Game o R; non spiega i salti dei vecchi filmati. Per nuove acquisizioni
+usare il case privato77d79 in `mf-front-native-motion-clock-v2`, con i suoi
+pin e rapporti, conservando la vecchia prova. Questa correzione del banco
+non modifica il runtime del gioco.
+
+L'isolamento R della coda BACK mostra che CEL7 contiene anche una base
+nascosta: non equivale a un pennacchio già separato. Il nuovo pilot divide
+le OAM originali senza eliminarne pixel: immagine19 mobile, immagini20–23
+statiche. Preserva le33posizioni visibili alla base e ricompone a riposo
+l'intero originale. L'atlante è immutato; solo due CEL, due tracce e una
+mappa sono aggiunte ai metadati privati, con inverso esatto e mappe0/1
+intatte. Tutte le otto coppie di pose nelle due tavole sono lette da root
+e da un revisore indipendente: volume49 e appoggi originali stabili,
+flessione distinta fra60 e72, senza seconda radice o gradino evidente.
+Il gesto resta contenuto e non è approvato come movimento o contatto541.
+
+La stessa curva passa poi505campioni distinti a intervalli di un quarto
+di frame, da0 a126, senza cambiare sorgente o soglie. Tre processi
+sequenziali eseguono511draw, inclusi i sei controlli iniziali, con zero
+nuovi PNG. In tutti i505campioni restano invariati i17pixel visibili dei
+piedi, i33pixel statici e il corpo protetto; nessun distacco, head-cover,
+spill o attraversamento del terreno. I picchi RSS campionati sono sotto
+143MB, con400MiB di limite per processo. Sono prove tecniche Canvas/NAPI,
+non fotogrammi del gioco, misura degli FPS o certificazione estetica.
+
+Anche il FRONT è isolato con R originale: tre draw, due tavole lette da
+root e da un revisore indipendente, ma coda dietro al corpo e geometria
+diversa. La sua partizione e le sue pose richiedono verifiche proprie.
+L'integrazione futura conserva il JSON nativo20b3 come riferimento e
+richiede un tipo esplicito per la sola derivazione qualificata; i guard
+di BG e Liepard non devono essere aggirati dalla fixture. Nessuna di
+queste prove private installa da sola la mossa o pubblica una build.
+
+Il FRONT supera successivamente il proprio pilot di otto pose e la griglia
+di505campioni:511draw, tre preparazioni, zero nuovi PNG. Root e revisore
+indipendente leggono entrambe le tavole; root ricontrolla i505record.
+I25pixel visibili dei piedi e il corpo protetto restano identici; i21pixel
+della porzione statica sono tutti conservati nella sorgente, mentre quelli
+visibili nella composizione variano da17 a21 per occlusione. La coda resta
+dietro il corpo, con giunti e geometria propri della vista frontale.
+Queste prove approvano le pose della sorgente, non il movimento completo.
+
+Il runtime locale ora riconosce esplicitamente gli originali e le sole due
+derivazioni qualificate, controllandone prefissi, ricetta, immagine e
+appoggi. Le16regressioni mirate passano; il renderer originale è invariato.
+L'API pura della coda conserva i contesti, compreso MISS0/0, e coincide con
+le sorgenti in1010campioni. Il loader aggiunge la revisione della build
+soltanto ai due JSON interessati, evitando una vecchia risposta HTTP dopo
+un aggiornamento:28test mirati passano. Il builder opt-in con provenienza,
+hash RAW e inverso strutturale passa cinque test Python. Gli originali
+rimangono riferimenti immutabili separati dai metadati derivati.
+
+Al checkpoint precedente la selezione541 era ancora spenta. Il seguito
+locale descritto sotto non trasferisce i PASS delle sorgenti al comando
+effettivo. Il vecchio CI del commit807d788c resta storico e non certifica
+il runtime modificato.
+
+### Raccordo locale541 e verifica del comando ancora aperta
+
+La candidata14, revisione1f321a517cf3aaa0, contiene le due partizioni ma
+non il nuovo controller541. Il controllo di coerenza legge tutti399moduli
+effettivi, comprese le dieci risorse provenienti dall'archivio originale.
+Nel suo preview sorgente due presentazioni normali e due rallentate per vista
+mostrano la coda con il corpo piantato:361fotogrammi BACK e277FRONT,
+esportati senza perdere campioni e letti tutti da root e da un revisore
+indipendente. Le nove tavole mantengono coda, testa e piedi nel ritaglio.
+Il gesto contenuto è una base articolata utilizzabile, non l'approvazione
+dell'intera Spazzasberla. Restano documentati l'arco generico vicino alla
+testa e cambiamenti del fondale di causa non provata.
+
+I FAIL precedenti rimangono conservati. Il riesame offline dello zero
+con segno usa uguaglianza esatta, senza tolleranze; non riscrive il FAIL
+originario dell'observer. L'export finale cambia soltanto la serializzazione
+PNG dopo verifica che ogni pixel sia opaco e che la riapertura restituisca
+gli stessi byte RGBA; nessun campione, soglia o budget viene rimosso.
+
+Il checkout locale integra poi cinque programmi per il solo caso nativo
+singolo572/541: acquisizione dei proprietari prima dei caricamenti,
+parti della coda autorevoli, superficie anatomica distinta per vista,
+soppressione del solo arco generico marcato e piano protetto già esistente.
+Sono preservati SPA704,39frame nativi, anchor0, impatto60 e le due voci
+1651/1427. Le48chiavi includono i gesti e i40tick dell'effetto; a FPS bassi
+la presentazione può allungarsi. Doppi/multi e corpi inizialmente non
+supportati mantengono il percorso precedente. Una perdita del proprietario
+dopo acquisizione rifiuta il vecchio chiamante.
+
+Il contratto precedente621 è conservato immutabile. Il nuovo b73 dichiara
+soltanto i cinque hash modificati; l'inversa delle43operazioni ricostruisce
+i sorgenti precedenti, mentre l'inversa storica M3 resta invariata dopo
+la rimozione delle sole cinque aggiunte Minccino. I riferimenti RAW nativi
+mantengono il proprio significato. CI e Pages richiedono ora esplicitamente
+la stessa opzione del builder; sei test Python passano, compreso il controllo
+di corrispondenza dei due workflow.
+
+Sul nuovo checkout passano19test di provider/metadati/framing e17di rig,
+senza skip e con input invariati. Il primo banco541 separato passa14test
+in65,282s, con picco RSS osservato338136KiB: clock, lease, caricamenti
+tardivi, cancellazione, hold e AudioEngine su nodi dichiaratamente simulati.
+Non esegue R.draw, GEN5, PCM o ascolto. Il banco indipendente GEN5/UI passa
+82casi, inclusi Protezione541, KO anticipato e assenza della proprietà miss
+nelle ripetizioni; usa un trasporto registrante e non certifica il renderer.
+
+Il successivo port installato passa16casi in73,660s, con picco RSS
+osservato335472KiB e126input invariati. Comprende due nuovi negativi:
+perdita del proprietario durante la hold126 senza cancellazione esterna,
+seguita da un nuovo chiamante non sovrascritto dall'IO vecchio; perdita
+durante l'attesa R.prepare propria dell'API, separata da Species.prepare.
+Gli otto test del registro passano e verificano427file,53fasi unitarie e
+94CLI; tutti i52argv precedenti rimangono invariati. La coppia di test541
+ha un processo dedicato con GC esposto e la medesima soglia RSS osservata.
+Il PASS privato14 rimane distinto da questa esecuzione del port16.
+
+L'audit del caricamento conferma che R.prepare541 usa il vero resourceGate
+del Game: un503 interno mantiene la promessa in attesa e offre il recupero,
+senza richiamare GEN5. Il test con R.prepare simulato che rigetta non
+certifica questo percorso: il recupero effettivo della stessa azione deve
+ancora essere provato con guasto reale, tentativi contati e input UI.
+
+La candidata15 coerente, revisione `b3b66a0b19856770`, supera la verifica
+dei399moduli effettivi, delle due derivazioni e degli atlanti RAW invariati.
+Il successivo comando reale R4 passa su desktop a×1, nei due ruoli e con
+caricamento freddo/riuso: quattro turni GEN5, otto chiamate M.play e12PNG
+letti integralmente da root e da un revisore indipendente. Sorgenti e asset
+restano invariati e i processi vengono chiusi. È un PASS tecnico del caso
+singolo572/541 supportato, non l'approvazione del movimento continuo.
+
+La suite completa Windows precedente resta FAIL:69fasi passate e25fallite,
+con builder e40controlli runtime passati. Le cause individuate riguardano
+quattro file di fixture: il blocco CLOSED541 mancante nell'estrazione del
+test audio, il vecchio hash Demo nel test602 e il vecchio pin BG in due
+host LIFE/G7. Le correzioni conservano le inverse e tutti gli assert;
+il successivo target di25processi supera59callback senza skip. La verifica
+prima/dopo attesta22139input identici e i soli quattro file test modificati,
+con389sorgenti e399moduli C15 invariati. La nuova suite integrata94 su CI
+è ancora **PENDING**: i PASS mirati non sostituiscono quella prova e non
+riscrivono i FAIL conservati.
+
+Il primo replay recovery503 resta FAIL in32,959s: l'adapter diagnostico
+rifiuta asset_retry1/2 e satura il limite16KiB dei metadati. Zero PNG,
+chiusura riuscita e sorgenti invariati; non è dimostrato un difetto del
+gioco e il recupero effettivo della stessa azione rimane aperto.
+
+Restano da qualificare il movimento continuo, i recuperi con guasti reali,
+gli altri formati e le velocità richieste; restano aperti i limiti M3 e la
+revisione estetica complessiva del catalogo e delle MN. Queste prove non
+certificano4K, GPU Android fisica o confronto udibile con la cartuccia.
+Nessuna nuova pubblicazione o approvazione estetica globale è attestata.

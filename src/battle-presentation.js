@@ -32,6 +32,7 @@
  const nativeSlapKeys064=Object.freeze([...new Set([0,20,24,42,44,56,58,60,62,64,66,70,78,80,84,88,92,96,126,...[0,5,10,15,20,22,25,28,33,38,43,47,52,56,100,129].map(n=>60+n/129*66)])].sort((a,b)=>a-b));
  const nativeSlapContext064=q=>!!q&&Object.keys(q).sort().join(',')==='hitCount,hitIndex'&&Number.isInteger(q.hitCount)&&q.hitCount>=0&&q.hitCount<=5&&Number.isInteger(q.hitIndex)&&q.hitIndex>=0&&(q.hitCount===0?q.hitIndex===0:q.hitIndex<q.hitCount);
  const definitions=Object.freeze({
+  '572:541':Object.freeze({privateTail541:true,nativeFrames:39,nativeAnchor:0,cues:[],keys:[...new Set([0,12,24,38,48,60,72,96,118,126,...Array.from({length:40},(_,n)=>60+n/39*66)])].sort((a,b)=>a-b)}),
   '572:3':Object.freeze({privateSlap:true,nativeFrames:129,nativeAnchor:0,cues:[],keys:nativeSlapKeys064}),
   '500:205':Object.freeze({nativeFrames:112,nativeAnchor:41,cues:[1475],keys:[0,25,38,48,60,63,84,98,107,116,126]}),
   '500:360':Object.freeze({nativeFrames:135,nativeAnchor:84,cues:[1686],keys:[0,25,36,48,60,63,88,102,110,119,126]}),
@@ -49,11 +50,19 @@
   '602:451':Object.freeze({nativeFrames:194,nativeAnchor:0,cues:[],keys:[0,10.5,15.75,28.98,31.5,47.25,52.5,60,73.5,78.75,93.24,94.5,110.25,115.5,126]})
  });
  function plan(profile,sequence){
+  if(profile?.species===572&&profile.id===541&&profile.nativeTail541064===undefined)return null;
   // Unmarked pre-existing572/3 keeps its previous unsupported/null result.
   if(profile?.species===572&&profile.id===3&&profile.minccinoNativeSlap064===undefined)return null;
   const definition=definitions[profile?.species+':'+profile?.id];if(!definition)return null;
   const openingStatus=!!definition.profileKey,duration=definition.duration??126,impact=definition.impact??60;
   if(profile.frames!==duration||profile.impact!==impact||(!openingStatus&&profile.nativeEffects!==true)||sequence?.frames!==duration||sequence.nativeFrames!==definition.nativeFrames||sequence.nativeAnchor!==definition.nativeAnchor||!Array.isArray(sequence.audio))throw Error('Supported battle presentation timing changed');
+  if(definition.privateTail541){
+   const q=profile.nativeTailContext541;
+   if(profile.nativeTail541064!=='native572-tail541-oam-partition/v1'||!nativeSlapContext064(q)||profile.key!=='training-572-541'||profile.kind!=='tailSlam'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='mouth'||profile.damage!==true||profile.graphic!==undefined&&profile.graphic!==572||sequence.customImpact!==60)throw Error('Native541 requires its exact profile/context');
+   const expected=[[1651,1,16,60],[1427,2,16,60]],raw=[[1651,1,16,0,0,127,0,0,0],[1427,2,16,0,0,50,0,0,0]];
+   if(sequence.audio.length!==2||sequence.audio.some((e,i)=>e.kind!=='sfx'||[e.id,e.channel,e.target,e.start].some((v,j)=>v!==expected[i][j])||JSON.stringify(e.raw)!==JSON.stringify(raw[i])))throw Error('Native541 cue changed');
+   if(!Array.isArray(sequence.events)||sequence.events.length!==3||sequence.events.some((e,i)=>e.spa?.id!==704||e.emitterIndex!==[2,1,0][i]||e.target!==11||e.travel!==false||e.start!==0||e.end!==[30,25,39][i]))throw Error('Native541 SPA704 changed');
+  }
   if(definition.privateSlap){
    if(profile.minccinoNativeSlap064!=='private-native-paw-SPA163'||!nativeSlapContext064(profile.nativeSlapContext064)||profile.key!=='training-572-3'||profile.kind!=='palmFlurry'||profile.chapter!==true||profile.training!==true||profile.target!=='foe'||profile.attachment!=='hand'||profile.damage!==true||profile.graphic!==undefined&&profile.graphic!==572||sequence.customImpact!==60)throw Error('Private Minccino presentation requires its exact native slap profile/context');
    const expected=[[1422,1,16,60],[1420,2,16,60],[1422,1,16,60+25/129*66],[1420,2,16,60+25/129*66]];

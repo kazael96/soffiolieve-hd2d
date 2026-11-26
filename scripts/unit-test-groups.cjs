@@ -20,6 +20,16 @@ function baseUnitStages(files,{exe=process.execPath,windows=process.platform==='
 }
 function unitStages(files,options={}){
  if(!Array.isArray(files)||!files.length||files.some(f=>typeof f!=='string'||!f.endsWith('.test.cjs'))||new Set(files).size!==files.length)throw Error('Invalid unit test inventory');
+ // Keep the two native541 files in ONE directly owned, sequential GC host.
+ // Remove them before the previous scheduler so all previous52 argv stay exact.
+ const tail541Names=['native-tail541-protocol064.test.cjs','native-tail541-audio064.test.cjs'],basename=file=>file.split(/[\\/]/).at(-1),selected=new Map();
+ for(const file of files)if(tail541Names.includes(basename(file))){if(selected.has(basename(file)))throw Error('Ambiguous native-tail541 paired basename');selected.set(basename(file),file);}
+ if(selected.size){
+  if(selected.size!==tail541Names.length)throw Error('Incomplete native-tail541 paired catalog');
+  const {exe=process.execPath,nodeVersion=process.versions.node,groups=8}=options;if(!Number.isInteger(groups)||groups<1||groups>8)throw Error('Invalid unit group count');
+  const previousFiles=files.filter(file=>!tail541Names.includes(basename(file))),previous=previousFiles.length?unitStages(previousFiles,options):[];
+  return [...previous,['unit-native-tail541',exe,['--expose-gc','--max-old-space-size=400','--require',require('node:path').resolve(__dirname,'../tests/helpers/native-tail541-metrics064.cjs'),'--test',isolationFlag(nodeVersion),'--test-concurrency=1',...tail541Names.map(name=>selected.get(name))]]];
+ }
  const lifecycle=require('./liepard-lifecycle-stages064.cjs');
  return lifecycle.applies(files)?lifecycle.augment(baseUnitStages,files,{...options,dedicatedFromOtherWork:['native602-density064.test.cjs']}):baseUnitStages(files,options);
 }

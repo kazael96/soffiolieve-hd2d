@@ -15,7 +15,7 @@ jobs:
       - name: Download verified base assets
         run: curl --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
       - name: Build exact sources
-        run: python3 scripts/build-site.py site.zip _site
+        run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064
       - name: Install pinned native Canvas for CPU fixtures
         run: npm install --no-save --ignore-scripts --package-lock=false @napi-rs/canvas@0.1.100
       - name: Run all automated regressions

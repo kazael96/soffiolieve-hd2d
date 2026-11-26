@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "ACTUAL_V4_ORIGINAL_FULL_RESTORED_SOURCE_CONTRACT_NOT_EXECUTION",
-  "revision": "coherent-v4-original-full-restored",
+  "status": "ACTUAL_V4_TYPED_NATIVE572_PARTITIONS_CLOSED541_SINGLES_SOURCE_CONTRACT_NOT_EXECUTION",
+  "revision": "coherent-v4-typed-native572-partitions-closed541-singles",
   "basisSourceManifestSHA256": "d8558489faa963bd032067b2436d697c34615bac1772762dc9b67601f482ba53",
   "sourceLFHashes": {
     "training-data.js": "8d20396f42cc664d5d404e317be97c672ccfcfad88290a36c0a17d73f40eed75",
@@ -11,7 +11,7 @@
     "training.js": "04e152a193bb38cc2c8c46b0d31ce359fd718d4a665a76f5eac0f23e027d8eb7",
     "pokemon-anim.js": "bde5a3f22260afc2002de9cdd4c82f32f4246dc80b3b3a528f1b062ed88df395",
     "purrloin-moves.js": "d71a7670ded4fd75ae3dfd4e9c5f9b893d92b714770bed8eccbaa54dbac1eb2c",
-    "demo-moves.js": "5b1a2c90bc8ad40a4251e55516b6ca75a60b3119480e2fb1473c3661a8c98098",
+    "demo-moves.js": "ad481c28635e0844a883de044f0da5f85c3f2bf5f606851ab667ebab68ea16e3",
     "chapter-moves.js": "a138d50df7aec766843e64f8f3dfb58025d94cbedb921caaa767e93f92d1544a",
     "route3-moves.js": "89d9b01bfa5b18bb08ad9256374cdb79b4b60fa3eebdb65447eb09ff3f8d2111",
     "species-moves.js": "d23bd08b7db75103eb1fe311b8f56b3cdd4abea14d29f3010b4c63073e23515a",
@@ -23,21 +23,21 @@
     "league-moves.js": "362eb7bcc7427dcd09ee9ecaf0c1ada58d574a3c6303a4d3c4d372a7daec16de",
     "finale-moves.js": "231e0a37d6c392b0655a2e7afd3146f5bb367ae317571304b000879a64a35031",
     "training-moves.js": "75a6f63a1fb7a20cdde48568a8ef3df2246385b094843b310484fc960c079cf9",
-    "minccino-moves.js": "20cac9936ad5b33f4196283c441fc3366d5be822aecf135a308cc5130b73889e",
+    "minccino-moves.js": "95f67de5d655da88dd17c58b236bd92fc2989acecc00c2c15a49f2d2622c1211",
     "emboar-moves.js": "5ce4bc8bab7237c771e0392b686272dee848f1a9effcdde99a075bdadae90a3e",
     "battle-reactions.js": "7a3522373866e8b644716448beb6db6f4d596c3428edfb542948f8e5ac114064",
     "native-visual.js": "9dc52f843e1829204832e6c31b83601dcca98bbfa51500d84d0a9467e58422ff",
     "native-audio.js": "56f3c872b42108212ecfe6f180df119a2e1c76741f6caab46bfb217c791403b7",
     "battle-diorama.js": "e36f3903827cedcb0ebced1d747d3ea1c21f79fa6c982a341e4ed77de57ead9f",
     "double-rules.js": "949e8f7d170d9d0990fa5cc74e3165731a0c4179f8b554803e6d7b7b890e3184",
-    "battle-presentation.js": "3adc5eecd3335c0232bfbc424e9f25fef3fd1cc608c4f74debfec4550f02f446",
-    "audio-engine.js": "7a18b9245a11a61e02556dafec71f1611809a491fdf9f8362318c268c47d76ab",
-    "liepard-moves.js": "326c2cef7093acc1ec00d11478859fb52f13cdc53c9c4492e105c32f6be0d538",
-    "battle-ground.js": "828451711278ffe5c72d351b53109f7597bbb08e19bfe92e16bb8496bd47a19e",
+    "battle-presentation.js": "7fa21597be35dca499052f06a2e64313d3c82cb38f3f8b1d474436d74c41469f",
+    "audio-engine.js": "64d93fca0a55b9762737df79c5da5cecf8629020a7b4c12f14fe02c693c8447d",
+    "liepard-moves.js": "07c57c2cb21eb740731ea37c88dcb63cff5bde34bcc2d2d70a911b917bebabfe",
+    "battle-ground.js": "a4c669c000a34bd7c2d4584b5fc810d29191e6b39bfae48e83db478d4e2cefbb",
     "game.js": "93c897a8b47c589b859c5aea8993463a6e8b89407219f87933f29767c4cbe047",
-    "move-fx.js": "80bc9f5bb7362e06dfbb508078d7a5622b520c4f22babaabceb3a8acea329e16",
+    "move-fx.js": "9e90b67ae12a1999a04f6a0c27b5b08316400bdf1a2f76d541024843e8330efe",
     "double-battles.js": "b1bc07758b48bc1e1f94b84b87e691f9f3ea48f41020ff49d21af3583df3d38a",
-    "runtime-assets.js": "32e0bad198cc1ec8dfb2a267e7959dafe951d08d60b90173cfbc7f7963d6c9b9",
+    "runtime-assets.js": "e7130d01eb54b1f7b72ecb889db5c708778e32975b866e904373ce43291568c9",
     "world3d.js": "97d6606ba2dee3e08062924d1b73647e457b9e1d54b36246f3af48dbeee87924"
   },
   "buildProgramRawSHA256": {
@@ -77,5 +77,38 @@
     "sourcePins": null
   },
   "previousAmbientContractCanonicalLFSHA256": "e11f3856e7d5870fcdf3378f7507f022996d6844257121b073fc463387c5893e",
-  "originalFullContractCanonicalLFSHA256": "0d8e384dcf67db3ff6199d23b5cafab647460b85bab68378649a3520df393b13"
+  "originalFullContractCanonicalLFSHA256": "0d8e384dcf67db3ff6199d23b5cafab647460b85bab68378649a3520df393b13",
+  "previousFullRestoredContractCanonicalLFSHA256": "04ebfc3ac16f327fbb00efaed6d8f3948de84df53c32b78c87567ebb087711fc",
+  "native572Lineage": {
+    "schema": 1,
+    "originalReferenceFixture": "tests/fixtures/native572-original064",
+    "originalRAWRole": "Immutable native baseline; never the current SITE transport",
+    "currentGraphRole": "Actual SITE data; original RAW or exact runtime-qualified view-specific append recipe with derived build.assets/provenance",
+    "derivedKinds": {
+      "back": "native572-back-cell7-oam-partition/v1",
+      "front": "native572-front-cell12-oam-partition/v1"
+    },
+    "nativeDefaultMaps": [
+      0,
+      1
+    ],
+    "rawAssetPinsRetainOriginalMeaning": true
+  },
+  "previousTypedNative572ContractCanonicalLFSHA256": "62104b5c7741b83abbd2a5dc10a8b3da217f4dc77f0250b479c942fa2a6296a7",
+  "closed541Lineage": {
+    "schema": 1,
+    "runtimeManifestSHA256": "632a284990c91457da4a65cbff37825baa10c4058ba26d60ef4e1c2d5f41ad81",
+    "operationCount": 43,
+    "sourceLFHashChanges": [
+      "minccino-moves.js",
+      "demo-moves.js",
+      "battle-presentation.js",
+      "audio-engine.js",
+      "move-fx.js"
+    ],
+    "minccinoOperationsFixture": "tests/fixtures/minccino-slap-reference064/closed541-minccino-operations.json",
+    "minccinoOperationsFixtureCanonicalLFSHA256": "b6a4d97585961a075542689bfd035b0ab013cf4d14377ab8b19afc7d9af7e1e6",
+    "scope": "Declared native singles572/541 only;metadata is not execution/motion/contact approval",
+    "rawAssetPinsRetainOriginalMeaning": true
+  }
 }

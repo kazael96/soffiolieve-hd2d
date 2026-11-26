@@ -1,6 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
 const repo=path.resolve(__dirname,'..'),site=process.env.SOFFIOLIEVE_TEST_SITE||path.join(repo,'_site');process.env.SOFFIOLIEVE_TEST_SITE=site;
+const native572=require('./helpers/native572-assets064.cjs').create({repo,site,sourceRoot:path.join(repo,'src')});
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 const c=require(path.join(repo,'tests/helpers/finale-moves-host.cjs')).setup({sourceRoot:path.join(repo,'src')});c.performance=performance;c.GameSpeed={now:()=>1000};c.Image=class{};
 const source=file=>fs.readFileSync(fs.existsSync(path.join(repo,'src',file))?path.join(repo,'src',file):path.join(site,file),'utf8');
@@ -12,7 +13,7 @@ const geometryLF=Buffer.from(fs.readFileSync(geometryFile).toString('latin1').re
 assert.equal(hash(geometryLF),'eb88e84ef63bdb233cbfe77d2783483c5a53e57cdb6ffc2af08a2e4f31c52c59');const geometry=JSON.parse(geometryLF),nativeBanks=new Map();
 const point=(x,y,f)=>{const a=f[2]*2*Math.PI/65536,xx=x*f[3]/4096,yy=y*f[4]/4096;return[f[5]+xx*Math.cos(a)-yy*Math.sin(a),f[6]+xx*Math.sin(a)+yy*Math.cos(a)];};
 function bounds(points){return points.reduce((b,p)=>[Math.min(b[0],p[0]),Math.min(b[1],p[1]),Math.max(b[2],p[0]),Math.max(b[3],p[1])],[Infinity,Infinity,-Infinity,-Infinity]);}
-function native(id,view){const key=id+'-'+view;if(nativeBanks.has(key))return nativeBanks.get(key);const jp=path.join(site,'assets/animated',key+'.json'),pp=jp.replace(/json$/,'png'),jb=fs.readFileSync(jp),pb=fs.readFileSync(pp),data=JSON.parse(jb),pin=geometry.banks[key];assert.equal(hash(jb),pin.jsonSHA256);assert.equal(hash(pb),pin.pngSHA256);assert.equal(JSON.stringify(data),pin.canonicalData);const image={width:pin.imageSize[0],height:pin.imageSize[1],naturalWidth:pin.imageSize[0],naturalHeight:pin.imageSize[1],CPU_DIMENSIONS_ONLY_NOT_RASTER:true};
+function native(id,view){const key=id+'-'+view;if(nativeBanks.has(key))return nativeBanks.get(key);const jp=path.join(site,'assets/animated',key+'.json'),pp=jp.replace(/json$/,'png'),current=id===572?native572.candidate(view):null,jb=current?current.originalJSON:fs.readFileSync(jp),pb=fs.readFileSync(pp),data=current?current.data:JSON.parse(jb),pin=geometry.banks[key];assert.equal(hash(jb),pin.jsonSHA256);assert.equal(hash(pb),pin.pngSHA256);assert.equal(JSON.stringify(JSON.parse(jb)),pin.canonicalData);const image={width:pin.imageSize[0],height:pin.imageSize[1],naturalWidth:pin.imageSize[0],naturalHeight:pin.imageSize[1],CPU_DIMENSIONS_ONLY_NOT_RASTER:true};
  // Reuse the separately decoded, SHA-pinned exact native positive-alpha CELL
  // hulls. No second PNG decoding/redraw here, and no dimensions-as-pixels claim.
  const sample=tick=>{const seen=new Set();return c.ROM_SPRITE_ANIM.parts(data,tick).flatMap(({r,f,pf})=>{if(seen.has(r))return[];seen.add(r);return pin.cells[f[0]].hull.map(([x,y])=>{const q=point(x,y,f);return point(q[0]+r[1],q[1]+r[2],pf);});});};

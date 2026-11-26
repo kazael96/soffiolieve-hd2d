@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '22'
       - name: Build verified site from editable sources
-        run: python3 scripts/build-site.py site.zip _site
+        run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064
       - name: Check source syntax
         run: for file in src/*.js; do node --check "$file"; done
       - name: Install pinned native Canvas for CPU fixtures

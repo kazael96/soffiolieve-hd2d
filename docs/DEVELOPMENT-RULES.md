@@ -333,3 +333,32 @@ mediana migliore non certifica un vantaggio se peggiora la coda: nel
 giudizio mantenere tutti i campioni e gli estremi, distinguere costo
 per aggiornamento dalle chiamate riusate e non dedurre FPS. Il seguito
 di questa decisione non apre un'altra ottimizzazione esplorativa.
+
+### Processo nativo572/541: protocollo e audio condividono un owner
+
+I due file `native-tail541-protocol064.test.cjs` e
+`native-tail541-audio064.test.cjs` formano un solo processo sequenziale
+dedicato `unit-native-tail541`: argv protocollo,audio, `--expose-gc`,
+preload `--require tests/helpers/native-tail541-metrics064.cjs` una volta,
+heap400MiB, `--test-concurrency=1` e isolamento disattivato con il flag
+corretto di Node22/24 su entrambi Windows/Linux. Il processo del runner
+è quello che esegue i callback, senza un figlio Node nascosto. Il preload
+metrics misura maxRSS; `--expose-gc` consente al fixture host il GC tra VM.
+L'ordine dei callback non dipende dall'ordine argv. Non disperdere questi
+test nei gruppi ordinari.
+
+La coppia viene rimossa prima del raggruppamento precedente: tutti gli
+altri52argv rimangono identici. Senza altri cambi d'inventario,425+2=427
+file producono53fasi unitarie e94CLI (builder1+runtime40 invariati).
+I16casi del port (14precedenti+2negativi owner/preparation) non sono16fasi:
+restano due file e un solo processo. Conservare180s, heap400MiB e8MiB
+di output per fase; un limite heap non è una prova di RSS del sistema.
+
+Le regressioni verificano coppia minima, Node22/24 e Windows/Linux,
+assegnazione unica/deterministica, incomplete catalog e basename ambigui
+rifiutati, presenza della coppia nell'inventario reale e le94fasi totali.
+Gli otto gruppi ordinari Linux mantengono `--test-concurrency=2`; tutte le
+vecchie dediche e i cataloghi vita/recovery rimangono invariati. Nessuna
+modifica al builder, alla CI, ai runtime o a un'asserzione funzionale deriva
+dal registro. Il run privato precedente14/14 è evidenza mirata, non PASS
+del port16 o della nuova suite94, né una certificazione del movimento.

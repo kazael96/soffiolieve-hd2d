@@ -1,0 +1,9 @@
+{
+  "schema": "historical-UI807-before-native572-partition/v1",
+  "HEAD": "807d788c6d221541999a4a93f27e18f2e15c6de8",
+  "origin": "Git HEAD807 src/battle-ui.js; UTF8 program, only CRLF->LF normalization allowed",
+  "beforeProgramCanonicalLFSHA256": "a6b2095f3fe8b249c8dd41a8060649a9c4f90c2fd5a76dd21709f107ab326395",
+  "prefixCanonicalLFSHA256": "c636bd355d2735bb89664cef98660f140983d8a16dac42e49f9a5637bc2439ea",
+  "suffixCanonicalLFSHA256": "e276e710774645401553cf94830f042032b50ecf32d56fa8bd8fa2f3f41f568c",
+  "originalPrepareResources": "const prepareResources=()=>Promise.all([BattleEnvironment.prepare(battleLocation),window.ROM_SPRITE_ANIM?.prepare?.((session.double?session.battle.getAllActive().filter(p=>p.hp>0).map(p=>({id:p.species.num,name:p.species.name,gender:p.gender,form:p.nativeForm??p.set?.form,back:['p1','p3'].includes(p.side.id)})):[{...partner,id:partner.spriteId,back:true},{...enemy,id:enemy.spriteId,back:false}]),{gate:false}),window.BattleScreen?.loading])"
+}

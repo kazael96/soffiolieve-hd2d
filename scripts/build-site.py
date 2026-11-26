@@ -3,6 +3,7 @@
 import argparse
 import errno
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -162,7 +163,15 @@ def publish_staging(site, target):
     return 'copy'
 
 
-def build(archive, target):
+def derive_native572_tail(site):
+    source = Path(__file__).with_name('native572_tail064.py')
+    spec = importlib.util.spec_from_file_location('native572_tail064', source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.derive_site(site)
+
+
+def build(archive, target, *, native572_tail_partition=False):
     with archive.open("rb") as stream:
         digest = hashlib.file_digest(stream, "sha256").hexdigest()
     if digest != ARCHIVE_SHA256:
@@ -185,6 +194,7 @@ def build(archive, target):
                 destination = site / source.relative_to(ROOT / 'src')
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, destination)
+        derived_native572 = derive_native572_tail(site) if native572_tail_partition else None
         packed = startup_pack(site)
         battle_pack = battle_ui_pack(site)
         chapter_pack = startup_pack(site,['castelia-assets.js'],'assets/castelia-pack.bin')
@@ -206,6 +216,8 @@ def build(archive, target):
                   for p in sorted(site.glob('*')) if p.suffix in ('.js', '.css', '.html')}
         asset_hashes = {p.relative_to(ROOT / 'src').as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sorted((ROOT / 'src/assets').rglob('*')) if p.is_file()}
+        if derived_native572:
+            asset_hashes.update(derived_native572['assets'])
         for season in range(4):
             for prefix in ['field','opelucid']:
                 pack = site / f'assets/{prefix}-season-{season}-pack.bin'
@@ -231,6 +243,7 @@ def build(archive, target):
         hashes['index.html'] = hashlib.sha256(index.read_bytes()).hexdigest()
         (site / 'build.json').write_text(json.dumps({
             'version': '0.64', 'revision': revision, 'battleUI': {'pack':'assets/battle-ui-pack.bin', **battle_pack}, 'capture': {'pack':'assets/capture-pack.bin', **capture_pack},
+            **({'native572TailPartition': derived_native572} if derived_native572 else {}),
             'archive_sha256': digest, 'files': hashes, 'assets': asset_hashes, 'startup': {'pack': packed, **entrypoints}, 'chapters': {'castelia': chapter_pack, 'nimbasa': nimbasa_pack, 'driftveil': driftveil_pack, 'mistralton': mistralton_pack, 'icirrus': icirrus_pack, 'opelucid': opelucid_packs, 'league': league_packs, 'finale': finale_packs},
         }, indent=2) + '\n', encoding='utf-8', newline='\n')
         publish_staging(site, target)
@@ -241,8 +254,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('archive', type=Path)
     parser.add_argument('target', type=Path, nargs='?', default=Path('_site'))
+    parser.add_argument('--native572-tail-partition064', action='store_true', help='Derive the two pinned native572 OAM JSON partitions in fresh build staging')
     arguments = parser.parse_args()
     try:
-        build(arguments.archive, arguments.target)
+        build(arguments.archive, arguments.target, native572_tail_partition=arguments.native572_tail_partition064)
     except (ValueError, OSError, zipfile.BadZipFile) as error:
         parser.exit(1, f"Build failed: {error}\n")

@@ -53,6 +53,13 @@
   // The original control envelopes and stereo trajectories are already baked
   // into these finite native clips. Changed scripts/banks require a new review.
   const contracts={
+   541:{frames:39,anchor:0,events:[
+    {kind:'sfx',id:1651,channel:1,target:16,start:0,raw:[1651,1,16,0,0,127,0,0,0]},
+    {kind:'sfx',id:1427,channel:2,target:16,start:0,raw:[1427,2,16,0,0,50,0,0,0]}
+   ],voices:[
+    [0,1651,1,16,0,39,true,'630cd21a8a75ae15595c','630cd21a8a75ae15595c','630cd21a8a75ae15595c','630cd21a8a75ae15595c'],
+    [1,1427,2,16,0,39,true,'71360983e52dfd6ab048','71360983e52dfd6ab048','71360983e52dfd6ab048','71360983e52dfd6ab048']
+   ]},
    3:{frames:129,anchor:0,events:[
     {kind:'sfx',id:1422,channel:1,target:16,start:0,raw:[1422,1,16,0,0,125,0,0,0]},
     {kind:'sfx',id:1420,channel:2,target:16,start:0,raw:[1420,2,16,0,0,35,0,0,0]},
@@ -171,10 +178,12 @@
    const q=options.nativeSlapContext064,slap=species===572&&options.moveId===3&&options.profileSpecies===572&&options.profileKey==='training-572-3'&&options.profileKind==='palmFlurry'&&options.profileMarker==='private-native-paw-SPA163';
    if(slap&&(!q||Object.keys(q).sort().join(',')!=='hitCount,hitIndex'||!Number.isInteger(q.hitCount)||q.hitCount<0||q.hitCount>5||!Number.isInteger(q.hitIndex)||q.hitIndex<0||(q.hitCount===0?q.hitIndex!==0:q.hitIndex>=q.hitCount)||q.hitCount===0&&options.miss!==true||(options.variant??0)!==0||options.nativeWaitGroups!==false))throw Error('Invalid private native slap audio context');
    if(slap&&(window.NATIVE_AUDIO_BANK?.moves[3]?.length!==1||!window.NATIVE_AUDIO_BANK.moves[3][0].p2))throw Error('Changed private native slap variant bank');
+   const native541=species===572&&options.moveId===541&&options.profileSpecies===572&&options.profileKey==='training-572-541'&&options.profileKind==='tailSlam'&&options.profileMarker==='native572-tail541-oam-partition/v1';
+   if(native541){const t=options.nativeTailContext541;if(!t||Object.keys(t).sort().join(',')!=='hitCount,hitIndex'||!Number.isInteger(t.hitCount)||t.hitCount<0||t.hitCount>5||!Number.isInteger(t.hitIndex)||t.hitIndex<0||(t.hitCount===0?t.hitIndex!==0||options.miss!==true:t.hitIndex>=t.hitCount)||(options.variant??0)!==0||options.nativeWaitGroups!==false||window.NATIVE_AUDIO_BANK?.moves[541]?.length!==1||!window.NATIVE_AUDIO_BANK.moves[541][0].p2)throw Error('Invalid native541 audio context/bank');}
    const claw=species===510&&options.moveId===10&&options.profileSpecies===510&&options.profileKey==='training-510-10';
    const tail=options.moveId===39&&[500,503].includes(species)&&options.profileKind==='nativeTailWhipStatus064'&&options.profileMarker==='native500503TailWhip064';
    const tynamo=species===602&&options.profileSpecies===602&&options.profileKind===({33:'bodyRam',86:'electricWave',209:'flameRush',451:'electricWave'}[options.moveId])&&[33,86,209,451].includes(options.moveId);
-   if(!definition||!([205,360].includes(options.moveId)&&species===500||options.moveId===16&&species===521||tail||tynamo||openingStatus||claw||slap)||options.frames!==duration)throw Error('Unsupported native battle presentation audio');
+   if(!definition||!([205,360].includes(options.moveId)&&species===500||options.moveId===16&&species===521||tail||tynamo||openingStatus||claw||slap||native541)||options.frames!==duration)throw Error('Unsupported native battle presentation audio');
    if(![.5,1].includes(options.playbackSpeed)||![1,2,4].includes(options.speed/options.playbackSpeed)||![.5,1,2,4].includes(options.speed))throw Error('Unsupported native battle presentation speed');
    if(!['p1','p2'].includes(options.side)||!['p1','p2'].includes(options.targetSide)||options.targetSide===options.side||!Array.isArray(options.requiredKeys)||options.requiredKeys.length>256||!Number.isInteger(options.variant??0)||(options.variant??0)<0)throw Error('Invalid native battle action contract');
    const keys=Object.freeze([...new Set([0,...options.requiredKeys,duration])].sort((a,b)=>a-b));if(keys.some(k=>!Number.isFinite(k)||k<0||k>duration))throw Error('Invalid native battle audio key');

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "scope": "Only fixture/program dependencies outside explicit closed541 five-source contract; no runtime pin auto-renewal or native RAW rename.",
+  "originalFixture": "tests/audio-presentation064.test.cjs",
+  "originalFixturePrefixCanonicalLFSHA256": "370bca2f6c6318ec26756170af9274f9e4eef22fb78a064085c6639c35b45b15",
+  "originalAudioPlaybackCanonicalLFSHA256": "e5bdfb84ab0cd4c3f247548f0e8a7d8f11beac656dcd953831e30ce0cde4da09",
+  "originalRawAudioPrograms": {
+    "assets/audio-catalog.js": "4ebc7cc6c558bae23f8e50c71c56f08541446bd3901b4770671f8e84328afd2c",
+    "assets/audio-data.js": "187ca833d46e2260471ef24e5df29dbef4a6a6674d635c4768dbd694d253288c"
+  },
+  "originalNativeAudioBankRole": "The strict provider retains its unchanged RAW bank pin; 541 native39/0 is not inferred from voice-bank39.",
+  "historicalPrivateFixtureProofSHA256": "201cc29ee4269cfc8e7232f16a9877060ed5503a4a9c6ddf9fdefabb9e437a34",
+  "programPolicy": "Fatal UTF8 and raw roundtrip; exact actual runtime bytes executed; source contract metadata and this metadata only normalize CRLF toLF."
+}
