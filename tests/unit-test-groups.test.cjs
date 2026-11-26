@@ -5,7 +5,7 @@ const tail541Names=['native-tail541-protocol064.test.cjs','native-tail541-audio0
 function assertTail541(stage,files,flag){assert.equal(stage[0],'unit-native-tail541');assert.deepEqual(stage[2],['--expose-gc','--max-old-space-size=400','--require',path.join(__dirname,'helpers/native-tail541-metrics064.cjs'),'--test',flag,'--test-concurrency=1',...tail541Names.map(name=>files.find(file=>basename541(file)===name))]);assert.equal(stage[2].filter(arg=>arg.endsWith('.test.cjs')).length,2);assert(!stage[2].includes('--test-concurrency=2'));}
 test('sequential unit groups include every real regression exactly once, with independent bounded processes',()=>{
  const files=fs.readdirSync(__dirname).filter(f=>f.endsWith('.test.cjs')).map(f=>path.join(__dirname,f)),groups=stages(files,{exe:'node',windows:true});
- assert.equal(files.length,427);assert.equal(groups.length,53);assertTail541(groups.at(-1),files,currentNoIsolationFlag);const previousFiles=files.filter(file=>!tail541Names.includes(basename541(file)));assert.deepEqual(groups.slice(0,-1),stages(previousFiles,{exe:'node',windows:true}),'All previous52 Windows argv remain exact');assert.deepEqual(groups.flatMap(g=>g[2].filter(a=>a.endsWith('.test.cjs'))).sort(),files.slice().sort());
+ assert.equal(files.length,428);assert.equal(groups.length,53);assertTail541(groups.at(-1),files,currentNoIsolationFlag);const previousFiles=files.filter(file=>!tail541Names.includes(basename541(file)));assert.deepEqual(groups.slice(0,-1),stages(previousFiles,{exe:'node',windows:true}),'All previous52 Windows argv remain exact');assert.deepEqual(groups.flatMap(g=>g[2].filter(a=>a.endsWith('.test.cjs'))).sort(),files.slice().sort());
  const heavy=require('../scripts/liepard-lifecycle-stages064.cjs'),expectedDedicated=['ambient-readback064.test.cjs','battle-actor-framing064.test.cjs','emboar-contact064.test.cjs','league-journeys.test.cjs','native602-density064.test.cjs',...heavy.lifeNames,...heavy.recoveryNames].sort();
  assert.equal(expectedDedicated.length,44);assert.deepEqual(groups.slice(8,-1).map(g=>path.basename(g[2].at(-1))).sort(),expectedDedicated);
  for(const [index,g]of groups.entries()){
@@ -58,7 +58,7 @@ test('native541 incomplete or ambiguous pair is rejected before ordinary groupin
   assert.throws(()=>stages([...tail541Names,'other/native-tail541-protocol064.test.cjs'],options),/Ambiguous native-tail541/);
  }
 });
-test('real427-file scheduler and unchanged deep registry produce53 unit and94 CLI stages',()=>{
+test('real428-file scheduler and unchanged deep registry produce53 unit and94 CLI stages',()=>{
  const files=fs.readdirSync(__dirname).filter(file=>file.endsWith('.test.cjs')).map(file=>path.join(__dirname,file)),deep=fs.readFileSync(path.join(__dirname,'../scripts/test-deep.cjs'),'utf8'),match=deep.match(/\.\.\.(\['built-site',[^\]]+\])\.map/);assert(match,'Exact runtime stage registry must remain explicit');const runtime=JSON.parse(match[1].replace(/'/g,'"'));assert.equal(runtime.length,40);assert.equal(new Set(runtime).size,40);for(const name of runtime)assert(fs.existsSync(path.join(__dirname,'check-'+name+'.cjs')),'Existing runtime file '+name);assert(deep.includes("['builder',python,['-m','unittest','discover','-s','tests','-p','test_*.py']]"));
- for(const nodeVersion of ['22.23.5','24.22.3'])for(const windows of [true,false]){const selected=stages(files,{windows,nodeVersion});assert.equal(files.length,427);assert.equal(selected.length,53);assert.equal(selected.length+1+runtime.length,94);}
+ for(const nodeVersion of ['22.23.5','24.22.3'])for(const windows of [true,false]){const selected=stages(files,{windows,nodeVersion});assert.equal(files.length,428);assert.equal(selected.length,53);assert.equal(selected.length+1+runtime.length,94);}
 });

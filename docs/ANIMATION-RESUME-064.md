@@ -1540,3 +1540,52 @@ Ricevute e immagini:
 Queste modifiche aggiornano QA e supervisione; nessun sorgente di gioco
 o nuova build cambia. Inventario427/53/94 invariato. La PR58 resta DRAFT
 e nessun merge o deploy deriva da questi PASS.
+
+### Tynamo33: integrazione sorgente del26 novembre, non ancora nuova candidata
+
+Integrati i tre moduli verificati SpeciesMoves/MoveFX/Game, il test
+portabile con28comportamenti e il catalogo alpha nativo (indice e300JSON,
+1.789.214byte). Il catalogo descrive geometria, non specie ottenibili
+o animazioni approvate. La risoluzione del contatto avviene a preparazione;
+il disegno riusa il piano senza nuove richieste o ricalcoli. Annullamento,
+errore, conferma finale e coda audio rilasciano le rispettive risorse.
+I consumatori senza BattleGround conservano l'API base; un host fornito
+ma malformato genera un errore. La configurazione predefinita non richiede
+un globale iniettato dal collaudo.
+
+Il primo negativo della proposta privata aveva27PASS/1FAIL: la fixture
+non provava l'assenza di SpeciesMoves nel contesto VM. Il nuovo contesto
+inizialmente privo dell'API corregge il test, senza modificare il runtime.
+La proposta passa28/28; dopo l'integrazione passano anche i consumatori
+CommonJS reali preesistenti e il raggruppatore:42test TAP complessivi,
+zero fail/skip/cancel, durata5474ms, Node22.23.5. Inventario428file,
+53processi unitari e94fasi CLI; il nuovo file ordinario può ridistribuire
+gli otto gruppi. Nessun budget, flag o catalogo dedicato viene ridotto.
+Ricevuta: `outputs/ci064green/tynamo33-canonical-targeted-v1`.
+
+Prima della copia sono stati collaudati i byte esatti con la C16 e tre
+override:399moduli=396originali+3sostituiti. Configurazione predefinita,
+nessun override globale anche nella catena dei prototipi, due turni GEN5
+e quattro azioni reali per formato:verticale42794ms,orizzontale42581ms.
+Root ha letto tutti i24PNG, con revisione indipendente degli impatti;
+254input e87asset osservati restano invariati. Il fronte qualificato
+include gli otto pixel di fronte nativi prima esclusi dalla maschera;
+i quattro/cinque riferimenti del muso e la geometria restano gli originali.
+
+La successiva prova di orientamento, stesso runtime predefinito, passa
+in44368ms:due cambi reali di viewport,12PNG protetti e una cattura del
+vero disegno ridimensionato. Tutti i13PNG sono letti da Root. Clock126
+già completato e token restano gli stessi, senza nuova conferma o attesa
+audio artificiale; wrapper ripristinati e quattro identità chiuse.
+Le occlusioni locali del volto del ricevente restano un limite estetico.
+Prove: `outputs/ci064green/tynamo33-production-default-actual-game-preparation-v1`
+e `outputs/ci064green/tynamo33-actual-orientation-addon-v3`.
+
+Questi esiti precedono una nuova build: non sono il collaudo di C17,
+né il PASS della suite completa94. Il movimento completo normale e
+rallentato, ombre, PCM/ascolto, GPU Android e tutto il catalogo4365/105MN
+non risultano certificati. Minccino3 rimane in revisione: la posa locale
+con coda sul fianco è leggibile in P1, mentre P2 taglia il capo al bordo
+sinistro. La camera e l'avvicinamento devono essere corretti prima di
+integrare questa coreografia. Nessuna nuova build, merge o pubblicazione;
+la PR58 resta DRAFT e il sito verificato rimane0.63.

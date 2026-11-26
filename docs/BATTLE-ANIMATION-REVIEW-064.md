@@ -7,6 +7,15 @@ restano cronologia documentale, senza diventare nuove prove della candidata
 corrente. Disponibilità effettiva e stato del collaudo sono in
 [ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
 
+Aggiornamento sorgente del26novembre: Tynamo33 dispone ora del percorso
+nativo predefinito, con risorse limitate, piano preparato prima del disegno
+e rilascio anche durante la coda audio. Il dettaglio delle28regressioni,
+dei test CommonJS e dei replay privati nei due formati è nel registro
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md). I nuovi test non
+certificano una nuova build o il movimento completo. Restano aperti
+Minccino3 (camera e percorso), Botta1 e i rilievi estetici di Emboar;
+nessun PASS statico viene esteso alle4365coppie o alle105MN.
+
 Stato: **in corso, nessuna certificazione estetica globale**. Il riferimento immutato è la build 0.63 `abedec256cddc00e`. La revisione applica [ANIMATION-QUALITY.md](ANIMATION-QUALITY.md), Sprite Animation/production e Pixel Art Fundamentals/critique. Inventario, movimento, pacchetto e integrazione hanno esiti distinti.
 
 **Rettifica della provenienza dei pilot:** il precedente server sostituiva gli URL dei singoli sorgenti, mentre la build esegue i testi inline di `app.js`. Gli overlay JavaScript non raggiungevano quel trasporto. Il corpus è sospeso; le attribuzioni al renderer aggiornato, compreso il confronto254RGBA di Canto47, richiedono una nuova cattura con attestazione runtime. Le immagini e le letture visive precedenti restano prove dell'output osservato, non dell'overlay previsto. I rapporti, i FAIL e gli indici originali sono preservati; l'audit separato `outputs/animation-review064/battles/historical-transport-erratum064.json` e la relativa rettifica Markdown distinguono i moduli privati aggiunti direttamente, gli asset e gli script inline. Il pin del server storico non era registrato e rimane nullo. Nessun PASS storico viene trasferito alla candidata corretta.
