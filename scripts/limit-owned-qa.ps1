@@ -5,6 +5,11 @@ param(
  [string]$PinnedProcessesJson = ''
 )
 $ErrorActionPreference = 'Stop'
+$phaseClock = [Diagnostics.Stopwatch]::StartNew()
+function Write-OwnedPhase([string]$Phase) {
+ [Console]::Error.WriteLine('OWNED_QA_PHASE ' + $Phase + ' ' + $phaseClock.Elapsed.TotalMilliseconds.ToString('F3',[Globalization.CultureInfo]::InvariantCulture))
+}
+Write-OwnedPhase 'ENTER'
 function Get-StartTicks($Process) {
  if ($null -eq $Process) { return '' }
  try {
@@ -59,6 +64,7 @@ try {
  if ($Mode -ne 'Inspect' -and $ExpectedStartTicks -eq '') { throw 'Mutations require the pinned owner start time' }
  # Enumerate ancestry, never process names. Every selected PID is pinned again
  # immediately before changing its scheduler or terminating it.
+ Write-OwnedPhase 'INTEROP'
  if (-not ('OwnedQaProcessTree' -as [type])) {
   Add-Type -TypeDefinition @'
 using System;
@@ -88,6 +94,7 @@ public static class OwnedQaProcessTree {
 }
 '@
  }
+ Write-OwnedPhase 'NATIVE'
  $all = [OwnedQaProcessTree]::Snapshot()
  $pending = [Collections.Generic.Queue[object]]::new()
  $pending.Enqueue(@{pid=$OwnedPid;startTicks=$rootTicks;depth=0})
@@ -131,4 +138,6 @@ public static class OwnedQaProcessTree {
 } catch {
  @{result='FAIL';pid=$OwnedPid;mode=$Mode;error=($_.Exception.Message+' at line '+$_.InvocationInfo.ScriptLineNumber);processes=@()} | ConvertTo-Json -Compress -Depth 6
  exit 1
+} finally {
+ Write-OwnedPhase 'DONE'
 }

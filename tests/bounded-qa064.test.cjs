@@ -63,9 +63,50 @@ test('owned helper failures retain bounded process diagnostics in the message sa
  }finally{cp.execFile=original;}
 });
 
+test('actual owner stops resource-failed work before another Limit and releases its pinned lease',async t=>{
+ const vm=require('node:vm'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),dir=temp(t),out=path.join(dir,'resource-abort'),ownerFile=require.resolve('../scripts/run-bounded-qa.cjs');
+ const timers=new Map(),calls=[],messages=[],logs=[],pid=43210,startTicks='638000000000000001',record={pid,startTicks,depth:0};let clock=1700000000000,nextTimer=0,diskReads=0;
+ class TestDate extends Date{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
+ const child=new EventEmitter();Object.assign(child,{pid,exitCode:null,stdout:new PassThrough(),stderr:new PassThrough(),send(message,callback){messages.push(message);callback?.();},kill(){if(this.exitCode!==null)return;this.exitCode=1;this.stdout.end();this.stderr.end();this.emit('exit',1,'SIGTERM');}});
+ const fakeCP={fork(file,args,options){calls.push({kind:'fork',file,args,options});return child;},execFile(exe,args,options,callback){const value=key=>args[args.indexOf(key)+1],mode=value('-Mode');calls.push({kind:'helper',mode,pid:Number(value('-OwnedPid')),ticks:args.includes('-ExpectedStartTicks')?value('-ExpectedStartTicks'):null,receipts:args.includes('-PinnedProcessesJson')?JSON.parse(value('-PinnedProcessesJson')):null});callback(null,JSON.stringify({result:'PASS',pid,startTicks,processes:mode==='Stop'?[]:[record]}),'');}};
+ const fakeFS={...fs,statfsSync(){return{bavail:++diskReads===1?1024*1024*1024:1,bsize:1};},createWriteStream(...args){const log=fs.createWriteStream(...args);logs.push(log);return log;}};
+ const localRequire=name=>{if(name==='node:fs')return fakeFS;if(name==='node:child_process')return fakeCP;return require(name);},moduleCopy={exports:{}};
+ const schedule=(callback,ms,interval)=>{const id=++nextTimer;timers.set(id,{callback,ms,interval});return id;};
+ vm.runInNewContext(fs.readFileSync(ownerFile,'utf8'),{require:localRequire,module:moduleCopy,__filename:ownerFile,__dirname:path.dirname(ownerFile),process:{platform:'win32',pid:12345},Buffer,URL,Date:TestDate,setInterval:(fn,ms)=>schedule(fn,ms,true),setTimeout:(fn,ms)=>schedule(fn,ms,false),clearInterval:id=>timers.delete(id),clearTimeout:id=>timers.delete(id)},{filename:ownerFile});
+ const drain=async()=>{for(let i=0;i<20;i++)await Promise.resolve();},tick=async ms=>{const timer=[...timers.values()].find(row=>row.interval&&row.ms===ms);assert.ok(timer,'expected active '+ms+'ms interval');clock+=ms;timer.callback();await drain();};
+ const running=moduleCopy.exports.run({out,leaseRoot:dir,site:dir,cases:['never-run'],viewports:[['portrait',390,844]]});let report,afterResource,afterAbort;
+ try{
+  await drain();assert.equal(calls.filter(row=>row.mode==='Birth').length,1);assert.equal(calls.filter(row=>row.mode==='Limit').length,1);
+  await tick(2500);afterResource=calls.filter(row=>row.mode==='Limit').length;
+  await tick(2500);afterAbort=calls.filter(row=>row.mode==='Limit').length;
+  await tick(500);report=await running;
+ }finally{child.kill();await running;await Promise.all(logs.map(log=>log.closed?Promise.resolve():once(log,'close')));}
+ assert.equal(afterResource,1,'resource failure must return before invoking Limit');assert.equal(afterAbort,1,'an aborting owner must not start another resource/Limit check');
+ assert.equal(messages.filter(row=>row.type==='abort').length,1);assert.equal(report.result,'FAIL');assert.equal(report.failure,'Free disk below220MiB');assert.equal(report.failureElapsedMs,2500);assert.ok(report.failureElapsedMs<=report.elapsedMs);assert.equal(report.samples.length,1);
+ const stops=calls.filter(row=>row.mode==='Stop');assert.ok(stops.length>0);for(const stop of stops){assert.equal(stop.pid,pid);assert.equal(stop.ticks,startTicks);assert.deepEqual(stop.receipts,[record]);}
+ assert.equal(report.cleanupErrors,undefined);assert.equal(report.leaseRetained,undefined);assert.equal(fs.existsSync(path.join(dir,'.bounded-qa-lease.json')),false);assert.equal(child.exitCode,1);
+ const saved=JSON.parse(fs.readFileSync(path.join(out,'bounded-report.json'),'utf8'));assert.equal(saved.failure,report.failure);assert.equal(saved.failureElapsedMs,2500);assert.equal(saved.result,'FAIL');
+ const fork=calls.find(row=>row.kind==='fork');assert.equal(fork.file,ownerFile);assert.equal(JSON.stringify(fork.options.execArgv),JSON.stringify(['--max-old-space-size=400']));assert.equal(fork.options.windowsHide,true);
+});
+test('optional owned helper metrics preserve results and expose only bounded wall and phase stamps',async()=>{
+ const original=cp.execFile,metrics=[],success={result:'PASS',pid:123,startTicks:'456',processes:[]};let reply,calls=0;
+ cp.execFile=(exe,args,options,callback)=>{calls++;assert.equal(exe,'powershell.exe');assert.equal(options.timeout,10000);callback(...reply);};
+ const phases=[{phase:'ENTER',elapsedMs:0},{phase:'INTEROP',elapsedMs:1.25},{phase:'NATIVE',elapsedMs:2.5},{phase:'DONE',elapsedMs:3.75}],stderr=['DO_NOT_COPY '+('x'.repeat(4096)),'OWNED_QA_PHASE UNKNOWN 1','OWNED_QA_PHASE INTEROP 1,25','OWNED_QA_PHASE NATIVE Infinity',...phases.map(row=>'OWNED_QA_PHASE '+row.phase+' '+row.elapsedMs.toFixed(3)),'OWNED_QA_PHASE ENTER 9.000','OWNED_QA_PHASE DONE NaN','untrusted trailing diagnostic'].join('\n');
+ const check=(row,expected)=>{assert.deepEqual(Object.keys(row).sort(),['mode','phases','pid','wallElapsedMs']);assert.equal(row.mode,'Limit');assert.equal(row.pid,123);assert.ok(Number.isFinite(row.wallElapsedMs)&&row.wallElapsedMs>=0);assert.deepEqual(row.phases,expected);assert.ok(Buffer.byteLength(JSON.stringify(row))<1024);assert.equal(JSON.stringify(row).includes('DO_NOT_COPY'),false);};
+ try{
+  reply=[null,JSON.stringify(success),stderr];assert.deepEqual(await B.ownedProcess('Limit',123,'456'),success);assert.equal(metrics.length,0);
+  assert.deepEqual(await B.ownedProcess('Limit',123,'456',undefined,row=>metrics.push(row)),success);assert.equal(metrics.length,1);check(metrics[0],phases);
+  reply=[Object.assign(Error('DO_NOT_COPY_COMMAND'),{code:null,killed:true,signal:'SIGTERM'}),'','OWNED_QA_PHASE ENTER 0.000\nOWNED_QA_PHASE INTEROP 2.125\nOWNED_QA_PHASE NATIVE '];
+  await assert.rejects(B.ownedProcess('Limit',123,'456',undefined,row=>metrics.push(row)),error=>{assert.match(error.message,/^Owned PID helper failed: invalid JSON reply/);assert.equal(error.ownedProcessDiagnostics.killed,true);assert.equal(error.ownedProcessDiagnostics.signal,'SIGTERM');return true;});
+  assert.equal(metrics.length,2);check(metrics[1],[{phase:'ENTER',elapsedMs:0},{phase:'INTEROP',elapsedMs:2.125}]);assert.equal(calls,3);
+ }finally{cp.execFile=original;}
+});
+
 test('Windows helper pins an owned CPU-only process, refuses stale birthtime and stops only its receipt',{skip:process.platform!=='win32',timeout:30000},async t=>{
  const child=cp.spawn(process.execPath,['--max-old-space-size=400','-e','setInterval(()=>{},1000)'],{windowsHide:true,stdio:'ignore'});const exit=once(child,'exit');t.after(()=>{if(child.exitCode===null)child.kill();});
- const birth=await B.ownedProcess('Birth',child.pid);assert.equal(birth.result,'PASS');assert.equal(birth.processes.length,1);const found=await B.ownedProcess('Inspect',child.pid,birth.startTicks);assert.equal(found.result,'PASS');assert.ok(found.processes.some(p=>p.pid===child.pid));await assert.rejects(B.ownedProcess('Limit',child.pid,'1'),e=>{assert.match(e.message,/start time changed/);assert.equal(e.ownedProcessDiagnostics.mode,'Limit');assert.equal(e.ownedProcessDiagnostics.pid,child.pid);assert.equal(e.ownedProcessDiagnostics.code,1);assert(e.message.includes(' [owned-helper '));return true;});
- const limited=await B.ownedProcess('Limit',child.pid,found.startTicks);const record=limited.processes.find(p=>p.pid===child.pid);assert.equal(record.priority,'BelowNormal');const bits=BigInt(record.affinity).toString(2).split('').filter(c=>c==='1').length;assert.equal(bits,Math.min(2,os.availableParallelism()));
- const stopped=await B.ownedProcess('Stop',child.pid,found.startTicks,limited.processes);assert.equal(stopped.result,'PASS');await exit;
+ const metrics={},capture=key=>row=>{assert.equal(metrics[key],undefined);metrics[key]=row;};
+ const birth=await B.ownedProcess('Birth',child.pid,undefined,undefined,capture('birth'));assert.equal(birth.result,'PASS');assert.equal(birth.processes.length,1);const found=await B.ownedProcess('Inspect',child.pid,birth.startTicks,undefined,capture('inspect'));assert.equal(found.result,'PASS');assert.ok(found.processes.some(p=>p.pid===child.pid));await assert.rejects(B.ownedProcess('Limit',child.pid,'1',undefined,capture('stale')),e=>{assert.match(e.message,/start time changed/);assert.equal(e.ownedProcessDiagnostics.mode,'Limit');assert.equal(e.ownedProcessDiagnostics.pid,child.pid);assert.equal(e.ownedProcessDiagnostics.code,1);assert(e.message.includes(' [owned-helper '));return true;});
+ const limited=await B.ownedProcess('Limit',child.pid,found.startTicks,undefined,capture('limit'));const record=limited.processes.find(p=>p.pid===child.pid);assert.equal(record.priority,'BelowNormal');const bits=BigInt(record.affinity).toString(2).split('').filter(c=>c==='1').length;assert.equal(bits,Math.min(2,os.availableParallelism()));
+ const stopped=await B.ownedProcess('Stop',child.pid,found.startTicks,limited.processes,capture('stop'));assert.equal(stopped.result,'PASS');await exit;
+ for(const [key,mode]of Object.entries({birth:'Birth',inspect:'Inspect',stale:'Limit',limit:'Limit',stop:'Stop'})){const row=metrics[key];assert.equal(row.mode,mode);assert.equal(row.pid,child.pid);assert.ok(Number.isFinite(row.wallElapsedMs)&&row.wallElapsedMs>=0);assert.deepEqual(row.phases.map(phase=>phase.phase),['inspect','limit'].includes(key)?['ENTER','INTEROP','NATIVE','DONE']:['ENTER','DONE']);let previous=0;for(const phase of row.phases){assert.ok(Number.isFinite(phase.elapsedMs)&&phase.elapsedMs>=previous);previous=phase.elapsedMs;}}
 });

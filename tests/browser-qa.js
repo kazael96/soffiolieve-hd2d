@@ -172,32 +172,50 @@
   GEN5.Session=class extends NativeSession{constructor(p1,p2,options){super(p1,p2,{...options,seed:[1,2,3,4]});}};
   const finish=()=>{if(battling){session.battle.win('p1');snapshotPartner();busy=false;endBattle();}MoveFX.cancel();};
   MoveFX.play=async function(...args){
-   const row={ordinal:rows.length+1,id:args[0],side:args[1],bodySamples:0,reactionSamples:0,maxForepaw:0,minccinoBodySamples:0,authoredMinccinoSamples:0,authoredNativeSlapSamples:0,frames:[],captured:false};rows.push(row);current=row;
+   const row={ordinal:rows.length+1,id:args[0],side:args[1],bodySamples:0,reactionSamples:0,maxForepaw:0,minccinoBodySamples:0,authoredMinccinoSamples:0,authoredNativeSlapSamples:0,frames:[],captured:false,rejectedImpactCaptures:0};rows.push(row);current=row;
    try{const result=play.apply(this,args);await until(()=>!!MoveFX.active,'064 actual move activation');const p=MoveFX.active.profile;row.profile=p&&{id:p.id,species:p.species,target:p.target,phase:p.phase};return await result;}
    finally{if(current===row)current=null;}
   };
+  // M3 snapshots belong to the real attacker at protected60, not reaction time or score.t (an angle).
+  function minccinoImpact064(row,c,id,back,grounded,a,result){
+   const side=back?'p1':'p2';
+   if(result!==true||row.id!==3||row.profile?.species!==572||c.canvas!==arena||(c.globalAlpha??1)<=0||grounded!==true||side!==row.side||Number(id)!==572||a?.species!==572||a.reaction||a.minccinoSlap064?.anatomy!=='tail'||a.minccinoSlap064.miss!==false)return null;
+   const active=MoveFX.active,p=active?.profile,record=active?.presentationRecord,clock=active?.presentationClock;
+   if(active?.side!==side||active.moveId!==3||active.targetSide!==(side==='p1'?'p2':'p1')||Number(active.cryIds?.[side])!==572||active.nativeSlapController064!==true||active.miss||active.preview||active.presentationPaused||active.presentationCompleting||active.preparationHold064!==undefined||active.nativeSlapCompletedHold064===true||p?.species!==572||p.id!==3||p.minccinoNativeSlap064!=='private-native-tail-SPA163/v1'||p.frames!==126||p.impact!==60||a.t!==60/p.frames||!record||record.action!==active||!Object.isFrozen(record)||!record.token||!Object.isFrozen(record.token)||record.token.frame!==60||typeof clock?.snapshot!=='function')return null;
+   const state=clock.snapshot();if(state.pending!==record.token||state.value!==60||state.paused||state.cancelled||state.complete||!state.required.includes(60))return null;
+   return{row,active,profile:p,record,token:record.token,clock,generation:MoveFX.generation,side,graphic:Number(id),poseT:a.t,anatomy:a.minccinoSlap064.anatomy,hitIndex:a.minccinoSlap064.hitIndex,hitCount:a.minccinoSlap064.hitCount};
+  }
+  // Game consumes this same record in its original finally, after both real actor marks and a drawable arena.
+  function minccinoImpactAfterArena064(owner){
+   const {row,active,profile,record,token,clock}=owner;
+   if(current!==row||MoveFX.active!==active||MoveFX.generation!==owner.generation||active.profile!==profile||active.presentationRecord!==record||record.action!==active||record.token!==token||active.presentationClock!==clock||active.preview||active.presentationPaused||active.presentationCompleting)return null;
+   const state=clock.snapshot();if(state.pending!==null||state.value!==60||state.paused||state.cancelled||!state.shown.includes(60))return null;
+   return{side:owner.side,graphic:owner.graphic,anatomy:owner.anatomy,poseT:owner.poseT,hitIndex:owner.hitIndex,hitCount:owner.hitCount,frame:token.frame,tokenId:token.id,generation:owner.generation,clockValue:state.value,originalTokenConsumed:state.pending===null,protectedFrameShown:state.shown.includes(token.frame),captureStage:'after-original-drawArena'};
+  }
   ROM_SPRITE_ANIM.draw=function(c,id,back,x,y,size,tick,grounded,a){
    const result=sprite.apply(this,arguments),row=current,side=back?'p1':'p2';
    if(result&&row&&a){
     if(side===row.side&&!a.reaction){row.bodySamples++;row.maxForepaw=Math.max(row.maxForepaw,Math.abs(a.liepardClawPose?.foreA||0));if(Number(id)===572&&a.species===572){row.minccinoBodySamples++;if(a.minccinoPose)row.authoredMinccinoSamples++;if(a.minccinoSlap064){check(a.minccinoSlap064.anatomy==='tail','064 native tail source was replaced by another gesture');row.authoredNativeSlapSamples++;}}if(row.frames.length<8)row.frames.push({t:a.t??null,graphic:id,side});}
     if(a.reaction){row.reactionSamples++;if(['intimidated','distracted','alert'].includes(a.kind))check(a.recoil===0&&a.rotation===0,'064 status move applied a physical recoil in the actual sprite renderer');}
-    const readable=a.reaction?(a.wind||0)>.15:Number(id)===572&&a.species===572?a.t>.3&&a.t<.8:(a.liepardClawPose?.foreA||0)>.35;
-    if(readable&&!row.captured&&!pendingShot)pendingShot={row,label:'064 actual '+row.id+' '+row.side+' '+GameSpeed.rate+'x step '+row.ordinal};
+    const nativeTailImpact=row.id===3?minccinoImpact064(row,c,id,back,grounded,a,result):null;
+    const readable=row.id===3?!!nativeTailImpact:a.reaction?(a.wind||0)>.15:Number(id)===572&&a.species===572?a.t>.3&&a.t<.8:(a.liepardClawPose?.foreA||0)>.35;
+    if(readable&&!row.captured&&!pendingShot)pendingShot={row,nativeTailImpact,label:'064 actual '+row.id+' '+row.side+' '+GameSpeed.rate+'x step '+row.ordinal};
    }
    return result;
   };
-  drawArena=function(...args){const result=arenaDraw.apply(this,args);if(pendingShot){const capture=pendingShot;pendingShot=null;capture.row.captured=true;shot(capture.label,arena,{nativeFade:JSON.parse(arena.dataset.visual||'{}').background,nativeFrame:pixels(arena)});}return result;};
+  drawArena=function(...args){const result=arenaDraw.apply(this,args);if(pendingShot){const capture=pendingShot;pendingShot=null;const impact=capture.nativeTailImpact?minccinoImpactAfterArena064(capture.nativeTailImpact):null;if(!capture.nativeTailImpact||impact){capture.row.captured=true;if(impact)capture.row.nativeTailImpact=impact;shot(capture.label,arena,{nativeFade:JSON.parse(arena.dataset.visual||'{}').background,nativeFrame:pixels(arena),...(impact?{nativeTailImpact:impact}:{})});}else capture.row.rejectedImpactCaptures++;}return result;};
   function minccinoCoverage064(played,id){
    const samples=played.filter(r=>r.profile?.species===572&&r.id===id);
    check(samples.length>0&&samples.every(r=>r.minccinoBodySamples>0),'064 actual Minccino command did not render its real native body');
    if(id===47)check(samples.every(r=>r.authoredMinccinoSamples>0),'064 actual Minccino song did not render its authored pose');
    else if(id===3)check(samples.every(r=>r.authoredNativeSlapSamples>0&&r.authoredMinccinoSamples===0),'064 actual Minccino Double Slap did not render its native tail choreography');
    else{check([1,541].includes(id),'064 unexpected Minccino coverage contract');check(samples.every(r=>r.authoredMinccinoSamples===0&&r.authoredNativeSlapSamples===0),'064 withheld Minccino contact choreography was installed');}
-   return {mode:id===47?'authored-song':id===3?'native-tail-double-slap':'preceding-contact-baseline-withheld',move:id,bodySamples:samples.reduce((n,r)=>n+r.minccinoBodySamples,0),authoredSamples:samples.reduce((n,r)=>n+r.authoredMinccinoSamples,0),nativeTailSamples:samples.reduce((n,r)=>n+r.authoredNativeSlapSamples,0),visualApproval:false};
+   return {mode:id===47?'authored-song':id===3?'native-tail-double-slap':'preceding-contact-baseline-withheld',move:id,bodySamples:samples.reduce((n,r)=>n+r.minccinoBodySamples,0),authoredSamples:samples.reduce((n,r)=>n+r.authoredMinccinoSamples,0),nativeTailSamples:samples.reduce((n,r)=>n+r.authoredNativeSlapSamples,0),sides:[...new Set(samples.map(r=>r.side))],protectedImpactCaptures:samples.filter(r=>r.nativeTailImpact?.frame===60&&r.nativeTailImpact.originalTokenConsumed).length,visualApproval:false};
   }
   const cases=[
    {name:'status',p1:{name:'Snivy',level:50,gender:'M',moves:[43]},p2:{name:'Tepig',level:50,gender:'M',moves:[39]}},
    ...[1,3,47,541].map(id=>({name:'contact-'+id,minccinoMove:id,p1:{name:'Liepard',level:50,gender:'M',moves:[10]},p2:{name:'Minccino',level:50,gender:'M',moves:[id]}})),
+   {name:'contact-3-p1',minccinoMove:3,p1:{name:'Minccino',level:50,gender:'M',moves:[3]},p2:{name:'Liepard',level:50,gender:'M',moves:[10]}},
    {name:'snatch',p1:{name:'Purrloin',level:50,gender:'M',moves:[289]},p2:{name:'Snivy',level:50,gender:'M',moves:[74]}}
   ],turns=[];
   try{
@@ -217,15 +235,17 @@
      check(played.every(r=>r.reactionSamples>0),'064 status reaction was never sent to the real sprite renderer');
     }else if(scenario.name.startsWith('contact-')){
      check(session.active('p2').hp<before.hp[1]&&(scenario.minccinoMove===47||session.active('p1').hp<before.hp[0]),'064 native contact turn did not resolve the damaging moves');
-     check(played.some(r=>r.profile?.species===510&&r.maxForepaw>.35),'064 actual Liepard command did not render its authored forepaw extension');
+     const liepardSide=['p1','p2'].find(side=>scenario[side].name==='Liepard'),claws=played.filter(r=>r.profile?.species===510);check(claws.length>0&&claws.every(r=>r.side===liepardSide&&r.maxForepaw>.35),'064 actual Liepard command did not render its authored forepaw extension on its native role');
      minccinoCoverage064(played,scenario.minccinoMove);
+     if(scenario.minccinoMove===3){const minccinoSide=['p1','p2'].find(side=>scenario[side].name==='Minccino'),tails=played.filter(r=>r.id===3&&r.profile?.species===572);check(tails.length>0&&tails.every(r=>r.side===minccinoSide&&r.captured&&r.nativeTailImpact?.frame===60&&r.nativeTailImpact.originalTokenConsumed&&r.nativeTailImpact.protectedFrameShown),'064 actual Minccino tail did not capture its real protected impact60 after the original arena ACK');}
     }else{
      check(session.active('p1').boosts.atk>0&&session.active('p1').boosts.spa>0&&session.active('p2').boosts.atk===0,'064 native Snatch did not steal Growth');
      const snatches=played.filter(r=>r.id===289);check(snatches.length>0&&snatches.every(r=>r.profile?.target==='self'&&r.reactionSamples===0),'064 actual Snatch targeted a victim or applied a victim reaction');
     }
     turns.push({scenario:scenario.name,speed,seed:[1,2,3,4],input:'actual LOTTA and move DOM buttons',inputLabel,before,turn:session.battle.turn,played,...(scenario.minccinoMove?{minccinoCoverage:minccinoCoverage064(played,scenario.minccinoMove)}:{})});
    }
-   check(AudioEngine.errors.length===audioErrors,'064 actual commands raised audio errors');return {turns,selectedRates,realGEN5Turns:true,suppliedBattleOutcomes:false,audio:{engineEnabled:audioWanted,audibleComparison:false},scope:'Six isolated scenarios at each explicitly selected rate, both sides; controlled legal fixture teams, native accuracy/multihit rolls and cleanup outcomes. Minccino47 requires its authored song;3 requires the new native-paw gesture;1/541 require the preceding native-body baseline and forbid the withheld new choreography. Baseline contact overlap remains a separate visual limitation; no new approval follows from these checks. This does not certify the full move matrix, audible synchronization or physical Android.'};
+   const nativeTailDoubleSlap=selectedRates.map(speed=>({speed,sides:[...new Set(turns.filter(t=>t.speed===speed).flatMap(t=>t.played).filter(r=>r.id===3&&r.profile?.species===572&&r.nativeTailImpact?.originalTokenConsumed).map(r=>r.side))]}));check(nativeTailDoubleSlap.every(row=>['p1','p2'].every(side=>row.sides.includes(side))),'064 native tail Double Slap was not captured on both actual roles at every selected rate');
+   check(AudioEngine.errors.length===audioErrors,'064 actual commands raised audio errors');return {turns,selectedRates,nativeTailDoubleSlap,realGEN5Turns:true,suppliedBattleOutcomes:false,audio:{engineEnabled:audioWanted,audibleComparison:false},scope:'Seven isolated scenarios at each explicitly selected rate; each native turn animates both battle roles with controlled legal fixture teams, native accuracy/multihit rolls and cleanup outcomes. Minccino3 explicitly runs as P2 and P1 and captures only the real attacker native-tail pose at protected60 after the original arena token is consumed; other moves retain their listed team role, without implying each move was exercised on both roles. Minccino47 requires its authored song;3 requires the new native-tail gesture;1/541 require the preceding native-body baseline and forbid the withheld new choreography. Baseline contact overlap remains a separate visual limitation; no new approval follows from these checks. This does not certify the full move matrix, audible synchronization or physical Android.'};
   }finally{GEN5.Session=NativeSession;MoveFX.play=play;ROM_SPRITE_ANIM.draw=sprite;drawArena=arenaDraw;current=null;pendingShot=null;finish();GameSpeed.set(1);AudioEngine.disable();AudioEngine.enable=audioEnable;}
  });
  case049('qaGustActions064','Unfezant064: Raffica reale M/F e due lati','animation064-real-renderer-unfezant-gust-native-turns',async()=>{

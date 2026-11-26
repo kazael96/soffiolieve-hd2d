@@ -1318,3 +1318,225 @@ precedenti sono conservati, con un negativo aggiuntivo sulla classificazione.
 Le prove sono in `outputs/ci064green/ci109-failed-tests-target-v1` e
 `ci109-seed-fixture-target-v2`. Nuova CI completa ancora necessaria;
 nessun PASS globale o nuova pubblicazione è dedotto dai target.
+
+## Checkpoint del26 novembre2026 · CI110, prova M3 e diagnosi del proprietario
+
+La [CI110](https://github.com/kazael96/soffiolieve-hd2d/actions/runs/45830208391)
+del commit `20c40dba46825705f332aeb57dcdb0d23a6cad93` conclude
+**94/94 fasi CLI PASS** e tutti i18lotti browser nativi, per54casi logici
+formato–caso–velocità. Questo esito sostituisce il PENDING della nuova CI
+al checkpoint precedente, conservando integralmente i FAIL CI109 e la loro
+diagnosi. L'inventario resta427file,53fasi unitarie e94CLI: un callback
+aggiunto a un file esistente non diventa una nuova fase del registro.
+
+Tutti i1080PNG dell'artefatto generale CI110 sono stati aperti dal team.
+Il ledger finale verifica l'associazione percorso/SHA di ogni file, senza
+omissioni o duplicazioni nell'assegnazione delle letture:225Tynamo,
+270desktop,270orizzontali,270verticali e45M3 letti dal root. Nei campioni
+consegnati non sono stati osservati nuovi tagli dell'arena o fondali bianchi;
+restano i rilievi anatomici e di contatto descritti sotto. La copertura
+dei fermi immagine non certifica gli intermedi o il movimento completo
+a velocità normale/rallentata. Ricevute esterne:
+`outputs/ci064green/ci110-animation-artifact-preparation-v1/root-complete1080-review.json`,
+con i ledger dei quattro gruppi di revisione, e
+`outputs/ci064green/ci110-deep-artifact-preparation-v1` per la provenienza
+dell'artefatto CLI. Questi percorsi locali sono riferimenti di archivio,
+non collegamenti pubblici del repository.
+
+### Windows541: ricevute CI110 e lettura dei14PNG
+
+Il [job Windows541](https://github.com/kazael96/soffiolieve-hd2d/actions/runs/45830208391/job/139944690244)
+passa nominale e recupero. Root ha aperto individualmente tutti i14PNG
+originali; una revisione tecnica indipendente verifica ZIP, CRC e SHA
+di tutti i73membri originali,12559532byte. Il manifest di estrazione è
+un file aggiunto separato. ZIP10493420byte, SHA256
+`12c9f9c26eabda319dc4664896de6d3d0f3ae2ccacd771d96119287dae988125`.
+
+Per entrambi i run coincidono399moduli expected/origins/CDP, con389sorgenti
+correnti confrontati CRLF→LF e dieci programmi della base confrontati con
+la C16 preservata. L'app ha SHA256
+`a53a10bbad04e34262eb9752a095daaf3789a49ff39b022c5a2ea4b1d1e9d919`.
+I dieci asset per run, compresi JSON derivati, PNG e FLAC, sono verificati
+sui byte RAW; nessuna normalizzazione degli asset nativi. Tutti gli otto
+gzip coincidono con SHA/dimensioni compressi e raw registrati; azioni e
+turni delle ricevute intermedie coincidono integralmente con i prefissi
+finali. Il limite4MiB riguarda il gzip memorizzato, non un taglio del JSON.
+
+Le ricevute finali contano5turni originali,10azioni541 e480ACK:48chiavi
+richieste per azione, con entrambi i corpi originali positivi, clock
+mostrato e disegno concluso. Esiti GEN5, HP, PP, status e boost coincidono
+con l'atteso; si ammettono soltanto i valori dei timestamp nativi `|t:|`,
+conservandone posizione e quantità. Ogni turno consuma un PP dell'attaccante.
+Il nominale ha1286righe arena,384nuoveACK e902righe senza nuovaACK;
+il recupero205righe,96nuoveACK e109senza nuovaACK. Le righe senzaACK
+rimangono `NO_NEW_REQUIRED_ACK_UNAPPROVED`, non nuovi frame protetti.
+
+I due ruoli nominali passano in64373/59816ms; il recupero in48748ms.
+Tempi bounded140878/61854ms. Nel recupero sono osservate24risposte503
+reali e una successiva200 originale verificata. Un solo `switch 2`,
+entry/promessa stabili, stato nativo e cursore18 invariati durante
+l'attesa, un retry sul pulsante originale con pointer Playwright/hitguard,
+risoluzione una volta e cursore finale34. Le due541p2 proseguono nel
+turno già impegnato. Binding ripristinati, busy/battling falsi, renderer
+pronto, contesto integro, gate risorse vuoto e proprietari chiusi.
+
+I metadati audio delle dieci azioni registrano due voci terminate,
+onset/ACK60,48chiavi disegnate e backend senza record attivi: nessuna
+prova PCM o all'ascolto. Chrome151.0.7922.34 usa SwiftShader, desktop×1
+e uscita muta. Gli abort dei sink QA restano nel rapporto generale:
+nominale47report+12snapshot, recupero19report, tutti `net::ERR_ABORTED`.
+Gli osservatori separano i503 attesi dagli altri errori; non si dichiara
+zero errori globale. `.click()` DOM nominale e pointer del retry non
+certificano trustedtouch, Android o qualità completa della541.
+
+Rapporto indipendente e ledger:
+`outputs/ci064green/ci110-native541-artifact-preparation-v1/independent-technical-review.md`
+e `receipt-ledger.json`. Nessun PASS CI109 è stato trasferito a CI110;
+questa lettura tecnica non è una seconda lettura visiva indipendente.
+
+### QA successiva non commessa e primo Game C16 conservato FAIL
+
+Dopo HEAD20c, i soli due file QA locali aggiungono il settimo scenario
+M3P1, conservano M3P2 e richiedono l'impatto esatto60 dal clock originale
+protetto. Il target CPU passa6/6callback, zero skip, in2733ms; il sesto
+esercita la regressione comportamentale della cattura BPO originale.
+Sono sei callback nello stesso file, non sei nuove fasi CLI. Sorgenti
+invariati durante la prova. Ricevute:
+`outputs/ci064green/qa-m3-protected60-qa-v1` e
+`outputs/ci064green/qa-m3-protected60-target-v1/actual-r1/report.json`.
+Questo6/6 non appartiene alla HEAD CI110 e non prova il renderer Game.
+
+La prima esecuzione reale sulla C16 `ce0d0dc3894405ea`, verticale×2,
+resta **FAIL in87759ms**: una chiamata del helper posseduto `Limit`
+raggiunge10s, viene terminata con killed=true/SIGTERM e non restituisce
+JSON. L'interruzione precede l'impatto M3P1; non è un PASS del nuovo
+scenario o della sua cattura60. Tutti i19PNG parziali sono letti dal root,
+senza trasformarli in una sequenza conclusa. La verifica iniziale dei399
+sorgenti CDP e delle55risposte native SHA passa; la verifica CDP finale
+rimane incompleta dopo l'interruzione. `source-after` è vero e le quattro
+identità registrate di launcher/worker/Chrome risultano chiuse.
+Rapporti originali,19PNG, provenienza e chiusura sono preservati in
+`outputs/ci064green/m3-protected-game-c16-v1`.
+
+Nessun timeout viene aumentato e nessun FAIL è sostituito da un rerun
+automatico. La diagnosi deve distinguere il helper/supervisore dal
+contenuto del caso, senza attribuire al gioco una causa non dimostrata.
+Le due future regressioni circoscritte RED del supervisore sono soltanto
+in preparazione e **non eseguite** a questo checkpoint; non sono i sei
+callback CPU già passati e non ricevono il loro esito.
+
+### Cache interop privata: compatibile nel pilot, non promossa
+
+Il pilot privato PS5.1/.NETFramework conclude PASS in6171ms con sei
+chiamate, leaf creata dopo bootstrap e quattro record di processo nelle
+richieste warm. Cold compila il C# originale e le richieste warm caricano
+i medesimi byte DLL verificati, senza nuova compilazione; Snapshot/BFS,
+birth e scheduler restano effettivi. Stop verifica tutte le quattro
+ricevute PID+birth; anche i proprietari esterni risultano chiusi, input
+invariati e cache privata ripristinata. Non si attribuisce un nome ai
+processi aggiuntivi non identificati dalle ricevute.
+
+Il confronto originale accoppiato, stessa branch idle/leaf, heap400MiB,
+sei chiamate e medesimi conteggi osservati, passa in5555ms. La coppia
+non dimostra un beneficio della cache: Warm Inspect/Limit richiedono
+circa1239/1169ms contro1039/1133ms dell'originale; validazione, avvio e
+traversal possono assorbire il costo di compilazione eliminato. Una sola
+coppia non è un benchmark robusto né riproduce la causa del timeout10s.
+Decisione **NO CANONICAL PROMOTION / NO BENEFIT DEMONSTRATED**:
+`outputs/ci064green/owned-helper-interop-cache-pilot-v1/decision-no-promotion.json`,
+con `closure-both-r1.json` e rapporti nominale/originale preservati.
+Non sono autorizzati ulteriori tuning/negativi della cache, installazione
+canonica o retry Game da questi soli risultati. L'API privata che richiede
+il payload interop resta inoltre distinta dal contratto canonico.
+
+### Rilievi anatomici aperti e stato della consegna
+
+La diagnosi sorgente Emboar conferma raccordi già sottili nella figura
+nativa; diversi esempi CI110 critici mostrano il passivo in idle Nitro.
+Non è dimostrato che il gather205/360 abbia introdotto il difetto.
+`outputs/ci064green/emboar-arm-connection-source-analysis-v1/PLAN.md`
+prepara un confronto causale allo stesso tick/ruolo: non autorizza una
+modifica del gather o l'invenzione di nuove superfici della spalla.
+Il rilievo estetico rimane aperto, senza una nuova approvazione anatomica.
+
+La variante Tynamo33P1 esterna reach0.45 passa la raccolta tecnica
+in61666ms, con sei PNG letti, ma il **contatto è FAIL**: a impatto60
+effettivamente confermato resta un gap visibile e il muso non segue il
+bersaglio più alto. Shadow/anatomia statica rimangono LIMIT; la variante
+non è installata. Prove e giudizi separati sono in
+`outputs/ci064green/tynamo33-p1-actual-trial-prep-v1`; il nuovo piano
+`outputs/ci064green/tynamo33-perspective-contact-plan-v1/PLAN.md`
+propone heading, pivot e patch native da qualificare, senza esecuzione
+o nuova approvazione del contatto. Nessun coefficiente di ruolo viene
+promosso dal solo PASS del raccoglitore.
+
+La [PR58](https://github.com/kazael96/soffiolieve-hd2d/pull/58) resta
+**DRAFT**. Il [sito pubblico](https://kazael96.github.io/soffiolieve-hd2d/)
+rimane0.63 secondo lo stato verificato e comunicato al checkpoint;
+nessun merge/deploy è eseguito da queste prove o da questo aggiornamento
+documentale. Il [manifest pubblico](https://kazael96.github.io/soffiolieve-hd2d/build.json)
+resta il riferimento per una futura verifica effettiva della distribuzione,
+non deducibile dal verde CI. Non sono approvati Game M3 completo,
+movimento normale/rallentato, PCM/ascolto, GPU Android fisica o l'intero
+catalogo4365coppie/105MN.
+
+Nessuna nuova build oltre la C16 già registrata. H.8 conserva la rimozione
+verificata della C14 e i relativi archivi/prove; C04 base, C08 verificata,
+C15 confronto ReadOnly e C16 candidata restano distinti. Il proprietario
+temporaneo che impedisce lo standby rimane attivo durante il lavoro
+autorizzato, senza modifica del piano energetico; il suo rilascio compete
+alla conclusione effettiva del lavoro. Questo checkpoint è documentale:
+non esegue test, parser, browser, rete, build, commit o pubblicazione.
+
+### Seguito del26 novembre: regressione del supervisore e Game M3 sui due lati
+
+Le due regressioni sopra preparate sono ora eseguite: sul supervisore
+originale risultano **11PASS e2FAIL su13**, zero skip. Il primo FAIL
+riproduce il `Limit` superfluo dopo l'errore di risorse; il secondo rileva
+la mancanza della telemetria. Un precedente avvio negato dal sandbox
+con `spawn EPERM` non aveva eseguito i callback e resta archiviato a parte.
+Il rapporto RED non viene riscritto.
+
+La correzione interrompe il monitor prima del `Limit` quando il campione
+fallisce e non riavvia il monitor durante l'abort. Conserva prima causa
+e tempo del fallimento, pulizia PID+birth e lease esclusiva. La garanzia
+riguarda il monitor: non afferma di annullare una registrazione concorrente
+già avviata. Le chiamate al helper espongono facoltativamente tempo wall
+monotono e quattro stamp fissi su stderr, senza cambiare il JSON restituito.
+Il rapporto conserva al massimo256chiamate, più il conteggio delle omesse.
+C#, traversal, scheduler, identità, Stop e budget restano invariati:
+10s helper,2500ms monitor,180s caso,240s outer, heap400MiB e due CPU.
+Non viene installata la cache interop respinta.
+
+Il target corretto passa **13/13, zero skip/cancel, in6856ms**, con tutti
+i pin invariati. Il callback Windows30s preesistente verifica anche le
+fasi realmente emesse da Birth, Inspect, Limit valido/stale e Stop;
+non sono soltanto metadati simulati. Ricevute RED/GREEN e delta congelata:
+`outputs/ci064green/owned-helper-abort-metrics-tests-v1` e
+`outputs/ci064green/owned-helper-abort-metrics-source-v1`.
+
+La nuova raccolta Game C16, stesso runtime e budget, conclude
+**PASS in83486ms**, sette scenari originali in verticale390×844 a×2.
+Sono catturati cinque impatti M3P1 e cinque M3P2, ciascuno a60/126,
+con il token originale consumato e il frame protetto effettivamente
+mostrato. I399moduli CDP e i binding coincidono sia prima sia dopo;
+69risposte native sono confrontate sui byte RAW, zero errori di questo
+osservatore. Input invariati e quattro identità registrate chiuse,
+lease libera. Le33chiamate al helper hanno massimo wall3380ms:
+il timeout10s precedente non è riprodotto, ma la sua causa non è dimostrata
+né dichiarata risolta da questo singolo PASS.
+
+Root ha aperto tutti i25PNG, compresi i dieci M3, e conserva il giudizio
+**contatto visivo FAIL sui due lati**. La coda resta esterna e lontana
+dal bersaglio mentre l'effetto originale della mano appare su Liepard.
+Le figure sono riconoscibili e senza nuovi tagli osservati, ma il gesto
+non mostra un colpo fisico della coda. Il PASS del clock e delle meccaniche
+non approva questa coreografia. Restano da verificare movimento completo
+normale/rallentato e ombre; nessuna prova PCM/ascolto o Android fisico.
+Ricevute e immagini:
+`outputs/ci064green/m3-protected-game-c16-v2-diagnostic`, compreso
+`root-complete25-review-r1.json`. La prima raccolta fallita resta intatta.
+
+Queste modifiche aggiornano QA e supervisione; nessun sorgente di gioco
+o nuova build cambia. Inventario427/53/94 invariato. La PR58 resta DRAFT
+e nessun merge o deploy deriva da questi PASS.

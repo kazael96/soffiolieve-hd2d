@@ -1,5 +1,5 @@
 /* One invisible owned browser batch. Wraps the tracked QA runner unchanged. */
-const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto');
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto'),{performance}=require('node:perf_hooks');
 const LIMITS=Object.freeze({deadlineMs:240000,heapMiB:400,pngBytes:64*1024*1024,diskFloorBytes:220*1024*1024,monitorMs:2500});
 function parse(argv){
  const own=new Map(),rest=[];
@@ -35,13 +35,20 @@ function acquire(o){
 function release(owner){try{const row=JSON.parse(fs.readFileSync(owner.lease,'utf8'));if(row.token===owner.token)fs.unlinkSync(owner.lease);}catch(error){if(error.code!=='ENOENT')throw error;}}
 function resources(out){let pngBytes=0,pngCount=0;function visit(dir){for(const row of fs.readdirSync(dir,{withFileTypes:true})){if(row.isSymbolicLink())continue;const p=path.join(dir,row.name);if(row.isDirectory())visit(p);else if(row.isFile()&&/\.png$/i.test(row.name)){pngBytes+=fs.statSync(p).size;pngCount++;}}}visit(out);const stat=fs.statfsSync(out),freeBytes=Number(stat.bavail)*Number(stat.bsize);return {pngBytes,pngCount,freeBytes};}
 function resourceFailure(sample){if(sample.pngBytes>LIMITS.pngBytes)return 'PNG evidence exceeds64MiB';if(sample.freeBytes<LIMITS.diskFloorBytes)return 'Free disk below220MiB';return null;}
-function ownedProcess(mode,pid,startTicks,receipts){
+function ownedProcess(mode,pid,startTicks,receipts,onMetrics){
+ const started=performance.now();
  return new Promise((resolve,reject)=>{const args=['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'limit-owned-qa.ps1'),'-Mode',mode,'-OwnedPid',String(pid),...(startTicks?['-ExpectedStartTicks',String(startTicks)]:[]),...(receipts?['-PinnedProcessesJson',JSON.stringify(receipts)]:[])];
   cp.execFile('powershell.exe',args,{windowsHide:true,timeout:10000,maxBuffer:1024*1024},(error,stdout,stderr)=>{
    const clipped=(value,limit)=>{const raw=Buffer.from(String(value??''));return{text:raw.subarray(0,limit).toString('utf8'),bytes:raw.length,truncated:raw.length>limit};};
    const failure=message=>{const detail={mode:clipped(mode,16).text,pid:Number.isInteger(pid)?pid:null,code:typeof error?.code==='number'?error.code:typeof error?.code==='string'?clipped(error.code,48).text:null,killed:typeof error?.killed==='boolean'?error.killed:null,signal:typeof error?.signal==='string'?clipped(error.signal,24).text:null,stdout:clipped(stdout,512),stderr:clipped(stderr,512)},e=Error(message);e.message+=' [owned-helper '+JSON.stringify(detail)+']';e.ownedProcessDiagnostics=detail;return e;};
-   let result;try{result=JSON.parse(stdout.replace(/^\uFEFF/,''));}catch{reject(failure('Owned PID helper failed: invalid JSON reply'));return;}
-   if(result.result==='FAIL')reject(failure(result.error));else if(error)reject(failure('Owned PID helper failed: process rejected after JSON reply'));else resolve(result);
+   let result,primary;try{result=JSON.parse(stdout.replace(/^\uFEFF/,''));}catch{primary=failure('Owned PID helper failed: invalid JSON reply');}
+   if(!primary){if(result.result==='FAIL')primary=failure(result.error);else if(error)primary=failure('Owned PID helper failed: process rejected after JSON reply');}
+   if(typeof onMetrics==='function'){
+    const phases=[],seen=new Set(),pattern=/^OWNED_QA_PHASE (ENTER|INTEROP|NATIVE|DONE) (\d+(?:\.\d+)?)$/;
+    for(const line of String(stderr??'').split(/\r?\n/)){const match=pattern.exec(line);if(!match||seen.has(match[1]))continue;const elapsedMs=Number(match[2]);if(!Number.isFinite(elapsedMs)||elapsedMs>Number.MAX_SAFE_INTEGER)continue;seen.add(match[1]);phases.push({phase:match[1],elapsedMs});if(phases.length===4)break;}
+    try{onMetrics({mode:clipped(mode,16).text,pid:Number.isInteger(pid)?pid:null,wallElapsedMs:performance.now()-started,phases});}catch(metricsError){if(!primary)primary=metricsError;}
+   }
+   if(primary)reject(primary);else resolve(result);
   });});
 }
 function createFacade(real,o,hooks={}){
@@ -87,33 +94,34 @@ async function run(o){
  if(process.platform!=='win32')throw Error('This bounded owner/affinity wrapper requires Windows');
  const lease=acquire(o),started=Date.now(),report={schema:1,result:'RUNNING',created:new Date().toISOString(),limits:LIMITS,tool:o.tool||'browser',site:o.site,out:o.out,cases:o.cases,rates:o.rates||null,recovery:o.recovery??null,viewports:o.viewports,observer:o.observer||null,lease:lease.lease,environment:{headless:true,personalBrowserAttached:false,workerHeapMiB:400,rendererHeapMiB:400},owners:[],samples:[],gotos:[]};
  const save=()=>fs.writeFileSync(path.join(o.out,'bounded-report.json'),JSON.stringify(report,null,2)+'\n');save();let child,monitor,deadline,finished=false,aborting=false,checkRunning=false,workerRegistration,stopPromise,monitorTask=Promise.resolve();const known=new Map();
+ const helper=(mode,pid,startTicks,receipts)=>ownedProcess(mode,pid,startTicks,receipts,row=>{const calls=report.helperCalls??=[];if(calls.length<256)calls.push(row);else report.helperCallsOmitted=(report.helperCallsOmitted||0)+1;});
  const remember=row=>{for(const item of row.processes||[])known.set(item.pid+':'+item.startTicks,item);};
- const pin=async(pid,role)=>{if(role==='chromium'){await workerRegistration;const ancestry=await ownedProcess('Inspect',child.pid,workerTicks);remember(ancestry);if(!ancestry.processes?.some(p=>p.pid===pid))throw Error('Browser is not a descendant of the owned worker');}const observed=await ownedProcess('Birth',pid);if(observed.result==='GONE')throw Error('Owned '+role+' exited before registration');remember(observed);if(role==='node-worker')workerTicks=observed.startTicks;const owner={pid,role,startTicks:observed.startTicks,registeredMs:Date.now()-started,limitsApplied:false};report.owners.push(owner);const limited=await ownedProcess('Limit',pid,observed.startTicks);remember(limited);owner.limitsApplied=true;save();return observed.startTicks;};
- const refreshKnown=async()=>{for(const owner of report.owners){try{remember(await ownedProcess('Inspect',owner.pid,owner.startTicks));}catch(error){(report.cleanupErrors??=[]).push(error.message);}}};
+ const pin=async(pid,role)=>{if(role==='chromium'){await workerRegistration;const ancestry=await helper('Inspect',child.pid,workerTicks);remember(ancestry);if(!ancestry.processes?.some(p=>p.pid===pid))throw Error('Browser is not a descendant of the owned worker');}const observed=await helper('Birth',pid);if(observed.result==='GONE')throw Error('Owned '+role+' exited before registration');remember(observed);if(role==='node-worker')workerTicks=observed.startTicks;const owner={pid,role,startTicks:observed.startTicks,registeredMs:Date.now()-started,limitsApplied:false};report.owners.push(owner);const limited=await helper('Limit',pid,observed.startTicks);remember(limited);owner.limitsApplied=true;save();return observed.startTicks;};
+ const refreshKnown=async()=>{for(const owner of report.owners){try{remember(await helper('Inspect',owner.pid,owner.startTicks));}catch(error){(report.cleanupErrors??=[]).push(error.message);}}};
  let workerTicks;
  try{
   const first=resources(o.out),problem=resourceFailure(first);if(problem)throw Error(problem);
   const log=fs.createWriteStream(path.join(o.out,'bounded-worker.log'),{flags:'wx'});
   child=cp.fork(__filename,['--worker',JSON.stringify(o)],{windowsHide:true,execArgv:['--max-old-space-size=400'],stdio:['ignore','pipe','pipe','ipc']});child.stdout.pipe(log,{end:false});child.stderr.pipe(log,{end:false});
   const exited=new Promise(resolve=>child.once('exit',(code,signal)=>{finished=true;log.end();resolve({code,signal});}));
-  const abort=reason=>{if(aborting||finished)return;aborting=true;report.failure=reason;child.send({type:'abort'},()=>{});};
+  const abort=reason=>{if(aborting||finished)return;aborting=true;report.failure=reason;report.failureElapsedMs=Date.now()-started;child.send({type:'abort'},()=>{});};
   child.on('message',m=>{if(m.type==='bootstrap'){void workerRegistration.then(()=>child.send({type:'registered',id:m.id},()=>{}),error=>child.send({type:'registered',id:m.id,error:error.message},()=>{}));}else if(m.type==='owned'){void pin(m.pid,m.role).then(()=>child.send({type:'registered',id:m.id},()=>{}),error=>{child.send({type:'registered',id:m.id,error:error.message},()=>{});abort(error.message);});}else if(m.type==='goto'){report.gotos.push(m.url);}else if(m.type==='done'){report.workerResult=m.result;report.originalResult=m.originalResult;report.runnerOut=m.runnerOut;report.requestedScope=m.expectedCases?{expectedCases:m.expectedCases,actualCases:m.actualCases,scope:m.scope}:undefined;}});
   workerRegistration=pin(child.pid,'node-worker');workerTicks=await workerRegistration;
-  const check=async()=>{if(checkRunning||finished)return;checkRunning=true;try{const sample={elapsedMs:Date.now()-started,...resources(o.out)};report.samples.push(sample);const issue=resourceFailure(sample);if(issue)abort(issue);const limited=await ownedProcess('Limit',child.pid,workerTicks);remember(limited);if(limited.result==='GONE'&&!finished)abort('Owned worker vanished');save();}catch(error){abort(error.message);}finally{checkRunning=false;}};
-  monitor=setInterval(()=>{if(!checkRunning&&!finished)monitorTask=check();},LIMITS.monitorMs);
+  const check=async()=>{if(checkRunning||finished||aborting)return;checkRunning=true;try{const sample={elapsedMs:Date.now()-started,...resources(o.out)};report.samples.push(sample);const issue=resourceFailure(sample);if(issue){abort(issue);save();return;}const limited=await helper('Limit',child.pid,workerTicks);remember(limited);if(limited.result==='GONE'&&!finished)abort('Owned worker vanished');save();}catch(error){abort(error.message);}finally{checkRunning=false;}};
+  monitor=setInterval(()=>{if(!checkRunning&&!finished&&!aborting)monitorTask=check();},LIMITS.monitorMs);
   const stopped=new Promise(resolve=>{deadline=setTimeout(()=>{abort('Outer240s deadline exceeded');resolve(null);},Math.max(0,LIMITS.deadlineMs-(Date.now()-started)));});
   // Resource aborts must not wait until the outer deadline.
   const abortPoll=setInterval(()=>{if(aborting&&!finished)void stopKnown();},500);
-  function stopKnown(){if(!aborting)return Promise.resolve();if(stopPromise)return stopPromise;clearInterval(abortPoll);stopPromise=(async()=>{await refreshKnown();try{if(known.size)await ownedProcess('Stop',child.pid,workerTicks,[...known.values()]);}catch(error){(report.cleanupErrors??=[]).push(error.message);}if(!finished)child.kill();})();return stopPromise;}
+  function stopKnown(){if(!aborting)return Promise.resolve();if(stopPromise)return stopPromise;clearInterval(abortPoll);stopPromise=(async()=>{await refreshKnown();try{if(known.size)await helper('Stop',child.pid,workerTicks,[...known.values()]);}catch(error){(report.cleanupErrors??=[]).push(error.message);}if(!finished)child.kill();})();return stopPromise;}
   const outcome=await Promise.race([exited,stopped]);if(!outcome){await stopKnown();await Promise.race([exited,new Promise(resolve=>setTimeout(resolve,5000))]);}clearInterval(abortPoll);if(stopPromise)await stopPromise;
   report.exit=outcome;report.result=!aborting&&outcome?.code===0&&['PASS','REQUESTED_PASS'].includes(report.workerResult)?report.workerResult:'FAIL';
- }catch(error){report.result='FAIL';report.failure=String(error.stack||error);}
+ }catch(error){report.result='FAIL';if(report.failure===undefined){report.failure=String(error.stack||error);report.failureElapsedMs=Date.now()-started;}}
  finally{
   clearInterval(monitor);clearTimeout(deadline);
   await monitorTask;
   // Any orphan is checked against its pinned birth time before owner-only stop.
-  await refreshKnown();report.cleanup=[];if(known.size)try{report.cleanup.push(await ownedProcess('Stop',child.pid,workerTicks,[...known.values()]));}catch(error){report.result='FAIL';(report.cleanupErrors??=[]).push(error.message);}
-  if(child&&!finished)child.kill();report.elapsedMs=Date.now()-started;try{report.finalResources=resources(o.out);const issue=resourceFailure(report.finalResources);if(issue){report.result='FAIL';report.failure??=issue;}}catch(error){report.result='FAIL';report.failure??=error.message;}if(report.cleanupErrors?.length){report.result='FAIL';report.leaseRetained='Owner cleanup was not verified; do not start another batch';}save();if(!report.leaseRetained)release(lease);
+  await refreshKnown();report.cleanup=[];if(known.size)try{report.cleanup.push(await helper('Stop',child.pid,workerTicks,[...known.values()]));}catch(error){report.result='FAIL';(report.cleanupErrors??=[]).push(error.message);}
+  if(child&&!finished)child.kill();report.elapsedMs=Date.now()-started;try{report.finalResources=resources(o.out);const issue=resourceFailure(report.finalResources);if(issue){report.result='FAIL';if(report.failure===undefined){report.failure=issue;report.failureElapsedMs=Date.now()-started;}}}catch(error){report.result='FAIL';if(report.failure===undefined){report.failure=error.message;report.failureElapsedMs=Date.now()-started;}}if(report.cleanupErrors?.length){report.result='FAIL';report.leaseRetained='Owner cleanup was not verified; do not start another batch';}save();if(!report.leaseRetained)release(lease);
  }
  return report;
 }
