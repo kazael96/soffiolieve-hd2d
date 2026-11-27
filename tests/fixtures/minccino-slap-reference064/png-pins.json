@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "scope": "Exact C9 prepared PNG byte snapshot, referenced by the immutable native programs; actor sprite pins additionally equal baked native-alpha source pins. This is not a new ROM extraction or visual approval.",
+  "programs": [
+    3,
+    33,
+    47
+  ],
+  "sourceDataSHA256": "4d6185f28404cec92f2e26078796aef3e88a3df0c02e03da19ff0ce311fc7b48",
+  "files": {
+    "assets/animated/495-back.png": "26f05bafce961011b3b9350c5146d9f1042e1c78e24b841df2e02cc3742d8fd3",
+    "assets/animated/495-front.png": "5cb55d05c96786116afd455fa9f1120d466382d0fc935c2504dd54c58af1e890",
+    "assets/animated/510-back.png": "c355796c3e6a6ea6994eb0a506e8814359ce273dbab2f2be72236ec1092205bf",
+    "assets/animated/510-front.png": "e1575ee02d29d4257dd19953115d2d09d2539ba73ea71c94ff415072b85fe946",
+    "assets/animated/572-back.png": "6c353c250af5711ad4bd49117867fd692932ef1cec47013d58edd2cac7c00063",
+    "assets/animated/572-front.png": "578893250125ee8ed35b7094369aa36f3ea1f40bb1f5f6b1f658ee997c902bd6",
+    "assets/move-fx/163-0.png": "db49dc2d723ea7843e71e6790d6fc1c654f88a51581a18e12877f850e5e86d57",
+    "assets/move-fx/163-1.png": "93c510260003b00d81215808d76eef1bdb66f9ac93216afedd2216556b3ae78e",
+    "assets/move-fx/163-2.png": "a71d8d4cd8f71c51c55c3949a4ea8e09172562a76279c83a8b74426e4339a7d2",
+    "assets/move-fx/163-3.png": "6ca90e0c22075070dcbce05aacd6f90a1abdc744dd74ce960ae168e5a13f84c5",
+    "assets/move-fx/163-4.png": "89ea27898fdf364478291f51930d3059fefcdfe56d9dea75a8be22738dc42471",
+    "assets/move-fx/163-5.png": "de6fe8f31990849a66a1e280b38d26f99f28b2b31c4f13ebc2e64c172bb46330",
+    "assets/move-fx/163-6.png": "b58e3599c3936898d9acc7795e02fba44b0b595db4ac27c06692270783e3e2ed",
+    "assets/move-fx/163-7.png": "61f3eb79f681ce28e35410b622afca97d0678bb8d21043ec5fcba171c89425ea",
+    "assets/move-fx/195-0.png": "dacc05f949cc122d234205618b6aa495505e332e13842804dab1d4d0bffb956c",
+    "assets/move-fx/195-1.png": "0a1230a90d7577b39a090ec5cfd9c4af4068037b9dd7d6fac261b01e8ef36f3f",
+    "assets/move-fx/195-2.png": "97849988b3e812e92f315b4b8b966e9db34dd976c4d25776a67f7b9058f9fb92",
+    "assets/move-fx/195-3.png": "b58e3599c3936898d9acc7795e02fba44b0b595db4ac27c06692270783e3e2ed",
+    "assets/move-fx/195-4.png": "cb80a37f3f9dc5e513f5470c31847c13e6fa7384c27f1671d7e6e5bc0f45f6a8",
+    "assets/move-fx/208-0.png": "8ea48f8b463aaf7154a19e3c5e86736adf925c2c9c5452391afd0ce46d2b076c",
+    "assets/move-fx/208-1.png": "1847034db7acd8e19a8273ab481eefa47220c9df7867b31c400c1f972300cebe",
+    "assets/move-fx/208-2.png": "3649b813a9386928f1c1a31addc5a83c36bcbdddfcd14def604ffb49cf978833",
+    "assets/move-fx/208-3.png": "0f655090abc61db9b4a408f48f68e5fec9f13aafe58dbb9d71fe4fea2f7f452a"
+  },
+  "nativeSpriteCrosschecks": {
+    "assets/animated/495-front.png": "C9 original baked native-alpha source pin",
+    "assets/animated/495-back.png": "C9 original baked native-alpha source pin",
+    "assets/animated/510-front.png": "C9 original baked native-alpha source pin",
+    "assets/animated/510-back.png": "C9 original baked native-alpha source pin",
+    "assets/animated/572-front.png": "C9 original baked native-alpha source pin",
+    "assets/animated/572-back.png": "C9 original baked native-alpha source pin"
+  }
+}

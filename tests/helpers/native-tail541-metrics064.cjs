@@ -1,0 +1,3 @@
+'use strict';
+const fs=require('node:fs');
+process.once('exit',code=>{const maxRSSKiB=process.resourceUsage().maxRSS,report={pid:process.pid,exitCode:code,maxRSSKiB,observedRSSLimitKiB:400*1024,observedRSSWithinLimit:maxRSSKiB<=400*1024,heapLimitMiB:400,scope:'Post-run observed RSS check; original stage-runner deadline. Not an OS memory reservation or real Game/raster test.'};if(!report.observedRSSWithinLimit)process.exitCode=1;if(process.env.NATIVE541_METRICS)fs.writeFileSync(process.env.NATIVE541_METRICS,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({native541Metrics:report}));});

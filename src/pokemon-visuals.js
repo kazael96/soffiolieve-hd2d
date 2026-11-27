@@ -12,6 +12,7 @@
   return Math.max(0,seasons.findIndex(s=>s.toLowerCase()===String(value||'').toLowerCase()));
  }
  function speciesId(value){
+  if(value===undefined||value===null)return 0;
   if(value&&typeof value==='object')return speciesId(value.speciesId)||speciesId(value.id)||speciesId(value.name||value.species);
   const n=Number(value);if(n>=701&&n<=703)return 585;if(n>=704&&n<=706)return 586;if(n===699)return 550;
   if(Number.isFinite(n)&&n>0)return Object.values(root.ROM_FORM_SPRITES||{}).find(f=>f.graphic===n)?.species||n;

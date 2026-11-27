@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "kind": "native572-original-raw-reference/v1",
+  "origin": "Verified original candidate12 native resources; unchanged ROM asset bytes preserved for independent baseline oracles. No absolute/private build path required.",
+  "policy": "All four assets RAW; never normalize native JSON/PNG. Metadata only canonicalLF. Derived candidate graphs must come from actual SITE and declared build lineage.",
+  "files": [
+    {
+      "relative": "assets/animated/572-back.json",
+      "rawSHA256": "20b3fdd73888941c8db3065bfc767418a5b6f035e1920d09ce9e842555a4ea05",
+      "bytes": 10241,
+      "view": "back",
+      "role": "original-native-RAW-reference-not-current-site"
+    },
+    {
+      "relative": "assets/animated/572-back.png",
+      "rawSHA256": "6c353c250af5711ad4bd49117867fd692932ef1cec47013d58edd2cac7c00063",
+      "bytes": 1868,
+      "view": "back",
+      "role": "original-native-RAW-reference-not-current-site"
+    },
+    {
+      "relative": "assets/animated/572-front.json",
+      "rawSHA256": "fca062a9388a440881ff23f66519b438a5c1f12f4f6e35e49449b0399aa31767",
+      "bytes": 10457,
+      "view": "front",
+      "role": "original-native-RAW-reference-not-current-site"
+    },
+    {
+      "relative": "assets/animated/572-front.png",
+      "rawSHA256": "578893250125ee8ed35b7094369aa36f3ea1f40bb1f5f6b1f658ee997c902bd6",
+      "bytes": 2233,
+      "view": "front",
+      "role": "original-native-RAW-reference-not-current-site"
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "source": "Frozen C7 actual SpeciesMoves.select510/10 and original native timeline/audio bank",
+  "rows": [
+    {
+      "variant": 0,
+      "side": "p1",
+      "profile": {
+        "species": 510,
+        "id": 10,
+        "name": "Graffio",
+        "kind": "furySlash",
+        "chapter": true,
+        "training": true,
+        "nativeEffects": true,
+        "key": "training-510-10",
+        "frames": 126,
+        "impact": 60,
+        "attachment": "hand",
+        "target": "foe",
+        "damage": true,
+        "color": "#e5edf4"
+      },
+      "timeline": {
+        "frames": 126,
+        "nativeFrames": 80,
+        "nativeAnchor": 29,
+        "audio": [
+          {
+            "kind": "sfx",
+            "id": 1423,
+            "channel": 1,
+            "target": 16,
+            "start": 60,
+            "raw": [
+              1423,
+              1,
+              16,
+              5,
+              0,
+              120,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "nativeAudio": {
+        "frames": 80,
+        "voices": [
+          {
+            "id": 1423,
+            "channel": 1,
+            "target": 16,
+            "order": 0,
+            "start": 29,
+            "end": 80,
+            "mirror": true,
+            "keys": {
+              "normal": "cac484e800f0f05c08d7",
+              "slow": "cac484e800f0f05c08d7"
+            }
+          }
+        ],
+        "p2": {
+          "frames": 80,
+          "voices": [
+            {
+              "id": 1423,
+              "channel": 1,
+              "target": 16,
+              "order": 0,
+              "start": 29,
+              "end": 80,
+              "mirror": true,
+              "keys": {
+                "normal": "cac484e800f0f05c08d7",
+                "slow": "cac484e800f0f05c08d7"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "variant": 0,
+      "side": "p2",
+      "profile": {
+        "species": 510,
+        "id": 10,
+        "name": "Graffio",
+        "kind": "furySlash",
+        "chapter": true,
+        "training": true,
+        "nativeEffects": true,
+        "key": "training-510-10",
+        "frames": 126,
+        "impact": 60,
+        "attachment": "hand",
+        "target": "foe",
+        "damage": true,
+        "color": "#e5edf4"
+      },
+      "timeline": {
+        "frames": 126,
+        "nativeFrames": 80,
+        "nativeAnchor": 29,
+        "audio": [
+          {
+            "kind": "sfx",
+            "id": 1423,
+            "channel": 1,
+            "target": 16,
+            "start": 60,
+            "raw": [
+              1423,
+              1,
+              16,
+              5,
+              0,
+              120,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "nativeAudio": {
+        "frames": 80,
+        "voices": [
+          {
+            "id": 1423,
+            "channel": 1,
+            "target": 16,
+            "order": 0,
+            "start": 29,
+            "end": 80,
+            "mirror": true,
+            "keys": {
+              "normal": "cac484e800f0f05c08d7",
+              "slow": "cac484e800f0f05c08d7"
+            }
+          }
+        ],
+        "p2": {
+          "frames": 80,
+          "voices": [
+            {
+              "id": 1423,
+              "channel": 1,
+              "target": 16,
+              "order": 0,
+              "start": 29,
+              "end": 80,
+              "mirror": true,
+              "keys": {
+                "normal": "cac484e800f0f05c08d7",
+                "slow": "cac484e800f0f05c08d7"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

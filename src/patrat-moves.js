@@ -1,7 +1,7 @@
 /* Original Patrat composite, with authored species-specific HD-2D choreography. */
 (function(root){
  const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x)},mix=(a,b,t)=>a+(b-a)*t;
- const profile=(id,name,frames,impact,kind='attack',phase=0)=>Object.freeze({species:504,id,name,frames,impact,kind,phase,key:'patrat-'+id+(id===117?'-'+kind:'')});
+ const profile=(id,name,frames,impact,kind='attack',phase=0)=>Object.freeze({species:504,id,name,frames,impact,kind,phase,...(id===117?{target:kind==='release'?'foe':'self',damage:kind==='release'}:{}),key:'patrat-'+id+(id===117?'-'+kind:'')});
  const bide=Object.freeze({prepare:profile(117,'Pazienza',192,48,'prepare'),store:profile(117,'Pazienza',96,46,'store'),release:profile(117,'Pazienza',144,67,'release',1)});
  const profiles=Object.freeze({33:profile(33,'Azione',96,44),43:profile(43,'Fulmisguardo',108,49,'status'),44:profile(44,'Morso',126,60),117:bide.prepare});
  const tracks=Object.freeze({front:{head:[0],teeth:[1],body:[2],raisedArm:[3,4],arm:[5],legs:[6,7],feet:[8,9],tail:[10,11]},back:{head:[0],body:[1],raisedArm:[3,2],arm:[4],legs:[5,6],feet:[7,8],tail:[9,10]}});

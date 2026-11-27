@@ -15,7 +15,9 @@ jobs:
       - name: Download verified base assets
         run: curl --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
       - name: Build exact sources
-        run: python3 scripts/build-site.py site.zip _site
+        run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064
+      - name: Install pinned native Canvas for CPU fixtures
+        run: npm install --no-save --ignore-scripts --package-lock=false @napi-rs/canvas@0.1.100
       - name: Run all automated regressions
         run: node scripts/test-deep.cjs _site test-results/deep --python=python3
       - uses: actions/upload-artifact@v4
@@ -78,4 +80,144 @@ jobs:
         with:
           name: phone057-browser-report
           path: test-results/phone057
+          if-no-files-found: ignore
+      - name: Check native animation commands, audio and protected poses in portrait at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-core-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=1
+      - name: Check native animation commands, audio and protected poses in portrait at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-core-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=2
+      - name: Check native animation commands, audio and protected poses in portrait at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-core-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=4
+      - name: Check Tynamo native commands and audio in portrait at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-tynamo-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaTynamoActions064 --rates=1
+      - name: Check Tynamo native commands and audio in portrait at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-tynamo-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaTynamoActions064 --rates=2
+      - name: Check Tynamo native commands and audio in portrait at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-portrait-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait --cases=qaTynamoActions064 --rates=4
+      - name: Check native animation commands, audio and protected poses in landscape at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-core-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=1
+      - name: Check native animation commands, audio and protected poses in landscape at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-core-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=2
+      - name: Check native animation commands, audio and protected poses in landscape at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-core-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=4
+      - name: Check Tynamo native commands and audio in landscape at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-tynamo-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaTynamoActions064 --rates=1
+      - name: Check Tynamo native commands and audio in landscape at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-tynamo-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaTynamoActions064 --rates=2
+      - name: Check Tynamo native commands and audio in landscape at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-landscape-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=landscape --cases=qaTynamoActions064 --rates=4
+      - name: Check native animation commands, audio and protected poses in desktop at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-core-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=1
+      - name: Check native animation commands, audio and protected poses in desktop at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-core-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=2
+      - name: Check native animation commands, audio and protected poses in desktop at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-core-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaBattleActions064,qaEmboarActions064,qaGustActions064,qaTailActions064,qaTailMixedActions064 --rates=4
+      - name: Check Tynamo native commands and audio in desktop at x1
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x1 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=1
+      - name: Check Tynamo native commands and audio in desktop at x2
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x2 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=2
+      - name: Check Tynamo native commands and audio in desktop at x4
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=4
+      - name: Check Oshawott Cut front and back at all speeds in all formats
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-oshawott-cut --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait,landscape,desktop --cases=qaOshawottCut064BackX1,qaOshawottCut064FrontX1,qaOshawottCut064BackX2,qaOshawottCut064FrontX2,qaOshawottCut064BackX4,qaOshawottCut064FrontX4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: animation064-browser-report
+          path: test-results/animation064-*
+          if-no-files-found: ignore
+
+  native541-windows:
+    # The existing owned-process/PowerShell browser backend is Windows-qualified.
+    # This adds browser steps, not a95th CLI stage or a Linux owner emulation.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Download verified base assets
+        shell: pwsh
+        run: curl.exe --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
+      - name: Build exact sources with the qualified native572 partition
+        shell: pwsh
+        run: python scripts/build-site.py site.zip _site --native572-tail-partition064
+      - name: Check all29 owned-process and PowerShell regressions on Windows
+        shell: pwsh
+        run: node --max-old-space-size=400 scripts/test-owned-helper-windows064.cjs _site test-results/owned-helper-windows
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-helper-windows-report
+          path: test-results/owned-helper-windows
+          if-no-files-found: ignore
+      - name: Install the pinned isolated browser driver
+        shell: pwsh
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false playwright@1.62.1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npx --no-install playwright install chromium
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $qaPython = (python -c "import sys; print(sys.executable)").Trim()
+          $qaBrowser = (node -p "require('playwright').chromium.executablePath()").Trim()
+          if (!(Test-Path -LiteralPath $qaPython -PathType Leaf) -or !(Test-Path -LiteralPath $qaBrowser -PathType Leaf)) { throw 'Missing resolved owner executable' }
+          python --version
+          & $qaBrowser --version
+          "TAIL541_PYTHON=$qaPython" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "TAIL541_BROWSER=$qaBrowser" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Check actual541 original commands in desktop at x1
+        shell: pwsh
+        run: node --max-old-space-size=400 scripts/test-native-tail541-actual064.cjs _site test-results/native541-nominal --mode=nominal --viewport=desktop --rate=1 --renderer=software "--python=$env:TAIL541_PYTHON" "--browser=$env:TAIL541_BROWSER"
+      - name: Check one real503 original UI switch and remaining541 replay
+        shell: pwsh
+        run: node --max-old-space-size=400 scripts/test-native-tail541-actual064.cjs _site test-results/native541-recovery --mode=recovery --viewport=desktop --rate=1 --renderer=software "--python=$env:TAIL541_PYTHON" "--browser=$env:TAIL541_BROWSER"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native541-windows-report
+          path: test-results/native541-*
+          if-no-files-found: ignore
+
+  native541-linux:
+    # Additional early feedback from the same paired stage; full94 and Windows remain unchanged.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Download verified base assets
+        run: curl --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
+      - name: Build exact sources
+        run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064
+      - name: Install pinned native Canvas for CPU fixtures
+        run: npm install --no-save --ignore-scripts --package-lock=false @napi-rs/canvas@0.1.100
+      - name: Run the original paired native541 stage and RSS guard
+        run: node scripts/test-native-tail541-unit064.cjs _site test-results/native541-linux
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native541-linux-pair-report
+          path: test-results/native541-linux
           if-no-files-found: ignore

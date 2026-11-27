@@ -10,7 +10,7 @@
    if(![0,1,2].includes(mode))throw Error('Primo piano originale non disponibile');
    if(!cache.has(mode)){const work=Promise.resolve().then(async()=>{const d=await data(),m=d.modes[mode],keys=[m.background,m.body,...m.eyes,...m.mouth],images=Object.fromEntries(await Promise.all(keys.map(async k=>{const image=await resources.image(resource(d.images[k].src));if(image.width!==d.images[k].size[0]||image.height!==d.images[k].size[1])throw Error('Dimensioni del primo piano non valide');return[k,image];})));return{data:d,mode:m,images,bytes:keys.reduce((n,k)=>n+d.images[k].size[0]*d.images[k].size[1]*4,0)};}).catch(error=>{cache.delete(mode);throw error;});cache.set(mode,work);}return cache.get(mode);
   }
-  function dispose(run){if(!run||run.disposed)return;run.disposed=true;if(run.raf!==undefined)cancelFrame?.(run.raf);run.panel?.remove();if(current===run)current=null;options.resetInput?.();}
+  function dispose(run){if(!run||run.disposed)return;run.disposed=true;if(run.resetClock)doc.removeEventListener?.('visibilitychange',run.resetClock);if(run.raf!==undefined)cancelFrame?.(run.raf);run.panel?.remove();if(current===run)current=null;options.resetInput?.();}
   function cancel(){const run=current;if(!run)return false;run.cancelled=true;run.reject?.(Error('Primo piano annullato'));dispose(run);return true;}
   function checkError(){if(heldError){const error=heldError;heldError=null;throw error;}}
   async function open(mode,unused=0,stayBlack=0){
@@ -20,6 +20,7 @@
     const prepared=await Promise.race([gate('finale-closeup-'+mode,()=>prepare(mode)),cancelled]);alive();
     const panel=run.panel=doc.createElement('section'),canvas=run.canvas=doc.createElement('canvas');panel.id='nativeNCloseup';panel.setAttribute('aria-label','N');Object.assign(panel.style,{position:'fixed',inset:'0',zIndex:'8',pointerEvents:'none',background:'#000'});canvas.width=256;canvas.height=192;Object.assign(canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%',objectFit:'contain',imageRendering:'pixelated'});panel.append(canvas);
     const motion=run.motion=(options.motion||root.FinaleCloseupMotion).create({speed:options.speed?.()||root.NativeSettings?.state.textSpeed||2,random:options.random||Math.random}),context=canvas.getContext('2d'),body=doc.createElement('canvas');body.width=256;body.height=192;const face=body.getContext('2d');face.imageSmoothingEnabled=false;context.imageSmoothingEnabled=false;let last,accumulator=0;
+    run.resetClock=()=>{if(current===run&&!run.cancelled)last=undefined;};doc.addEventListener?.('visibilitychange',run.resetClock);
     const rendered=new Promise((resolve,reject)=>{run.blendResolve=resolve;const tick=now=>{
      if(run.cancelled||current!==run)return;
      try{last??=now;const dt=Math.max(0,Math.min(100,now-last));last=now;if(!doc.hidden){accumulator+=dt*.03*(options.rate?.()||root.GameSpeed?.rate||1);while(accumulator>=1){accumulator--;run.frame++;motion.tick();}if(run.blendStart!==undefined)run.blend=Math.min(30,run.frame-run.blendStart);}

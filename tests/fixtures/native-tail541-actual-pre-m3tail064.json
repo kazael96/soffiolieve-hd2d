@@ -1,0 +1,1805 @@
+{
+  "schema": 1,
+  "scope": "actual native541 Game/UI nominal cold+warm bothroles and one original switch2 real503 recovery; no visual/audio-listening approval",
+  "metadataPolicy": "UTF8 exact; metadata/program CRLF to LF only; native PNG/JSON/FLAC RAW",
+  "sourceContract": {
+    "relative": "tests/fixtures/liepard-protocol064/source-contract.json",
+    "canonicalLFSHA256": "b73ec24834acde208c73da44239fbd2d199d70930b7c5248b601c1b346a8e2a9",
+    "revision": "coherent-v4-typed-native572-partitions-closed541-singles"
+  },
+  "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+  "sourceOrder": [
+    {
+      "file": "assets/scene.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "f086c81e2326dc77b6053a57856cf39e8add0cb79160a4e9f71af9b8ea5f55be",
+      "compiledLFSHA256": "f086c81e2326dc77b6053a57856cf39e8add0cb79160a4e9f71af9b8ea5f55be",
+      "compiledBytes": 679916,
+      "member": "soffiolieve/assets/scene.js"
+    },
+    {
+      "file": "assets/sprites.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "107be6913a4ae0ed45b901e283083726f8f4428b4993d98527ec5b4384e209ad",
+      "compiledLFSHA256": "107be6913a4ae0ed45b901e283083726f8f4428b4993d98527ec5b4384e209ad",
+      "compiledBytes": 2804,
+      "member": "soffiolieve/assets/sprites.js"
+    },
+    {
+      "file": "opening-sprites.js",
+      "origin": "source"
+    },
+    {
+      "file": "opening-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-model-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-effect-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "trio-badge-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "opening-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "opening-trainers.js",
+      "origin": "source"
+    },
+    {
+      "file": "opening-battle-rules.js",
+      "origin": "source"
+    },
+    {
+      "file": "encounter-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "encounter-rules.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-mail-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-mail.js",
+      "origin": "source"
+    },
+    {
+      "file": "training-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "training.js",
+      "origin": "source"
+    },
+    {
+      "file": "trainer-profile.js",
+      "origin": "source"
+    },
+    {
+      "file": "player-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "player-identity.js",
+      "origin": "source"
+    },
+    {
+      "file": "intro-fullbody-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "intro-pokeball.js",
+      "origin": "source"
+    },
+    {
+      "file": "intro-history.js",
+      "origin": "source"
+    },
+    {
+      "file": "game-introduction.js",
+      "origin": "source"
+    },
+    {
+      "file": "game-start.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-season.js",
+      "origin": "source"
+    },
+    {
+      "file": "scene-camera.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokemon-storage.js",
+      "origin": "source"
+    },
+    {
+      "file": "dragonspiral-jump.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-gym-save.js",
+      "origin": "source"
+    },
+    {
+      "file": "story-state.js",
+      "origin": "source"
+    },
+    {
+      "file": "save-slots.js",
+      "origin": "source"
+    },
+    {
+      "file": "accumula-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "accumula-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-trainers.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "striaton-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "striaton-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "striaton-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "striaton-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "pinwheel-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "pinwheel-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "pinwheel-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "pinwheel-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-rail-paths.js",
+      "origin": "source"
+    },
+    {
+      "file": "pinwheel-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "pinwheel-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-phone.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-gym-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-gym.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-gestures.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-phone.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-gym-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-gym.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-cinematics-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-cinematics.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-cinematics.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-gym-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-gym.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-badge-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-surfaces.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-gym-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-gym-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-cannon-task.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-gym.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-seasons.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-machine-text.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-parts.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-sprites.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-resource-cache.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-family-loader.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-scene-window.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-map-variants.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-seasons.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-parts.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-sprites.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-field-models.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-camera-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-slide-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-slide-effects-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-battle-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-journeys-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-journeys.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-geography.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-surfaces.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-seasons.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-graphics.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-camera.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gates.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-slide-effects.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-slide.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-player-slide.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-npc-slide.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-task.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-jump.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-save.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-renderer.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-rail.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-gym-install.js",
+      "origin": "source"
+    },
+    {
+      "file": "trainer-intro-music-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "trainer-intro-music.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-scenes.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-map-variants-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-map-variants.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-parts.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-sprites.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-selector-sprites.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-actor-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-completion-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-completion.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-end.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-save.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-legend-party.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-closeup-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-closeup.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-ball-release.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-credits-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-credits.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-music-resume.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-object-emotes-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-object-emotes.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-field-projection.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-stone.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-field-models.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-initial-state.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-migration.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-progression.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-return-location-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-return-location.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-elite-four-animation.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-camera-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-elite-controls.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-elite-sound.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-elite-ambient.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-elite-task.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-elite-renderer.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-bootstrap.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-badge-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-badge-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-badge-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-encounters.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-field-motion-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-actor-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-dragon-flight.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-departure.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "runtime-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "world3d.js",
+      "origin": "source"
+    },
+    {
+      "file": "assets/battle-data.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "917d9bc973f0d12bcb661a57c5ab919f00394508e406026792623b286bb226c7",
+      "compiledLFSHA256": "917d9bc973f0d12bcb661a57c5ab919f00394508e406026792623b286bb226c7",
+      "compiledBytes": 536719,
+      "member": "soffiolieve/assets/battle-data.js"
+    },
+    {
+      "file": "battle-sim.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "c7d74cd5ad50c62389db91176e74e095a71a0b75b5ac910c710ccd6ad697ebb9",
+      "compiledLFSHA256": "c7d74cd5ad50c62389db91176e74e095a71a0b75b5ac910c710ccd6ad697ebb9",
+      "compiledBytes": 6650777,
+      "member": "soffiolieve/battle-sim.js"
+    },
+    {
+      "file": "double-rules.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokemon-visuals.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-forms.js",
+      "origin": "source"
+    },
+    {
+      "file": "capture-rules.js",
+      "origin": "source"
+    },
+    {
+      "file": "engine.js",
+      "origin": "source"
+    },
+    {
+      "file": "assets/audio-catalog.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "4ebc7cc6c558bae23f8e50c71c56f08541446bd3901b4770671f8e84328afd2c",
+      "compiledLFSHA256": "4ebc7cc6c558bae23f8e50c71c56f08541446bd3901b4770671f8e84328afd2c",
+      "compiledBytes": 552186,
+      "member": "soffiolieve/assets/audio-catalog.js"
+    },
+    {
+      "file": "assets/audio-data.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "187ca833d46e2260471ef24e5df29dbef4a6a6674d635c4768dbd694d253288c",
+      "compiledLFSHA256": "187ca833d46e2260471ef24e5df29dbef4a6a6674d635c4768dbd694d253288c",
+      "compiledBytes": 139760,
+      "member": "soffiolieve/assets/audio-data.js"
+    },
+    {
+      "file": "native-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "assets/native-audio-bank.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "9b30888a34e0b386a64794db50f1c1494e5c227c4684ea5ca430c4e451a95af5",
+      "compiledLFSHA256": "9b30888a34e0b386a64794db50f1c1494e5c227c4684ea5ca430c4e451a95af5",
+      "compiledBytes": 1344713,
+      "member": "soffiolieve/assets/native-audio-bank.js"
+    },
+    {
+      "file": "field-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "introduction-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-audio.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-battle-music.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-cinematics.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-cry-graph.js",
+      "origin": "source"
+    },
+    {
+      "file": "audio-playback.js",
+      "origin": "source"
+    },
+    {
+      "file": "audio-engine.js",
+      "origin": "source"
+    },
+    {
+      "file": "assets/move-fx-data.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "4d6185f28404cec92f2e26078796aef3e88a3df0c02e03da19ff0ce311fc7b48",
+      "compiledLFSHA256": "4d6185f28404cec92f2e26078796aef3e88a3df0c02e03da19ff0ce311fc7b48",
+      "compiledBytes": 2771440,
+      "member": "soffiolieve/assets/move-fx-data.js"
+    },
+    {
+      "file": "assets/visual-camera.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "6748d199dc9863e53b61259062ee1813422e360322b412ee1fbd6354f39f87ac",
+      "compiledLFSHA256": "6748d199dc9863e53b61259062ee1813422e360322b412ee1fbd6354f39f87ac",
+      "compiledBytes": 1624,
+      "member": "soffiolieve/assets/visual-camera.js"
+    },
+    {
+      "file": "native-visual.js",
+      "origin": "source"
+    },
+    {
+      "file": "particle-spl.js",
+      "origin": "source"
+    },
+    {
+      "file": "capture-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-ball.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-ball.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-ball.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-ball.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-ball.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-capture.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-ground.js",
+      "origin": "source"
+    },
+    {
+      "file": "purrloin-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "demo-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "chapter-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "species-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "tepig-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "oshawott-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "patrat-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "lillipup-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "training-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "liepard-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "minccino-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "emboar-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-reactions.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-presentation.js",
+      "origin": "source"
+    },
+    {
+      "file": "move-fx.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokemon-anim.js",
+      "origin": "source"
+    },
+    {
+      "file": "tail-whip-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "unfezant-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "emboar-contact-moves.js",
+      "origin": "source"
+    },
+    {
+      "file": "assets/form-sprites.js",
+      "origin": "native-base-zip",
+      "rawSHA256": "367630b77e72900647c7da7a2c81643b63ebe10940001e03d723c5cfd4d6a0c1",
+      "compiledLFSHA256": "367630b77e72900647c7da7a2c81643b63ebe10940001e03d723c5cfd4d6a0c1",
+      "compiledBytes": 13212,
+      "member": "soffiolieve/assets/form-sprites.js"
+    },
+    {
+      "file": "input.js",
+      "origin": "source"
+    },
+    {
+      "file": "journey-state.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-fields.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-backdrop.js",
+      "origin": "source"
+    },
+    {
+      "file": "game-speed.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-settings.js",
+      "origin": "source"
+    },
+    {
+      "file": "game.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-context.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-narrative-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-battle-text.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-location.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-environment-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-diorama.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-environment.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-ui.js",
+      "origin": "source"
+    },
+    {
+      "file": "animation-preview.js",
+      "origin": "source"
+    },
+    {
+      "file": "original-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "accumula-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-event-vm.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokedex-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-shortcut-order.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-repeat.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-color.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-text-layout.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokedex.js",
+      "origin": "source"
+    },
+    {
+      "file": "dex-browser-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "dex-modes-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "dex-effects-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-popup-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "dex-search-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "dex-scroll-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-list-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokedex-search.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokedex-browser.js",
+      "origin": "source"
+    },
+    {
+      "file": "pokedex-details.js",
+      "origin": "source"
+    },
+    {
+      "file": "townmap-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-fly-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-fly.js",
+      "origin": "source"
+    },
+    {
+      "file": "townmap.js",
+      "origin": "source"
+    },
+    {
+      "file": "story.js",
+      "origin": "source"
+    },
+    {
+      "file": "evolution-scene.js",
+      "origin": "source"
+    },
+    {
+      "file": "phone-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-phone.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-phone.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-phone.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-events.js",
+      "origin": "source"
+    },
+    {
+      "file": "starter-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "nitro-skinning.js",
+      "origin": "source"
+    },
+    {
+      "file": "starter-scene.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-models.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-effects.js",
+      "origin": "source"
+    },
+    {
+      "file": "starter-selection.js",
+      "origin": "source"
+    },
+    {
+      "file": "npc-walk.js",
+      "origin": "source"
+    },
+    {
+      "file": "common-dialogue-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "shortcut-native-meta.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-save.js",
+      "origin": "source"
+    },
+    {
+      "file": "menu-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "route2-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "party-detail-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "striaton-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "route3-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "training-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "castelia-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "nimbasa-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "driftveil-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "league-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "finale-menu.js",
+      "origin": "source"
+    },
+    {
+      "file": "party-popup-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "options-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-options.js",
+      "origin": "source"
+    },
+    {
+      "file": "trainer-card-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-trainer-card.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-storage.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-ui.js",
+      "origin": "source"
+    },
+    {
+      "file": "summary-detail-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "summary-model.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-summary.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-shortcuts.js",
+      "origin": "source"
+    },
+    {
+      "file": "naming-assets.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-naming.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-field-message.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-battle-rules.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-hud.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-medicine.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-bag.js",
+      "origin": "source"
+    },
+    {
+      "file": "battle-screen.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-controls.js",
+      "origin": "source"
+    },
+    {
+      "file": "double-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-actor-exits.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-gestures.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-doors.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-services.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-paths.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-return-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-returns.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-npc-falls.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-continuity.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-continuity.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-continuity.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-puzzle-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-ice.js",
+      "origin": "source"
+    },
+    {
+      "file": "mistralton-puzzles.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-field-models.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-field-models.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-gestures.js",
+      "origin": "source"
+    },
+    {
+      "file": "icirrus-field-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-field-fall.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-quicksand.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-music-fade.js",
+      "origin": "source"
+    },
+    {
+      "file": "surf-field-motion.js",
+      "origin": "source"
+    },
+    {
+      "file": "surf-field.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-backdrops.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-cut-choreographies.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-fly-choreographies.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-surf-choreographies.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-cut-anatomy.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-fly-anatomy.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-surf-anatomy.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-choreography.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-profiles.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-oshawott-cut.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-evolved-cut.js",
+      "origin": "source"
+    },
+    {
+      "file": "field-hm-world.js",
+      "origin": "source"
+    },
+    {
+      "file": "surf-battles.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-gym-data.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-gym-routes.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-gym-task.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-gym-renderer.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-ice-rails.js",
+      "origin": "source"
+    },
+    {
+      "file": "opelucid-gym.js",
+      "origin": "source"
+    },
+    {
+      "file": "original-story.js",
+      "origin": "source"
+    },
+    {
+      "file": "native-touch.js",
+      "origin": "source"
+    },
+    {
+      "file": "snivy-preview.js",
+      "origin": "source"
+    },
+    {
+      "file": "bicycle.js",
+      "origin": "source"
+    },
+    {
+      "file": "demo-controls.js",
+      "origin": "source"
+    }
+  ],
+  "nativeAssets": {
+    "/assets/animated/572-back.png": {
+      "sha256": "6c353c250af5711ad4bd49117867fd692932ef1cec47013d58edd2cac7c00063",
+      "bytes": 1868,
+      "sourceKind": "immutable-native-png-raw",
+      "manifestSHA256": null,
+      "provenanceSHA256": "6c353c250af5711ad4bd49117867fd692932ef1cec47013d58edd2cac7c00063",
+      "referencePNGSHA256": "6c353c250af5711ad4bd49117867fd692932ef1cec47013d58edd2cac7c00063"
+    },
+    "/assets/animated/572-front.png": {
+      "sha256": "578893250125ee8ed35b7094369aa36f3ea1f40bb1f5f6b1f658ee997c902bd6",
+      "bytes": 2233,
+      "sourceKind": "immutable-native-png-raw",
+      "manifestSHA256": null,
+      "provenanceSHA256": "578893250125ee8ed35b7094369aa36f3ea1f40bb1f5f6b1f658ee997c902bd6",
+      "referencePNGSHA256": "578893250125ee8ed35b7094369aa36f3ea1f40bb1f5f6b1f658ee997c902bd6"
+    },
+    "/assets/move-fx/704-0.png": {
+      "sha256": "db49dc2d723ea7843e71e6790d6fc1c654f88a51581a18e12877f850e5e86d57",
+      "bytes": 342,
+      "manifestSHA256": null,
+      "sourceKind": "spa704-texture-authenticated-source-raw",
+      "provenanceSHA256": null,
+      "referencePNGSHA256": null,
+      "sourceRawSHA256": "db49dc2d723ea7843e71e6790d6fc1c654f88a51581a18e12877f850e5e86d57",
+      "sourceQualification": {
+        "kind": "builder-authenticated-zip-member",
+        "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+        "member": "soffiolieve/assets/move-fx/704-0.png"
+      }
+    },
+    "/assets/move-fx/704-1.png": {
+      "sha256": "826be17ea1b993ac02b75c30e182b612dc96d081025aabcb8c31377db4bef6dc",
+      "bytes": 1119,
+      "manifestSHA256": null,
+      "sourceKind": "spa704-texture-authenticated-source-raw",
+      "provenanceSHA256": null,
+      "referencePNGSHA256": null,
+      "sourceRawSHA256": "826be17ea1b993ac02b75c30e182b612dc96d081025aabcb8c31377db4bef6dc",
+      "sourceQualification": {
+        "kind": "builder-authenticated-zip-member",
+        "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+        "member": "soffiolieve/assets/move-fx/704-1.png"
+      }
+    },
+    "/assets/move-fx/704-2.png": {
+      "sha256": "94b1d078911b958fb9f4abdb33863a96e056069fe5ae3c3abf60a74723fbf7f6",
+      "bytes": 416,
+      "manifestSHA256": null,
+      "sourceKind": "spa704-texture-authenticated-source-raw",
+      "provenanceSHA256": null,
+      "referencePNGSHA256": null,
+      "sourceRawSHA256": "94b1d078911b958fb9f4abdb33863a96e056069fe5ae3c3abf60a74723fbf7f6",
+      "sourceQualification": {
+        "kind": "builder-authenticated-zip-member",
+        "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+        "member": "soffiolieve/assets/move-fx/704-2.png"
+      }
+    },
+    "/assets/move-fx/704-3.png": {
+      "sha256": "613de54e66d01231db8879113e844b14af79b22c0305f411ea0e4d22f6c46fa4",
+      "bytes": 638,
+      "manifestSHA256": null,
+      "sourceKind": "spa704-texture-authenticated-source-raw",
+      "provenanceSHA256": null,
+      "referencePNGSHA256": null,
+      "sourceRawSHA256": "613de54e66d01231db8879113e844b14af79b22c0305f411ea0e4d22f6c46fa4",
+      "sourceQualification": {
+        "kind": "builder-authenticated-zip-member",
+        "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+        "member": "soffiolieve/assets/move-fx/704-3.png"
+      }
+    },
+    "/assets/audio/native/630cd21a8a75ae15595c.flac": {
+      "sha256": "35edb041c347252113eb232e55e60409e65b88f2c2980f98854708164c770cf1",
+      "bytes": 28550,
+      "manifestSHA256": null,
+      "sourceKind": "native-audio-raw",
+      "provenanceSHA256": null,
+      "referencePNGSHA256": null,
+      "sourceRawSHA256": "35edb041c347252113eb232e55e60409e65b88f2c2980f98854708164c770cf1",
+      "sourceQualification": {
+        "kind": "builder-authenticated-zip-member",
+        "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+        "member": "soffiolieve/assets/audio/native/630cd21a8a75ae15595c.flac"
+      }
+    },
+    "/assets/audio/native/71360983e52dfd6ab048.flac": {
+      "sha256": "a479c416ec620a58721d568f60b0b51040dcf8b03b4ac2b1a273f3f2af1b61c7",
+      "bytes": 42537,
+      "manifestSHA256": null,
+      "sourceKind": "native-audio-raw",
+      "provenanceSHA256": null,
+      "referencePNGSHA256": null,
+      "sourceRawSHA256": "a479c416ec620a58721d568f60b0b51040dcf8b03b4ac2b1a273f3f2af1b61c7",
+      "sourceQualification": {
+        "kind": "builder-authenticated-zip-member",
+        "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
+        "member": "soffiolieve/assets/audio/native/71360983e52dfd6ab048.flac"
+      }
+    }
+  },
+  "requiredResponsePaths": [
+    "/assets/animated/572-back.json",
+    "/assets/animated/572-front.json",
+    "/assets/move-fx/704-0.png",
+    "/assets/move-fx/704-1.png",
+    "/assets/move-fx/704-2.png",
+    "/assets/move-fx/704-3.png",
+    "/assets/audio/native/630cd21a8a75ae15595c.flac",
+    "/assets/audio/native/71360983e52dfd6ab048.flac"
+  ],
+  "marker": "native572-tail541-oam-partition/v1",
+  "kinds": {
+    "back": "native572-back-cell7-oam-partition/v1",
+    "front": "native572-front-cell12-oam-partition/v1"
+  },
+  "nativeVoiceSources": [
+    "assets/audio/native/630cd21a8a75ae15595c.flac",
+    "assets/audio/native/71360983e52dfd6ab048.flac"
+  ],
+  "limits": {
+    "outerMs": 240000,
+    "caseMs": 180000,
+    "heapMiB": 400,
+    "maxWebM": 0,
+    "nominalSelectedPNG": 12,
+    "nominalFailurePNG": 1,
+    "recoveryPNGIncludingFailure": 2,
+    "networkRecords": 32,
+    "networkBytes": 16384,
+    "diagnosticStoredBytes": 4194304
+  },
+  "parametricCoverage": {
+    "viewports": {
+      "desktop": [
+        1280,
+        720
+      ],
+      "portrait": [
+        390,
+        844
+      ],
+      "landscape": [
+        844,
+        390
+      ]
+    },
+    "rates": [
+      1,
+      2,
+      4
+    ],
+    "CI": "desktop x1 nominal + desktop x1 recovery only",
+    "matrixEvidence": "private matrix status is external; no9lot PASS inferred by this fixture"
+  }
+}

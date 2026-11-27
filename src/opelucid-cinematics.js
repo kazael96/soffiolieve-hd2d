@@ -12,12 +12,13 @@
    const doc=options.document||root.document,panel=doc.createElement('section'),canvas=doc.createElement('canvas');panel.id='chapterCinematic';panel.setAttribute('aria-label','Torre Dragospira · N e il Pokémon leggendario');Object.assign(panel.style,{position:'fixed',inset:'0',zIndex:'80',background:'#10191f',display:'grid',placeItems:'center'});Object.assign(canvas.style,{width:'100%',height:'100%',objectFit:'contain'});canvas.width=960;canvas.height=720;panel.append(canvas);doc.body.append(panel);
    let scene,soundtrack,raf,last,frame=0,stopped=false;
    const request=options.requestFrame||root.requestAnimationFrame,cancel=options.cancelFrame||root.cancelAnimationFrame;
+   const resetClock=()=>{if(active&&!stopped)last=undefined;};doc.addEventListener?.('visibilitychange',resetClock);
    try{
     const gate=options.resourceGate||((key,load)=>renderer.resourceGate(key,load));
     let film;await gate('tower-cinematic-'+id,async()=>{film=(await data()).films[id];soundtrack?.stop();scene?.destroy();const assets={preserveDrawingBuffer:true,clearColor:[0,0,0],brightness:film.brightness,models:Object.fromEntries(Object.entries(film.models).map(([key,value])=>[key,value.url])),materialAlpha:{dragon:{},...film.materialAlpha},materialColor:film.materialColor,materialTextures:film.materialTextures,curves:{stage:film.camera},perspective:film.perspective};scene=new(options.Scene||root.StarterScene.Scene)(canvas,assets);await scene.ready;soundtrack=(options.audio||root.AudioEngine)?.createCinematic(film.audio.src);await soundtrack?.prepare();});
     panel.dataset.frames=String(film.frames);panel.dataset.film=String(id);
     await new Promise((resolve,reject)=>{const tick=now=>{if(stopped)return;try{last??=now;const elapsed=Math.max(0,Math.min(100,now-last));last=now;if(!doc.hidden)frame=Math.min(film.frames-1,frame+elapsed*.03*(options.rate?.()||root.GameSpeed?.rate||1));scene.draw('stage',frame,{extra:['dragon']});soundtrack?.sync(frame,options.rate?.()||root.GameSpeed?.rate||1);panel.dataset.frame=String(Math.floor(frame));if(frame>=film.frames-1)resolve();else raf=request(tick);}catch(error){reject(error);}};raf=request(tick);});
-   }finally{stopped=true;if(raf!==undefined)cancel(raf);soundtrack?.stop();scene?.destroy();panel.remove();active=false;(options.resetInput||(()=>{if(typeof resetInput==='function')resetInput();}))();}
+   }finally{stopped=true;doc.removeEventListener?.('visibilitychange',resetClock);if(raf!==undefined)cancel(raf);soundtrack?.stop();scene?.destroy();panel.remove();active=false;(options.resetInput||(()=>{if(typeof resetInput==='function')resetInput();}))();}
   }
   return {data,play,get active(){return active;}};
  }

@@ -1,0 +1,42 @@
+[
+  {
+    "file": "game.js",
+    "group": "density602",
+    "purpose": "Declared602 dispatch",
+    "before": " if(!ground?.setActorFraming||!current?.battle)return;",
+    "after": " if(!ground?.setActorFraming||!current?.battle)return;\n if(current.double&&window.DoubleBattles?.framingActors)return ground.setSlotActorFraming?.({owner:current,actors:DoubleBattles.framingActors()});",
+    "count": 1
+  },
+  {
+    "file": "game.js",
+    "group": "coherent",
+    "purpose": "Capture original completed arena before resize",
+    "before": "function resize(){W=",
+    "after": "function resize(){window.SpeciesMoves?.beforeArenaResize?.();try{W=",
+    "count": 1
+  },
+  {
+    "file": "game.js",
+    "group": "coherent",
+    "purpose": "Post-resize barrier in finally",
+    "before": "ac.imageSmoothingEnabled=false}addEventListener('resize',resize);",
+    "after": "ac.imageSmoothingEnabled=false}finally{window.SpeciesMoves?.afterArenaResize?.();}}addEventListener('resize',resize);",
+    "count": 1
+  },
+  {
+    "file": "game.js",
+    "group": "coherent",
+    "purpose": "Preserve existing MoveFX preclear gate; chain SpeciesMoves preclear gate",
+    "before": " if(window.MoveFX?.beforeArenaFrame?.(arena.width,arena.height)===false)return;",
+    "after": " if(window.MoveFX?.beforeArenaFrame?.(arena.width,arena.height)===false)return;\n if(window.SpeciesMoves?.beforeArenaFrame?.(arena.width,arena.height)===false)return;",
+    "count": 1
+  },
+  {
+    "file": "game.js",
+    "group": "coherent",
+    "purpose": "Original ACK remains sole completion authority",
+    "before": "}finally{window.MoveFX?.presentedArenaFrame(presentationRecord,presentationDrawn&&!window.document?.hidden&&renderer.ready&&!renderer.battleRecovering&&!renderer.modelsRecovering&&!renderer.contextLost&&!renderer.gl.isContextLost()&&!ac.isContextLost?.());}",
+    "after": "}finally{const drawable=presentationDrawn&&!window.document?.hidden&&renderer.ready&&!renderer.battleRecovering&&!renderer.modelsRecovering&&!renderer.contextLost&&!renderer.gl.isContextLost()&&!ac.isContextLost?.(),ack=window.MoveFX?.presentedArenaFrame(presentationRecord,drawable);window.SpeciesMoves?.afterArenaFrame?.({record:presentationRecord,completed:presentationDrawn,drawable,ack});}",
+    "count": 1
+  }
+]

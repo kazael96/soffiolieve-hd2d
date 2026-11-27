@@ -1,0 +1,46 @@
+'use strict';
+// Prepared only. Actual native JSON+PNG are decoded/prepared on successful resource IO.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),vm=require('node:vm'),L=require('../liepard-protocol064/strict-loader.cjs'),{create,geometry,site,hash}=require('../liepard-protocol064/real-stage-host.cjs'),{observeStageFraming}=require('./framing-observer.cjs');
+const Canvas=require(process.env.SOFFIOLIEVE_CANVAS_MODULE||'@napi-rs/canvas');
+const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};},drain=async()=>{for(let i=0;i<60;i++)await Promise.resolve();},turn=()=>new Promise(setImmediate);
+const observations=[];process.once('exit',()=>{if(process.env.C11_PROTOCOL_LEDGER)fs.writeFileSync(process.env.C11_PROTOCOL_LEDGER.replace(/\.json$/,'.recovery.json'),JSON.stringify({scope:'Actual CPU protocol/native bank IO, not full rendered action or browser.',observations},null,2)+'\n');});
+function fixture({holdPredecessor=false}={}){
+ const h=create({variant:'v4.1',holdPredecessor}),e=h.setup('p2',390,490),c=h.c,stage=c.LiepardMoves.staging064,trace={requests:[],retryWaits:[],prepares:[],events:[],timers:[],nativeDecoded:[],bodyDraws:0,clears:[],plays:0,readyWrites:0,statusCalls:0,gateCalls:0};
+ const listeners=new Map(),timers=new Map(),instances=new Set(),rssSamples=[];let serial=0,broken=true,held=null;
+ function sampleRSS(){const value=process.memoryUsage().rss;rssSamples.push(value);assert(value<400*1024*1024,'observed RSS below400MiB');}sampleRSS();
+ const listen=(n,fn)=>{if(!listeners.has(n))listeners.set(n,new Set());listeners.get(n).add(fn);};c.addEventListener=listen;c.removeEventListener=(n,fn)=>listeners.get(n)?.delete(fn);c.document.addEventListener=listen;c.document.removeEventListener=c.removeEventListener;c.navigator={onLine:true};c.TextDecoder=TextDecoder;
+ const originalElement=c.document.createElement;
+ c.document.createElement=tag=>{if(tag==='canvas')return Canvas.createCanvas(1,1);const node=originalElement(tag),append=node.append,remove=node.remove;node.append=function(...children){append.apply(this,children);for(const child of children)child.parentNode=this;};node.remove=function(){if(this.parentNode){const a=this.parentNode.children,i=a.indexOf(this);if(i>=0)a.splice(i,1);this.parentNode=null;}remove?.call(this);};return node;};
+ c.arena=Canvas.createCanvas(390,490);c.arena.style={};c.ac=c.arena.getContext('2d');
+ const draw=c.ROM_SPRITE_ANIM.draw;c.ROM_SPRITE_ANIM.draw=function(...a){trace.bodyDraws++;return draw.apply(this,a);};
+ const ioError=vm.runInContext('Error',c,{filename:'FIXTURE_ONLY/resource-Error-constructor'});
+ L.run(c,'runtime-assets.js');
+ const Recovery=c.RuntimeAssets.Recovery;
+ c.RuntimeAssets.Recovery=class extends Recovery{constructor(options){super({...options,setTimer:(fn,ms)=>{trace.timers.push(ms);timers.set(++serial,{fn,ms});return serial;},clearTimer:id=>timers.delete(id)});instances.add(this);}dispose(){super.dispose();instances.delete(this);}};
+ const retry=c.RuntimeAssets.retry;c.RuntimeAssets.retry=(task,options)=>retry(task,{...options,wait:async ms=>{trace.retryWaits.push(ms);}});
+ async function beforeIO(type,src){trace.requests.push({type,src,broken,pending:!!held});if(held)await held.promise;if(broken)throw new ioError('Temporary native bank transport failure');}
+ c.RuntimeAssets.json=async src=>{await beforeIO('json',src);const raw=L.nativeAsset(src),text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(raw);assert(Buffer.from(text,'utf8').equals(raw));return JSON.parse(text);};
+ c.RuntimeAssets.image=async src=>{await beforeIO('image',src);const raw=L.nativeAsset(src),key=path.basename(src,'.png');assert.equal(hash(raw),geometry.banks[key].pngSHA256);const image=await Canvas.loadImage(raw);sampleRSS();trace.nativeDecoded.push({src,sha256:hash(raw),width:image.width,height:image.height});return image;};
+ const nativePrepare=c.ROM_SPRITE_ANIM.prepare;c.ROM_SPRITE_ANIM.prepare=function(keys,options){trace.prepares.push({keys:[...keys],options});sampleRSS();return nativePrepare.call(this,keys,options).then(value=>{sampleRSS();return value;},error=>{sampleRSS();throw error;});};
+ const renderer=c.renderer;let ready=true;Object.defineProperty(renderer,'ready',{get:()=>ready,set:v=>{trace.readyWrites++;ready=v;},configurable:true});renderer.status=()=>{trace.statusCalls++;throw Error('No renderer.status ownership allowed');};renderer.resourceGate=()=>{trace.gateCalls++;throw Error('No renderer.resourceGate ownership allowed');};
+ const play=c.MoveFX.play;c.MoveFX.play=function(...a){trace.plays++;return play.apply(this,a);};
+ observeStageFraming(c);h.pins.gameFramingTrace=c.protocolTrace.stageFraming;const row={case:process.env.C11_CASE_LABEL||process.env.LIEPARD_RECOVERY_CASE_LABEL||'unselected',pins:h.pins,trace};observations.push(row);
+ function start(){let error,settled=false;const promise=c.MoveFX.play(10,'p2',{cryIds:e.cryIds,targetSide:'p1'}).catch(x=>{error=x;}).finally(()=>settled=true);return{promise,get error(){return error;},get settled(){return settled;}};}
+ async function until(predicate,reason){for(let i=0;i<10000;i++){if(predicate())return;await turn();}throw Error('Fixture did not reach '+reason);}
+ async function active(job){await Promise.race([c.protocolAudioReached.promise,job.promise.then(()=>{throw job.error||Error('Settled before audio');})]);c.protocolTrace.audio.at(-1).gate.resolve();await drain();assert(c.MoveFX.active);sampleRSS();return c.MoveFX.active;}
+ function invalidate(kind='invalid'){const key='510-front',bank=c.ROM_SPRITE_ANIM.cache[key];if(kind==='delete')delete c.ROM_SPRITE_ANIM.cache[key];else c.ROM_SPRITE_ANIM.cache[key]={...bank,ready:false,pending:false};return bank;}
+ function emit(name){trace.events.push(name);for(const fn of [...listeners.get(name)||[]])fn();}
+ async function nextTimer(){assert(timers.size,'actual Recovery must schedule a timer');const[id,t]=timers.entries().next().value;timers.delete(id);t.fn();await drain();await turn();return t.ms;}
+ function hold(){held=deferred();return held;}
+ function online(v){c.navigator.onLine=v;emit(v?'online':'offline');}
+ function hidden(v){c.document.hidden=v;emit('visibilitychange');}
+ function actualGameBlockedFrame(){L.slice(c,path.join(L.target,'game.js'),'function drawArena(){','\nfunction frame(');const ctx=c.ac,fill=ctx.fillRect;let fills=0;ctx.fillRect=function(...a){fills++;return fill.apply(this,a);};try{c.drawArena();}finally{ctx.fillRect=fill;}assert.equal(fills,0,'pending preflight must stop before original clear');assert.equal(trace.bodyDraws,0,'no incomplete native body R.draw');}
+ function resize(w=844,H=355,duringClear){let changed=false;c.innerWidth=w;c.innerHeight=H;c.canvas={};for(const k of ['width','height'])Object.defineProperty(c.canvas,k,{set(v){trace.clears.push({surface:'world-'+k,loading:!!c.protocolLoading(),pending:c.LiepardMoves.pendingPreparation064?.()?.id,snapshot:!!c.LiepardMoves.layoutBarrier064?.controller.status.hasFrozen});if(!changed&&duringClear){changed=true;duringClear();}},configurable:true});c.ctx={};c.$=()=>({style:{setProperty(){}}});L.slice(c,path.join(L.target,'game.js'),'function resize(){',"addEventListener('resize',resize);");c.resize();}
+ function gamePreflight(){c.syncBattleActorFraming();if(c.MoveFX.beforeArenaFrame?.(c.arena.width,c.arena.height)===false)return false;return c.SpeciesMoves.beforeArenaFrame?.(c.arena.width,c.arena.height)!==false;}
+ function snapshot(action){assert.equal(gamePreflight(),true);c.SpeciesMoves.afterArenaFrame({record:{action,token:{id:1,frame:60}},ack:{frame:60,key:true},completed:true,drawable:true});}
+ async function resourcePending(){await until(()=>instances.size>0,'local Recovery registration');assert.equal(c.MoveFX.active,null);assert.equal(trace.prepares[0].options.gate,false);assert.equal(trace.gateCalls,0);assert.equal(trace.statusCalls,0);assert.equal(trace.readyWrites,0);}
+ async function readyAction(){await until(()=>gamePreflight(),'active bank/layout readiness');sampleRSS();}
+ async function close(job){c.MoveFX.cancel();await job?.promise;await drain();rssSamples.push(process.memoryUsage().rss);row.rssSamples=rssSamples;row.maxObservedRSS=Math.max(...rssSamples);row.stageStats=stage.stats;row.activeAtCleanup=!!c.MoveFX.active;row.remainingRecoveryInstances=instances.size;row.remainingTimers=timers.size;row.remainingListeners=[...listeners.values()].reduce((n,s)=>n+s.size,0);const pending=c.LiepardMoves.pendingPreparation064?.();row.pendingInitial=pending?{id:pending.id,generation:pending.generation,phase:pending.phase}:null;try{assert(row.maxObservedRSS<400*1024*1024);assert.equal(row.remainingRecoveryInstances,0);assert.equal(row.remainingTimers,0);assert.equal(row.remainingListeners,0);assert.equal(row.pendingInitial,null);}finally{for(const r of [...instances])r.dispose();stage.clear();global.gc?.();}}
+ return{h,e,c,stage,trace,row,timers,instances,listeners,start,active,until,invalidate,emit,nextTimer,hold,online,hidden,actualGameBlockedFrame,resize,snapshot,resourcePending,readyAction,close,setBroken(v){broken=v;},release(){held?.resolve();held=null;},sameVMError:s=>new ioError(s)};
+}
+module.exports={fixture,drain,turn,deferred};

@@ -23,6 +23,7 @@ srt = helper('film_srt', 'native-texture-srt.py')
 from irbi_reader import NintendoDSRom, NARC
 inspect = helper('film_source', 'inspect-finale-films.py').inspect
 native_projection = helper('film_projection', 'native-film-projection.py').projection
+material_basis = helper('film_material_basis', 'native-material-basis.py')
 
 
 def material_tracks(raw):
@@ -101,9 +102,21 @@ def main():
             work = args.work / str(identifier) / key
             work.mkdir(parents=True, exist_ok=True)
             inputs = []
+            animated_diffuse = {}
+            for member in members:
+                if files[member][:4] == b'BMA0':
+                    _, colors = material_tracks(files[member])
+                    animated_diffuse.update(colors)
+            # Only these three recovered models have an installed, visually
+            # reviewed neutral-color basis. Do not silently change other films.
+            if (identifier, key) not in {(7, 'part0'), (10, 'part1'), (11, 'part1')}:
+                animated_diffuse.clear()
             for member in members:
                 path = work / (str(member) + '.bin')
-                path.write_bytes(files[member])
+                data = files[member]
+                if data[:4] == b'BMD0':
+                    data, _ = material_basis.neutral_diffuse(data, animated_diffuse)
+                path.write_bytes(data)
                 inputs.append(str(path.resolve()))
             converted = work / 'converted'
             run = subprocess.run([str(args.apicula.resolve()), 'convert', *inputs, '-o', str(converted.resolve()), '-f', 'glb', '--all-animations', '--overwrite'], capture_output=True)
@@ -116,7 +129,8 @@ def main():
             glbs = list(destination.glob('*.glb'))
             if len(glbs) != 1:
                 raise ValueError('Expected one native model per film part')
-            blob = glbs[0].read_bytes()
+            blob = material_basis.mark_glb(glbs[0].read_bytes(), animated_diffuse)
+            glbs[0].write_bytes(blob)
             doc = json.loads(blob[20:20 + struct.unpack_from('<I', blob, 12)[0]])
             resources = [files[member] for member in members if files[member][:4] != b'BMD0']
             native_model = next(files[member] for member in members if files[member][:4] == b'BMD0')
@@ -139,6 +153,12 @@ def main():
                     film['materialAlpha'][key], film['materialColor'][key] = material_tracks(animation)
             film['models'][key] = {'url': glbs[0].relative_to(args.output).as_posix(), 'members': members, 'sha256': hashlib.sha256(blob).hexdigest(), 'bindings': srt.animation_bindings(resources, len(resources), doc).get('0', []), 'materials': [m['name'] for m in doc.get('materials', [])]}
             print(identifier, key, 'native members', members, 'bound recovered UV', len(film['materialUV'][key]), flush=True)
+        if identifier == 6:
+            rays = args.output / 'assets/finale/cinematics/6/part2/fx_rays02.png'
+            matrices = film['materialUV']['part2'].get('fx_rays', {}).get('frames', [])
+            if hashlib.sha256(rays.read_bytes()).hexdigest() != '83778d933a075499e4ff21951b3912f2a4b53e9b4d221de3cfaa33099652aff6' or not matrices or not all(m[1] == 0 and m[4] == 1 and m[7] == 0 for m in matrices) or film['materialTextures']['part2'].get('fx_rays'):
+                raise ValueError('Castle native edge source changed; gutter requires a new proof')
+            film['materialTextureGutters'] = {'part2': {'fx_rays': {'sourceImage': 'fx_rays02.png', 'sourceWidth': 128, 'sourceHeight': 128, 'paddingV': 64, 'reason': 'native-quad-msaa-repeat-edge'}}}
         result['films'][identifier] = film
     (args.output / 'finale-cinematics-data.js').write_text('window.FINALE_CINEMATICS=' + json.dumps(result, separators=(',', ':')) + ';\n', encoding='utf-8')
     print('Exported '+str(len(args.films))+' original films; audio and runtime validation remain separate')

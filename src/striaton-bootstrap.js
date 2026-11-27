@@ -3,6 +3,9 @@
  if(!window.STRIATON_ASSETS)return;
  Object.assign(OPENING_ASSETS.models,STRIATON_ASSETS.models);Object.assign(OPENING_ASSETS.textures,STRIATON_ASSETS.textures);Object.assign(OPENING_DATA,STRIATON_DATA.pokemonData);
  for(const z of [7,9,10,15,152])OPENING_ASSETS.scenes['zone'+z]={...STRIATON_ASSETS.scenes[z],chapter040:true,outdoor:z===152};
+ // Native Dreamyard279 arch cap and baked shadows are render geometry.
+ // Retain all other original surfaces; see native-face/permission proof.
+ OPENING_ASSETS.scenes.zone152.groundExcludedGroups={'acc-map-279':[6,27]};
  for(const [id,paths]of Object.entries(STRIATON_ASSETS.sprites))OPENING_SPRITES[{74:'Zania',85:'Spighetto',178:'Chicco',179:'Maisello',126:'Munna',127:'Musharna'}[id]||'Original'+id]??=paths;
  if(window.OPENING_GESTURES)OPENING_GESTURES.Spighetto={steps:[[7,4],[8,8],[7,4],[2,4]],source:'IRBI billboard poses 7/8; HD-2D bow timing'};
  // Folded HD-2D cloth; native room and type-button floor remain unchanged.

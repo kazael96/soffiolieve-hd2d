@@ -183,11 +183,15 @@ I vecchi `site-part-*.zip` non sono usati. La ROM non è inclusa né richiesta p
 curl -L --fail https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
 node --test tests/*.test.cjs
 python -m unittest discover -s tests -p 'test_*.py'
-python scripts/build-site.py site.zip _site
+python scripts/build-site.py site.zip _site --native572-tail-partition064
 node tests/check-built-site.cjs _site
 node tests/check-story-runtime.cjs _site
 python -m http.server 4174 --bind 127.0.0.1 --directory _site
 ```
+
+Il flag `--native572-tail-partition064` è richiesto dal controller corrente di
+Minccino: prepara le mappe delle parti native della coda, conservando i PNG
+originali. Senza il flag la build si interrompe prima di creare il sito.
 
 La destinazione della build deve essere nuova. Il workflow esegue i test,
 controlla gli asset e il percorso e pubblica su GitHub Pages da `main`.

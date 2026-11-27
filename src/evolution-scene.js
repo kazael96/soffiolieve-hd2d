@@ -12,7 +12,8 @@
   cancel.textContent='B · Interrompi';cancel.type='button';dialog.append(canvas,status,cancel);document.body.append(dialog);
   const recovery=window.RuntimeAssets?.Recovery?new RuntimeAssets.Recovery():null;const c=canvas.getContext('2d');let raf=0,done=false,elapsed=0,last=performance.now();
   const clock=()=>performance.now();
-  let finish;const answer=new Promise(resolve=>{finish=result=>{if(done)return;done=true;recovery?.dispose();cancelAnimationFrame(raf);active=null;dialog.close();dialog.remove();resetInput();resolve(result);};});
+  const resetClock=()=>{if(!done)last=undefined;};document.addEventListener?.('visibilitychange',resetClock);
+  let finish;const answer=new Promise(resolve=>{finish=result=>{if(done)return;done=true;document.removeEventListener?.('visibilitychange',resetClock);recovery?.dispose();cancelAnimationFrame(raf);active=null;dialog.close();dialog.remove();resetInput();resolve(result);};});
   active=dialog;cancel.onclick=()=>finish(false);
   dialog.addEventListener('cancel',event=>{event.preventDefault();finish(false);});
   dialog.addEventListener('keydown',event=>{const key=event.key.toLowerCase();if(['b','escape'].includes(key)){event.preventDefault();event.stopImmediatePropagation();finish(false);}else if(['a','z','enter',' '].includes(key)&&!event.target.dataset?.retry){event.preventDefault();event.stopImmediatePropagation();}});
@@ -27,7 +28,7 @@
    }
    recovery?.clear('evolution');dialog.querySelector('[data-retry]')?.remove();status.textContent='Premi B per interrompere l’evoluzione.';last=clock();
    function draw(){
-    if(done)return;const now=clock();if(!document.hidden)elapsed+=Math.min(80,Math.max(0,now-last))*(GameSpeed.rate||1);last=now;
+    if(done)return;const now=clock();last??=now;if(!document.hidden)elapsed+=Math.min(80,Math.max(0,now-last))*(GameSpeed.rate||1);last=now;
     const t=Math.min(1,elapsed/3000);dialog.dataset.progress=String(Math.round(t*100));
     const bg=c.createRadialGradient(320,220,20,320,220,400);bg.addColorStop(0,'#3e7281');bg.addColorStop(1,'#101d31');c.fillStyle=bg;c.fillRect(0,0,640,420);
     c.save();c.translate(320,252);c.strokeStyle='#b3ebef';c.globalAlpha=Math.sin(Math.PI*t)*.65;c.lineWidth=2;

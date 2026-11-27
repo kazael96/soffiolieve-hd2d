@@ -1,0 +1,91 @@
+{
+  "scope": "Actual C3 native500 passive draw arguments for three clipped idle witnesses. CPU source-pixel projection, no embedded screenshot or claim actualupdatedC4.",
+  "sourceRevision": "5e6034059fa4921b",
+  "sourceReportSHA256": "0508eb12472dad911fda7504f84f77efdc06d6d0fb04a822e5f9c343c934465f",
+  "rows": [
+    {
+      "ordinal": 3,
+      "frame": 36,
+      "rate": 1,
+      "graphic": 500,
+      "view": "back",
+      "nativeTick": 236.96399997711185,
+      "matrix": [
+        1.1871191263198853,
+        0,
+        0,
+        1.1871191263198853,
+        107.62718695344029,
+        400.6002768278122
+      ],
+      "size": 1.8524999999999998,
+      "groundBounds": [
+        -35,
+        -71,
+        42,
+        0
+      ],
+      "viewport": [
+        390,
+        490
+      ],
+      "pose": null
+    },
+    {
+      "ordinal": 11,
+      "frame": 25,
+      "rate": 2,
+      "graphic": 500,
+      "view": "back",
+      "nativeTick": 232.6559999656677,
+      "matrix": [
+        1.1871191263198853,
+        0,
+        0,
+        1.1871191263198853,
+        107.62718695344029,
+        400.6002768278122
+      ],
+      "size": 1.8524999999999998,
+      "groundBounds": [
+        -35,
+        -71,
+        42,
+        0
+      ],
+      "viewport": [
+        390,
+        490
+      ],
+      "pose": null
+    },
+    {
+      "ordinal": 11,
+      "frame": 25,
+      "rate": 2,
+      "graphic": 500,
+      "view": "back",
+      "nativeTick": 237.35999999999996,
+      "matrix": [
+        1.1871191263198853,
+        0,
+        0,
+        1.1871191263198853,
+        107.62718695344029,
+        400.6002768278122
+      ],
+      "size": 1.8524999999999998,
+      "groundBounds": [
+        -35,
+        -71,
+        42,
+        0
+      ],
+      "viewport": [
+        390,
+        490
+      ],
+      "pose": null
+    }
+  ]
+}

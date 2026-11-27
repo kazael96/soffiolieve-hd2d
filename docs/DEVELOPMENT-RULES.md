@@ -228,6 +228,10 @@ Il banco usa ora 256 voci per la cache di sola compilazione, mantenendo 96 MiB d
 
 Il tentativo locale precedente in `outputs/chapter055-preparation/deep-exclusive03` resta una baseline interrotta dopo i timeout180 s dei gruppi 3–6; i log e la ricevuta di arresto sono preservati. Il nuovo rapporto completo usa `deep-exclusive03-final`. Registrare il runtime Node effettivo di ogni esecuzione e distinguere le versioni del banco dai browser del gioco. Un nuovo PASS non riscrive i vecchi FAIL.
 
+### Budget delle fixture native · revisione0.64
+
+Il primo gruppo della candidata04 ha superato il limite400MiB durante il confronto di3048 pose, mentre condivideva il processo con gli inventari VM di altri test. Conservare quel FAIL in `outputs/animation-review064/deep-candidate04-r2`; il rapporto non certifica una candidata corretta. Non alzare il limite né rimuovere l'asserzione. I confronti `emboar-contact064.test.cjs` e `battle-actor-framing064.test.cjs`, che misurano la memoria dell'intero processo proprietario, hanno ciascuno un processo sequenziale dedicato. Gli altri file restano distribuiti negli otto gruppi bilanciati. L'inventario completo viene eseguito una sola volta, senza gruppi vuoti, con gli stessi flag Windows/Linux e180s per fase; il registro corrente passa da49 a51 fasi. I test verificano inventario, isolamento e determinismo. La separazione conserva un significato corretto del budget per fixture; un miglioramento complessivo richiede la misura e la nuova suite completa.
+
 ### Identità e tempi di presentazione · 0.56
 
 Per la nuova introduzione conservare la scelta del personaggio e il nome in tutti i sistemi che li mostrano, con immagini native coerenti, tastiera italiana e comandi touch/tastiera. Distinguere i sette caratteri del nuovo nome dai dieci dei soprannomi e dai nomi legacy già salvati. Le partite precedenti proseguono senza ripetere l'introduzione; Ricomincia mantiene conferma e cancellazione verificate. Testi originali lunghi devono essere impaginati senza perdere righe.
@@ -235,3 +239,126 @@ Per la nuova introduzione conservare la scelta del personaggio e il nome in tutt
 L'avanzamento di una coreografia MN non può attraversare tutte le pose fra due disegni: una carta composta non certifica un fotogramma mostrato. Preservare pose autoriali, contatti una sola volta, sedile e recupero anche a×4 con FPS bassi, context loss, scheda nascosta e ripresa dal salvataggio. Una conferma vecchia non libera una nuova azione. Le animazioni possono durare più del nominale se il dispositivo non disegna abbastanza fotogrammi; non eliminare gesti o modificare la fisica per rispettare artificialmente la velocità.
 
 Il naming deve misurare anche i tasti effettivi, il campo del nome e la leggibilità del prompt nei tre formati: un tocco automatico al centro di un tasto troppo piccolo non certifica l'usabilità. Conservare nome e comandi durante la rotazione. L'annullamento del riavvio non cambia i dati di gioco; il confronto deve distinguere il naturale avanzamento del tempo e l'ordine delle raccolte non ordinate, senza ignorare posizioni, identità, squadra o progressione.
+
+### Budget dei percorsi fisici degli attori · candidata0.64/7
+
+La suite completa C7/r1 conserva il FAIL del terzo gruppo unitario, terminato dopo180788ms contro il budget180000ms. Quel gruppo comprendeva anche `league-journeys.test.cjs`: i replay completi di Belle e Komor sul Percorso10, nelle diverse stagioni, attraversano controller, terreno e portali nativi e hanno un costo CPU significativo. Separare questo file in un processo sequenziale dedicato, oltre ai due processi già riservati alle fixture native che misurano la memoria. L'isolamento dei percorsi riguarda il budget di esecuzione: non attribuirgli una misura RSS che non effettua.
+
+Conservare gli otto gruppi ordinari bilanciati, ogni file eseguito esattamente una volta, ordinamento deterministico e nessun gruppo vuoto o test saltato. Rimangono invariati180s per fase, limiti di memoria, asserzioni e flag Windows `--test-isolation=none` / Linux `--test-concurrency=2`. Il registro completo passa da51 a52 fasi perché si aggiunge un processo, non perché siano aumentati i file o sia stata ridotta la copertura. Le regressioni del raggruppatore devono coprire anche l'inventario minimo con tutti e tre i file isolati e i due sistemi operativi. Un PASS mirato del raggruppatore o dei percorsi non sostituisce la nuova suite completa; conservare il rapporto C7/r1 fallito e non affermare una riduzione del tempo totale prima della misura.
+
+### Processi dei protocolli di lotta · candidata0.64/11
+
+Il nuovo inventario integra21 casi del ciclo di vita di Graffio e18 casi
+di risorse/recupero in39 processi sequenziali dedicati, con un callback
+per wrapper. Questi processi disattivano l'isolamento anche su Linux:
+il processo controllato dal runner deve essere quello che esegue il caso,
+senza un ulteriore figlio Node lasciato fuori dal controllo del timeout.
+Conservare180s per fase, heap V8 massimo400MiB, output massimo8MiB e
+zero casi saltati. Un limite dell'heap non misura il picco RSS del sistema.
+
+I quattro controlli602 condividono un solo processo dedicato. Rimangono
+anche i tre processi storici e gli otto gruppi ordinari bilanciati; i28
+casi leggeri del controller restano ordinari. L'inventario attuale di424
+file produce51 fasi unitarie, più il builder e40 controlli runtime, per92
+fasi totali. Verificare inventario completo e unico, ordine deterministico,
+cataloghi incompleti rifiutati e flag effettivi su Windows/Linux. I piccoli
+inventari dei test del raggruppatore conservano il comportamento storico.
+Il PASS dei cinque controlli di distribuzione non sostituisce l'esecuzione
+delle92 fasi e non certifica da solo velocità o memoria complessive.
+
+Le fixture derivate di questo protocollo usano pin canonical LF per i soli
+metadati, conservando separatamente hash e byte originali di provenienza.
+I programmi compilati registrano i propri byte reali e i frammenti il
+parent effettivo; i JSON/PNG/DATA nativi restano controllati sui byte raw.
+Conservare il FAIL del providerR1 che confrontava il pin raw del metadato
+con il testo normalizzato. Le regressioni devono accettare LF/CRLF per i
+metadati equivalenti e rifiutare sia modifiche sostanziali sia variazioni
+dei byte nativi, anche se il JSON risultante contiene gli stessi valori.
+
+La forma del flag dipende dalla versione effettiva di Node: da22.8 e
+nelle prime23 usare `--experimental-test-isolation=none`; da23.6 e nelle
+24 successive usare `--test-isolation=none`. Il modulo condiviso
+`scripts/node-test-options.cjs` seleziona il nome e rifiuta versioni
+precedenti o non riconosciute. Gli otto gruppi ordinari Linux mantengono
+`--test-concurrency=2`; i39 processi di protocollo e quello602 eseguono
+direttamente i callback nel processo controllato, su entrambi i sistemi.
+Non cambiare Node su CI o i budget per aggirare un'opzione incompatibile.
+Conservare la suite45621297400:52 fasi PASS e40 avvii falliti prima dei
+callback su Node22.23.5. Le prove di compatibilità dei flag e del PID non
+sostituiscono i casi funzionali o la successiva suite completa.
+
+### Letture dei pixel ambientali · candidata0.64/13
+
+Il confronto nativo di `ambient-readback064.test.cjs` ha un processo
+sequenziale dedicato: un owner esegue32passi, i cicli completi e il riuso,
+confrontando tutti i byte RGBA del frame e della superficie finale,
+metriche, fallback e proprietà delle risorse. Il nuovo inventario ha
+425file,52fasi unitarie e93fasi totali; gli altri51argv/callback unitari
+rimangono invariati. Soltanto il nuovo owner riceve `--expose-gc`,
+heap400MiB e il flag di isolamento corretto per Node22/24 anche su Linux.
+
+Conservare i FAIL dei primi banchi sincroni: la sola raccolta GC non
+rilasciava i buffer nativi entro il ciclo. Il banco restituisce il
+controllo all'event loop ogni32coppie e a fine passo, mantenendo gli
+stessi guard prima e dopo GC/yield,170s/RSS400MiB interni e180s per fase.
+Non trasferire queste misure alla memoria, ai caricamenti o agli FPS
+del gioco. La prova Chrome separata conserva tutti32casi logici in tre
+processi limitati, dopo il FAIL80s del lotto unico; non alzare i timeout.
+
+I programmi e i metadati ammettono soltanto l'equivalenza CRLF→LF;
+JSON/PNG nativi restano verificati sui byte RAW. Il riferimento storico
+ambientPose867byte è immutabile; il nuovo helper viene estratto dal
+sorgente corrente, con lo stesso renderer nativo per A/B. Il test CPU
+e il confronto Canvas in Chrome non certificano da soli l'app completa:
+verificare ordine/proprietà effettivi, binding intatti, rettangolo
+ridotto realmente attivo e beneficio misurato nell'app prima del rilascio.
+
+### Esito del confronto ambientale · 25 novembre2026
+
+Il readback rettangolare e la successiva alpha memo sono respinti per
+utilità prestazionale; i rispettivi PASS funzionali e tutti i FAIL
+rimangono storici. Il runtime torna alla FULL originale e36. L'owner
+portabile conserva32casi/2340coppie: A è la ROI storica immutabile,
+B è la FULL estratta dal runtime corrente, con lo stesso rendererR6c.
+Trasporre esplicitamente le aspettative ai rispettivi lati: B legge
+sempre65536pixel; A conserva riduzioni positive e fallback FULL,
+compreso il vecchio contesto avvelenato prima di crearne uno nuovo.
+Non eliminare assert ROI o applicare assert memo a un runtime FULL.
+Restano invariati inventario425/52/93, budget, GC/yield e oracoli RGBA.
+
+Conservare separatamente i contratti V4 e V4+ROI; il contratto attuale
+`coherent-v4-original-full-restored` dichiara entrambe le provenienze e
+ripristina tutti i pin sorgente originali. Una minore area letta o una
+mediana migliore non certifica un vantaggio se peggiora la coda: nel
+giudizio mantenere tutti i campioni e gli estremi, distinguere costo
+per aggiornamento dalle chiamate riusate e non dedurre FPS. Il seguito
+di questa decisione non apre un'altra ottimizzazione esplorativa.
+
+### Processo nativo572/541: protocollo e audio condividono un owner
+
+I due file `native-tail541-protocol064.test.cjs` e
+`native-tail541-audio064.test.cjs` formano un solo processo sequenziale
+dedicato `unit-native-tail541`: argv protocollo,audio, `--expose-gc`,
+preload `--require tests/helpers/native-tail541-metrics064.cjs` una volta,
+heap400MiB, `--test-concurrency=1` e isolamento disattivato con il flag
+corretto di Node22/24 su entrambi Windows/Linux. Il processo del runner
+è quello che esegue i callback, senza un figlio Node nascosto. Il preload
+metrics misura maxRSS; `--expose-gc` consente al fixture host il GC tra VM.
+L'ordine dei callback non dipende dall'ordine argv. Non disperdere questi
+test nei gruppi ordinari.
+
+La coppia viene rimossa prima del raggruppamento precedente: tutti gli
+altri52argv rimangono identici. Senza altri cambi d'inventario,425+2=427
+file producono53fasi unitarie e94CLI (builder1+runtime40 invariati).
+I16casi del port (14precedenti+2negativi owner/preparation) non sono16fasi:
+restano due file e un solo processo. Conservare180s, heap400MiB e8MiB
+di output per fase; un limite heap non è una prova di RSS del sistema.
+
+Le regressioni verificano coppia minima, Node22/24 e Windows/Linux,
+assegnazione unica/deterministica, incomplete catalog e basename ambigui
+rifiutati, presenza della coppia nell'inventario reale e le94fasi totali.
+Gli otto gruppi ordinari Linux mantengono `--test-concurrency=2`; tutte le
+vecchie dediche e i cataloghi vita/recovery rimangono invariati. Nessuna
+modifica al builder, alla CI, ai runtime o a un'asserzione funzionale deriva
+dal registro. Il run privato precedente14/14 è evidenza mirata, non PASS
+del port16 o della nuova suite94, né una certificazione del movimento.

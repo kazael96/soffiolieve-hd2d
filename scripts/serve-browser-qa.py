@@ -83,7 +83,7 @@ class Handler(SimpleHTTPRequestHandler):
             return str(args.qa.resolve() / 'index.html')
         if pathname.startswith('/__qa/'):
             name = pathname.removeprefix('/__qa/')
-            if name not in ('index.html', 'browser-qa.js', 'ambient-audit.js', 'qa-input-health.js', 'qa-artifact-queue.js', 'field-regression057.js'):
+            if name not in ('index.html', 'browser-qa.js', 'ambient-audit.js', 'qa-input-health.js', 'qa-artifact-queue.js', 'field-regression057.js', 'field-hm-regression064.js', 'qa-gust064.js', 'qa-body-actions064.js', 'qa-tail-reference064.js', 'qa-tail-mixed064.js', 'qa-gust-reference064.js', 'qa-tail-actual064.js'):
                 return str(args.qa.resolve() / '__not_found__')
             return str(args.qa.resolve() / name)
         return super().translate_path(value)

@@ -11,7 +11,7 @@
  }
  function create(options={}){
   let current=null,heldError=null;const doc=options.document||root.document,request=options.requestFrame||root.requestAnimationFrame,cancelFrame=options.cancelFrame||root.cancelAnimationFrame;
-  function dispose(run){if(!run||run.disposed)return;run.disposed=true;if(run.raf!==undefined)cancelFrame?.(run.raf);run.scene?.destroy();run.panel?.remove();options.stop?.(1382);options.stop?.(1383);if(current===run)current=null;options.resetInput?.();}
+  function dispose(run){if(!run||run.disposed)return;run.disposed=true;run.document?.removeEventListener?.('visibilitychange',run.resetClock);if(run.raf!==undefined)cancelFrame?.(run.raf);run.scene?.destroy();run.panel?.remove();options.stop?.(1382);options.stop?.(1383);if(current===run)current=null;options.resetInput?.();}
   function cancel(){const run=current;if(!run)return false;run.cancelled=true;const error=Error('Lancio originale annullato');run.reject?.(error);for(const waiter of run.waiters)waiter.reject(error);run.waiters=[];dispose(run);return true;}
   function checked(){if(heldError){const error=heldError;heldError=null;throw error;}if(!current)throw Error('Lancio originale non disponibile');return current;}
   function settle(run){for(const w of [...run.waiters])if(w.phase===run.phase&&run.frame>=w.frame){run.waiters.splice(run.waiters.indexOf(w),1);w.resolve(true);}}
@@ -24,7 +24,7 @@
      const panel=run.panel=doc.createElement('section'),canvas=run.canvas=doc.createElement('canvas');panel.id='nativeCastleBall';panel.setAttribute('aria-label','Poké Ball di N');Object.assign(panel.style,{position:'fixed',inset:'0',zIndex:'8',pointerEvents:'none'});Object.assign(canvas.style,{width:'100%',height:'100%'});const r=options.renderer;canvas.width=r.canvas.width;canvas.height=r.canvas.height;panel.append(canvas);
      run.scene=new(options.Scene||root.StarterScene.Scene)(canvas,{transparent:true,preserveDrawingBuffer:true,frameSampling:'native',models:{part1:d.models.part1.url},materialAlpha:d.materialAlpha,materialColor:d.materialColor,materialTextures:d.materialTextures,materialUV:d.materialUV,curves:{}});await run.scene.ready;alive();await options.prepareAudio?.([1382,1383]);alive();return d;
     });
-    const d=await Promise.race([prepared,cancelled]);alive();doc.body.append(run.panel);run.phase='flight';options.play?.(1382);let last;
+    const d=await Promise.race([prepared,cancelled]);alive();doc.body.append(run.panel);run.phase='flight';options.play?.(1382);let last;run.document=doc;run.resetClock=()=>{if(!run.disposed&&current===run)last=undefined;};doc.addEventListener?.('visibilitychange',run.resetClock);
     const failed=new Promise((_,reject)=>run.drawReject=reject);failed.catch(()=>{});
     const tick=now=>{if(run.cancelled||current!==run)return;try{const r=options.renderer;last??=now;const dt=Math.max(0,Math.min(100,now-last));last=now;if(!doc.hidden){const limit=run.phase==='flight'?run.frames:46;run.frame=Math.min(limit,run.frame+dt*.03*(options.rate?.()||root.GameSpeed?.rate||1));}
       if(run.phase==='flight')run.position=position(run.from,run.to,run.arc,run.frames,run.frame);

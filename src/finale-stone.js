@@ -16,7 +16,7 @@
    }).catch(error=>{loading=null;throw error;});return loading;
   }
   function dispose(run){
-   if(!run||run.disposed)return;run.disposed=true;if(run.raf!==undefined)cancelFrame?.(run.raf);run.sound?.stop();run.scene?.destroy();run.panel?.remove();if(current===run)current=null;(options.resetInput||root.resetInput)?.();
+   if(!run||run.disposed)return;run.disposed=true;run.document?.removeEventListener?.('visibilitychange',run.resetClock);if(run.raf!==undefined)cancelFrame?.(run.raf);run.sound?.stop();run.scene?.destroy();run.panel?.remove();if(current===run)current=null;(options.resetInput||root.resetInput)?.();
   }
   function cancel(){heldError=null;const run=current;if(!run)return;run.cancelled=true;run.reject?.(Error('Animazione del Chiarolite annullata'));dispose(run);}
   function close(){const error=current?.error||heldError;cancel();if(error)throw error;}
@@ -33,7 +33,7 @@
      run.scene=new(options.Scene||root.StarterScene.Scene)(canvas,{transparent:true,preserveDrawingBuffer:true,frameSampling:'native',models:{part0:d.models.part0.url},materialAlpha:d.materialAlpha,materialColor:d.materialColor,materialTextures:d.materialTextures,materialUV:d.materialUV,curves:{}});
      await run.scene.ready;alive();run.sound=(options.audio||root.AudioEngine)?.createCinematic(d.audio.src,{ownsMusic:false});await run.sound?.prepare();alive();return d;
     });
-    const d=await Promise.race([prepared,cancelled]);alive();let last;
+    const d=await Promise.race([prepared,cancelled]);alive();let last;run.document=doc;run.resetClock=()=>{if(!run.disposed&&current===run)last=undefined;};doc.addEventListener?.('visibilitychange',run.resetClock);
     await Promise.race([new Promise((resolve,reject)=>{
      const tick=now=>{
       if(run.cancelled||current!==run)return;

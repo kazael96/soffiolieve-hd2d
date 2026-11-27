@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "status": "STATIC_PORT_NOT_EXECUTED",
+  "recovery": [
+    {
+      "id": "recovery-01",
+      "index": 0,
+      "name": "G7 initial resource recovery retains birth ticket and preclear/resize coverage until real native IO succeeds",
+      "wrapper": "tests/liepard-recovery064-01.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-02",
+      "index": 1,
+      "name": "G7 active resize preserves snapshot and action while invalid nonpending bank really reloads",
+      "wrapper": "tests/liepard-recovery064-02.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-03",
+      "index": 2,
+      "name": "initial pending caller cancels immediately without waiting for held native IO",
+      "wrapper": "tests/liepard-recovery064-03.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-04",
+      "index": 3,
+      "name": "new play cancels original pending epoch and late held IO cannot overwrite fresh owner",
+      "wrapper": "tests/liepard-recovery064-04.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-05",
+      "index": 4,
+      "name": "pending Recovery Session replacement rejects birth owner without resource retry or replay",
+      "wrapper": "tests/liepard-recovery064-05.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-06",
+      "index": 5,
+      "name": "pending Recovery actor replacement rejects birth owner without resource retry or replay",
+      "wrapper": "tests/liepard-recovery064-06.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-07",
+      "index": 6,
+      "name": "pending Recovery target replacement rejects birth owner without resource retry or replay",
+      "wrapper": "tests/liepard-recovery064-07.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-08",
+      "index": 7,
+      "name": "offline and hidden pause automatic Recovery and resume only when both permit",
+      "wrapper": "tests/liepard-recovery064-08.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-09",
+      "index": 8,
+      "name": "three automatic Recovery delays then owned manual retry resume same caller with real decoded bank",
+      "wrapper": "tests/liepard-recovery064-09.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-10",
+      "index": 9,
+      "name": "foreign loading is preserved and owned manual control returns after foreign removal",
+      "wrapper": "tests/liepard-recovery064-10.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-11",
+      "index": 10,
+      "name": "cleanup callback exceptions cannot leave local Recovery listeners/manual UI alive",
+      "wrapper": "tests/liepard-recovery064-11.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-12",
+      "index": 11,
+      "name": "geometry rejection after resource success stays terminal and preserves original Error identity",
+      "wrapper": "tests/liepard-recovery064-12.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-13",
+      "index": 12,
+      "name": "predecessor pending await uses one IO-free stable barrier and pending teardown restores owned hooks",
+      "wrapper": "tests/liepard-recovery064-13.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-14",
+      "index": 13,
+      "name": "pending bank shared with another native consumer is never deleted or closed by original cancellation",
+      "wrapper": "tests/liepard-recovery064-14.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-15",
+      "index": 14,
+      "name": "throwing previous cancellation callback cannot bypass birth/resource cleanup or replace generation cancellation",
+      "wrapper": "tests/liepard-recovery064-15.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "recovery-16",
+      "index": 15,
+      "name": "frozen bitmap survives only same native lease and is released on Session replacement during real bank recovery",
+      "wrapper": "tests/liepard-recovery064-16.test.cjs",
+      "sourceGroup": "resource-recovery",
+      "source": "actual326c-fixed-only"
+    }
+  ],
+  "g7fixed": [
+    {
+      "id": "g7-fixed-01",
+      "index": 0,
+      "name": "G7 initial-prepare two exhausted resource attempts keep the same M.play recoverable on online/visible/manual without replay",
+      "wrapper": "tests/liepard-g7-fixed064-01.test.cjs",
+      "sourceGroup": "g7-resource-fault",
+      "source": "actual326c-fixed-only"
+    },
+    {
+      "id": "g7-fixed-02",
+      "index": 1,
+      "name": "G7 active-resize two exhausted resource attempts keep the same M.play recoverable on online/visible/manual without replay",
+      "wrapper": "tests/liepard-g7-fixed064-02.test.cjs",
+      "sourceGroup": "g7-resource-fault",
+      "source": "actual326c-fixed-only"
+    }
+  ]
+}

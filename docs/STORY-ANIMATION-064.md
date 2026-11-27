@@ -1,0 +1,82 @@
+# Revisione delle animazioni di storia - 0.64 in lavorazione
+
+Questo è il registro storico delle acquisizioni anteriori alla ripresa del
+23 novembre. Il percorso `outputs/animation-review064` citato sotto non
+risulta più disponibile e le sue copie private non sono state recuperate.
+I vecchi PASS e le letture descrivono quanto registrato allora; non sono
+nuovi rapporti C7. Disponibilità effettiva e collaudo corrente sono in
+[ANIMATION-RESUME-064.md](ANIMATION-RESUME-064.md).
+
+Richiesta del20 novembre2026: esaminare le animazioni gia aggiunte con il metodo di `ANIMATION-QUALITY.md` e le skill `sprite-animation` e `pixel-art-fundamentals`. Il lancio di Aralia0.63 resta quello gia rifatto con pose complete; non viene ridisegnato in questa revisione. Registrare un metodo o generare tavole non certifica una revisione grafica compiuta.
+
+## Inventario e metodo
+
+L'inventario esterno `outputs/animation-review064/story/inventory.json` comprende18 ricezioni (16 medaglie e2 Pokedex),11 filmati (Ruota, Ponte, due Torre, sette del finale),3 primi piani di N,6 chiamate Interpoke,8 programmi di draghi e437 comandi/401 testi dei crediti. NPC, porte, bicicletta e introduzione hanno verbali separati del revisore principale. Evoluzioni e MN hanno acquisizioni e limiti dichiarati. Le voci restano UNREVIEWED fino alla lettura effettiva delle immagini.
+
+I riferimenti usano il renderer reale e le parti native. Il campionamento15fps comprende tutti i cambi PAT/BVA/luminosita pertinenti; le evoluzioni dense usano30fps. Le tavole di20 pose sono normalizzate a256 pixel di larghezza, nearest e con fondale neutro. Il riuso e consentito soltanto per RGBA, dimensioni e traccia dei fotogrammi identici. Ogni verbale conserva SHA256 del rapporto e di ogni tavola realmente letta. Frame forniti dal banco, correttezza numerica e assenza di eccezioni non certificano il comando effettivo, la campagna, l'ascolto o Android fisico.
+
+Chrome e sempre invisibile, isolato dal browser personale, con profilo temporaneo, mutex esclusivo e chiusura limitata ai processi propri. Il banco usa2 dei4 core logici, non riduce qualita grafica e registra i costi come latenza dello strumento, non FPS del gioco. I budget restano256MiB di artefatti e1GiB di heap JS grossolano; ogni record viene salvato prima del successivo. FAIL e acquisizioni parziali restano conservati.
+
+## Clock e conservazione dei passaggi
+
+Le ricezioni avanzavano con il tempo trascorso fuori scheda (frame1->360 nella regressione); Ruota/Ponte avanzavano con callback nascosti. `clock-baseline.log` conserva4 FAIL reali. Torre, finale, crediti, primi piani ed evoluzione ignoravano i callback nascosti ma includevano ancora il primo intervallo dopo una sospensione completa dei RAF: il limite100ms puo saltare12 fotogrammi a4x. `suspended-allmodules-baseline.log` conserva4 PASS/5 FAIL. I sette player azzerano il riferimento temporale su `visibilitychange`, rimuovono il listener a conclusione/annullamento/errore e respingono callback obsoleti.
+
+Le ricezioni a4x potevano saltare texture PAT brevissime e passaggi BVA. I checkpoint ora derivano dalle vere tracce installate, mantenendo modelli, curve e durata logica nativa. Un dispositivo lento puo richiedere disegni aggiuntivi per preservare i gesti; non si certifica la durata nominale a4x. `clocks-all-fixed.log` e `clocks-native-assets-fixed.log` raccolgono43 PASS (9 nuovi e34 precedenti). Un tentativo con fixture _site assente resta un errore del banco conservato, non un difetto del runtime.
+
+La ricognizione successiva ha riprodotto altri tre clock: Nardo, Chiarolite e Ball di N. Senza alcun RAF nascosto, al ritorno il Chiarolite avanzava27->30 e la Ball0.57->3.57 gia a1x. `nardo-clock-baseline.log` e `stone-ball-clock-baseline.log` conservano i FAIL. I tre player hanno ora reset e cleanup per-run, senza cambiare pose, traiettorie e durata nativa. `stone-ball-clock-fixed.log` raccoglie22 PASS con1x/2x/4x, errori/cancel e i nove controlli precedenti. Questi tre fix sono POSTERIORI alla candidata2 e richiedono la candidata3 integrata.
+
+## Medaglie: geometria nativa e prova prima/dopo
+
+Il pilot01 comprende9 sequenze,1222 campioni,703 RGBA distinti e36 tavole lette. Conserva VISUAL_FINDING_UNRESOLVED: schegge nere sul coperchio durante la rotazione del portamedaglie, soprattutto effetto42 (Medaglia Tris femminile). Gli effetti50/51 sono Pokedex, non portamedaglie.
+
+L'indagine `case-conditioning.json` ha identificato nei16 modelli di medaglie e nello sfondo una base di skinning quasi singolare: scala2e-6 e inverse bind500000. La conversione Float32 aveva gia perso dettagli; modificare soltanto la matrice del renderer non puo recuperarli. I due modelli Pokedex non hanno questa condizione. `probe42-bind01` riconverte il modello originale con base di bind non singolare:184 campioni/7 tavole lette, schegge scomparse ai174/182/186/204 e conferma indipendente del revisore principale.
+
+La ROM IRBI ripristinata (SHA256 f8a56b6675e4306f618e32f690cddb274b817c0c004153142909af9c9b07644f) ha permesso la riconversione diretta di tutte17 risorse. `tools/rebind-native-receipts.py` lavora in destinazione privata e verifica le invarianti; `tools/install-native-receipt-bind.py` installa solo17 prove complete con hash corretti. `rebind-native-all02/proof.json` conserva fonti, convertitore e output; gli originali e BCA/PAT/BVA/materiali/texture/indici/pesi restano invariati. `background-visibility-native-proof.json` confronta esattamente361 fotogrammi per7 nodi. Il trapianto parziale esplorato non e stato installato. Dieci test Python del formato/binario passano.
+
+`receipts-native03/manual-review.json` lega56 tavole lette:18 ricezioni,3016 campioni,972 RGBA distinti. Coperchi/cerniere, rotazione, apertura/chiusura, varianti e PAT272-276 non mostrano piu le schegge. E un PASS limitato a geometria/BCA/PAT/BVA campionata: le particelle SPL15 delle16 medaglie restano NON RICOSTRUITE. `spl15-structure.json` decodifica2 emettitori e2 texture A5I3; dispatch, attacco e tempi del gestore nativo non sono stabiliti. Nessuna particella sostitutiva inventata.
+
+## Film, crediti ed evoluzioni effettivamente letti
+
+`credits-evolution01/manual-review.json`:115 tavole lette,2453 catture lungo8464 tick dei crediti effettivi, con ogni cambio comando/fase/visibilita/alpha. Titoli, scorrimento, testa/occhio, lampeggio e uscita sono coerenti nei campioni. Audio silenziato e clock fornito: nessuna prova sonora o di campagna. Le prime evoluzioni in tempo reale hanno troppe poche pose per una revisione completa; il limite resta conservato.
+
+`films-evolution03/manual-review.json`:56 tavole lette, Ruota3 e Torre14 complete, piu tre evoluzioni dense di92 pose ciascuna. Evoluzione adattata HD-2D con sprite nativi, non ricostruzione della scena DS. Il FAIL globale dell'osservatore B e del banco, non del player. `films-evolution04/manual-review-root.json`:55 tavole interamente lette dal revisore principale, Castello6 e Partenza7 complete; nessun altro difetto osservato oltre alla linea del Castello sotto. L'evoluzione in questo lotto resta PARZIALE (33 pose,0-36%), non approvazione del completamento.
+
+`films05/manual-review.json`:49 tavole lette di8/9. `films06/manual-review.json`:70 tavole lette di10/11 e finding materiale conservato. `films07/manual-review.json`:33 tavole lette di12. Volo, appoggi, ali, coda, muro, detriti, fumo e dissolvenze restano leggibili nei campioni salvo i finding espliciti. Le copie WebP di trasporto sono confrontate pixel per pixel con i PNG, senza perdita. `films-evolution02` fallisce per budget del banco durante10 e non certifica il film incompleto.
+
+## Zekrom: profondita e base colore
+
+Nel film11 Zekrom era molto scuro; ai942-970 testa e ali diventavano bianche o apparentemente trasparenti, con occhi/denti isolati. L'audit distingue due cause: una traccia alpha costante31 rendeva erroneamente traslucida l'anatomia e disattivava la scrittura della profondita; il convertitore aveva inoltre cotto il diffuse iniziale nei COLOR_0, moltiplicato di nuovo dal BMA e talvolta gia nullo. Il riferimento tecnico e il [convertitore apicula](https://github.com/scurest/apicula/blob/master/src/convert/gltf/mod.rs) con le [primitive native](https://github.com/scurest/apicula/blob/master/src/primitives/mod.rs). Non si presume equivalenza colorimetrica globale con il DS.
+
+Solo7/part0,10/part1 e11/part1 sono riconvertiti dalla ROM, neutralizzando nella copia di conversione il diffuse dei soli materiali BMA. `film-color-white02/proof.json` verifica gerarchia, materiali, texture, ogni accessore non COLOR_0 e BCA identici. BMA originali invariati; un metadato GLB esplicito applica il trasferimento lineare/quantizzazione8bit del convertitore una volta sola. `tools/native-material-basis.py`, export aggiornato e installatore riproducono/verificano la correzione. Il catalogo cambia soltanto3 SHA GLB.
+
+`material-probe-review.json`:28 pose selezionate e4 tavole prima/4 dopo, tutte lette. Testa/ali intere ai942/950/960/970, occhi aderenti e corpo leggibile anche350/514/1200. `material-probe-independent-root.json` conserva4 PNG effettivamente letti anche dal revisore principale. E una conferma di keyframe, non film completo o candidata integrata. Sette test JS e4 Python passano. Le linee del Castello restano identiche prima/dopo.
+
+## Consumatori del renderer e perimetro dei replay
+
+`story/renderer-consumer-impact.json` e lo script riproducibile confrontano58 modelli/758 materiali usati dai nove consumatori diretti di StarterScene.Scene. Le18 ricezioni richiedono replay per17 GLB cambiati. Film7/10/11 cambiano base colore e profondita; Torre13 cambia profondita di sky02 (alpha31). Ruota3/wheelField/lambert1 e Torre14/dragon/shintail_r1+glow1 cambiano ramo senza traccia, ma hanno alpha base0: il fragment shader li scarta in entrambi i casi. La comparazione rimane esplicita; non si attribuisce loro un nuovo difetto estetico dal solo branch.
+
+Scelta iniziale, crediti, Ponte15, film6/8/9/12, Chiarolite, Ball e Nardo hanno asset e rami di profondita/colore invariati. E equivalenza tecnica, non nuova approvazione estetica. I consumatori di loadGLB/matrici/campionamento nei renderer di campo e palestre non eseguono i rami della classe cambiati e non caricano i20 asset modificati.
+
+## Finding e limiti ancora aperti
+
+Castello6: una linea orizzontale di1px ai248/280 resta OPEN. `castle6-source-edge/finding.json` localizza l'edge nel quad fx_rays (primitive27, joint26). UV native e glTF sono esattamente0..1, sampler REPEAT coincide, texture128x128 ha bordo alto trasparente e basso opaco. L'ipotesi e un campionamento appena fuori bordo/MSAA, non una prova gia conclusa; niente clamp globale o modifiche arbitrarie. Una texture privata con gutter e pronta ma non installata e richiede confronto prima/dopo.
+
+Torre13: il frame0 ha traslazione nulla gia nella camera nativa, diversa dal frame1. Nessuno smussamento inventato; l'inizializzazione effettiva va distinta dal taglio nativo. SPL15 resta non ricostruito. Anatomia campionata non equivale a fedelta sonora o assenza assoluta di bug.
+
+Le94 sequenze MN realmente lette da questo revisore sono in `hm-partition100-manual.json` e nella copia compatibile `hm/story-reference-review/review/manual-review-story.json`:88 PASS limitati alla composizione,6 Ducklett/Volo NEEDS_SUPPORT_CHECK per seduta apparentemente alta. Le6 Swanna/Volo della partizione sono state lette soltanto dall'altro revisore: suo verbale separato, non duplicate come viste qui. Il totale100 indica assegnazione contabilizzata, non100 PASS. Nuovi fix di supporto richiedono replay sulla loro candidata.
+
+## Candidate e consegna
+
+La candidata2 e congelata a37f6e8bad665dee5. I nuovi fix Nardo/Chiarolite/Ball sono posteriori: la directory C2 rimane immutata e il replay integrato rifiuta overlay di sorgenti o GLB privati. `c2-replay-plan.json` e `c3-replay-plan.json` separano i perimetri. La candidata finale richiede controller effettivi alle tre velocita, tre formati, lettura delle immagini cambiate, suite completa e verifica pubblica. Nessun PASS storico viene trasferito automaticamente al runtime modificato. Pubblicazione ancora di competenza dell'integrazione principale.
+
+La scelta dello starter aveva un quarto clock: il riferimento iniziale precedeva il caricamento dei modelli e il RAF non distingueva document.hidden. La baseline reale produce60 fotogrammi al primo disegno dopo caricamento lento e lettera5->65 dopo una sospensione senza RAF (`starter-selection-clock-baseline.log`,2 FAIL). Il riferimento ora parte dopo ready, viene azzerato su visibilita e non avanza nei callback nascosti; lo stoppedguard respinge disegni tardivi. Cleanup dei listener verificato anche su errore modello. I3 nuovi test a1x/2x/4x e7 precedenti GPU/camera/risorse passano (`starter-selection-clock-fixed.log`,10 PASS). Nessuna regia, posa Aralia o dato nativo cambiato. La copertura integrata e demandata ai12 replay intro della candidata3 del revisore principale.
+
+Il successivo probe privato `castle-gutter-private01/manual-review.json` ha reso la causa del bordo verificabile:240 e258 sono RGBA identici;248 cambia soltanto230 pixel in una riga, bbox[14,118,244,119];280 cambia18 pixel sull'edge inclinato, nessun altro pixel della scena. La tavola unica e stata realmente letta anche dal revisore principale, che conferma la scomparsa della riga. La prova riguarda Chrome software e quattro keyframe; non e ancora un film completo.
+
+Su questa prova e autorizzazione e aggiunto un metadato esplicito SOLTANTO a6/part2/fx_rays. Il renderer genera una superficie privata128x256 con64 righe trasparenti sopra e sotto i128x128 texel originali, e compone la trasformazione del bordo dopo la matrice SRT nativa. PNG, GLB, camera, BCA/BMA/BTA, AA e tempi originali restano immutati; non si applica clamp globale. I guard rifiutano immagine/dimensioni/sampler diversi, PAT aggiunto, V nativa non identita, UV usati fuori0..1 o texture condivisa con altri materiali. Il catalogo cambia solo il metadato (`catalog-declaration-delta.json`), non i canali nativi. I3 test specifici falliscono prima e passano dopo con le7 regressioni materiale/GPU precedenti. Il primo fixed aveva un controllo UV sull'intero accessor condiviso; il FAIL resta conservato e r2 limita correttamente agli indici usati dal materiale. Il film6 completo sulla candidata3 resta obbligatorio prima di chiudere il finding.
+
+L'export riproduce questo solo metadato dopo verifica SHA della PNG nativa e delle tracce V; rifiuta fonti cambiate. La base diffuse neutra nell'export viene limitata ai tre modelli effettivamente provati7/part0,10/part1,11/part1, evitando modifiche future silenziose agli altri film. La nuova regressione da includere nei gate e `tests/native-texture-gutter.test.cjs`.
+
+Il padding di produzione usa esclusivamente GPU: allocazione trasparente con texImage2D(null) e texSubImage2D dell'Image originale a(0,64), evitando il roundtrip premoltiplicato Canvas2D sui molti texel nativi a basso alpha. Il test verifica che nessun canvas2D venga creato. La matrice nativa resta intatta e solo la sua copia per il materiale dichiarato viene adattata.
+
+Una quarta regressione ha anche riprodotto un leak precedente: un errore al terzo upload texture della scena C2 lasciava3 risorse GPU e0 rilasciate. `native-texture-upload-leak-baseline.log` conserva il FAIL sul renderer effettivo della candidata2. Ogni texture e ora registrata prima dell'upload, per consentire cleanup anche se l'upload lancia un'eccezione. Le4 regressioni gutter/risorse e7 materiale/GPU precedenti passano insieme (`castle-gutter-unit-fixed-r4-gpu.log`,11 PASS). Questi controlli non chiudono il finding grafico prima del film6 completo C3.

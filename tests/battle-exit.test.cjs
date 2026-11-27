@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const source=fs.readFileSync(require.resolve('../src/battle-ui.js'),'utf8');
 function environment(escape=true){
  const logs=[],music=[],battle={log:[],ended:false,win(){this.ended=true;this.winner='Alcide';this.log.push('|win|Alcide');}};
- const c={console,busy:false,finished:false,storyBattle:'wild',escapedBattle:false,labBattle:false,trainer:false,partner:{},enemy:{},
+ const c={console,busy:false,finished:false,storyBattle:'wild',escapedBattle:false,labBattle:false,trainer:false,partner:{},enemy:{},visualBattleContext:{},visualState:{p1:{},p2:{}},
   session:{battle,flee:()=>escape,act:()=>battle.win()},Journey:{recordParticipant(){}},
   AudioEngine:{setScene:name=>music.push(name)},MoveFX:{cancel(){}},
   updateBattle(){},captureVisualContext(){},snapshotPartner(){c.finished=battle.ended;},syncVisualVolatiles(){},showOpeningTrainerHint:async()=>{},

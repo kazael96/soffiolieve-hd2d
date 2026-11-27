@@ -60,20 +60,20 @@
   },
   // Front neck patch 9 belongs to the head group. Tail is part of the torso.
   '580':{
-   front:{head:[0,1,2,9],left:[5],right:[6],footLeft:[8],footRight:[7]},
-   back:{head:[0,1],left:[5],right:[4],footLeft:[7],footRight:[6]}
+   front:{body:[3],head:[0,1,2,9],left:[5],right:[6],footLeft:[8],footRight:[7]},
+   back:{body:[2],head:[0,1],left:[5],right:[4],footLeft:[7],footRight:[6]}
   },
   // Swanna's broad white feathers 8/front and 9/back are wings, not head.
   // Torso track 2 stays fixed; front tail pixels are inseparable from torso.
   '581':{
-   front:{head:[0,1],left:[7],right:[8],footLeft:[5,6],footRight:[3,4]},
-   back:{head:[0,1],left:[10],right:[9],footLeft:[5,6],footRight:[7,8],tail:[3,4]}
+   front:{body:[2],head:[0,1],left:[7],right:[8],footLeft:[5,6],footRight:[3,4]},
+   back:{body:[2],head:[0,1],left:[10],right:[9],footLeft:[5,6],footRight:[7,8],tail:[3,4]}
   },
   // Golurk chest seal 2/front stays on torso; each fist follows its shoulder.
   // Native paired feet are one track in each view, intentionally unsplit.
   '623':{
-   front:{head:[0],left:[4,7],right:[5,6],feet:[3]},
-   back:{head:[0],left:[3,5],right:[4,6],feet:[2]},
+   front:{body:[1,2],head:[0],left:[4,7],right:[5,6],feet:[3]},
+   back:{body:[1],head:[0],left:[3,5],right:[4,6],feet:[2]},
    // Native opaque foot-component bottom contacts. u is horizontal distance
    // from full opaque center / full opaque height; v is height above foot.
    jetAnchors:{front:[[-.22151899,.02531646],[.15822785,0]],back:[[-.1875,.0125],[.13125,0]]}

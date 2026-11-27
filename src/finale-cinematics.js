@@ -20,12 +20,13 @@
    const run=current={cancelled:false,reject:null},doc=options.document||root.document,panel=doc.createElement('section'),canvas=doc.createElement('canvas');
    panel.id='chapterCinematic';panel.setAttribute('aria-label',id===6?'Comparsa del Castello di N':id===7||id===8?'Partenza di N':'Risveglio del Pokémon leggendario');Object.assign(panel.style,{position:'fixed',inset:'0',zIndex:'80',background:'#000',display:'grid',placeItems:'center'});Object.assign(canvas.style,{width:'100%',height:'100%',objectFit:'contain'});canvas.width=960;canvas.height=720;panel.append(canvas);doc.body.append(panel);
    let scene,soundtrack,raf,last,frame=0;const request=options.requestFrame||root.requestAnimationFrame,cancelFrame=options.cancelFrame||root.cancelAnimationFrame;
+   const resetClock=()=>{if(current===run&&!run.cancelled)last=undefined;};doc.addEventListener?.('visibilitychange',resetClock);
    const assertCurrent=()=>{if(run.cancelled||current!==run)throw Error('Sequenza del finale annullata');};
    try{
     const load=(options.resourceGate||((key,work)=>renderer.resourceGate(key,work)))('finale-cinematic-'+id,async()=>{
      const film=(await data()).films[id];assertCurrent();soundtrack?.stop();scene?.destroy();
      const dual=film.perspective.nativeScreenOffsetsQ12?.some(v=>v!==0),raster=dual?doc.createElement('canvas'):canvas;canvas.width=dual?768:960;canvas.height=dual?1152:720;raster.width=dual?768:960;raster.height=dual?576:720;
-     scene=new(options.Scene||root.StarterScene.Scene)(raster,{preserveDrawingBuffer:true,frameSampling:'native',clearColor:[0,0,0],brightness:film.brightness,models:Object.fromEntries(Object.entries(film.models).map(([k,m])=>[k,m.url])),materialAlpha:film.materialAlpha,materialColor:film.materialColor,materialTextures:film.materialTextures,materialUV:film.materialUV,curves:{part0:film.camera},perspective:film.perspective});
+     scene=new(options.Scene||root.StarterScene.Scene)(raster,{preserveDrawingBuffer:true,frameSampling:'native',clearColor:[0,0,0],brightness:film.brightness,models:Object.fromEntries(Object.entries(film.models).map(([k,m])=>[k,m.url])),materialAlpha:film.materialAlpha,materialColor:film.materialColor,materialTextures:film.materialTextures,materialUV:film.materialUV,materialTextureGutters:film.materialTextureGutters,curves:{part0:film.camera},perspective:film.perspective});
      await scene.ready;assertCurrent();soundtrack=(options.audio||root.AudioEngine)?.createCinematic(film.audio.src,{ownsMusic:true});await soundtrack?.prepare();assertCurrent();return film;
     });
     const cancellation=new Promise((_,reject)=>{run.reject=reject;});let film=await Promise.race([load,cancellation]);assertCurrent();panel.dataset.frames=String(film.frames);panel.dataset.film=String(id);
@@ -35,7 +36,7 @@
      else scene.draw('part0',frame,{extra:['part1','part2']});
      soundtrack?.sync(frame,rate);panel.dataset.frame=String(Math.floor(frame));observer?.({id,frame,canvas,scene,screens:dual?2:1});if(frame>=film.frames-1)resolve();else raf=request(tick);
     }catch(error){reject(error);}};raf=request(tick);}),cancellation]);
-   }finally{run.cancelled=true;run.reject=null;if(raf!==undefined)cancelFrame(raf);soundtrack?.stop();scene?.destroy();panel.remove();if(current===run)current=null;(options.resetInput||(()=>{if(typeof resetInput==='function')resetInput();}))();}
+   }finally{run.cancelled=true;run.reject=null;doc.removeEventListener?.('visibilitychange',resetClock);if(raf!==undefined)cancelFrame(raf);soundtrack?.stop();scene?.destroy();panel.remove();if(current===run)current=null;(options.resetInput||(()=>{if(typeof resetInput==='function')resetInput();}))();}
   }
   function cancel(){if(!current)return false;current.cancelled=true;current.reject?.(Error('Sequenza del finale annullata'));return true;}
   function observe(callback){if(callback!==undefined&&typeof callback!=='function')throw Error('Osservatore del filmato non valido');const previous=observer;observer=callback;return()=>{if(observer===callback)observer=previous;};}

@@ -17,12 +17,16 @@
  MoveFX.idleTick=side=>passive?undefined:baseIdleTick(side);
  MoveFX.pose=side=>{if(!passive)return basePose(side);const a=storedStance(passive,views[passive]?.spriteId);return {x:0,y:0,scale:1,alpha:1,...(a?{scaleY:1-a.crouch,scaleX:1+a.crouch*.4,pauseAnimation:true}:{})};};
  BattleGround.effect=function(side,w,h,context){if(!enabled())return baseEffect(side,w,h,context);const p=BattleGround.layout(w,h)[side];return {x:p.x,y:p.y-p.height*.55};};
- function slots(w,h){const normal=baseLayout(w,h),out={};
+ const rawSlotCache=new WeakMap();
+ function slots(w,h){const normal=baseLayout(w,h);let out=rawSlotCache.get(normal);if(out)return BattleGround.frameSlots?.(out)??out;out={};
   for(const side of ['p1','p2'])out[side]=[0,1].map(i=>{const base=normal[side],x=w*(side==='p1'?(i?.43:.19):(i?.79:.56)),y=h*(side==='p1'?(i?.84:.77):(i?.57:.61)),height=base.height*.76;
-   const world=base.view?BattleGround.groundPoint(base.view,x,y,w,h,.02):undefined;return {...base,x,y,height,size:height/80,world,pixelsPerUnit:world?h/(2*base.view.lens[1]*BattleGround.project(base.view,world,w,h).depth):base.pixelsPerUnit};});return out;
+   const world=base.view?BattleGround.groundPoint(base.view,x,y,w,h,.02):undefined;return {...base,x,y,height,size:height/80,world,pixelsPerUnit:world?h/(2*base.view.lens[1]*BattleGround.project(base.view,world,w,h).depth):base.pixelsPerUnit};});rawSlotCache.set(normal,out);return BattleGround.frameSlots?.(out)??out;
  }
  function position(key,w,h){const side=owner(key),slot=session.multi?(/^p[34]/.test(key)?1:0):key.endsWith('b')?1:0;return slots(w,h)[side][slot];}
  BattleGround.layout=function(w,h,...args){if(!enabled())return baseLayout(w,h,...args);const result={};for(const side of ['p1','p2'])result[side]=override?.[side]||position(refs[side],w,h);return result;};
+
+ function framingActors(){if(!enabled())return null;const actors={};for(const side of['p1','p2'])for(let index=0;index<2;index++){const key=ref(side,index),nativeMon=mon(key),view=views[key],role=Object.keys(refs).find(r=>refs[r]===key),state=(role?visualState[role]:poses[key])||{},graphic=window.PokemonVisuals?.graphic?.(view)??view?.spriteId,back=side==='p1';actors[key]={nativeMon,slot:key,supportSide:side,supportIndex:index,graphic,back,visible:!!view&&!state.hidden&&!state.faint,bank:window.ROM_SPRITE_ANIM?.cache[graphic+'-'+(back?'back':'front')],hidden:!!state.hidden,substitute:!!state.substitute,minimized:!!state.minimized,faint:!!state.faint};}return actors;}
+
  function prepareInput(){if(!enabled()||busy||finished)return;rememberStances();const r=session.battle.p1.activeRequest;
   if(r?.active&&!session.battle.p1.active[session.selectionSlot]?.hp){const alive=session.battle.p1.active.findIndex(p=>p?.hp>0);if(alive>=0)session.selectionSlot=alive;}
   if(r?.forceSwitch){const pending=r.forceSwitch.findIndex((force,i)=>force&&!session.queued[i]);if(pending>=0)session.selectionSlot=pending;}
@@ -76,5 +80,5 @@
  }
  async function partnerBattle(args){const [ally,first,second]=args,team=id=>structuredClone(OPENING_TRAINERS[id].party).map(p=>({...p,item:GEN5.items.find(i=>i.id===p.heldItem)?.key||''}));rival=first===401?'Mila e Michelino':'Team Plasma';await startBattle(true,{story:rival,trainerId:first,doubles:true,aiFlags:OPENING_TRAINERS[first].aiFlags,ally:team(ally),secondFoe:team(second),p1:Journey.configs(),p2:team(first)});session.partnerTrainers=[first,second];resetViews();display();updateBattle();}
  const originalStart=startBattle;startBattle=async function(...args){views={};poses={};stances={};for(const e of extras)e.hidden=true;document.getElementById('battle').classList.remove('is-double');await originalStart(...args);if(enabled()){session.onItemUsed=id=>Journey.consumeItem(id);resetViews();display();updateBattle();}};
- window.DoubleBattles={isReserved:index=>enabled()&&session.queued.some((c,i)=>i!==session.selectionSlot&&c==='switch '+index),combatantFor:side=>enabled()?mon(refs[side]):null,captureTarget,prepareInput,normalizeEvents,focusEvent,moveMiss,targetSide,drawIdle,backFor,cards,partner:partnerBattle,undo,slots};
+ window.DoubleBattles={framingActors,isReserved:index=>enabled()&&session.queued.some((c,i)=>i!==session.selectionSlot&&c==='switch '+index),combatantFor:side=>enabled()?mon(refs[side]):null,captureTarget,prepareInput,normalizeEvents,focusEvent,moveMiss,targetSide,drawIdle,backFor,cards,partner:partnerBattle,undo,slots};
 })();

@@ -121,3 +121,10 @@ test('female HM QA propagates a missing native resource and restores its loader 
 test('female HM QA does not cancel another active native command to prepare its fixture',async()=>{
  const f=femaleHMFixture056();f.context.FieldHMWorld.active={move:19};await assert.rejects(f.context.runFemale(19,()=>{throw Error('must not start');}),/requires an idle field/);assert.deepEqual(f.calls,[]);assert.equal(f.context.RuntimeAssets.image,f.image);
 });
+
+test('actual541 command helper is copied byte-exact and loaded before its three canonical registrations',()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'tail541-qa-build-')),site=path.join(dir,'site'),out=path.join(dir,'fixture');fs.mkdirSync(site);
+ try{fs.writeFileSync(path.join(site,'index.html'),'<!doctype html><html lang="it"><head><title>Original</title><script>window.SpeciesStudioMode=[572];</script></head><body></body></html>');const original=fs.readFileSync(path.join(site,'index.html'));build(site,out);
+ const html=fs.readFileSync(path.join(out,'index.html'),'utf8'),source=fs.readFileSync(path.join(__dirname,'qa-tail-actual064.js')),copied=fs.readFileSync(path.join(out,'qa-tail-actual064.js')),qa=fs.readFileSync(path.join(out,'browser-qa.js'),'utf8');assert(source.equals(copied));assert(html.indexOf('/__qa/qa-tail-actual064.js?v=')<html.indexOf('/__qa/browser-qa.js?v='));assert.equal((html.match(/\/qa-tail-actual064\.js/g)||[]).length,1);new vm.Script(copied.toString('utf8'),{filename:'qa-tail-actual064.js'});for(const id of ['qaTail541ActualP1064','qaTail541ActualP2064','qaTail541RecoverySwitchP1064'])assert.equal((qa.match(new RegExp("case049\\('"+id+"'",'g'))||[]).length,1);assert(fs.readFileSync(path.join(site,'index.html')).equals(original));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

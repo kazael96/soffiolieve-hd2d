@@ -120,4 +120,50 @@ test('private town resource plans ignore live identity, story actors and Surf wh
  renderer.isolated=false;const field=plan();assert.ok(field.models.includes('surf-model'));assert.ok(field.textures.includes('surf-texture'));assert.deepEqual(field.sprites.map(s=>s.key),['F-0','Aralia-0','SurfMon-0']);assert.equal(storyCalls,1);assert.equal(surfCalls,1);
 });
 
+// Same production prepare/compose/play and existing privateHost; no new renderer.
+class HistoryVisibilityDoc extends EventTarget{
+ constructor(){super();this.hidden=false;this.listeners=new Set();}
+ addEventListener(type,listener,options){super.addEventListener(type,listener,options);if(type==='visibilitychange')this.listeners.add(listener);}
+ removeEventListener(type,listener,options){super.removeEventListener(type,listener,options);if(type==='visibilitychange')this.listeners.delete(listener);}
+ visibility(hidden){this.hidden=hidden;this.dispatchEvent(new Event('visibilitychange'));}
+}
+function historyPlayback(doc,cards,extra={}){
+ let next,lastTick,draws=0;const c={canvas:{width:768},save(){},restore(){},setTransform(){},clearRect(){},fillRect(){},drawImage(){draws++;}};
+ const run=H.play({canvas:{getContext:()=>c},cards,font:{},document:doc,request:f=>(next=f,1),cancel(){next=null;},...extra});
+ return{run,step(now){const tick=next;assert.equal(typeof tick,'function');next=null;lastTick=tick;tick(now);},get pending(){return !!next;},get draws(){return draws;},stale(now){lastTick(now);}};
+}
+test('actual seven-era player holds its current frame across fully suspended hidden RAFs at x1/x2/x4',async()=>{
+ const names=['NativeText','NAMING_ASSETS','renderer'],old=Object.fromEntries(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));
+ try{globalThis.NativeText={draw(){}};globalThis.NAMING_ASSETS={font:{}};const field={center:[10,20],zoom:1.37,cameraPitch:[.4,.9]},fieldBefore=JSON.stringify(field);globalThis.renderer=field;
+  for(const rate of [1,2,4]){const host=privateHost(),doc=new HistoryVisibilityDoc(),foreign=()=>{};let bundle,h;doc.addEventListener('visibilitychange',foreign);
+   try{bundle=await H.prepare();const cards=H.compose(bundle,{width:1,height:1,data:new Uint8ClampedArray([70,110,80,255])});let frame;
+    h=historyPlayback(doc,cards,{rate:()=>rate,onFrame:p=>{frame=p.frame;}});h.step(0);assert.equal(frame,0);
+    doc.visibility(true); // No RAF at all during this5000ms hidden interval.
+    doc.visibility(false);h.step(5000);assert.equal(frame,0,'First visible RAF consumed hidden wall time at x'+rate);
+    assert.equal(doc.listeners.size,2);assert.equal(H.activeViews,1);h.step(5016);assert.equal(frame,16*.03*rate);
+    doc.visibility(true);doc.visibility(false);h.step(15016);assert.equal(frame,16*.03*rate,'Resume rewound or advanced the current era');
+    h.step(15032);assert.equal(frame,2*(16*.03*rate));h.run.cancel();assert.equal(await h.run.promise,false);
+    assert.equal(doc.listeners.size,1);assert(doc.listeners.has(foreign));assert.equal(host.disposals(),1);assert.equal(H.activeViews,0);assert.equal(bundle.evolution.disposed,true);
+    assert.equal(host.instances[0].canvas.width,0);assert.equal(host.instances[0].canvas.height,0);assert.equal(globalThis.renderer,field);assert.equal(JSON.stringify(field),fieldBefore);assert.equal(globalThis.ROM_SCENE.clearColor,undefined);
+   }finally{h?.run.cancel();bundle?.evolution.dispose();host.restore();doc.removeEventListener('visibilitychange',foreign);}
+  }
+ }finally{for(const name of names){if(old[name])Object.defineProperty(globalThis,name,old[name]);else delete globalThis[name];}}
+});
+test('history visibility and original private view close on finish/cancel/context/callback/initial-RAF errors',async()=>{
+ const names=['NativeText','NAMING_ASSETS','renderer'],old=Object.fromEntries(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));
+ try{globalThis.NativeText={draw(){}};globalThis.NAMING_ASSETS={font:{}};const field={center:[3,4],zoom:1.2},fieldBefore=JSON.stringify(field);globalThis.renderer=field;
+  for(const mode of ['finish','cancel','context-loss','frame-error','rate-error','initial-RAF-error']){const host=privateHost(),doc=new HistoryVisibilityDoc(),foreign=()=>{},sentinel=Error('original '+mode);let bundle,h;doc.addEventListener('visibilitychange',foreign);
+   try{bundle=await H.prepare();const cards=H.compose(bundle,{width:1,height:1,data:new Uint8ClampedArray([70,110,80,255])});
+    if(mode==='initial-RAF-error'){let late,draws=0;assert.throws(()=>H.play({canvas:{getContext:()=>({})},cards,document:doc,request(fn){late=fn;throw sentinel;},onFrame(){draws++;}}),error=>error===sentinel);assert.equal(host.disposals(),1,'Initial RAF failure leaked the private view');assert.equal(doc.listeners.size,1);late(100000);assert.equal(draws,0);}
+    else{const extra=mode==='frame-error'?{onFrame(){throw sentinel;}}:mode==='rate-error'?{rate(){throw sentinel;}}:{rate:()=>4};
+     h=historyPlayback(doc,cards,extra);const rejected=mode==='context-loss'?assert.rejects(h.run.promise,/Panorama/):mode.endsWith('error')?assert.rejects(h.run.promise,error=>error===sentinel):null;
+     if(mode==='context-loss')host.lose();h.step(0);if(mode==='cancel')h.run.cancel();else for(let n=1;n<1000&&h.pending;n++)h.step(n*100);
+     if(rejected)await rejected;else assert.equal(await h.run.promise,mode==='finish');const draws=h.draws;h.stale(100000);assert.equal(h.draws,draws);h.run.cancel();
+    }
+    assert.equal(doc.listeners.size,1,mode);assert(doc.listeners.has(foreign));assert.equal(host.disposals(),1,mode);assert.equal(H.activeViews,0);assert.equal(bundle.evolution.disposed,true);assert.equal(host.instances[0].canvas.width,0);assert.equal(host.instances[0].canvas.height,0);assert.equal(globalThis.renderer,field);assert.equal(JSON.stringify(field),fieldBefore);assert.equal(globalThis.ROM_SCENE.clearColor,undefined);
+   }finally{h?.run.cancel();bundle?.evolution.dispose();host.restore();doc.removeEventListener('visibilitychange',foreign);}
+  }
+ }finally{for(const name of names){if(old[name])Object.defineProperty(globalThis,name,old[name]);else delete globalThis[name];}}
+});
+
 }

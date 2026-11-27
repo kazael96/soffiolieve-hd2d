@@ -1,0 +1,5 @@
+/* Minimal native RGBA8 PNG decoder for independent source-pixel QA. */
+'use strict';
+const assert=require('node:assert/strict'),zlib=require('node:zlib');
+function png(buffer){let width,height,depth,color;const chunks=[];for(let i=8;i<buffer.length;){const n=buffer.readUInt32BE(i),kind=buffer.toString('ascii',i+4,i+8),data=buffer.subarray(i+8,i+8+n);if(kind==='IHDR'){width=data.readUInt32BE(0);height=data.readUInt32BE(4);depth=data[8];color=data[9];}if(kind==='IDAT')chunks.push(data);i+=n+12;}assert.equal(depth,8);assert.equal(color,6);const raw=zlib.inflateSync(Buffer.concat(chunks)),stride=width*4,pixels=Buffer.alloc(width*height*4);for(let y=0;y<height;y++)for(let x=0;x<stride;x++){const filter=raw[y*(stride+1)],a=x>=4?pixels[y*stride+x-4]:0,b=y?pixels[(y-1)*stride+x]:0,c=y&&x>=4?pixels[(y-1)*stride+x-4]:0,p=a+b-c,pa=Math.abs(p-a),pb=Math.abs(p-b),pc=Math.abs(p-c),predict=filter===0?0:filter===1?a:filter===2?b:filter===3?Math.floor((a+b)/2):pa<=pb&&pa<=pc?a:pb<=pc?b:c;pixels[y*stride+x]=(raw[y*(stride+1)+x+1]+predict)&255;}return {width,pixels};}
+module.exports=png;

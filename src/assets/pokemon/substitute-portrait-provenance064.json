@@ -1,0 +1,59 @@
+{
+  "status": "GENUINE_NATIVE_REST_COMPOSITION_FOR_GENERIC_TEMPORARY_FALLBACK",
+  "canonicalNativeGridRGBAExact": true,
+  "genericFallbackProjection": true,
+  "source": "Original animated Substitute800 cells/map/texture frame0; identity affine keys, exact native OAM order. No AI redraw, palette edits, resizing or atlas-as-portrait shortcut.",
+  "rows": [
+    {
+      "view": "front",
+      "file": "800-front.png",
+      "sha256": "e2e0d1332da0dc7cf921bcd95c5e704524e59bb70b230f18c9a8687031ab3cfd",
+      "RGBA_SHA256": "2e5a2e74fb99df1a80ee014c6242b4facb70c396b2fcc23247b62fe6aab6b074",
+      "size": [
+        30,
+        30
+      ],
+      "nativeOpaqueBounds": [
+        -15,
+        -30,
+        15,
+        0
+      ],
+      "sourceFrame": 0,
+      "sourceJSON": "assets/animated/800-front.json",
+      "sourceJSONSHA256": "6e681c9c4c7908186d407b2fb369b29fca3cc7ddd50b1461bfb39c93263f5356",
+      "sourceTexture": "assets/animated/800-front.png",
+      "sourceTextureSHA256": "449e79dccf490594227650abffbeda5bb2398905c89db1ca6fab9ac95f160b69"
+    },
+    {
+      "view": "back",
+      "file": "800-back.png",
+      "sha256": "bd28a3b5a8f9d0a7406227424db8ac107d7a24e96c5044b45eb7356890d0d3ec",
+      "RGBA_SHA256": "cf6060f89ca0a804c22b285b38c1c977079131efbd48c871263f81f4cdd3390b",
+      "size": [
+        29,
+        29
+      ],
+      "nativeOpaqueBounds": [
+        -17,
+        -29,
+        12,
+        0
+      ],
+      "sourceFrame": 0,
+      "sourceJSON": "assets/animated/800-back.json",
+      "sourceJSONSHA256": "e3b5dada40a95a1f6972136c5b731617485916a587542e0ee161b15ea5e628cb",
+      "sourceTexture": "assets/animated/800-back.png",
+      "sourceTextureSHA256": "fd311a949cd6d15bff17b97768191169b32e48e9242a41570905167916da2049"
+    }
+  ],
+  "canonicalWitnessReportSHA256": "8d9b97d2636b1af102ca47ef0ac1082aba816f4114fc855a7addcb0ce2253c86",
+  "battleVisualReviewSHA256": "10d189e8cd8fb77ee1ce98b92389ea3ca91822b262dce860ad301d7e91843201",
+  "limits": [
+    "Original pixel-grid equality verified at frontx64/backx64.5, with same native bounds and foot support.",
+    "At other tested sizes generic nearest sampling can differ from the native composite by one horizontal tie row; original strict-all-sizes failure retained separately.",
+    "These PNGs provide a coherent temporary fallback while the original native compositor is unavailable; no animation or general fit approval."
+  ],
+  "reproductionScript": "scripts/generate-substitute-portraits064.py",
+  "reproductionScriptSHA256": "2aa7e0ec87e5a329b51e52817c0c04d1d1be5fff032577e1f132fb068b262a91"
+}

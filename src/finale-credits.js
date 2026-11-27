@@ -8,7 +8,8 @@
   async function data(){if(!pending)pending=Promise.resolve().then(async()=>{if(options.data)return options.data;const s=new TextDecoder().decode(await resources.bytes(resource('finale-credits-data.js'))),m=/^\s*window\.FINALE_CREDITS\s*=\s*([\s\S]*?)\s*;?\s*$/.exec(s);if(!m)throw Error('Crediti originali non validi');const d=JSON.parse(m[1]);if(d.source?.overlay!==181||d.rows?.length!==437||d.texts?.length!==401||!d.model?.url||d.music!==1016||d.perspective?.sin<=0)throw Error('Crediti originali incompleti');return d;}).catch(e=>{pending=null;throw e;});return pending;}
   function cancel(){if(!current)return false;current.cancelled=true;current.reject?.(Error('Titoli di coda annullati'));return true;}
   async function play(){
-   if(current)throw Error('Titoli di coda già in corso');const run=current={cancelled:false},alive=()=>{if(run.cancelled||current!==run)throw Error('Titoli di coda annullati');},cancelled=new Promise((_,reject)=>run.reject=reject);let panel,scene,soundtrack,raf;
+   if(current)throw Error('Titoli di coda già in corso');const run=current={cancelled:false},alive=()=>{if(run.cancelled||current!==run)throw Error('Titoli di coda annullati');},cancelled=new Promise((_,reject)=>run.reject=reject);let panel,scene,soundtrack,raf,last;
+   const resetClock=()=>{if(current===run&&!run.cancelled)last=undefined;};doc.addEventListener?.('visibilitychange',resetClock);
    try{
     const prepared=await Promise.race([(options.resourceGate||((key,load)=>load()))('finale-credits',async()=>{
      // ResourceGate can invoke this loader again. Dispose the failed attempt
@@ -21,7 +22,7 @@
      scene=new(options.Scene||root.StarterScene.Scene)(model,{frameSampling:'native',clearColor:[0,0,0],models:{dragon:d.model.url},materialAlpha:{dragon:{}},materialTextures:{dragon:d.materialTextures},curves:{dragon:[[0,0,0,0,0,1]]},perspective:d.perspective});await scene.ready;alive();
      const music=options.music||root.FINALE_AUDIO?.music?.[1016];if(!music?.src)throw Error('Musica originale dei crediti non disponibile');soundtrack=(options.audio||root.AudioEngine)?.createCinematic(music.src,{ownsMusic:true});await soundtrack?.prepare();alive();return{d,atlases,model,text};
     }),cancelled]);alive();
-    const {d,atlases,model,text}=prepared,motion=(options.motion||root.FinaleCreditsMotion).create(d),context=text.getContext('2d');context.imageSmoothingEnabled=false;let last,accumulator=0,state=motion.snapshot();
+    const {d,atlases,model,text}=prepared,motion=(options.motion||root.FinaleCreditsMotion).create(d),context=text.getContext('2d');context.imageSmoothingEnabled=false;let accumulator=0,state=motion.snapshot();
     await Promise.race([new Promise((resolve,reject)=>{const tick=now=>{try{
      alive();last??=now;const elapsed=Math.max(0,Math.min(100,now-last));last=now;const rate=options.rate?.()||root.GameSpeed?.rate||1;
      if(!doc.hidden){accumulator+=elapsed*.06*rate;while(accumulator>=1&&!state.finished){state=motion.tick();accumulator--;}}
@@ -32,7 +33,7 @@
      context.globalAlpha=1;soundtrack?.sync(state.frame/2,rate);panel.dataset.frame=String(state.frame);panel.dataset.row=String(state.row);options.onFrame?.(state);
      if(state.finished)resolve();else raf=request(tick);
     }catch(error){reject(error);}};raf=request(tick);}),cancelled]);
-   }finally{run.cancelled=true;run.reject=null;if(raf!==undefined)cancelFrame(raf);soundtrack?.stop();scene?.destroy();panel?.remove();if(current===run)current=null;options.resetInput?.();}
+   }finally{run.cancelled=true;run.reject=null;doc.removeEventListener?.('visibilitychange',resetClock);if(raf!==undefined)cancelFrame(raf);soundtrack?.stop();scene?.destroy();panel?.remove();if(current===run)current=null;options.resetInput?.();}
   }
   return{data,play,cancel,get active(){return !!current;}};
  }

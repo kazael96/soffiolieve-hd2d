@@ -1,4 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+const nativeSite=process.env.SOFFIOLIEVE_TEST_SITE||path.join(__dirname,'../_site'),decodeNativePNG=require('./helpers/native-png.cjs'),nativeShoreBounds=new Map();
 const c={};vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/surf-field-motion.js'),'utf8'),c);
 function setup({special=false,prepare=async()=>{},occupied=()=>false,presentation=null}={}){
  const n={zone:113,fieldHeight:7,bicycle:true},p={x:.5,y:.5},party=[{hp:0,pp:[{id:57,left:0}]}],samples=[],saves=[];
@@ -82,11 +83,32 @@ test('render-gated native wait and travel endpoints close despite floating-point
 });
 
 function shoreProgress(r){return r.landing?(r.phase==='recall'?.7+.3*r.wait/16:.7*r.travel):(r.phase==='wait'?.2*r.wait/16:.2+.8*r.travel);}
+function nativeShoreGroundBounds(R,key){
+ if(nativeShoreBounds.has(key))return nativeShoreBounds.get(key);
+ const bank=R.cache[key],data=bank.data,image=bank.image;let l=Infinity,t=Infinity,r=-Infinity,b=-Infinity;
+ // All 58 Surf bank initial poses use unit scale/rotation and integral
+ // translations, including legitimate -1px offsets. R.parts selects the
+ // real parent/track frames. Measure their actual opaque OAM pixels rather
+ // than the placeholder Canvas; reject other transforms instead of guessing.
+ for(const {r:row,f,o,pf}of R.parts(data,0)){
+  for(const transform of [f,pf]){assert.deepEqual(Array.from(transform.slice(2,5)),[0,4096,4096]);assert.ok(Number.isInteger(transform[5])&&Number.isInteger(transform[6]));}
+  const im=data.images[o[4]],dx=row[1]+f[5]+pf[5]+o[0],dy=row[2]+f[6]+pf[6]+o[1];
+  for(let y=0;y<o[3];y++)for(let x=0;x<o[2];x++){const sx=im[0]+Math.floor((o[5]?o[2]-x-.5:x+.5)*im[2]/o[2]),sy=im[1]+Math.floor((o[6]?o[3]-y-.5:y+.5)*im[3]/o[3]);if(image.pixels[(sy*image.width+sx)*4+3]<64)continue;l=Math.min(l,dx+x);t=Math.min(t,dy+y);r=Math.max(r,dx+x+1);b=Math.max(b,dy+y+1);}
+ }
+ const result=[l,t,r,b];assert.ok(result.every(Number.isFinite)&&r>l&&b>t,'Native Surf opaque bounds missing '+key);nativeShoreBounds.set(key,result);return result;
+}
 async function renderedShore({id=501,special=false}={}){
  let host;const a=setup({special,presentation:(motion,dt)=>host.FieldHMWorld.surfBudget(motion,dt)});Object.assign(a.party[0],{id});
  const context=new Proxy({getImageData:()=>({data:new Uint8Array(4096)})},{get:(target,key)=>key in target?target[key]:()=>{}}),image={width:32,height:32};
- host={console,Promise,Map,WeakMap,document:{hidden:false,createElement:()=>({getContext:()=>context})},NativeStory:{state:a.n},Journey:{state:{party:a.party,original:a.n}},SurfField:{mounted:()=>a.task.mounted()},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},SURF_FIELD_ASSETS:{sprites:{AlcideSurf:Array(12).fill('surf')}},RuntimeAssets:{image:async()=>image},ROM_SPRITE_ANIM:{prepare:async()=>{},pin:()=>()=>{},draw:()=>true,alphaBounds:()=>[0,0,32,32]}};host.window=host;vm.createContext(host);
- for(const file of ['pokemon-visuals.js','field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js','field-hm-world.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',file),'utf8'),host,{filename:file});
+ host={console,Promise,Map,WeakMap,document:{hidden:false,createElement:()=>({getContext:()=>context})},NativeStory:{state:a.n},Journey:{state:{party:a.party,original:a.n}},SurfField:{mounted:()=>a.task.mounted()},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},SURF_FIELD_ASSETS:{sprites:{AlcideSurf:Array(12).fill('surf')}},RuntimeAssets:{json:async file=>JSON.parse(fs.readFileSync(path.join(nativeSite,file),'utf8')),image:async file=>{if(!file.startsWith('assets/animated/'))return image;const p=decodeNativePNG(fs.readFileSync(path.join(nativeSite,file)));return {width:p.width,height:p.pixels.length/p.width/4,naturalWidth:p.width,naturalHeight:p.pixels.length/p.width/4,pixels:p.pixels};}}};host.window=host;vm.createContext(host);
+ for(const file of ['pokemon-visuals.js','pokemon-anim.js','field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js','field-hm-world.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src',file),'utf8'),host,{filename:file});
+ // This host verifies presentation/physics checkpoints, not Canvas pixels.
+ // Keep real native preparation, frame selection, bounds and pin lifetimes;
+ // replace only the absent Canvas raster's opaque bounds with an independent
+ // OAM/PNG measurement and explicitly retain the CPU draw stub.
+ const nativePrepare=host.ROM_SPRITE_ANIM.prepare;
+ host.ROM_SPRITE_ANIM.prepare=async(keys,options)=>{const result=await nativePrepare(keys,options);for(const key of keys)host.ROM_SPRITE_ANIM.cache[key].groundBounds=nativeShoreGroundBounds(host.ROM_SPRITE_ANIM,key);return result;};
+ host.ROM_SPRITE_ANIM.draw=()=>true;
  await host.FieldHMWorld.prepare(a.party[0],57);
  const renderer={cameraPitch:[.423,.906],yaw:0,groundHeight:()=>a.n.fieldHeight,upload:()=>({texture:{}}),gl:{isContextLost:()=>false,isTexture:()=>true,bindTexture(){},texSubImage2D(){},deleteTexture(){}}},frames=[];host.renderer=renderer;let time=0;
  return {...a,host,renderer,frames,tick(dt){time+=dt;a.task.tick(dt);},draw({ack=true}={}){
@@ -100,6 +122,17 @@ function finishShore(a,{speed=4,holdFinal=false}={}){
  let frames=0;while(a.task.busy&&frames++<300){let rest=.25*speed;while(rest>1e-8){const dt=Math.min(.04,rest);a.tick(dt);rest-=dt;}if(holdFinal&&a.n.surfMotion&&shoreProgress(a.n.surfMotion)>=1){a.draw({ack:false});return;}a.draw();}
  assert.equal(a.task.busy,false,'Drawable Surf did not finish within 300 acknowledged frames');
 }
+
+test('the Surf CPU host prepares real native form banks and opaque support geometry before shoreline presentation',async()=>{
+ for(const id of [501,699,'592-female','593-female']){
+  const a=await renderedShore({id});try{const R=a.host.ROM_SPRITE_ANIM;
+   for(const view of ['front','back']){const key=id+'-'+view,bank=R.cache[key],json=JSON.parse(fs.readFileSync(path.join(nativeSite,'assets/animated/'+key+'.json'),'utf8'));
+    assert.ok(bank?.ready&&!bank.pending,'Native preparation did not settle '+key);assert.ok(bank.promise instanceof Promise,'The host skipped actual native prepare');assert.deepEqual(JSON.parse(JSON.stringify(bank.data)),json,'The host replaced native frame/parent metadata');assert.ok(bank.image.pixels.some(value=>value),'Native pixels absent');assert.ok(Array.from(R.bounds(bank.data)).every(Number.isFinite));assert.ok(bank.groundBounds.every(Number.isFinite)&&bank.groundBounds[3]>bank.groundBounds[1]);
+   }
+   assert.ok(await a.task.start());a.draw();assert.ok(a.frames.length,'The native banks did not produce a CPU presentation checkpoint');
+  }finally{a.task.cancel();a.host.FieldHMWorld.clear();}
+ }
+});
 
 test('the production Surf frame budget preserves every native authored boarding and landing key at ×1/×2/×4',async()=>{
  const ids=[501,502,503,507,508,515,516,531,535,536,537,550,699,564,565,580,581,592,'592-female',593,'593-female',594,612,613,614,618,621,626,635];
