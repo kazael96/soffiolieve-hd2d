@@ -54,7 +54,18 @@ class Native572DerivationTests(unittest.TestCase):
             with self.subTest(workflow=name):
                 text = (ROOT / '.github/workflows' / name).read_text(encoding='utf-8')
                 commands = [line.strip() for line in text.splitlines() if 'run:' in line and 'scripts/build-site.py' in line]
-                self.assertEqual(commands, [expected, windows_expected] if name == 'qa.yml' else [expected])
+                self.assertEqual(commands, [expected, windows_expected, expected] if name == 'qa.yml' else [expected])
+                if name == 'qa.yml':
+                    expected_jobs = {'regression': [expected], 'native541-windows': [windows_expected],
+                                     'native541-linux': [expected]}
+                    current_job, actual_jobs = None, {}
+                    for line in text.splitlines():
+                        if line.startswith('  ') and not line.startswith('   ') and line.rstrip().endswith(':'):
+                            current_job = line.strip()[:-1]
+                        if 'run:' in line and 'scripts/build-site.py' in line:
+                            self.assertIn(current_job, expected_jobs)
+                            actual_jobs.setdefault(current_job, []).append(line.strip())
+                    self.assertEqual(actual_jobs, expected_jobs)
 
     def test_exact_prefix_inverse_all_oam_and_png_bytes(self):
         for view, (raw, png) in originals().items():
