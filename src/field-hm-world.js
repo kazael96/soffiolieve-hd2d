@@ -140,7 +140,7 @@
  }
  function copyCard(renderer,context,...rect){const card=cards.get(renderer);if(!card)return false;context.drawImage(card.canvas,...rect);return true;}
  function placement(position,pitch=[.423,.906],bob=0,yaw=0){return {x:position.x+2*pitch[0]*Math.sin(yaw),z:position.z+2*pitch[0]*Math.cos(yaw),height:position.height+bob-2*pitch[1],groundHeight:position.height,groundX:position.x,groundZ:position.z};}
- function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;if(cutCameraScope(action)&&action.direction===1)return base;const t=clamp(action.elapsed/action.duration),amount=cutCameraScope(action)?cutCameraAmount(action):action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
+ function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;const t=clamp(action.elapsed/action.duration),amount=cutCameraScope(action)?cutCameraAmount(action):action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
  function cutCameraAmount(owner){const walk=owner&&cutWalks.get(owner);if(!walk)return 0;if(walk.phase==='core')return 1;const q=walk.step/((walk.route.length-1)*8);return walk.phase==='out'?ease(q):1-ease(q);}
  // Private501/15 camera pilot. Geometry is frozen before the original staging.
  const cutCameraPlans=new WeakMap(),cutCameraFrames=new Map();
@@ -185,7 +185,7 @@
   if(![...home,...end,unit,radius].every(Number.isFinite)||!(radius>0&&unit>0)||!inside(...home)||!cutStageClear(renderer,...home,.18,action.height))return {error:'Appoggio iniziale Taglio non libero'};
   const goal=(point,route)=>{
    const candidate={...plan,roots:[home,point,home,end],pokemonRoots:[home,end],heroRoute:route};
-   const pitch=action.direction===1?base.cameraPitch:[Math.sin(62*Math.PI/180),Math.cos(62*Math.PI/180)],close=closeCutCamera(renderer,candidate,base,pitch,1);if(!close)return false;
+   const pitch=[Math.sin(62*Math.PI/180),Math.cos(62*Math.PI/180)],close=closeCutCamera(renderer,candidate,base,pitch,1);if(!close)return false;
    for(const camera of [base,close]){
     const [ps,pc]=camera.cameraPitch,cs=Math.cos(camera.yaw),sn=Math.sin(camera.yaw),body=[];
     // Disc of the ORIGINAL opaque bounds: all lean angles, independent channel

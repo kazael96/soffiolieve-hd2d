@@ -1750,3 +1750,12 @@ La corsia del Pokémon è respinta nel C20 effettivo: fronte non percorribile e 
 Il supervisore e la pulizia della fixture hanno regressioni distinte: RED35/2 per l’uscita, successivo FAIL Windows/180s preservato, RED36/1 per la pulizia, infine37/37PASS, compresi29controlli Windows e8runner. I limiti restano invariati. H.8: dopo consenso specifico, C18 e C19 sono rimosse con archivi ricostruibili e controlli completi; restano C04, C08 e C20, sorgenti, ROM e rapporti.
 
 Le nuove pose Minccino sono materiale locale. Il raccordo con i veri estremi R6 supera i controlli tecnici e conserva il bordo dei piedi, ma è respinto per differenza di identità fra testa/orecchie/torso autoriali e nativi. La revisione riparte da sei pose rappresentative, prima di espandere il catalogo. Il contatto541, Botta1, Emboar e la revisione completa restano separati; SPL15 resta sospeso. PR58DRAFT e pubblico0.63; nessun nuovo rilascio è attestato da queste prove.
+
+
+### Fronte di Taglio e materiale nativo ·27 novembre2026
+
+C21 be31d14b contiene399programmi verificati contro389sorgenti e10programmi ZIP; il checker originale supera dipendenze, hash, percorsi e interazioni. Il replay locale resta FAIL dopo quattro comandi PASS per timeout10s del supervisore, con25PNG esaminati e audit delle16identità di processo note. Non sono eseguiti i lotti successivi. CI123, sul precedente6dbbb2, termina invece con94fasi PASS, Windows29PASS,54casi nativi/Tynamo e18comandi Oshawott PASS. I rapporti restano distinti e il limite grafico del protagonista frontale è confermato.
+
+Il sorgente attuale rimuove soltanto le due eccezioni del pitch frontale: ritorna alla regia Taglio esistente verso62°. Test diretti sul canonico: RED69/2, GREEN71/71,83input ricontrollati, owner chiusi. Sono ancora obbligatori nuova build e replay visivo del suo codice; il PASS CPU non certifica il protagonista visibile.
+
+Per Minccino i sei disegni schematici sono respinti per identità. Il corpo nativo conserva invece gli otto fotogrammi RGBA esatti e i quattro estremi legacy nel prototipo separato. La prima decomposizione dinamica della coda conserva OAM/NANR ma fallisce tre confronti RGBA: non è integrata né tollerata. Si studia un unico layer composto prima della trasformazione nativa, senza nuovi contatti495 o ricerche di pose. È materiale di lavoro, non animazione541 completata. PR58 resta DRAFT, pubblico0.63; standby bloccato e nessun controllo del PC.

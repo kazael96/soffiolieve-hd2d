@@ -1,5 +1,15 @@
 # Camera di Taglio di Oshawott · revisione0.64
 
+La revisione corrente conserva il percorso umano nativo, l’avvicinamento originale di Oshawott e il ritorno dopo il richiamo. Rimuove due eccezioni del solo fronte e ripristina il pitch di Taglio già esistente: salita graduale verso62° e ritorno durante il cammino. Yaw0° nel fronte e30° nel retro; frustum, passi, quote, PP, commit0.52, ACK e ripristino delle quattro proprietà della camera restano invariati. Non vengono nascosti NPC o recinzioni e non sono cercati nuovi angoli o percorsi per adattare la posa.
+
+La nuova regressione diretta usa i file canonici: RED69PASS/2FAIL, GREEN71/71PASS in10976.6833ms, senza skip o annullamenti. Tutti83input sono invariati nelle rispettive esecuzioni e gli owner sono chiusi. Tre descrizioni di policy sono rinominate intenzionalmente; due corpi di test cambiano, mentre gli altri69 callback conservano la copertura. Il RED conserva anche l’avviso asincrono di annullamento dopo il test interrotto.
+
+Il C21 precedente è costruito e verificato su399programmi e tutti gli asset dichiarati. In Windows locale passano quattro comandi effettivi prima di un timeout del supervisore: il rapporto complessivo resta FAIL, con pulizia e audit separati. Tutti25PNG,12contenuti RAW distinti, sono esaminati: nel fronte il protagonista è coperto presso la recinzione/NPC. I metadati dello stesso disegno registrano protagonista10.5,8.5 e NPCuid9 a10.5,10.5; non identificano il vincitore per ogni pixel. Il commit rimuove l’albero prima del disegno0.52, quindi quei campioni non dimostrano contatto lama–tronco.
+
+CI123 sul sorgente precedente6dbbb2 passa tutte94fasi e tutti18comandi Oshawott nei tre formati/velocità, oltre alle54prove native e Tynamo. Questo esito remoto non approva la grafica osservata e non si trasferisce al nuovo pitch. La prossima candidata deve mostrare protagonista, Pokémon e appoggi effettivi nei tre formati; movimento continuo, contatto fisico e rilascio restano da qualificare.
+
+## Percorso umano con fronte basso: revisione precedente
+
 La revisione corrente fa camminare il protagonista su celle native libere prima di liberare Oshawott; conserva l’avvicinamento radiale originale del Pokémon e il ritorno del protagonista dopo il richiamo. Il percorso usa otto passi nativi per cella, con frame originali specifici del personaggio e conferma di ogni disegno riuscito. Coordinate del giocatore e dati salvati restano invariati. Il verso parte all’arrivo; il gesto centrale conserva durata2.4, stop0.65 e commit0.52. La camera mantiene retro30°/62° e fronte originale, includendo il percorso umano nell’inquadratura.
 
 La corsia laterale precedente è respinta: nel Game C20 il fronte incrociava celle native bloccate; il retro separava le figure ma lasciava un vuoto fra lama e albero. Il nuovo controller supera71/71test, dopo63PASS/8FAIL sul sorgente precedente, senza skip o annullamenti. Sono verificati anche sospensione, perdita del contesto, ritorno visibile e conservazione del primo errore, inclusi i cinque valori falsy di JavaScript.
