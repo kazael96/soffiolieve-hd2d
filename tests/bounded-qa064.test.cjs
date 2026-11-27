@@ -202,15 +202,13 @@ async function realWindowsFixture(t){
     // An assertion can fail after the flag created a child but BEFORE Limit
     // recorded it. Fresh Inspect of the already-pinned root captures that case.
     if(quiescent)for(const root of roots)if(root.birth)try{const found=await B.ownedProcess('Inspect',root.child.pid,root.birth.startTicks);remember(found.processes);if(root.maySpawn&&found.result==='GONE'&&!root.descendantObserved)errors.push(Error('Root vanished before descendant ownership was captured'));if(found.processes.some(r=>r.depth>0))root.descendantObserved=true;}catch(e){errors.push(e);}
-    const rows=[...known.values()],ancestryComplete=errors.length===0;if(quiescent&&ancestryComplete&&rows.length){const owner=rows[0];try{stopped=await B.ownedProcess('Stop',owner.pid,owner.startTicks,rows);if(stopped.result!=='PASS')throw Error('Pinned native fixture Stop failed');}catch(e){errors.push(e);}}
-    if(quiescent&&ancestryComplete)for(const root of roots)if(root.birth||root.maySpawn){if(root.child.exitCode===null){let timer;try{await Promise.race([root.exit,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original native root did not exit')),2000);})]);}catch(e){errors.push(e);}finally{clearTimeout(timer);}}}
+    const rows=[...known.values()];if(quiescent&&rows.length){const owner=rows[0];try{stopped=await B.ownedProcess('Stop',owner.pid,owner.startTicks,rows);if(stopped.result!=='PASS')throw Error('Pinned native fixture Stop failed');}catch(e){errors.push(e);}}
    }finally{
-    // These original capabilities cannot have received the descendant flag:
-    // no birth was admitted and maySpawn is still false. Always stop AND join
-    // them, even when fencing, quiescence or ledger recovery failed above.
-    for(const root of roots)if(!root.birth&&!root.maySpawn){
+    // Stop/join every original ChildProcess capability even on uncertain cleanup.
+    // This is never a new PID-based ownership claim; errors/evidence stay failed.
+    for(const root of roots){
      try{if(root.child.exitCode===null&&root.child.signalCode===null)root.child.kill();}catch(e){errors.push(e);}
-     let timer;try{await Promise.race([root.exit,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Unqualified original native root did not exit')),2000);})]);}catch(e){errors.push(e);}finally{clearTimeout(timer);}
+     let timer;try{await Promise.race([root.exit,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original native root did not exit')),2000);})]);}catch(e){errors.push(e);}finally{clearTimeout(timer);}
     }
     try{shutdown=await session.close();}catch(e){errors.push(e);}
    }
@@ -219,7 +217,7 @@ async function realWindowsFixture(t){
   })();cleanupPromise.catch(()=>{});return cleanupPromise;
  };
  t.after(()=>cleanup());await session.ready;
- return{out,session,cleanup,remember,async spawn(script='setInterval(()=>{},1000)',args=[]){const child=cp.spawn(process.execPath,['--max-old-space-size=400','-e',script,...args],{windowsHide:true,stdio:'ignore'}),root={child,exit:once(child,'exit'),birth:null,maySpawn:false,descendantObserved:false};root.exit.catch(()=>{});roots.push(root);const birth=await session.request('Birth',child.pid);assert.equal(birth.result,'PASS');root.birth=birth;remember(root.birth.processes);return root;}};
+ return{out,session,cleanup,remember,async spawn(script='setInterval(()=>{},1000)',args=[]){if(cleanupPromise)throw Error('Native fixture cleanup already started; refusing spawn');const child=cp.spawn(process.execPath,['--max-old-space-size=400','-e',script,...args],{windowsHide:true,stdio:'ignore'}),root={child,exit:once(child,'exit'),birth:null,maySpawn:false,descendantObserved:false};root.exit.catch(()=>{});roots.push(root);const birth=await session.request('Birth',child.pid);assert.equal(birth.result,'PASS');root.birth=birth;remember(root.birth.processes);return root;}};
 }
 
 test('one persistent Windows host discovers a real child born between Limits and refuses stale or foreign ownership',{skip:process.platform!=='win32',timeout:30000},async t=>{
@@ -343,18 +341,20 @@ test('unqualified original fixture roots are stopped and joined even when Birth 
  const vm=require('node:vm'),{EventEmitter}=require('node:events'),source=fs.readFileSync(__filename,'utf8'),first=source.indexOf('async function realWindowsFixture(t){'),last=source.indexOf("\ntest('one persistent Windows host",first);assert(first>=0&&last>first);
  // Execute the ACTUAL fixture function, not a mirrored cleanup implementation.
  // This is a controlled UNIT ChildProcess capability: no process is spawned and
- // no descendant is invented or inspected. Birth/GONE admission must fail.
- for(const kind of ['Birth-reject-ledger-fail','Birth-GONE-ledger-fail','Birth-reject-fence-fail']){
-  const events=[],hooks=[],child=new EventEmitter(),exit=once(child,'exit'),birthError=Error('intentional Birth rejection'),ledgerError=Error('intentional ledger failure'),fenceError=Error('intentional fence failure');let out,killCount=0,processOperations=0,removed=0;
+ // no descendant is invented or inspected. The three original Birth/GONE
+ // negatives still reject admission; the fourth case admits one declared UNIT
+ // root then fails its later Inspect, without proving native discovery.
+ for(const kind of ['admitted-later-Inspect-fail','Birth-reject-ledger-fail','Birth-GONE-ledger-fail','Birth-reject-fence-fail']){
+  const admitted=kind==='admitted-later-Inspect-fail',events=[],hooks=[],child=new EventEmitter(),exit=once(child,'exit'),birthError=Error('intentional Birth rejection'),ledgerError=Error('intentional ledger failure'),fenceError=Error('intentional fence failure'),inspectError=Error('intentional later Inspect failure'),record={pid:54321,startTicks:'638000000000000001',depth:0};let out,killCount=0,processOperations=0,removed=0,spawns=0;
   Object.assign(child,{pid:54321,exitCode:null,signalCode:null,kill(){assert.equal(this,child,'only the original ChildProcess capability');killCount++;events.push('kill');queueMicrotask(()=>{this.exitCode=1;this.signalCode='SIGTERM';events.push('exit');this.emit('exit',1,'SIGTERM');});}});
-  const session={ready:Promise.resolve(),alive:false,failure:birthError,async request(mode,pid){assert.equal(mode,'Birth');assert.equal(pid,child.pid);if(kind.includes('GONE'))return{result:'GONE',pid,processes:[]};throw birthError;},async beginCleanup(){if(kind.includes('fence'))throw fenceError;},async settleForFallback(){throw Error('intentional helper death not verified');},recoverLedger(){throw ledgerError;},async close(){assert.equal(child.exitCode,1,'join must precede helper close');events.push('helper-close');return{result:'CLOSED'};}};
+  const session={ready:Promise.resolve(),alive:admitted,failure:admitted?null:birthError,async request(mode,pid){assert.equal(mode,'Birth');assert.equal(pid,child.pid);if(admitted)return{result:'PASS',pid,startTicks:record.startTicks,processes:[record]};if(kind.includes('GONE'))return{result:'GONE',pid,processes:[]};throw birthError;},async beginCleanup(){if(kind.includes('fence'))throw fenceError;},async settleForFallback(){throw Error('intentional helper death not verified');},recoverLedger(){if(admitted)return[record];throw ledgerError;},async close(){assert.equal(child.exitCode,1,'join must precede helper close');events.push('helper-close');return{result:'CLOSED'};}};
   const fixtureFS={...fs,mkdtempSync(prefix){out=fs.mkdtempSync(prefix);return out;},rmSync(){removed++;throw Error('uncertain evidence must not be removed');}},copy={exports:{}};
-  vm.runInNewContext(source.slice(first,last)+'\nmodule.exports=realWindowsFixture;',{module:copy,B:{createOwnedSession:()=>session,ownedProcess(){processOperations++;throw Error('unqualified PID must never be inspected or stopped by PID');}},cp:{spawn(){return child;}},fs:fixtureFS,path,os,assert,once,process:{execPath:process.execPath},setTimeout,clearTimeout},{filename:'declared-unit-realWindowsFixture-v3'});
+  vm.runInNewContext(source.slice(first,last)+'\nmodule.exports=realWindowsFixture;',{module:copy,B:{createOwnedSession:()=>session,ownedProcess(mode,pid,ticks,rows){processOperations++;assert.equal(admitted,true,'unqualified PID must never be inspected or stopped by PID');assert.equal(pid,record.pid);assert.equal(ticks,record.startTicks);if(mode==='Inspect')throw inspectError;assert.equal(mode,'Stop');assert.deepEqual(JSON.parse(JSON.stringify(rows)),[record]);events.push('trusted-stop');return Promise.resolve({result:'PASS',processes:[{pid:record.pid,startTicks:record.startTicks,stopped:true}]});}},cp:{spawn(){spawns++;return child;}},fs:fixtureFS,path,os,assert,once,process:{execPath:process.execPath},setTimeout,clearTimeout},{filename:'declared-unit-realWindowsFixture-v3'});
   try{
    const fixture=await copy.exports({after:hook=>hooks.push(hook)});
-   await assert.rejects(fixture.spawn(),error=>kind.includes('GONE')?error.code==='ERR_ASSERTION':error===birthError);
-   assert.equal(hooks.length,1);const cleanup=fixture.cleanup();assert.equal(hooks[0](),cleanup,'one memoized cleanup');await assert.rejects(cleanup,error=>{assert.match(error.message,kind.includes('fence')?/intentional fence failure/:/intentional ledger failure/);return true;});
-   assert.equal(killCount,1);assert.deepEqual(events,['kill','exit','helper-close']);assert.equal(processOperations,0);assert.equal(removed,0);assert.equal(fs.existsSync(out),true,'uncertain evidence remains');
+   if(admitted){const root=await fixture.spawn();assert.equal(root.birth.startTicks,record.startTicks);}else await assert.rejects(fixture.spawn(),error=>kind.includes('GONE')?error.code==='ERR_ASSERTION':error===birthError);
+   assert.equal(hooks.length,1);const cleanup=fixture.cleanup();assert.equal(hooks[0](),cleanup,'one memoized cleanup');const refusedSpawn=fixture.spawn();refusedSpawn.catch(()=>{});await assert.rejects(cleanup,error=>{assert.match(error.message,admitted?/intentional later Inspect failure/:kind.includes('fence')?/intentional fence failure/:/intentional ledger failure/);return true;});
+   assert.equal(killCount,1);assert.deepEqual(events,admitted?['trusted-stop','kill','exit','helper-close']:['kill','exit','helper-close']);assert.equal(processOperations,admitted?2:0);await assert.rejects(refusedSpawn,/cleanup already started; refusing spawn/);assert.equal(spawns,1,'cleanup fencing must prevent creation of another ChildProcess');assert.equal(removed,0);assert.equal(fs.existsSync(out),true,'uncertain evidence remains');
   }finally{if(child.exitCode===null)child.kill();await exit;if(out)fs.rmSync(out,{recursive:true,force:true});}
  }
 });
@@ -385,4 +385,56 @@ if (@($stopped.processes | Where-Object { $_.pid -eq $RootPid -and $_.startTicks
  const receipt=await new Promise((resolve,reject)=>cp.execFile('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',script,'-Helper',helper,'-RootPid',String(child.pid)],{windowsHide:true,timeout:10000,maxBuffer:1024*1024},(error,stdout)=>{if(error){reject(error);return;}try{resolve(JSON.parse(stdout.replace(/^\uFEFF/,'')));}catch(parseError){reject(parseError);}}));
  assert.equal(receipt.result,'PASS');assert.match(receipt.psVersion,/^5\.1\./);assert.deepEqual(receipt.modes,['Birth','Inspect','Limit','Stop']);assert.equal(receipt.birth.pid,child.pid);assert(receipt.inspect.processes.some(r=>r.pid===child.pid&&r.startTicks===receipt.birth.startTicks));
  const applied=receipt.limit.processes.find(r=>r.pid===child.pid);assert.equal(applied.priority,'BelowNormal');assert.equal(BigInt(applied.affinity).toString(2).split('').filter(b=>b==='1').length,Math.min(2,os.availableParallelism()));assert.deepEqual(Object.keys(receipt.stop.processes[0]).sort(),['pid','startTicks','stopped']);await exit;
+});
+
+// Declared UNIT transport executing the actual owner/session source. Its child,
+// disk and helper replies do not prove native discovery, browser or Game behavior.
+function terminalRaceOwnerUnit(t){
+ const vm=require('node:vm'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'bounded-qa064-terminal-')),out=path.join(dir,'terminal-race'),ownerFile=require.resolve('../scripts/run-bounded-qa.cjs'),timers=new Map(),logs=[],calls=[],sent=[];
+ const root={pid:43210,startTicks:'638000000000000001',depth:0};let nextTimer=0,helper,releaseMonitor,monitorCount=0,workerKills=0;
+ const worker=new EventEmitter();Object.assign(worker,{pid:root.pid,exitCode:null,signalCode:null,stdout:new PassThrough(),stderr:new PassThrough(),send(m,cb){sent.push(m);cb?.();},kill(){workerKills++;exitWorker(1,'SIGTERM');}});
+ function exitWorker(code,signal=null){if(worker.exitCode!==null||worker.signalCode!==null)return;worker.exitCode=code;worker.signalCode=signal;worker.stdout.end();worker.stderr.end();worker.emit('exit',code,signal);}
+ const fakeCP={fork(){return worker;},execFile(){throw Error('No one-shot fallback is expected in this healthy-session UNIT');},spawn(exe,args){
+  const token=args[args.indexOf('-SessionToken')+1],ledger=args[args.indexOf('-LedgerPath')+1],helperTicks='638000000000000000',parentTicks='637000000000000000';helper=new EventEmitter();
+  Object.assign(helper,{pid:90001,exitCode:null,signalCode:null,killed:false,stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough(),kill(){this.killed=true;this.exitCode=1;this.signalCode='SIGTERM';this.emit('close',1,'SIGTERM');}});
+  const frame=m=>helper.stdout.write(JSON.stringify(m)+'\n'),save=()=>fs.writeFileSync(ledger,JSON.stringify({schema:1,token,helperPid:helper.pid,helperStartTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,processes:[root]}));save();
+  helper.stdin.on('data',chunk=>{const m=JSON.parse(chunk.toString());
+   if(m.kind==='close'){frame({kind:'closed',token,id:m.id});helper.exitCode=0;helper.emit('close',0,null);return;}
+   calls.push({mode:m.mode,pid:m.pid,startTicks:m.startTicks,receipts:m.receipts});save();
+   if(m.mode==='Limit'&&++monitorCount===2){releaseMonitor=(result='GONE')=>{frame({kind:'result',token,id:m.id,value:result==='FAIL'?{result:'FAIL',pid:root.pid,processes:[],error:'Exact helper sentinel'}:{result:'GONE',pid:root.pid,processes:[]}});};return;}
+   frame({kind:'ledger',token,id:m.id,processes:[root]});frame({kind:'result',token,id:m.id,value:m.mode==='Stop'?{result:'PASS',mode:'Stop',processes:[]}:(worker.exitCode!==null||worker.signalCode!==null)?{result:'GONE',pid:root.pid,processes:[]}:{result:'PASS',pid:root.pid,startTicks:root.startTicks,processes:[root]}});
+  });queueMicrotask(()=>frame({kind:'ready',token,pid:helper.pid,startTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,affinity:Math.min(2,os.availableParallelism())===1?'1':'3',priority:'BelowNormal'}));return helper;
+ }};
+ const fakeFS={...fs,statfsSync(){return{bavail:1024*1024*1024,bsize:1};},createWriteStream(...a){const log=fs.createWriteStream(...a);logs.push(log);return log;}},copy={exports:{}},localRequire=n=>n==='node:child_process'?fakeCP:n==='node:fs'?fakeFS:require(n),schedule=(fn,ms,interval)=>{const id=++nextTimer;timers.set(id,{fn,ms,interval});return id;};
+ vm.runInNewContext(fs.readFileSync(ownerFile,'utf8'),{require:localRequire,module:copy,__filename:ownerFile,__dirname:path.dirname(ownerFile),process:{platform:'win32',pid:12345},Buffer,URL,setTimeout:(f,m)=>schedule(f,m,false),clearTimeout:id=>timers.delete(id),setInterval:(f,m)=>schedule(f,m,true),clearInterval:id=>timers.delete(id)},{filename:ownerFile});
+ const running=copy.exports.run({out,leaseRoot:dir,site:dir,cases:['UNIT-no-Game'],viewports:[['portrait',390,844]]}),drain=async()=>{for(let i=0;i<80;i++)await Promise.resolve();};running.catch(()=>{});
+ t.after(async()=>{if(releaseMonitor){releaseMonitor();releaseMonitor=null;}exitWorker(1,'SIGTERM');await running;await Promise.all(logs.map(log=>log.closed?Promise.resolve():once(log,'close')));fs.rmSync(dir,{recursive:true,force:true});});
+ return{running,drain,root,worker,calls,sent,out,dir,get workerKills(){return workerKills;},async monitor(){const timer=[...timers.values()].find(r=>r.interval&&r.ms===2500);assert(timer);timer.fn();await drain();},async reply(result='GONE'){assert(releaseMonitor,'actual monitor request must be pending');const reply=releaseMonitor;releaseMonitor=null;reply(result);await drain();},done(result='PASS'){worker.emit('message',{type:'done',result,originalResult:result});},exit:exitWorker,async deadline(){const timer=[...timers.values()].find(r=>!r.interval&&r.ms>200000);assert(timer,'original outer deadline remains active');timer.fn();await drain();}};
+}
+
+test('GONE during the awaited monitor joins the original worker exit without presuming IPC completion order',async t=>{
+ for(const order of ['gone-done-exit','done-gone-exit','done-exit-gone']){
+  const unit=terminalRaceOwnerUnit(t);await unit.drain();assert.equal(unit.calls.filter(r=>r.mode==='Limit').length,1);await unit.monitor();assert.equal(unit.calls.filter(r=>r.mode==='Limit').length,2);
+  if(order.startsWith('done'))unit.done();
+  if(order==='done-exit-gone')unit.exit(0);
+  await unit.reply();assert.equal(unit.sent.filter(m=>m.type==='abort').length,0,'GONE alone must not abort a normally terminating original child');
+  if(order==='gone-done-exit')unit.done();
+  if(order!=='done-exit-gone'){await unit.monitor();assert.equal(unit.calls.filter(r=>r.mode==='Limit').length,2,'no more Limits while the GONE terminal join is pending');unit.exit(0);}
+  const report=await unit.running;assert.equal(report.result,'PASS');assert.equal(report.workerResult,'PASS');assert.deepEqual(JSON.parse(JSON.stringify(report.exit)),{code:0,signal:null});assert.equal(report.failure,undefined);assert.equal(unit.workerKills,0);
+  assert.equal(report.cleanup[0].result,'PASS');assert.equal(report.helperShutdown.result,'CLOSED');assert.equal(report.cleanupErrors,undefined);assert.equal(report.leaseRetained,undefined);assert.equal(fs.existsSync(path.join(unit.dir,'.bounded-qa-lease.json')),false);
+  assert.deepEqual(JSON.parse(JSON.stringify(report.ownedProcessLedger)),[unit.root]);const stop=unit.calls.find(r=>r.mode==='Stop');assert.equal(stop.startTicks,unit.root.startTicks);assert.deepEqual(JSON.parse(JSON.stringify(stop.receipts)),[unit.root]);
+ }
+});
+
+test('GONE never grants success without original done and clean exit, and retains the original deadline and helper failure',async t=>{
+ for(const kind of ['missing-done','failed-done','nonzero','signal','no-exit','helper-failure']){
+  const unit=terminalRaceOwnerUnit(t);await unit.drain();await unit.monitor();
+  if(kind!=='missing-done')unit.done(kind==='failed-done'?'FAIL':'PASS');await unit.reply(kind==='helper-failure'?'FAIL':'GONE');
+  if(kind==='no-exit'){assert.equal(unit.sent.filter(m=>m.type==='abort').length,0);await unit.deadline();}
+  else unit.exit(kind==='nonzero'?7:kind==='signal'?null:0,kind==='signal'?'SIGTERM':null);
+  const report=await unit.running;assert.equal(report.result,'FAIL',kind);assert.equal(unit.calls.filter(r=>r.mode==='Limit').length,2);assert.equal(fs.existsSync(path.join(unit.dir,'.bounded-qa-lease.json')),kind==='helper-failure');
+  if(kind==='no-exit'){assert.equal(report.failure,'Outer240s deadline exceeded');assert.equal(unit.sent.filter(m=>m.type==='abort').length,1);}
+  if(kind==='helper-failure'){assert.match(report.failure,/Exact helper sentinel/);assert.match(report.helperFailure,/Exact helper sentinel/);assert.equal(report.result,'FAIL');}
+  else{assert.equal(report.cleanup[0].result,'PASS');assert.equal(report.helperShutdown.result,'CLOSED');assert.equal(report.cleanupErrors,undefined);}
+ }
 });

@@ -44,12 +44,12 @@ test('Linux native541 feedback is an additional independent fresh-build job whil
  const build=job.indexOf('python3 scripts/build-site.py site.zip _site --native572-tail-partition064'),check=job.indexOf('node scripts/test-native-tail541-unit064.cjs _site test-results/native541-linux');assert(build>=0&&check>build,'Run the original stage only after a fresh standard build');assert.match(job,/if: always\(\)[\s\S]*name: native541-linux-pair-report[\s\S]*path: test-results\/native541-linux/);
 });
 
-test('Windows owned-helper gate runs all27 direct callbacks and rejects skips, partial TAP or a failed child',()=>{
+test('Windows owned-helper gate runs all29 direct callbacks and rejects skips, partial TAP or a failed child',()=>{
  const focused=require('../scripts/test-owned-helper-windows064.cjs'),args=['--max-old-space-size=400','--test','--experimental-test-isolation=none','--test-concurrency=1',path.join(__dirname,'bounded-qa064.test.cjs')];
  assert.deepEqual(focused.stageArgs('22.23.5'),args);assert.throws(()=>focused.stageArgs('22.7.0'),{code:'UNSUPPORTED_NODE_TEST_ISOLATION'});
- const log='# tests 27\n# pass 27\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n',pass={result:'PASS',exitCode:0};assert.equal(focused.verifyResult(pass,log).tests,27);
+ const log='# tests 29\n# pass 29\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n',pass={result:'PASS',exitCode:0};assert.equal(focused.verifyResult(pass,log).tests,29);
  assert.throws(()=>focused.verifyResult({result:'FAIL',exitCode:7},log),/stage failed/);
- for(const altered of [log.replace('# pass 27','# pass 26'),log.replace('# skipped 0','# skipped 1'),log.replace('# tests 27\n',''),log+'# tests 27\n'])assert.throws(()=>focused.verifyResult(pass,altered));
+ for(const altered of [log.replace('# pass 29','# pass 28'),log.replace('# skipped 0','# skipped 1'),log.replace('# tests 29\n',''),log+'# tests 29\n'])assert.throws(()=>focused.verifyResult(pass,altered));
  const workflow=fs.readFileSync(path.join(__dirname,'../.github/workflows/qa.yml'),'utf8').replace(/\r\n/g,'\n'),windows=workflow.split('\n  native541-windows:\n')[1].split('\n  native541-linux:\n')[0];
  assert.equal((windows.match(/run: node --max-old-space-size=400 scripts\/test-owned-helper-windows064\.cjs _site test-results\/owned-helper-windows/g)||[]).length,1);assert.doesNotMatch(windows,/--test-name-pattern|--test-skip-pattern|continue-on-error:/);assert.match(windows,/if: always\(\)[\s\S]*name: owned-helper-windows-report[\s\S]*path: test-results\/owned-helper-windows/);
 });

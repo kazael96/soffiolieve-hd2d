@@ -2,7 +2,7 @@
  * one reusable 1 MiB GPU card per renderer; no accumulating frame textures. */
 (function(root){
  let bank=null,pending=null,generation=0,action=null;
- const cards=new WeakMap(),presented=new WeakMap(),surfGates=new WeakMap(),native=()=>root.NativeStory?.state||root.Journey?.state.original;
+ const cards=new WeakMap(),presented=new WeakMap(),surfGates=new WeakMap(),cutWalks=new WeakMap(),cutFailures=new WeakMap(),native=()=>root.NativeStory?.state||root.Journey?.state.original;
  const riderWaists064={M:[[16,25],[16,23.5],[19.5,23.5],[12.5,23.5]],F:[[16,24.5],[16,23.5],[18.5,23.5],[13.5,23.5]]};
  const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
  function graphic(mon){return root.PokemonVisuals.graphic(mon);}
@@ -19,11 +19,12 @@
    if(cutArt)await cutArt.prepare();
    const sources=root.PlayerIdentity?[root.PlayerIdentity.frames('Alcide'),root.PlayerIdentity.frames('AlcideSurf')]:[root.OPENING_SPRITES?.Alcide||root.ROM_SPRITES?.Alcide,root.SURF_FIELD_ASSETS?.sprites.AlcideSurf];
    if(!sources[0]||[19,57].includes(move)&&!sources[1])throw Error('Sprite del protagonista MN non disponibile');
-   const images=await Promise.all(sources.map(async frames=>frames?Promise.all([0,3,6,9].map(async i=>{const image=await root.RuntimeAssets.image(frames[i]);return {image,bounds:alpha(image)};})):null));
+   const walking=+key===501&&move===15;
+   const images=await Promise.all(sources.map(async (frames,slot)=>frames?Promise.all((walking&&slot===0?Array.from({length:12},(_,i)=>i):[0,3,6,9]).map(async i=>{const image=await root.RuntimeAssets.image(frames[i]);return {image,bounds:alpha(image)};})):null));
    if(ticket!==generation)throw Error('Preparazione MN sostituita');
    const contactProfile=root.FieldHMProfiles.profiles.get(key+':57')||root.FieldHMProfiles.profiles.get(key+':19'),contact=contactProfile?.riderContact,contacts=contact?{}:null;
    if(contact)for(const view of ['front','back']){const source=root.ROM_SPRITE_ANIM.cache[key+'-'+view],b=source.groundBounds,q=root.FieldHMChoreography.riderAnchor(key,view==='back',contact[view],source.data),h=b[3]-b[1];contacts[view]=Object.freeze({x:(q.x-(b[0]+b[2])/2)/h,y:(b[3]-q.y)/h,track:q.track});}
-   const previous=bank;bank={contacts,graphic:key,identity,mon,displayMon:{...mon},standing:images[0],sitting:images[1],release,cutArt};previous?.release();if(previous?.cutArt&&previous.cutArt!==cutArt)previous.cutArt.release();return bank;
+   const previous=bank;bank={contacts,graphic:key,identity,mon,displayMon:{...mon},standing:walking?[0,3,6,9].map(i=>images[0][i]):images[0],walking:walking?images[0]:null,sitting:images[1],release,cutArt};previous?.release();if(previous?.cutArt&&previous.cutArt!==cutArt)previous.cutArt.release();return bank;
   }catch(error){release();throw error;}finally{if(pending?.ticket===ticket)pending=null;if(!pending&&!bank?.cutArt)cutArt?.release();}})();
   pending={graphic:key,identity,move,promise,ticket};return promise;
  }
@@ -70,6 +71,11 @@
   captureCutCamera(renderer,original,actors);
   const stagedPlan=cutCameraScope(action)?cutCameraPlans.get(action)?.get(renderer):null;
   if(cutCameraScope(action)&&(!stagedPlan||stagedPlan.invalid||stagedPlan.scene!==renderer.scene||stagedPlan.bank!==bank||stagedPlan.staging?.error))return rejectCutStage(renderer,actors,stagedPlan?.staging?.error||'Riferimenti della scena Taglio sostituiti');
+  if(stagedPlan){
+   const walk=cutWalks.get(action);if(walk.renderer!==renderer)return rejectCutStage(renderer,actors,'Renderer Taglio sostituito');
+   const hero=cutHumanActor(original,walk);actors=actors.map(a=>a===original?hero:a);
+   if(walk.phase!=='core'){presented.set(renderer,{action,walk,step:walk.step,phase:walk.phase});return cutStripForeground(actors,action);}
+  }
   let mon,move,sample,position,rider=true,scale=1;
   if(action){if(action.zone!==native()?.zone&&!action.transfer)return actors;({mon,move}=action);const p=root.FieldHMProfiles.profile(mon,move),t=clamp(action.elapsed/action.duration);const viewDirection=root.NativeRails&&renderer.yaw?root.NativeRails.screenDirection(action.direction,renderer.yaw):action.direction;sample=root.FieldHMProfiles.sample(p,time,{phase:action.phase,progress:t,direction:viewDirection});position={x:original.x,z:original.z,height:action.height};
    if(move===19){
@@ -79,7 +85,7 @@
     scale=departing?ease(t/.15):1-ease(clamp((t-.85)/.15));
    }
    else {rider=false;const travel=ease(clamp((t-.12)/.2))*(1-ease(clamp((t-.73)/.2))),dx=action.target.x-original.x,dz=action.target.y-original.z,distance=Math.hypot(dx,dz),approach=Math.max(0,distance-.65)/Math.max(.01,distance);scale=t<.12?ease(t/.12):t>.9?1-ease((t-.9)/.1):1;
-    if(stagedPlan){const lane=stagedPlan.staging;position.x=lane.origin[0]+(lane.end[0]-lane.origin[0])*travel;position.z=lane.origin[1]+(lane.end[1]-lane.origin[1])*travel;}
+    if(stagedPlan){position.x+=dx*approach*travel;position.z+=dz*approach*travel;}
     else {position.x+=dx*approach*travel;position.z+=dz*approach*travel;
     const [vx,vz]=[[0,-1],[0,1],[-1,0],[1,0]][action.direction];if(action.canRetreat===undefined)action.canRetreat=[.25,.5,.75,.95].every(step=>{const x=original.x-vx*step,z=original.z-vz*step;return typeof blocked==='function'&&!blocked(x-.18,z-.18)&&!blocked(x+.18,z+.18)&&!root.NativeStory?.occupied(x,z)&&Math.abs(renderer.groundHeight(x,z)-action.height)<.25;});
     if(action.canRetreat){const back=ease(t/.2)*(1-ease((t-.82)/.18));original.x-=vx*.95*back;original.z-=vz*.95*back;original.groundX=original.x;original.groundZ=original.z;if(t<.2||t>.82)original.frame=action.direction*3+1+Math.floor(time*8)%2;}
@@ -102,7 +108,8 @@
   }else {dispose(renderer);if(!root.SurfField?.mounted()){if(!pending)bank?.cutArt?.release();bank?.release();bank=null;}return actors;}
   const p=root.FieldHMProfiles.profile(mon,move);if(bank?.graphic!==graphic(mon))return actors;
   position.height+=sample.bob||0;
-  let ball=null;if(!rider&&scale<1){const heroHeight=(action?.height??native()?.fieldHeight??position.height)+1.1,q=1-scale;position={x:position.x+(original.x-position.x)*q,z:position.z+(original.z-position.z)*q,height:position.height+(heroHeight-position.height)*q-sample.height*sample.bodyScaleY*scale*q*.5};const pitch=renderer.cameraPitch||[.423,.906],yaw=renderer.yaw||0,dx=original.x-position.x,dz=original.z-position.z;ball=[256+(dx*Math.cos(yaw)-dz*Math.sin(yaw))*64,384-((heroHeight-position.height)*pitch[1]-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*pitch[0])*64/Math.max(.1,pitch[1])];}
+  const ballHero=stagedPlan?actors.find(a=>a.hero||a.name==='Alcide'):original;
+  let ball=null;if(!rider&&scale<1){const heroHeight=(action?.height??native()?.fieldHeight??position.height)+1.1,q=1-scale;position={x:position.x+(ballHero.x-position.x)*q,z:position.z+(ballHero.z-position.z)*q,height:position.height+(heroHeight-position.height)*q-sample.height*sample.bodyScaleY*scale*q*.5};const pitch=renderer.cameraPitch||[.423,.906],yaw=renderer.yaw||0,dx=ballHero.x-position.x,dz=ballHero.z-position.z;ball=[256+(dx*Math.cos(yaw)-dz*Math.sin(yaw))*64,384-((heroHeight-position.height)*pitch[1]-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*pitch[0])*64/Math.max(.1,pitch[1])];}
   const texture=paint(renderer,p,sample,move===15?action.elapsed/action.duration:time,{rider,scale,ball});
   const actor={name:'Alcide',fieldHM:true,texture,hero:true,...placement(position,renderer.cameraPitch,0,renderer.yaw||0),...(action?{groundHeight:action.height,shadowAlpha:1/(1+Math.max(0,position.height-action.height)**2)}:{}),worldWidth:8,worldHeight:8,nativeBillboard:true,noShadow:move===57||scale<1,frame:0};
   if(action)presented.set(renderer,{action,elapsed:action.elapsed});
@@ -133,7 +140,8 @@
  }
  function copyCard(renderer,context,...rect){const card=cards.get(renderer);if(!card)return false;context.drawImage(card.canvas,...rect);return true;}
  function placement(position,pitch=[.423,.906],bob=0,yaw=0){return {x:position.x+2*pitch[0]*Math.sin(yaw),z:position.z+2*pitch[0]*Math.cos(yaw),height:position.height+bob-2*pitch[1],groundHeight:position.height,groundX:position.x,groundZ:position.z};}
- function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;if(cutCameraScope(action)&&action.direction===1)return base;const t=clamp(action.elapsed/action.duration),amount=action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
+ function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;if(cutCameraScope(action)&&action.direction===1)return base;const t=clamp(action.elapsed/action.duration),amount=cutCameraScope(action)?cutCameraAmount(action):action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
+ function cutCameraAmount(owner){const walk=owner&&cutWalks.get(owner);if(!walk)return 0;if(walk.phase==='core')return 1;const q=walk.step/((walk.route.length-1)*8);return walk.phase==='out'?ease(q):1-ease(q);}
  // Private501/15 camera pilot. Geometry is frozen before the original staging.
  const cutCameraPlans=new WeakMap(),cutCameraFrames=new Map();
  function restoreCutCamera(renderer){const lease=cutCameraFrames.get(renderer);if(!lease)return;cutCameraFrames.delete(renderer);
@@ -141,33 +149,83 @@
  }
  function releaseCutCameras(owner){for(const [renderer,lease]of cutCameraFrames)if(!owner||lease.owner===owner)restoreCutCamera(renderer);}
  function cutCameraScope(a){return !!a&&!a.done&&a.move===15&&a.phase==='cut'&&+graphic(a.mon)===501&&[0,1].includes(a.direction)&&a.zone===152;}
-  function rejectCutStage(renderer,actors,reason){const old=action;releaseCutCameras(old);action=null;old.reject(Error(reason));dispose(renderer);return actors;}
+  function rejectCutStage(renderer,actors,reason){const old=action;releaseCutCameras(old);cutWalks.delete(old);cutCameraPlans.delete(old);action=null;cutReject(old,Error(reason));dispose(renderer);return actors;}
   function cutStageClear(renderer,x,z,radius,height){
    if(typeof blocked!=='function'||typeof root.NativeStory?.occupied!=='function')return false;
    return (radius?[[0,0],[-radius,-radius],[-radius,radius],[radius,-radius],[radius,radius]]:[[0,0]]).every(([u,v])=>!blocked(x+u,z+v)&&!root.NativeStory.occupied(x+u,z+v)&&renderer.groundHeight(x+u,z+v)===height);
   }
-  function cutLateralStage(renderer,h,metadata,p,keys,stretch){
-   const back=action.direction===0,side=back?-1:1,b=metadata.bounds[back?'back':'front'],row=bank.standing?.[action.direction],image=row?.image,width=image?.naturalWidth||image?.width,unit=p.height/(b[3]-b[1]),lean=Math.max(0,...keys.map(k=>-side*(k.lean||0)));
-   if(!row?.bounds||!(width>0&&unit>0&&lean<Math.PI/2))return {error:'Dimensioni native della corsia Taglio non disponibili'};
-   // Shell is held to the right in back cells, to the left in front cells.
-   // Keep that original gesture facing the tree. One source texel is the gap;
-   // the other terms are actual hero alpha and the authored inward-lean bound.
-   const heroHalf=h.width*(row.bounds[2]-row.bounds[0])/(2*width),bodyHalf=unit*((b[2]-b[0])/2+(b[3]-b[1])*Math.sin(lean))*stretch,clearance=(heroHalf+bodyHalf+unit)/Math.cos(back?Math.PI/6:0),foot=unit*(b[2]-b[0])/2;
-   const dx=action.target.x-h.x,dz=action.target.y-h.z,distance=Math.hypot(dx,dz),advance=distance>.65?(distance-.65)/distance:0,origin=[h.x+side*clearance,h.z],end=[origin[0]+dx*advance,origin[1]+dz*advance];
-   if(![heroHalf,bodyHalf,clearance,foot,...origin,...end].every(Number.isFinite)||!(heroHalf>0&&foot>0))return {error:'Corsia Taglio non finita'};
-   // The native permission grid is one world unit per tile. Check every cell
-   // touched by the conservative body-width footprint, not a distance-step fit.
-   const left=Math.floor(Math.min(origin[0],end[0])-foot),right=Math.floor(Math.max(origin[0],end[0])+foot),top=Math.floor(Math.min(origin[1],end[1])-foot),bottom=Math.floor(Math.max(origin[1],end[1])+foot);
-   if((right-left+1)*(bottom-top+1)>128)return {error:'Corsia Taglio fuori dal vicinato del bersaglio'};
-   for(let x=left;x<=right;x++)for(let z=top;z<=bottom;z++)if(!cutStageClear(renderer,x+.5,z+.5,0,action.height))return {error:'Spazio laterale insufficiente per Taglio'};
-   if(!cutStageClear(renderer,...origin,foot,action.height)||!cutStageClear(renderer,...end,foot,action.height))return {error:'Appoggio laterale di Taglio non libero'};
-   return {origin,end,foot,side,clearance,heroHalf,bodyHalf,sourceUnit:unit};
+ // A native navigation search, not a pose/reach fit. Each edge is the original
+ // one-cell walk (8 field updates at30Hz); every emitted substep needs a draw.
+ function cutHumanActor(hero,walk){
+  const points=walk.phase==='back'?walk.route.slice().reverse():walk.route,total=(points.length-1)*8,step=walk.phase==='core'?total:walk.step,i=Math.min(points.length-2,Math.floor(Math.max(0,step-1)/8)),q=(step-i*8)/8,from=points[Math.max(0,i)],to=points[Math.min(points.length-1,i+1)],dx=to[0]-from[0],dz=to[1]-from[1],dir=Math.abs(dx)>Math.abs(dz)?dx>0?3:2:dz>0?1:0,standing=step===0||step===total||step%8===0;
+  const x=from[0]+dx*q,z=from[1]+dz*q,frame=standing?(walk.phase==='core'||walk.phase==='back'&&step===total?walk.facing:dir)*3:dir*3+(step%8<4?1:2);
+  return {...hero,x,z,height:walk.height+.04,groundX:x,groundZ:z,groundHeight:walk.height,noShadow:false,frame};
+ }
+ function cutWalkEdge(renderer,a,b,height){
+  for(let f=0;f<=8;f++)if(!cutStageClear(renderer,a[0]+(b[0]-a[0])*f/8,a[1]+(b[1]-a[1])*f/8,.18,height))return false;
+  return true;
+ }
+ function cutProject(renderer,camera,point){
+  const [ps,pc]=camera.cameraPitch,cs=Math.cos(camera.yaw||0),sn=Math.sin(camera.yaw||0),dx=point[0]-camera.center[0],dz=point[2]-camera.center[1],py=point[1]-(renderer.elevation||0),q=Math.max(.35,1-(py*ps+(dx*sn+dz*cs)*pc)/(renderer.cameraDistance||65));
+  return [(dx*cs-dz*sn)/q,(pc*py-ps*(dx*sn+dz*cs))/q];
+ }
+ function cutHeroPoints(h,x,z,rows,pitch,yaw){
+  const points=[],cs=Math.cos(yaw),sn=Math.sin(yaw),[ps,pc]=pitch;
+  for(const row of rows){const width=row.image.naturalWidth||row.image.width,height=row.image.naturalHeight||row.image.height,[l,t,r,b]=row.bounds;
+   // The ordinary sprite plane's top-right skew lies inside these extrema.
+   // Use actual prepared alpha extents for all12 native standing/walk cells.
+   for(const u of [(l/width-.5)*h.width,(r/width-.5)*h.width])for(const v of [(1-b/height)*h.tall,(1-t/height)*h.tall])for(const skew of [0,1]){const d=-v*(ps+.202*skew);points.push([x+u*cs+d*sn,h.height+v*(pc-.126*skew),z-u*sn+d*cs]);}
+  }return points;
+ }
+ function cutHumanStage(renderer,h,metadata,p,keys,stretch,sy,plan){
+  if(!bank.walking||bank.walking.length!==12||bank.identity!==(root.PlayerIdentity?.key||'M'))return {error:'Passi nativi del protagonista Taglio non pronti'};
+  if(bank.walking.some(row=>!row?.bounds||row.bounds.length!==4||!row.bounds.every(Number.isFinite)||!((row.image?.naturalWidth||row.image?.width)>0&&(row.image?.naturalHeight||row.image?.height)>0))||!Array.isArray(renderer.center)||renderer.center.length!==2||!renderer.center.every(Number.isFinite))return {error:'Dimensioni native del protagonista Taglio non disponibili'};
+  const grids=renderer.scene.permissionGrids;if(!grids?.length||grids.length>4)return {error:'Griglia nativa Taglio non disponibile'};
+  const inside=(x,z)=>grids.some(g=>Number.isFinite(g.x)&&Number.isFinite(g.z)&&x>=g.x-16&&x<g.x+16&&z>=g.z-16&&z<g.z+16),home=[h.x,h.z],dx=action.target.x-h.x,dz=action.target.y-h.z,distance=Math.hypot(dx,dz),advance=distance>.65?(distance-.65)/distance:0,end=[h.x+dx*advance,h.z+dz*advance],b=metadata.bounds[action.direction===0?'back':'front'],unit=p.height/(b[3]-b[1]),radius=unit*Math.hypot((b[2]-b[0])/2,b[3]-b[1])*Math.max(stretch,sy),base={zoom:renderer.zoom,center:renderer.center,yaw:renderer.yaw||0,cameraPitch:renderer.cameraPitch||[.423,.906]},dirs=[[0,-1],[0,1],[-1,0],[1,0]];
+  if(![...home,...end,unit,radius].every(Number.isFinite)||!(radius>0&&unit>0)||!inside(...home)||!cutStageClear(renderer,...home,.18,action.height))return {error:'Appoggio iniziale Taglio non libero'};
+  const goal=(point,route)=>{
+   const candidate={...plan,roots:[home,point,home,end],pokemonRoots:[home,end],heroRoute:route};
+   const pitch=action.direction===1?base.cameraPitch:[Math.sin(62*Math.PI/180),Math.cos(62*Math.PI/180)],close=closeCutCamera(renderer,candidate,base,pitch,1);if(!close)return false;
+   for(const camera of [base,close]){
+    const [ps,pc]=camera.cameraPitch,cs=Math.cos(camera.yaw),sn=Math.sin(camera.yaw),body=[];
+    // Disc of the ORIGINAL opaque bounds: all lean angles, independent channel
+    // extrema and both endpoints of the unchanged radial Pokemon approach.
+    for(const [x,z]of [home,end])for(const u of [-radius,radius])for(const v of [-radius,radius])for(const bob of keys.map(k=>k.bob||0))body.push(cutProject(renderer,camera,[x+u*cs-v*ps*sn,action.height+bob+v*pc,z-u*sn-v*ps*cs])[0]);
+    const human=cutHeroPoints(h,...point,bank.walking,camera.cameraPitch,camera.yaw).map(q=>cutProject(renderer,camera,q)[0]);
+    const gap=unit/.35; // one ORIGINAL native texel under the shader's q floor
+    if(!(Math.max(...human)+gap<Math.min(...body)||Math.max(...body)+gap<Math.min(...human)))return false;
+   }
+   // The unchanged frustum fit includes the complete human route. Walk-out
+   // raises its existing camera amount; walk-home restores it, without a core
+   // t0/t1 discontinuity. This is not a new projection or an angle search.
+   return true;
+  };
+  const queue=[{point:home,parent:-1}],seen=new Set([home.join(',')]);
+  for(let cursor=0;cursor<queue.length&&cursor<4096;cursor++){
+   const node=queue[cursor],route=[];for(let i=cursor;i>=0;i=queue[i].parent)route.push(queue[i].point);route.reverse();
+   if(cursor&&goal(node.point,route))return {route,origin:home,end,sourceUnit:unit,bodyRadius:radius};
+   for(const [u,v]of dirs){const next=[node.point[0]+u,node.point[1]+v],key=next.join(',');if(seen.has(key)||!inside(...next))continue;seen.add(key);if(cutWalkEdge(renderer,node.point,next,action.height))queue.push({point:next,parent:cursor});}
   }
+  return {error:'Nessun percorso pedonale leggibile e libero per Taglio'};
+ }
+ function cutWalkTick(walk,dt){if(walk.pending)return;walk.debt=Math.min(1/30,walk.debt+dt);if(walk.debt>=1/30){walk.debt=0;walk.step++;walk.pending=true;}}
+ function cutCry(owner){if(owner.cryStarted)return;owner.cryStarted=true;void root.AudioEngine?.cry(root.PokemonVisuals.speciesId(owner.mon));}
+ function cutRememberFailure(owner,value){if(!cutFailures.has(owner))cutFailures.set(owner,{value});}
+ function cutReject(owner,fallback){const reason=cutFailures.has(owner)?cutFailures.get(owner).value:fallback;cutFailures.delete(owner);owner.reject(reason);}
+ function cutFinish(owner){const failed=cutFailures.has(owner);releaseCutCameras(owner);cutWalks.delete(owner);cutCameraPlans.delete(owner);owner.done=true;if(!owner.retain)action=null;if(failed){cutReject(owner);releaseFieldBank();}else owner.resolve();}
+ function cutWalkACK(walk){
+  walk.pending=false;walk.started||=walk.step>0;
+  if(walk.step!==(walk.route.length-1)*8)return;
+  walk.step=0;walk.debt=0;
+  if(walk.phase==='out'&&!cutFailures.has(action)){walk.phase='core';action.elapsed=0;action.debt=0;cutCry(action);}
+  else if(walk.phase==='out'){walk.phase='back';}
+  else cutFinish(action);
+ }
  function captureCutCamera(renderer,hero,actors){if(!cutCameraScope(action))return;let plans=cutCameraPlans.get(action);if(!plans){plans=new WeakMap();cutCameraPlans.set(action,plans);}const prior=plans.get(renderer);
-  if(prior){if(hero.x!==prior.hero.x||hero.z!==prior.hero.z||bank!==prior.bank)prior.invalid=true;return;}
+  if(prior){if(hero.x!==prior.hero.x||hero.z!==prior.hero.z||hero.name!==prior.hero.name||bank!==prior.bank||bank.identity!==(root.PlayerIdentity?.key||'M'))prior.invalid=true;return;}
   const target=action.target,tree=actors.find(a=>a.source?.model===108&&a.x===target?.x&&a.z===target?.y),metadata=bank?.cutArt?.metadata,p=root.FieldHMProfiles.profile(action.mon,15);
   if(!target||!tree||!metadata||bank.graphic!==graphic(action.mon)||!p||!renderer.images?.[(renderer.spriteName?.(tree.name)||tree.name)+'-0'])return;
-  const geometry=a=>({x:a.x,z:a.z,height:a.height??.04,width:a.worldWidth??2,tall:a.worldHeight??2,nativeBillboard:!!a.nativeBillboard});const h=geometry(hero),treeBox=geometry(tree);
+  const geometry=a=>({name:a.name,x:a.x,z:a.z,height:a.height??.04,width:a.worldWidth??2,tall:a.worldHeight??2,nativeBillboard:!!a.nativeBillboard});const h=geometry(hero),treeBox=geometry(tree);
   if(![h.x,h.z,h.height,h.width,h.tall,treeBox.x,treeBox.z,treeBox.height,treeBox.width,treeBox.tall,action.height,p.height].every(Number.isFinite)||h.width<=0||h.tall<=0||treeBox.width<=0||treeBox.tall<=0)return;
   const keys=p.choreography.cut.map(row=>row[1]),range=key=>[Math.min(0,...keys.map(k=>k[key]||0)),Math.max(0,...keys.map(k=>k[key]||0))],stretch=range('stretch'),squash=range('squash'),crouch=range('crouch'),bob=range('bob'),sx=1+stretch[1]+.32*crouch[1],sy=1+squash[1]-crouch[0];
   const b=metadata.bounds[action.direction===0?'back':'front'],unit=p.height/(b[3]-b[1]),cx=(b[0]+b[2])/2,origin=metadata.origin,cell=metadata.cell;
@@ -176,12 +234,16 @@
   const radius=unit*Math.hypot(Math.max(Math.abs(-origin[0]-cx),Math.abs(cell-origin[0]-cx)),Math.max(Math.abs(-origin[1]-b[3]),Math.abs(cell-origin[1]-b[3])));
   const dx=target.x-h.x,dz=target.y-h.z,distance=Math.hypot(dx,dz),advance=distance>.65?(distance-.65)/distance:0,[vx,vz]=action.direction===0?[0,-1]:[0,1];
   if(!(Number.isFinite(radius)&&radius>0&&sx>0&&sy>0&&p.height>0))return;
-  const staging=cutLateralStage(renderer,h,metadata,p,keys,sx),roots=staging.error?[[h.x,h.z]]:[[h.x,h.z],[h.x,h.z],staging.origin,staging.end],low=action.height+Math.min(bob[0],0)-p.height*sy/8,high=action.height+Math.max(bob[1],1.1);
-  plans.set(renderer,{owner:action,bank,scene:renderer.scene,hero:h,tree:treeBox,targetSource:tree.source,staging,roots,low,high,u:radius*sx,v:radius*sy,height:p.height,invalid:false});
+  const low=action.height+Math.min(bob[0],0)-p.height*sy/8,high=action.height+Math.max(bob[1],1.1),plan={owner:action,bank,scene:renderer.scene,hero:h,tree:treeBox,targetSource:tree.source,roots:[[h.x,h.z],[h.x,h.z]],low,high,u:radius*sx,v:radius*sy,height:p.height,invalid:false};
+  const staging=h.height!==action.height+.04?{error:'Protagonista Taglio non sul pavimento nativo'}:cutHumanStage(renderer,h,metadata,p,keys,sx,sy,plan);plan.staging=staging;
+  if(!staging.error){plan.roots=[[h.x,h.z],staging.route.at(-1),staging.origin,staging.end];plan.pokemonRoots=[staging.origin,staging.end];plan.heroRoute=staging.route;cutWalks.set(action,{renderer,plan,route:staging.route,phase:'out',step:0,debt:0,pending:false,height:action.height,facing:action.direction,started:false});}
+  plans.set(renderer,plan);
  }
  // A copied render actor only: native target/save data and its hidden flag stay untouched.
+ function cutStripForeground(actors,owner){return actors.map(a=>{if(a.fieldHMCutForeground064?.ownerRef!==owner)return a;const {fieldHMCutForeground064,...plain}=a;return plain;});}
  function cutForegroundActors064(renderer,actors){
   const owner=action,plan=owner&&cutCameraPlans.get(owner)?.get(renderer),lease=cutCameraFrames.get(renderer);
+  if(owner&&cutFailures.has(owner))return cutStripForeground(actors,owner);
   if(!cutCameraScope(owner)||owner.direction!==1||owner.committed||native()?.zone!==152||!plan||plan.invalid||plan.owner!==owner||plan.bank!==bank||plan.scene!==renderer.scene||lease?.owner!==owner)return actors;
   const t=clamp(owner.elapsed/owner.duration),amount=ease(t/.18)*(1-ease((t-.82)/.18));if(amount===0)return actors;
   const alpha=1-(1-.38)*amount;if(!Number.isFinite(alpha)||alpha<.38||alpha>1)return actors;
@@ -189,8 +251,8 @@
  }
  function cutCameraPoints(plan,pitch,yaw){const points=[],cs=Math.cos(yaw),sn=Math.sin(yaw),[ps,pc]=pitch;
   const billboard=(box,x,z)=>{const w=box.width,h=box.tall,local=[[-w/2,0,0],[w/2,0,0],[-w/2,h*pc,-h*ps],[w/2,h*(box.nativeBillboard?pc:pc-.126),-h*(box.nativeBillboard?ps:ps+.202)]];for(const [u,v,d]of local)points.push([x+u*cs+d*sn,box.height+v,z-u*sn+d*cs]);};
-  billboard(plan.tree,plan.tree.x,plan.tree.z);for(const [x,z]of plan.roots.slice(0,2))billboard(plan.hero,x,z);
-  for(const [x,z]of plan.roots)for(const y of [plan.low,plan.high])for(const u of [-plan.u,plan.u])for(const v of [-plan.v,plan.v])points.push([x+u*cs-v*ps*sn,y+v*pc,z-u*sn-v*ps*cs]);return points;
+  billboard(plan.tree,plan.tree.x,plan.tree.z);for(const [x,z]of plan.heroRoute||plan.roots.slice(0,2))billboard(plan.hero,x,z);
+  for(const [x,z]of plan.pokemonRoots||plan.roots)for(const y of [plan.low,plan.high])for(const u of [-plan.u,plan.u])for(const v of [-plan.v,plan.v])points.push([x+u*cs-v*ps*sn,y+v*pc,z-u*sn-v*ps*cs]);return points;
  }
  function closeCutCamera(renderer,plan,base,pitch,amount){const w=renderer.viewSize?.[0]??root.innerWidth,h=renderer.viewSize?.[1]??root.innerHeight,gutter=16;
   if(plan.invalid||plan.owner!==action||bank!==plan.bank||renderer.scene!==plan.scene||native()?.zone!==action.zone||renderer.taskProjection||(base.yaw||0)!==0||!(w>gutter*2&&h>gutter*2&&base.zoom>0)||!Array.isArray(base.center)||base.center.length!==2)return null;
@@ -203,7 +265,7 @@
   if(!(Number.isFinite(zoom)&&zoom>0&&center.every(Number.isFinite)))return null;return {zoom,center,yaw,cameraPitch:pitch};
  }
  function applyCamera(renderer){restoreCutCamera(renderer);const pitchBase=renderer.cameraPitch;if(![15,19].includes(action?.move))return ()=>{};
-  const pitch=cameraFor(pitchBase),plan=cutCameraPlans.get(action)?.get(renderer),t=clamp(action.elapsed/action.duration),amount=ease(t/.18)*(1-ease((t-.82)/.18));
+  const pitch=cameraFor(pitchBase),plan=cutCameraPlans.get(action)?.get(renderer),t=clamp(action.elapsed/action.duration),amount=cutCameraScope(action)?cutCameraAmount(action):ease(t/.18)*(1-ease((t-.82)/.18));
   if(cutCameraScope(action)&&plan&&amount>0){const base={zoom:renderer.zoom,center:renderer.center,yaw:renderer.yaw,cameraPitch:pitchBase},applied=closeCutCamera(renderer,plan,base,pitch,amount);if(applied){const lease={owner:action,base,applied,values:Object.fromEntries(Object.entries(applied).map(([k,v])=>[k,Array.isArray(v)?v.slice():v]))};cutCameraFrames.set(renderer,lease);Object.assign(renderer,applied);return ()=>{if(cutCameraFrames.get(renderer)===lease)restoreCutCamera(renderer);};}}
   renderer.cameraPitch=pitch;return ()=>{renderer.cameraPitch=pitchBase;};
  }
@@ -228,26 +290,29 @@
   return {dt:Math.max(0,Math.min(dt,(stop-q)/rate)),complete:gate.complete};
  }
  function rendered(renderer){const frame=presented.get(renderer);presented.delete(renderer);if(!frame||document.hidden||renderer.contextLost||renderer.gl?.isContextLost?.())return;
+  if(frame.walk){if(frame.action===action&&cutWalks.get(action)===frame.walk&&frame.walk.renderer===renderer&&frame.walk.phase===frame.phase&&frame.walk.step===frame.step)cutWalkACK(frame.walk);return;}
   if(frame.riderBank){if(frame.riderBank!==bank)return;acknowledgeBalance064(bank.leanIn,frame.balanceProgress);if(bank.leanIn?.done)bank.leanIn=null;return;}
   if(frame.motion){const motion=native()?.surfMotion,gate=surfGates.get(frame.motion);if(frame.motion!==motion||!gate||Math.abs(frame.progress-surfProgress(motion))>1e-9)return;if(frame.balanceProgress!==undefined){acknowledgeBalance064(gate.leanOut,frame.balanceProgress);return;}while(gate.index<gate.stops.length&&frame.progress+1e-9>=gate.stops[gate.index])gate.index++;if(frame.progress>=1-1e-9)gate.complete=true;return;}
   if(frame.action!==action||frame.elapsed!==action.elapsed||action.done)return;
   if(action.elapsed+1e-9>=action.checkpoints[action.checkpoint]*action.duration)action.checkpoint++;
-  if(action.elapsed>=action.duration){const old=action;releaseCutCameras(old);old.done=true;if(!old.retain)action=null;old.resolve();}
+  if(action.elapsed>=action.duration){if(cutWalks.has(action)){const walk=cutWalks.get(action);walk.phase='back';walk.step=0;walk.pending=false;walk.debt=0;}else cutFinish(action);}
  }
- function tick(dt){if(document.hidden)return;if(bank?.leanIn&&root.SurfField?.mounted()&&!native()?.surfMotion)advanceBalance064(bank.leanIn,dt);if(!action)return;if(action.zone!==native()?.zone&&!action.transfer){const old=action;releaseCutCameras(old);action=null;old.reject(Error('Scena MN sostituita'));return;}if(action.done||!Number.isFinite(dt)||dt<=0)return;
+ function tick(dt){if(document.hidden)return;if(bank?.leanIn&&root.SurfField?.mounted()&&!native()?.surfMotion)advanceBalance064(bank.leanIn,dt);if(!action)return;if(action.zone!==native()?.zone&&!action.transfer){const old=action;releaseCutCameras(old);cutWalks.delete(old);cutCameraPlans.delete(old);action=null;cutReject(old,Error('Scena MN sostituita'));return;}if(action.done||!Number.isFinite(dt)||dt<=0)return;
+  if(cutCameraScope(action)){const walk=cutWalks.get(action);if(!walk)return;if(walk.phase!=='core'){cutWalkTick(walk,dt);return;}}
   action.debt=Math.min(action.duration-action.elapsed,action.debt+dt);
   const limit=Math.max(action.elapsed,action.checkpoints[action.checkpoint]*action.duration);
   const elapsed=Math.min(limit,action.elapsed+action.debt);action.debt-=elapsed-action.elapsed;action.elapsed=elapsed;
-  if(action.onContact&&!action.committed&&action.elapsed/action.duration>=.52){action.committed=true;try{action.onContact();}catch(error){const old=action;releaseCutCameras(old);action=null;old.reject(error);}}
+  if(action.onContact&&!action.committed&&action.elapsed/action.duration>=.52){action.committed=true;try{action.onContact();}catch(error){if(cutWalks.has(action)){cutRememberFailure(action,error);action.onContact=null;}else{const old=action;releaseCutCameras(old);action=null;old.reject(error);}}}
  }
  async function start(mon,move,{phase=move===19?'depart':'cut',direction=1,target=null,height=0,duration=2,transfer=false,retain=false,onContact=null}={}){
   if(action&&!action.done)throw Error('Azione MN già in corso');await prepare(mon,move);if(action&&!action.done)throw Error('Azione MN già in corso');
   if(!Number.isFinite(duration)||duration<=0)throw Error('Durata MN non valida');
   releaseCutCameras(action);
   const stops=checkpoints(mon,move,phase);
-  const finished=new Promise((resolve,reject)=>{action={mon,move,phase,direction,target,height,duration,transfer,retain,onContact,zone:native()?.zone,elapsed:0,debt:0,checkpoints:stops,checkpoint:0,resolve,reject};});if(move===15)void root.AudioEngine?.cry(root.PokemonVisuals.speciesId(mon));return {finished};
+  const finished=new Promise((resolve,reject)=>{action={mon,move,phase,direction,target,height,duration,transfer,retain,onContact,zone:native()?.zone,elapsed:0,debt:0,checkpoints:stops,checkpoint:0,resolve,reject};});if(move===15&&!cutCameraScope(action))cutCry(action);return {finished};
  }
  async function run(...args){return (await start(...args)).finished;}
- function clear(){releaseCutCameras();generation++;const old=action;action=null;old?.reject(Error('Azione MN annullata'));bank?.release();bank=null;pending=null;root.FieldHMOshawottCut?.release();root.FieldHMEvolvedCut?.release();}
+ function releaseFieldBank(){generation++;bank?.release();bank=null;pending=null;root.FieldHMOshawottCut?.release();root.FieldHMEvolvedCut?.release();}
+ function clear(){releaseCutCameras();const walk=action&&cutWalks.get(action);if(walk?.started&&action.zone===native()?.zone&&walk.renderer.scene===walk.plan.scene&&!walk.plan.invalid){cutRememberFailure(action,Error('Azione MN annullata'));action.onContact=null;return;}const old=action;if(old){cutWalks.delete(old);cutCameraPlans.delete(old);}action=null;if(old)cutReject(old,Error('Azione MN annullata'));releaseFieldBank();}
  root.FieldHMWorld={prepare,present,rendered,inspectCard,copyCard,placement,cameraFor,applyCamera,tick,start,run,end(){if(action?.done){releaseCutCameras(action);action=null;}},dispose,clear,swimmer,surfReady,surfRenderable,surfBudget,rendererStats(renderer){const card=cards.get(renderer),valid=!!card&&renderer.gl.isTexture(card.texture.texture);return {gpuCards:valid?1:0,gpuBytes:valid?512*512*4:0};},get active(){return action;},get retained(){return {banks:bank?1:0,gpuCardBudgetBytes:512*512*4,authoredAtlasBytes:(root.FieldHMOshawottCut?.stats.decodedBytes||0)+(root.FieldHMEvolvedCut?.stats.decodedBytes||0)};}};
 })(typeof window==='undefined'?globalThis:window);

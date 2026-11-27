@@ -1792,8 +1792,17 @@
  // must return the field actor in that same draw; a previous card cannot pass.
  function observeFieldHMDraw055(onFrame){
   const draw=renderer.draw,present=FieldHMWorld.present;let frame=null,sequence=0;
-  FieldHMWorld.present=function(...args){const actors=present.apply(this,args);if(frame&&args[0]===renderer){frame.actor=actors.find(a=>a.fieldHM&&a.texture)||null;frame.hero=actors.find(a=>a.name==='Alcide'&&!a.fieldHM)||null;}return actors;};
-  renderer.draw=function(...args){const previous=frame,current={actor:null,sequence:++sequence};frame=current;try{const result=draw.apply(this,args),action=FieldHMWorld.active;if(action&&!action.done)onFrame({action,actor:current.actor,hero:current.hero,progress:action.elapsed/action.duration,sequence:current.sequence});return result;}finally{frame=previous;}};
+  FieldHMWorld.present=function(...args){const actors=present.apply(this,args);if(frame&&args[0]===renderer){frame.actor=actors.find(a=>a.fieldHM&&a.texture)||null;frame.hero=actors.find(a=>a.name==='Alcide'&&!a.fieldHM)||null;
+   const a=FieldHMWorld.active,q=a?.elapsed/a?.duration;
+   if(a?.zone===152&&a.move===15&&a.phase==='cut'&&a.direction===1&&+PokemonVisuals.graphic(a.mon)===501&&!a.committed&&q>=.30&&q<=.45){
+    const matches=actors.filter(n=>n.source?.uid===9&&n.source?.fieldZone===152);frame.npc9Count=matches.length;
+    if(matches.length===1){const n=matches[0],key=n.name+'-'+n.frame,fallback=n.name+'-0',selection=n.texture?'actor':renderer.images[key]?'frame':renderer.images[fallback]?'fallback0':'missing',selectedKey=selection==='frame'?key:selection==='fallback0'?fallback:null;
+     // Original11 is not a PlayerIdentity alias. Read the SAME World sprite
+     // selection without calling a renderer query or retaining a cache.
+     frame.npc9={actor:n,source:n.source,texture:n.texture||renderer.images[key]||renderer.images[fallback]||null,key:selectedKey,selection};}
+   }
+  }return actors;};
+  renderer.draw=function(...args){const previous=frame,current={actor:null,sequence:++sequence};frame=current;try{const result=draw.apply(this,args),action=FieldHMWorld.active;if(action&&!action.done){const n=current.npc9;onFrame({action,actor:current.actor,hero:current.hero,progress:action.elapsed/action.duration,sequence:current.sequence,npc9Count:current.npc9Count,npc9:n?{...n,sourceSameRef:n.actor.source===n.source,textureSameRef:n.texture===(n.selection==='actor'?n.actor.texture:renderer.images[n.key])}:null});}return result;}finally{frame=previous;}};
   return ()=>{renderer.draw=draw;FieldHMWorld.present=present;};
  }
  async function cutAction054(speed=1,identity=null){  await seed049({16532:5},[575,576,579,658,676,678,780]);if(identity)await prepareHMIdentity056(identity);NativeStory.state.dreamyardTreeCut=false;GameSpeed.set(speed);await fieldHMAudio054({silent:speed===4});
