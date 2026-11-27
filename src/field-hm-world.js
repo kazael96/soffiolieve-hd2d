@@ -68,6 +68,8 @@
   if(renderer.contextLost||renderer.gl?.isContextLost?.())return actors;
   const original=actors.find(a=>a.hero||a.name==='Alcide'||a.name==='AlcideSurf');if(!original)return actors;
   captureCutCamera(renderer,original,actors);
+  const stagedPlan=cutCameraScope(action)?cutCameraPlans.get(action)?.get(renderer):null;
+  if(cutCameraScope(action)&&(!stagedPlan||stagedPlan.invalid||stagedPlan.scene!==renderer.scene||stagedPlan.bank!==bank||stagedPlan.staging?.error))return rejectCutStage(renderer,actors,stagedPlan?.staging?.error||'Riferimenti della scena Taglio sostituiti');
   let mon,move,sample,position,rider=true,scale=1;
   if(action){if(action.zone!==native()?.zone&&!action.transfer)return actors;({mon,move}=action);const p=root.FieldHMProfiles.profile(mon,move),t=clamp(action.elapsed/action.duration);const viewDirection=root.NativeRails&&renderer.yaw?root.NativeRails.screenDirection(action.direction,renderer.yaw):action.direction;sample=root.FieldHMProfiles.sample(p,time,{phase:action.phase,progress:t,direction:viewDirection});position={x:original.x,z:original.z,height:action.height};
    if(move===19){
@@ -76,9 +78,12 @@
     if(!rider){const ground={x:original.x,z:original.z,height:action.height+.04},contact=seatPoint({...position,height:position.height+sample.bob},sample,renderer);original.name='Alcide';original.frame=viewDirection*3;original.x=ground.x+(contact.x-ground.x)*boarding;original.z=ground.z+(contact.z-ground.z)*boarding;original.height=ground.height+(contact.height-ground.height)*boarding+Math.sin(boarding*Math.PI)*.5;original.groundHeight=action.height;original.groundX=ground.x;original.groundZ=ground.z;original.shadowAlpha=1/(1+Math.max(0,original.height-action.height)**2);}
     scale=departing?ease(t/.15):1-ease(clamp((t-.85)/.15));
    }
-   else {rider=false;const travel=ease(clamp((t-.12)/.2))*(1-ease(clamp((t-.73)/.2))),dx=action.target.x-original.x,dz=action.target.y-original.z,distance=Math.hypot(dx,dz),approach=Math.max(0,distance-.65)/Math.max(.01,distance);position.x+=dx*approach*travel;position.z+=dz*approach*travel;scale=t<.12?ease(t/.12):t>.9?1-ease((t-.9)/.1):1;
+   else {rider=false;const travel=ease(clamp((t-.12)/.2))*(1-ease(clamp((t-.73)/.2))),dx=action.target.x-original.x,dz=action.target.y-original.z,distance=Math.hypot(dx,dz),approach=Math.max(0,distance-.65)/Math.max(.01,distance);scale=t<.12?ease(t/.12):t>.9?1-ease((t-.9)/.1):1;
+    if(stagedPlan){const lane=stagedPlan.staging;position.x=lane.origin[0]+(lane.end[0]-lane.origin[0])*travel;position.z=lane.origin[1]+(lane.end[1]-lane.origin[1])*travel;}
+    else {position.x+=dx*approach*travel;position.z+=dz*approach*travel;
     const [vx,vz]=[[0,-1],[0,1],[-1,0],[1,0]][action.direction];if(action.canRetreat===undefined)action.canRetreat=[.25,.5,.75,.95].every(step=>{const x=original.x-vx*step,z=original.z-vz*step;return typeof blocked==='function'&&!blocked(x-.18,z-.18)&&!blocked(x+.18,z+.18)&&!root.NativeStory?.occupied(x,z)&&Math.abs(renderer.groundHeight(x,z)-action.height)<.25;});
     if(action.canRetreat){const back=ease(t/.2)*(1-ease((t-.82)/.18));original.x-=vx*.95*back;original.z-=vz*.95*back;original.groundX=original.x;original.groundZ=original.z;if(t<.2||t>.82)original.frame=action.direction*3+1+Math.floor(time*8)%2;}
+    }
    }
   }else if(root.SurfField?.mounted()&&surfRenderable()){
    mon=surfReady()?swimmer():bank.displayMon;move=57;const p=root.FieldHMProfiles.profile(mon,move),n=native(),motion=n.surfMotion;
@@ -136,6 +141,28 @@
  }
  function releaseCutCameras(owner){for(const [renderer,lease]of cutCameraFrames)if(!owner||lease.owner===owner)restoreCutCamera(renderer);}
  function cutCameraScope(a){return !!a&&!a.done&&a.move===15&&a.phase==='cut'&&+graphic(a.mon)===501&&[0,1].includes(a.direction)&&a.zone===152;}
+  function rejectCutStage(renderer,actors,reason){const old=action;releaseCutCameras(old);action=null;old.reject(Error(reason));dispose(renderer);return actors;}
+  function cutStageClear(renderer,x,z,radius,height){
+   if(typeof blocked!=='function'||typeof root.NativeStory?.occupied!=='function')return false;
+   return (radius?[[0,0],[-radius,-radius],[-radius,radius],[radius,-radius],[radius,radius]]:[[0,0]]).every(([u,v])=>!blocked(x+u,z+v)&&!root.NativeStory.occupied(x+u,z+v)&&renderer.groundHeight(x+u,z+v)===height);
+  }
+  function cutLateralStage(renderer,h,metadata,p,keys,stretch){
+   const back=action.direction===0,side=back?-1:1,b=metadata.bounds[back?'back':'front'],row=bank.standing?.[action.direction],image=row?.image,width=image?.naturalWidth||image?.width,unit=p.height/(b[3]-b[1]),lean=Math.max(0,...keys.map(k=>-side*(k.lean||0)));
+   if(!row?.bounds||!(width>0&&unit>0&&lean<Math.PI/2))return {error:'Dimensioni native della corsia Taglio non disponibili'};
+   // Shell is held to the right in back cells, to the left in front cells.
+   // Keep that original gesture facing the tree. One source texel is the gap;
+   // the other terms are actual hero alpha and the authored inward-lean bound.
+   const heroHalf=h.width*(row.bounds[2]-row.bounds[0])/(2*width),bodyHalf=unit*((b[2]-b[0])/2+(b[3]-b[1])*Math.sin(lean))*stretch,clearance=(heroHalf+bodyHalf+unit)/Math.cos(back?Math.PI/6:0),foot=unit*(b[2]-b[0])/2;
+   const dx=action.target.x-h.x,dz=action.target.y-h.z,distance=Math.hypot(dx,dz),advance=distance>.65?(distance-.65)/distance:0,origin=[h.x+side*clearance,h.z],end=[origin[0]+dx*advance,origin[1]+dz*advance];
+   if(![heroHalf,bodyHalf,clearance,foot,...origin,...end].every(Number.isFinite)||!(heroHalf>0&&foot>0))return {error:'Corsia Taglio non finita'};
+   // The native permission grid is one world unit per tile. Check every cell
+   // touched by the conservative body-width footprint, not a distance-step fit.
+   const left=Math.floor(Math.min(origin[0],end[0])-foot),right=Math.floor(Math.max(origin[0],end[0])+foot),top=Math.floor(Math.min(origin[1],end[1])-foot),bottom=Math.floor(Math.max(origin[1],end[1])+foot);
+   if((right-left+1)*(bottom-top+1)>128)return {error:'Corsia Taglio fuori dal vicinato del bersaglio'};
+   for(let x=left;x<=right;x++)for(let z=top;z<=bottom;z++)if(!cutStageClear(renderer,x+.5,z+.5,0,action.height))return {error:'Spazio laterale insufficiente per Taglio'};
+   if(!cutStageClear(renderer,...origin,foot,action.height)||!cutStageClear(renderer,...end,foot,action.height))return {error:'Appoggio laterale di Taglio non libero'};
+   return {origin,end,foot,side,clearance,heroHalf,bodyHalf,sourceUnit:unit};
+  }
  function captureCutCamera(renderer,hero,actors){if(!cutCameraScope(action))return;let plans=cutCameraPlans.get(action);if(!plans){plans=new WeakMap();cutCameraPlans.set(action,plans);}const prior=plans.get(renderer);
   if(prior){if(hero.x!==prior.hero.x||hero.z!==prior.hero.z||bank!==prior.bank)prior.invalid=true;return;}
   const target=action.target,tree=actors.find(a=>a.source?.model===108&&a.x===target?.x&&a.z===target?.y),metadata=bank?.cutArt?.metadata,p=root.FieldHMProfiles.profile(action.mon,15);
@@ -149,8 +176,8 @@
   const radius=unit*Math.hypot(Math.max(Math.abs(-origin[0]-cx),Math.abs(cell-origin[0]-cx)),Math.max(Math.abs(-origin[1]-b[3]),Math.abs(cell-origin[1]-b[3])));
   const dx=target.x-h.x,dz=target.y-h.z,distance=Math.hypot(dx,dz),advance=distance>.65?(distance-.65)/distance:0,[vx,vz]=action.direction===0?[0,-1]:[0,1];
   if(!(Number.isFinite(radius)&&radius>0&&sx>0&&sy>0&&p.height>0))return;
-  const roots=[[h.x,h.z],[h.x-.95*vx,h.z-.95*vz],[h.x+dx*advance,h.z+dz*advance]],low=action.height+Math.min(bob[0],0)-p.height*sy/8,high=action.height+Math.max(bob[1],1.1);
-  plans.set(renderer,{owner:action,bank,scene:renderer.scene,hero:h,tree:treeBox,targetSource:tree.source,roots,low,high,u:radius*sx,v:radius*sy,height:p.height,invalid:false});
+  const staging=cutLateralStage(renderer,h,metadata,p,keys,sx),roots=staging.error?[[h.x,h.z]]:[[h.x,h.z],[h.x,h.z],staging.origin,staging.end],low=action.height+Math.min(bob[0],0)-p.height*sy/8,high=action.height+Math.max(bob[1],1.1);
+  plans.set(renderer,{owner:action,bank,scene:renderer.scene,hero:h,tree:treeBox,targetSource:tree.source,staging,roots,low,high,u:radius*sx,v:radius*sy,height:p.height,invalid:false});
  }
  // A copied render actor only: native target/save data and its hidden flag stay untouched.
  function cutForegroundActors064(renderer,actors){

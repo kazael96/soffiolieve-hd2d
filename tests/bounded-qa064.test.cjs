@@ -69,6 +69,18 @@ test('actual owner stops resource-failed work before another Limit and releases 
  class TestDate extends Date{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
  const child=new EventEmitter();Object.assign(child,{pid,exitCode:null,stdout:new PassThrough(),stderr:new PassThrough(),send(message,callback){messages.push(message);callback?.();},kill(){if(this.exitCode!==null)return;this.exitCode=1;this.stdout.end();this.stderr.end();this.emit('exit',1,'SIGTERM');}});
  const fakeCP={fork(file,args,options){calls.push({kind:'fork',file,args,options});return child;},execFile(exe,args,options,callback){const value=key=>args[args.indexOf(key)+1],mode=value('-Mode');calls.push({kind:'helper',mode,pid:Number(value('-OwnedPid')),ticks:args.includes('-ExpectedStartTicks')?value('-ExpectedStartTicks'):null,receipts:args.includes('-PinnedProcessesJson')?JSON.parse(value('-PinnedProcessesJson')):null});callback(null,JSON.stringify({result:'PASS',pid,startTicks,processes:mode==='Stop'?[]:[record]}),'');}};
+ // Declared UNIT transport adapter: the resource/lease assertions below remain
+ // the actual owner code; this fixture does not certify native process discovery.
+ fakeCP.spawn=(exe,args,options)=>{
+  const token=args[args.indexOf('-SessionToken')+1],ledger=args[args.indexOf('-LedgerPath')+1],helper=new EventEmitter(),helperTicks='638000000000000000',parentTicks='637000000000000000';
+  Object.assign(helper,{pid:90001,exitCode:null,signalCode:null,killed:false,stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough(),kill(){if(this.exitCode!==null)return;this.killed=true;this.exitCode=1;this.signalCode='SIGTERM';this.emit('close',1,'SIGTERM');}});
+  const save=rows=>fs.writeFileSync(ledger,JSON.stringify({schema:1,token,helperPid:helper.pid,helperStartTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,processes:rows}));
+  const emit=value=>helper.stdout.write(JSON.stringify(value)+'\n');save([]);
+  helper.stdin.on('data',chunk=>{const m=JSON.parse(chunk.toString());if(m.kind==='close'){emit({kind:'closed',token,id:m.id});helper.exitCode=0;helper.emit('close',0,null);return;}
+   calls.push({kind:'helper',mode:m.mode,pid:m.pid,ticks:m.startTicks||null,receipts:m.receipts.length?m.receipts:null});save([record]);emit({kind:'ledger',token,id:m.id,processes:[record]});emit({kind:'result',token,id:m.id,value:{result:'PASS',pid,startTicks,processes:m.mode==='Stop'?[]:[record]}});
+  });
+  queueMicrotask(()=>emit({kind:'ready',token,pid:helper.pid,startTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,affinity:Math.min(2,os.availableParallelism())===1?'1':'3',priority:'BelowNormal'}));return helper;
+ };
  const fakeFS={...fs,statfsSync(){return{bavail:++diskReads===1?1024*1024*1024:1,bsize:1};},createWriteStream(...args){const log=fs.createWriteStream(...args);logs.push(log);return log;}};
  const localRequire=name=>{if(name==='node:fs')return fakeFS;if(name==='node:child_process')return fakeCP;return require(name);},moduleCopy={exports:{}};
  const schedule=(callback,ms,interval)=>{const id=++nextTimer;timers.set(id,{callback,ms,interval});return id;};
@@ -109,4 +121,268 @@ test('Windows helper pins an owned CPU-only process, refuses stale birthtime and
  const limited=await B.ownedProcess('Limit',child.pid,found.startTicks,undefined,capture('limit'));const record=limited.processes.find(p=>p.pid===child.pid);assert.equal(record.priority,'BelowNormal');const bits=BigInt(record.affinity).toString(2).split('').filter(c=>c==='1').length;assert.equal(bits,Math.min(2,os.availableParallelism()));
  const stopped=await B.ownedProcess('Stop',child.pid,found.startTicks,limited.processes,capture('stop'));assert.equal(stopped.result,'PASS');await exit;
  for(const [key,mode]of Object.entries({birth:'Birth',inspect:'Inspect',stale:'Limit',limit:'Limit',stop:'Stop'})){const row=metrics[key];assert.equal(row.mode,mode);assert.equal(row.pid,child.pid);assert.ok(Number.isFinite(row.wallElapsedMs)&&row.wallElapsedMs>=0);assert.deepEqual(row.phases.map(phase=>phase.phase),['inspect','limit'].includes(key)?['ENTER','INTEROP','NATIVE','DONE']:['ENTER','DONE']);let previous=0;for(const phase of row.phases){assert.ok(Number.isFinite(phase.elapsedMs)&&phase.elapsedMs>=previous);previous=phase.elapsedMs;}}
+});
+
+// Only transport failure/queue tests use this declared UNIT host. No fake reply
+// here establishes Toolhelp ancestry, scheduler application or actual Game work.
+function sessionUnit(t,{deferKill=false}={}){
+ const vm=require('node:vm'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),dir=temp(t),ownerFile=require.resolve('../scripts/run-bounded-qa.cjs'),timers=new Map(),queries=[],ledgers=[];
+ let clock=0,nextTimer=0,helper,token,ledgerPath,helperKills=0;const helperTicks='638000000000000000',parentTicks='637000000000000000';
+ const frame=value=>helper.stdout.write(JSON.stringify(value)+'\n');
+ const save=rows=>fs.writeFileSync(ledgerPath,JSON.stringify({schema:1,token,helperPid:helper.pid,helperStartTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,processes:rows}));
+ const fakeCP={...cp,spawn(exe,args,options){
+  assert.equal(exe,'powershell.exe');assert.equal(options.windowsHide,true);assert.deepEqual(Array.from(options.stdio),['pipe','pipe','pipe']);assert(args.includes('-Session'));
+  token=args[args.indexOf('-SessionToken')+1];ledgerPath=args[args.indexOf('-LedgerPath')+1];helper=new EventEmitter();
+  Object.assign(helper,{pid:90001,exitCode:null,signalCode:null,killed:false,stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough(),kill(){assert.equal(this,helper);helperKills++;this.killed=true;if(!deferKill){this.exitCode=1;this.signalCode='SIGTERM';this.emit('close',1,'SIGTERM');}}});
+  helper.stdin.on('data',chunk=>queries.push(JSON.parse(chunk.toString())));save([]);return helper;
+ }};
+ const localRequire=name=>name==='node:child_process'?fakeCP:name==='node:perf_hooks'?{performance:{now:()=>clock}}:require(name),copy={exports:{}};
+ const schedule=(fn,ms)=>{const id=++nextTimer;timers.set(id,{fn,at:clock+ms,ms});return id;};
+ vm.runInNewContext(fs.readFileSync(ownerFile,'utf8'),{require:localRequire,module:copy,__filename:ownerFile,__dirname:path.dirname(ownerFile),process:{platform:'win32',pid:12345},Buffer,URL,setTimeout:schedule,clearTimeout:id=>timers.delete(id),setInterval,clearInterval},{filename:ownerFile});
+ const session=copy.exports.createOwnedSession({out:dir,onLedger:rows=>ledgers.push(JSON.parse(JSON.stringify(rows)))});
+ const ready=()=>frame({kind:'ready',token,pid:helper.pid,startTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,affinity:Math.min(2,os.availableParallelism())===1?'1':'3',priority:'BelowNormal'});
+ const advance=ms=>{clock+=ms;for(const[id,value]of [...timers])if(value.at<=clock){timers.delete(id);value.fn();}};
+ t.after(async()=>{if(helper.exitCode===null)helper.kill();await session.close();});
+ return{session,ready,queries,frame,save,advance,elapseWithoutTimers:ms=>{clock+=ms;},ledgers,helper,get token(){return token;},get helperKills(){return helperKills;},get ledgerPath(){return ledgerPath;}};
+}
+
+test('persistent queue deadline is measured from enqueue and never reset when the request starts',async t=>{
+ const unit=sessionUnit(t);unit.ready();await unit.session.ready;
+ const first=unit.session.request('Inspect',222,'100'),second=unit.session.request('Inspect',333,'101');
+ const rejected=assert.rejects(second,/timeout10s including queue/);assert.equal(unit.queries.length,1);
+ unit.advance(9000);const sent=unit.queries[0];unit.frame({kind:'result',token:unit.token,id:sent.id,value:{result:'GONE',pid:222,processes:[]}});assert.equal((await first).result,'GONE');assert.equal(unit.queries.length,2);
+ unit.advance(1000);await rejected;assert.equal(unit.helperKills,1);await assert.rejects(unit.session.request('Inspect',222,'100'),/timeout10s/);assert.equal(unit.queries.length,2);
+});
+
+test('persistent malformed JSON, stale reply, EOF and oversized line fail closed on the original child',async t=>{
+ for(const kind of ['bad-json','stale-id','eof','oversize','partial-line']){
+  const unit=sessionUnit(t);unit.ready();await unit.session.ready;const promise=unit.session.request('Limit',222,'100'),rejected=assert.rejects(promise,/owned-helper/);
+  if(kind==='bad-json')unit.helper.stdout.write('{not JSON}\n');
+  if(kind==='stale-id')unit.frame({kind:'result',token:unit.token,id:99,value:{result:'GONE',pid:222,processes:[]}});
+  if(kind==='eof'){unit.helper.exitCode=1;unit.helper.emit('close',1,null);}
+  if(kind==='oversize')unit.helper.stdout.write(Buffer.alloc(1024*1024+1,120));
+  if(kind==='partial-line'){unit.helper.stdout.write('{"kind":');unit.helper.exitCode=1;unit.helper.emit('close',1,null);}
+  await rejected;assert.equal(unit.session.alive,false);assert.ok(unit.helperKills<=1);await assert.rejects(unit.session.request('Limit',222,'100'),/owned-helper/);
+ }
+});
+
+test('persistent READY rejects foreign identity and durable receipts survive EOF before a reply',async t=>{
+ const foreign=sessionUnit(t);const badReady=assert.rejects(foreign.session.ready,/READY/);foreign.frame({kind:'ready',token:foreign.token,pid:88888,startTicks:'10',parentPid:12345,parentStartTicks:'9',affinity:'3',priority:'BelowNormal'});await badReady;assert.equal(foreign.queries.length,0);
+ const unit=sessionUnit(t);unit.ready();await unit.session.ready;const promise=unit.session.request('Limit',222,'100'),rejected=assert.rejects(promise,/EOF/);
+ const rows=[{pid:222,startTicks:'100',depth:0},{pid:333,startTicks:'101',depth:1}];unit.save(rows); // durable write precedes the deliberately missing reply
+ unit.helper.exitCode=1;unit.helper.emit('close',1,null);await rejected;
+ assert.deepEqual(JSON.parse(JSON.stringify(unit.session.recoverLedger())),rows);assert.deepEqual(unit.ledgers.at(-1),rows);
+ const saved=JSON.parse(fs.readFileSync(unit.ledgerPath,'utf8'));saved.token='foreign';fs.writeFileSync(unit.ledgerPath,JSON.stringify(saved));assert.throws(()=>unit.session.recoverLedger(),/Foreign/);assert.deepEqual(unit.ledgers.at(-1),rows);
+});
+
+test('persistent cleanup fence drains submitted requests and rejects fresh work without losing Stop access',async t=>{
+ const unit=sessionUnit(t);unit.ready();await unit.session.ready;const pending=unit.session.request('Inspect',222,'100'),drain=unit.session.beginCleanup();
+ await assert.rejects(unit.session.request('Limit',222,'100'),/closed for new work/);assert.equal(unit.queries.length,1);
+ unit.frame({kind:'result',token:unit.token,id:1,value:{result:'GONE',pid:222,processes:[]}});await pending;await drain;
+ const stop=unit.session.request('Stop',222,'100');assert.equal(unit.queries.length,2);
+ unit.frame({kind:'result',token:unit.token,id:2,value:{result:'GONE',pid:222,processes:[]}});assert.equal((await stop).result,'GONE');
+ const closing=unit.session.close(),rejected=assert.rejects(closing,/partial JSON/);assert.equal(unit.queries.at(-1).kind,'close');unit.frame({kind:'closed',token:unit.token,id:3});unit.helper.stdout.write('partial');unit.helper.exitCode=0;unit.helper.emit('close',0,null);await rejected;
+});
+
+// Native test fixture owns ONE service and birth-pinned CPU-only roots. Its ONE
+// after-hook cleans descendants before helper closure and directory removal.
+async function realWindowsFixture(t){
+ const out=fs.mkdtempSync(path.join(os.tmpdir(),'bounded-qa064-real-session-')),session=B.createOwnedSession({out}),roots=[],known=new Map();let cleanupPromise;
+ const remember=rows=>{for(const r of rows){assert.ok(Number.isInteger(r.pid)&&/^\d+$/.test(r.startTicks)&&Number.isInteger(r.depth));known.set(r.pid+':'+r.startTicks,{pid:r.pid,startTicks:r.startTicks,depth:r.depth});}};
+ const cleanup=()=>{
+  if(cleanupPromise)return cleanupPromise;
+  cleanupPromise=(async()=>{
+   const errors=[];let stopped,shutdown,quiescent=false;
+   try{
+    await session.beginCleanup();
+    quiescent=session.alive;
+    if(!session.alive&&session.failure)try{const stable=await session.settleForFallback();remember(stable.processes);quiescent=true;}catch(e){errors.push(e);}
+    if(!quiescent)errors.push(Error('Native fixture helper quiescence not verified'));
+    try{remember(session.recoverLedger());}catch(e){errors.push(e);}
+    // An assertion can fail after the flag created a child but BEFORE Limit
+    // recorded it. Fresh Inspect of the already-pinned root captures that case.
+    if(quiescent)for(const root of roots)if(root.birth)try{const found=await B.ownedProcess('Inspect',root.child.pid,root.birth.startTicks);remember(found.processes);if(root.maySpawn&&found.result==='GONE'&&!root.descendantObserved)errors.push(Error('Root vanished before descendant ownership was captured'));if(found.processes.some(r=>r.depth>0))root.descendantObserved=true;}catch(e){errors.push(e);}
+    const rows=[...known.values()],ancestryComplete=errors.length===0;if(quiescent&&ancestryComplete&&rows.length){const owner=rows[0];try{stopped=await B.ownedProcess('Stop',owner.pid,owner.startTicks,rows);if(stopped.result!=='PASS')throw Error('Pinned native fixture Stop failed');}catch(e){errors.push(e);}}
+    if(quiescent&&ancestryComplete)for(const root of roots)if(root.birth||root.maySpawn){if(root.child.exitCode===null){let timer;try{await Promise.race([root.exit,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original native root did not exit')),2000);})]);}catch(e){errors.push(e);}finally{clearTimeout(timer);}}}
+   }finally{
+    // These original capabilities cannot have received the descendant flag:
+    // no birth was admitted and maySpawn is still false. Always stop AND join
+    // them, even when fencing, quiescence or ledger recovery failed above.
+    for(const root of roots)if(!root.birth&&!root.maySpawn){
+     try{if(root.child.exitCode===null&&root.child.signalCode===null)root.child.kill();}catch(e){errors.push(e);}
+     let timer;try{await Promise.race([root.exit,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Unqualified original native root did not exit')),2000);})]);}catch(e){errors.push(e);}finally{clearTimeout(timer);}
+    }
+    try{shutdown=await session.close();}catch(e){errors.push(e);}
+   }
+   if(errors.length)throw Error('Native fixture cleanup unverified; preserved '+out+': '+errors.map(e=>e.message).join(' | '));
+   const proof={processes:[...known.values()],stopped,shutdown};fs.rmSync(out,{recursive:true,force:true});return proof;
+  })();cleanupPromise.catch(()=>{});return cleanupPromise;
+ };
+ t.after(()=>cleanup());await session.ready;
+ return{out,session,cleanup,remember,async spawn(script='setInterval(()=>{},1000)',args=[]){const child=cp.spawn(process.execPath,['--max-old-space-size=400','-e',script,...args],{windowsHide:true,stdio:'ignore'}),root={child,exit:once(child,'exit'),birth:null,maySpawn:false,descendantObserved:false};root.exit.catch(()=>{});roots.push(root);const birth=await session.request('Birth',child.pid);assert.equal(birth.result,'PASS');root.birth=birth;remember(root.birth.processes);return root;}};
+}
+
+test('one persistent Windows host discovers a real child born between Limits and refuses stale or foreign ownership',{skip:process.platform!=='win32',timeout:30000},async t=>{
+ const fixture=await realWindowsFixture(t),{out,session}=fixture,helper=session.owner,first=await fixture.spawn(),before=await session.request('Limit',first.child.pid,first.birth.startTicks);
+ assert(before.processes.some(p=>p.pid===first.child.pid));
+ // A second directly owned root is born AFTER the first snapshot; this validates
+ // fresh session ancestry/limiting. An actual grandchild is requested from root1.
+ const spawnGrandchild=path.join(out,'spawn-grandchild.flag'),grandchildPid=path.join(out,'grandchild.pid');
+ const root=await fixture.spawn(`const fs=require('node:fs'),cp=require('node:child_process');let done=false;setInterval(()=>{if(!done&&fs.existsSync(process.argv[1])){done=true;const c=cp.spawn(process.execPath,['--max-old-space-size=400','-e','setInterval(()=>{},1000)'],{windowsHide:true,stdio:'ignore'});fs.writeFileSync(process.argv[2],String(c.pid));}},10)`,[spawnGrandchild,grandchildPid]);
+ assert.equal(fs.existsSync(spawnGrandchild),false);assert.equal(fs.existsSync(grandchildPid),false);
+ const initial=await session.request('Limit',root.child.pid,root.birth.startTicks);
+ const initialState={flag:fs.existsSync(spawnGrandchild),childFile:fs.existsSync(grandchildPid),receipts:initial.processes.slice(0,16).map(({pid,startTicks,depth})=>({pid,startTicks,depth}))};
+ assert.equal(initialState.flag,false,JSON.stringify(initialState));assert.equal(initialState.childFile,false,JSON.stringify(initialState));
+ root.maySpawn=true;fs.writeFileSync(spawnGrandchild,'go');const until=Date.now()+3000;while(!fs.existsSync(grandchildPid)&&Date.now()<until)await new Promise(resolve=>setTimeout(resolve,10));assert(fs.existsSync(grandchildPid),'real child must be born');
+ const childPid=Number(fs.readFileSync(grandchildPid,'utf8')),after=await session.request('Limit',root.child.pid,root.birth.startTicks),record=after.processes.find(p=>p.pid===childPid);root.descendantObserved=!!record;fixture.remember(after.processes);
+ assert(record,'the next real Toolhelp snapshot must discover the new descendant');assert(!initial.processes.some(p=>p.pid===childPid&&p.startTicks===record.startTicks),'Controlled child already present before its flag: '+JSON.stringify(initialState));assert.equal(record.priority,'BelowNormal');assert.equal(BigInt(record.affinity).toString(2).split('').filter(b=>b==='1').length,Math.min(2,os.availableParallelism()));assert.equal(session.owner.pid,helper.pid);assert.equal(session.owner.startTicks,helper.startTicks);
+ const ledger=session.recoverLedger();assert(ledger.some(p=>p.pid===childPid&&p.startTicks===record.startTicks));
+ assert.equal((await session.request('Stop',first.child.pid,first.birth.startTicks,[{pid:first.child.pid,startTicks:first.birth.startTicks,depth:0}])).result,'PASS');await first.exit;
+ await assert.rejects(session.request('Limit',root.child.pid,'1'),/start time changed/);assert.equal(session.alive,false);
+ // The dead-channel fallback is the ORIGINAL one-shot Stop, with ONLY the
+ // persisted ownership receipts. No retry of Limit or new browser is allowed.
+ const proof=await fixture.cleanup();assert.equal(proof.stopped.result,'PASS');await Promise.all([root.exit,first.exit]);assert.equal((await B.ownedProcess('Birth',childPid)).result,'GONE');
+ const foreign=await realWindowsFixture(t),foreignHelper=foreign.session.owner;
+ await assert.rejects(foreign.session.request('Inspect',process.pid,foreignHelper.parentStartTicks),/cannot target|descendant/); // never mutate the owner
+});
+
+test('actual owner retains lease and every durable receipt when the session dies and original fallback cleanup fails',async t=>{
+ const vm=require('node:vm'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),dir=temp(t),out=path.join(dir,'dead-channel'),ownerFile=require.resolve('../scripts/run-bounded-qa.cjs'),timers=new Map(),fallback=[];
+ const pid=43210,startTicks='638000000000000001',rootRecord={pid,startTicks,depth:0},newRecord={pid:43211,startTicks:'638000000000000002',depth:1};let nextTimer=0,limits=0;const logs=[];
+ const child=new EventEmitter();Object.assign(child,{pid,exitCode:null,stdout:new PassThrough(),stderr:new PassThrough(),send(m,cb){cb?.();if(m.type==='abort')this.kill();},kill(){if(this.exitCode!==null)return;this.exitCode=1;this.stdout.end();this.stderr.end();this.emit('exit',1,'SIGTERM');}});
+ // Declared UNIT transport: only the bootstrap precondition is acknowledged;
+ // the monitored operation and the ORIGINAL fallback both fail deliberately.
+ const fakeCP={fork(){return child;},execFile(exe,args,options,cb){assert.equal(exe,'powershell.exe');assert.equal(options.timeout,10000);assert.equal(args[args.indexOf('-Mode')+1],'Stop');fallback.push(JSON.parse(args[args.indexOf('-PinnedProcessesJson')+1]));cb(Object.assign(Error('injected original fallback timeout'),{killed:true,signal:'SIGTERM'}),'','');},spawn(exe,args){
+  const token=args[args.indexOf('-SessionToken')+1],ledger=args[args.indexOf('-LedgerPath')+1],helper=new EventEmitter(),helperTicks='638000000000000000',parentTicks='637000000000000000';
+  Object.assign(helper,{pid:90001,exitCode:null,signalCode:null,killed:false,stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough(),kill(){if(this.exitCode!==null)return;this.killed=true;this.exitCode=1;this.emit('close',1,'SIGTERM');}});
+  const save=rows=>fs.writeFileSync(ledger,JSON.stringify({schema:1,token,helperPid:helper.pid,helperStartTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,processes:rows})),emit=m=>helper.stdout.write(JSON.stringify(m)+'\n');save([]);
+  helper.stdin.on('data',chunk=>{const m=JSON.parse(chunk.toString());assert.equal(m.kind,'request');if(m.mode==='Limit'&&++limits===2){save([rootRecord,newRecord]);helper.exitCode=1;helper.emit('close',1,null);return;}save([rootRecord]);emit({kind:'ledger',token,id:m.id,processes:[rootRecord]});emit({kind:'result',token,id:m.id,value:{result:'PASS',pid,startTicks,processes:[rootRecord]}});});
+  queueMicrotask(()=>emit({kind:'ready',token,pid:helper.pid,startTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,affinity:Math.min(2,os.availableParallelism())===1?'1':'3',priority:'BelowNormal'}));return helper;
+ }};
+ const fakeFS={...fs,statfsSync(){return{bavail:1024*1024*1024,bsize:1};},createWriteStream(...args){const log=fs.createWriteStream(...args);logs.push(log);return log;}},copy={exports:{}},localRequire=n=>n==='node:child_process'?fakeCP:n==='node:fs'?fakeFS:require(n);
+ const schedule=(fn,ms,interval)=>{const id=++nextTimer;timers.set(id,{fn,ms,interval});return id;};
+ vm.runInNewContext(fs.readFileSync(ownerFile,'utf8'),{require:localRequire,module:copy,__filename:ownerFile,__dirname:path.dirname(ownerFile),process:{platform:'win32',pid:12345},Buffer,URL,setTimeout:(f,m)=>schedule(f,m,false),clearTimeout:id=>timers.delete(id),setInterval:(f,m)=>schedule(f,m,true),clearInterval:id=>timers.delete(id)},{filename:ownerFile});
+ const running=copy.exports.run({out,leaseRoot:dir,site:dir,cases:['never-run'],viewports:[['portrait',390,844]]});
+ const drain=async()=>{for(let n=0;n<40;n++)await Promise.resolve();};await drain();assert.equal(limits,1);const monitor=[...timers.values()].find(r=>r.interval&&r.ms===2500);assert(monitor);monitor.fn();await drain();
+ const report=await running;await Promise.all(logs.map(log=>log.closed?Promise.resolve():once(log,'close')));
+ assert.equal(report.result,'FAIL');assert.match(report.failure,/EOF/);assert.match(report.cleanupErrors.join('\n'),/Stop/);assert.equal(report.helperShutdown.result,'CLOSED');assert.equal(report.helperShutdown.forced,true);
+ assert.deepEqual(JSON.parse(JSON.stringify(report.ownedProcessLedger)),[rootRecord,newRecord]);assert.equal(fallback.length,1);assert.deepEqual(fallback[0],[rootRecord,newRecord]);assert.match(report.leaseRetained,/not verified/);assert(fs.existsSync(path.join(dir,'.bounded-qa-lease.json')));
+ const saved=JSON.parse(fs.readFileSync(path.join(out,'bounded-report.json'),'utf8'));assert.equal(saved.failure,report.failure);assert.deepEqual(saved.ownedProcessLedger,[rootRecord,newRecord]);
+});
+
+test('original depthless Stop ACKs require the requested historical PID and birth without changing reply shape',async t=>{
+ const unit=sessionUnit(t);unit.ready();await unit.session.ready;const rows=[{pid:222,startTicks:'100',depth:2}],ack={pid:222,startTicks:'100',stopped:true};unit.save(rows);unit.session.recoverLedger();
+ const stopped=unit.session.request('Stop',222,'100',rows);unit.frame({kind:'result',token:unit.token,id:1,value:{result:'PASS',mode:'Stop',processes:[ack]}});
+ assert.deepEqual(JSON.parse(JSON.stringify((await stopped).processes)),[ack]);assert.deepEqual(JSON.parse(JSON.stringify(unit.session.recoverLedger())),rows);
+ for(const bad of [{pid:333,startTicks:'100',stopped:true},{pid:222,startTicks:'101',stopped:true},{pid:222,startTicks:'100',depth:0,stopped:true},{pid:222,startTicks:'100',stopped:false}]){
+  const rejectedUnit=sessionUnit(t);rejectedUnit.ready();await rejectedUnit.session.ready;rejectedUnit.save(rows);rejectedUnit.session.recoverLedger();const promise=rejectedUnit.session.request('Stop',222,'100',rows),rejected=assert.rejects(promise,/Stop acknowledgement|schema/);rejectedUnit.frame({kind:'result',token:rejectedUnit.token,id:1,value:{result:'PASS',mode:'Stop',processes:[bad]}});await rejected;
+ }
+});
+
+test('startup and active stderr enforce1MiB while diagnostics retain exact byte counts and clipping',async t=>{
+ for(const phase of ['startup','active']){
+  const unit=sessionUnit(t);let promise;if(phase==='active'){unit.ready();await unit.session.ready;promise=unit.session.request('Limit',222,'100');}else promise=unit.session.ready;
+  const rejected=assert.rejects(promise,error=>{assert.match(error.message,/stderr exceeds1MiB/);assert.equal(error.ownedProcessDiagnostics.stderr.bytes,1024*1024+1);assert.equal(error.ownedProcessDiagnostics.stderr.truncated,true);assert.ok(Buffer.byteLength(error.ownedProcessDiagnostics.stderr.text)<=515);return true;});
+  unit.helper.stderr.write(Buffer.alloc(1024*1024,120));if(phase==='active')assert.equal(unit.session.alive,true);unit.helper.stderr.write(Buffer.from('x'));await rejected;assert.equal(unit.helperKills,1);
+ }
+});
+
+test('shutdown rejects late exit delivery on both CLOSED fast path and after awaited exit without timer callbacks',async t=>{
+ for(const phase of ['closed-fast-path','await-exit']){
+  const unit=sessionUnit(t);unit.ready();await unit.session.ready;const closing=unit.session.close(),rejected=assert.rejects(closing,/shutdown past deadline10s/);
+  unit.elapseWithoutTimers(9000);unit.frame({kind:'closed',token:unit.token,id:1});
+  if(phase==='await-exit')for(let n=0;n<5;n++)await Promise.resolve();
+  unit.elapseWithoutTimers(1001);unit.helper.exitCode=0;unit.helper.emit('close',0,null);await rejected;
+ }
+});
+
+test('an assertion before the second native snapshot still cleans the actual born descendant before helper and fixture removal',{skip:process.platform!=='win32',timeout:30000},async t=>{
+ const fixture=await realWindowsFixture(t),flag=path.join(fixture.out,'birth.flag'),pidFile=path.join(fixture.out,'child.pid');
+ const root=await fixture.spawn(`const fs=require('node:fs'),cp=require('node:child_process');let born=false;setInterval(()=>{if(!born&&fs.existsSync(process.argv[1])){born=true;const c=cp.spawn(process.execPath,['--max-old-space-size=400','-e','setInterval(()=>{},1000)'],{windowsHide:true,stdio:'ignore'});fs.writeFileSync(process.argv[2],String(c.pid));}},10)`,[flag,pidFile]);
+ root.maySpawn=true;fs.writeFileSync(flag,'go');const until=Date.now()+3000;while(!fs.existsSync(pidFile)&&Date.now()<until)await new Promise(resolve=>setTimeout(resolve,10));assert(fs.existsSync(pidFile));const childPid=Number(fs.readFileSync(pidFile,'utf8'));
+ let sentinel;try{assert.fail('intentional assertion before post-birth Limit');}catch(error){sentinel=error;}assert.match(sentinel.message,/intentional assertion/);
+ const proof=await fixture.cleanup();assert(proof.processes.some(r=>r.pid===childPid&&r.depth>0));assert(proof.stopped.processes.some(r=>r.pid===childPid&&r.stopped===true));assert.equal(proof.shutdown.result,'CLOSED');assert.equal(fs.existsSync(fixture.out),false);
+});
+
+// Narrow UNIT owner transport for the two regression paths missed by V1.
+// Worker PASS is only an adversarial precondition; both tests require FAIL.
+function lifecycleOwnerUnit(t,{idleDeath=false}={}){
+ const vm=require('node:vm'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'bounded-qa064-owner-v2-')),out=path.join(dir,'out'),ownerFile=require.resolve('../scripts/run-bounded-qa.cjs'),timers=new Map(),fallback=[],logs=[];
+ const root={pid:43210,startTicks:'638000000000000001',depth:0},late={pid:43211,startTicks:'638000000000000002',depth:1};let timerId=0,limits=0,helper,saveLedger;
+ const worker=new EventEmitter();Object.assign(worker,{pid:root.pid,exitCode:null,stdout:new PassThrough(),stderr:new PassThrough(),send(m,cb){cb?.();},kill(){if(this.exitCode!==null)return;this.exitCode=1;this.stdout.end();this.stderr.end();this.emit('exit',1,'SIGTERM');}});
+ const exitHelper=()=>{if(helper.exitCode!==null)return;helper.exitCode=1;helper.signalCode='SIGTERM';helper.emit('close',1,'SIGTERM');};
+ const fakeCP={fork(){return worker;},execFile(exe,args,options,callback){assert.notEqual(helper.exitCode,null,'original helper must be gone BEFORE fallback');assert.equal(options.timeout,10000);assert.equal(args[args.indexOf('-Mode')+1],'Stop');fallback.push(JSON.parse(args[args.indexOf('-PinnedProcessesJson')+1]));callback(Object.assign(Error('injected fallback failure'),{killed:true,signal:'SIGTERM'}),'','');},spawn(exe,args){
+  const token=args[args.indexOf('-SessionToken')+1],ledger=args[args.indexOf('-LedgerPath')+1],helperTicks='638000000000000000',parentTicks='637000000000000000';helper=new EventEmitter();
+  Object.assign(helper,{pid:90001,exitCode:null,signalCode:null,killed:false,stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough(),kill(){this.killed=true;/* Deliberately no exit: the test must supply the original-handle close event. */}});
+  saveLedger=rows=>fs.writeFileSync(ledger,JSON.stringify({schema:1,token,helperPid:helper.pid,helperStartTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,processes:rows}));const frame=m=>helper.stdout.write(JSON.stringify(m)+'\n');saveLedger([]);
+  helper.stdin.on('data',chunk=>{const m=JSON.parse(chunk.toString());assert.equal(m.kind,'request');if(!idleDeath&&m.mode==='Limit'&&++limits===2){helper.stdout.write('{bad JSON}\n');return;}
+   if(m.mode==='Limit')limits=Math.max(limits,1);saveLedger([root]);
+   if(m.mode==='Stop'){frame({kind:'result',token,id:m.id,value:{result:'PASS',mode:'Stop',processes:[]}});if(idleDeath)exitHelper();return;}
+   const gone=idleDeath&&worker.exitCode!==null;frame({kind:'ledger',token,id:m.id,processes:[root]});frame({kind:'result',token,id:m.id,value:gone?{result:'GONE',pid:root.pid,processes:[]}:{result:'PASS',pid:root.pid,startTicks:root.startTicks,processes:[root]}});
+  });queueMicrotask(()=>frame({kind:'ready',token,pid:helper.pid,startTicks:helperTicks,parentPid:12345,parentStartTicks:parentTicks,affinity:Math.min(2,os.availableParallelism())===1?'1':'3',priority:'BelowNormal'}));return helper;
+ }};
+ const fakeFS={...fs,statfsSync(){return{bavail:1024*1024*1024,bsize:1};},createWriteStream(...a){const log=fs.createWriteStream(...a);logs.push(log);return log;}},copy={exports:{}},localRequire=n=>n==='node:child_process'?fakeCP:n==='node:fs'?fakeFS:require(n),schedule=(fn,ms,interval)=>{const id=++timerId;timers.set(id,{fn,ms,interval});return id;};
+ vm.runInNewContext(fs.readFileSync(ownerFile,'utf8'),{require:localRequire,module:copy,__filename:ownerFile,__dirname:path.dirname(ownerFile),process:{platform:'win32',pid:12345},Buffer,URL,setTimeout:(f,m)=>schedule(f,m,false),clearTimeout:id=>timers.delete(id),setInterval:(f,m)=>schedule(f,m,true),clearInterval:id=>timers.delete(id)},{filename:ownerFile});
+ const running=copy.exports.run({out,leaseRoot:dir,site:dir,cases:['UNIT-never-Game'],viewports:[['portrait',390,844]]}),drain=async()=>{for(let n=0;n<60;n++)await Promise.resolve();};running.catch(()=>{});
+ t.after(async()=>{worker.kill();if(helper)exitHelper();await running;await Promise.all(logs.map(log=>log.closed?Promise.resolve():once(log,'close')));fs.rmSync(dir,{recursive:true,force:true});});
+ return{running,drain,root,late,fallback,worker,dir,out,get limits(){return limits;},tick:async ms=>{const timer=[...timers.values()].find(r=>r.interval&&r.ms===ms);assert(timer);timer.fn();await drain();},saveFinalLedger:()=>saveLedger([root,late]),exitHelper,finishPass:()=>{worker.emit('message',{type:'done',result:'PASS',originalResult:'PASS'});worker.exitCode=0;worker.stdout.end();worker.stderr.end();worker.emit('exit',0,null);}};
+}
+
+test('idle helper death after successful final Stop still fails the batch even when cleanup is verified',async t=>{
+ const unit=lifecycleOwnerUnit(t,{idleDeath:true});await unit.drain();assert.equal(unit.limits,1);unit.finishPass();const report=await unit.running;
+ assert.equal(report.workerResult,'PASS');assert.equal(report.cleanup[0].result,'PASS');assert.equal(report.helperShutdown.result,'CLOSED');assert.equal(report.result,'FAIL');assert.match(report.failure,/EOF/);assert.match(report.helperFailure,/EOF/);assert.equal(report.cleanupErrors,undefined);assert.equal(unit.fallback.length,0);assert.equal(fs.existsSync(path.join(unit.dir,'.bounded-qa-lease.json')),false);
+});
+
+test('abort and finally share one fallback only after helper death and final durable-ledger recovery',async t=>{
+ const unit=lifecycleOwnerUnit(t);await unit.drain();assert.equal(unit.limits,1);await unit.tick(2500);assert.equal(unit.worker.exitCode,null,'the worker stays alive on abort in this regression');await unit.tick(500);assert.equal(unit.fallback.length,0,'no fallback while the original helper can still mutate');
+ unit.saveFinalLedger();unit.exitHelper();await unit.drain();const report=await unit.running;
+ assert.equal(unit.fallback.length,1);assert.deepEqual(unit.fallback[0],[unit.root,unit.late]);assert.equal(report.helperFallback.attempts,1);assert.equal(report.helperFallback.stableLedger,true);assert.equal(report.helperFallback.status,'FAIL');assert.deepEqual(JSON.parse(JSON.stringify(report.ownedProcessLedger)),[unit.root,unit.late]);assert.match(report.failure,/JSON/);assert.match(report.cleanupErrors.join('\n'),/Stop/);assert.match(report.leaseRetained,/not verified/);assert.equal(fs.existsSync(path.join(unit.dir,'.bounded-qa-lease.json')),true);
+});
+
+test('unqualified original fixture roots are stopped and joined even when Birth and ledger or fencing fail',async()=>{
+ const vm=require('node:vm'),{EventEmitter}=require('node:events'),source=fs.readFileSync(__filename,'utf8'),first=source.indexOf('async function realWindowsFixture(t){'),last=source.indexOf("\ntest('one persistent Windows host",first);assert(first>=0&&last>first);
+ // Execute the ACTUAL fixture function, not a mirrored cleanup implementation.
+ // This is a controlled UNIT ChildProcess capability: no process is spawned and
+ // no descendant is invented or inspected. Birth/GONE admission must fail.
+ for(const kind of ['Birth-reject-ledger-fail','Birth-GONE-ledger-fail','Birth-reject-fence-fail']){
+  const events=[],hooks=[],child=new EventEmitter(),exit=once(child,'exit'),birthError=Error('intentional Birth rejection'),ledgerError=Error('intentional ledger failure'),fenceError=Error('intentional fence failure');let out,killCount=0,processOperations=0,removed=0;
+  Object.assign(child,{pid:54321,exitCode:null,signalCode:null,kill(){assert.equal(this,child,'only the original ChildProcess capability');killCount++;events.push('kill');queueMicrotask(()=>{this.exitCode=1;this.signalCode='SIGTERM';events.push('exit');this.emit('exit',1,'SIGTERM');});}});
+  const session={ready:Promise.resolve(),alive:false,failure:birthError,async request(mode,pid){assert.equal(mode,'Birth');assert.equal(pid,child.pid);if(kind.includes('GONE'))return{result:'GONE',pid,processes:[]};throw birthError;},async beginCleanup(){if(kind.includes('fence'))throw fenceError;},async settleForFallback(){throw Error('intentional helper death not verified');},recoverLedger(){throw ledgerError;},async close(){assert.equal(child.exitCode,1,'join must precede helper close');events.push('helper-close');return{result:'CLOSED'};}};
+  const fixtureFS={...fs,mkdtempSync(prefix){out=fs.mkdtempSync(prefix);return out;},rmSync(){removed++;throw Error('uncertain evidence must not be removed');}},copy={exports:{}};
+  vm.runInNewContext(source.slice(first,last)+'\nmodule.exports=realWindowsFixture;',{module:copy,B:{createOwnedSession:()=>session,ownedProcess(){processOperations++;throw Error('unqualified PID must never be inspected or stopped by PID');}},cp:{spawn(){return child;}},fs:fixtureFS,path,os,assert,once,process:{execPath:process.execPath},setTimeout,clearTimeout},{filename:'declared-unit-realWindowsFixture-v3'});
+  try{
+   const fixture=await copy.exports({after:hook=>hooks.push(hook)});
+   await assert.rejects(fixture.spawn(),error=>kind.includes('GONE')?error.code==='ERR_ASSERTION':error===birthError);
+   assert.equal(hooks.length,1);const cleanup=fixture.cleanup();assert.equal(hooks[0](),cleanup,'one memoized cleanup');await assert.rejects(cleanup,error=>{assert.match(error.message,kind.includes('fence')?/intentional fence failure/:/intentional ledger failure/);return true;});
+   assert.equal(killCount,1);assert.deepEqual(events,['kill','exit','helper-close']);assert.equal(processOperations,0);assert.equal(removed,0);assert.equal(fs.existsSync(out),true,'uncertain evidence remains');
+  }finally{if(child.exitCode===null)child.kill();await exit;if(out)fs.rmSync(out,{recursive:true,force:true});}
+ }
+});
+
+test('PowerShell5 one-shot replies enter the actual caller pipeline for Birth Inspect Limit and pinned Stop',{skip:process.platform!=='win32',timeout:30000},async t=>{
+ const out=fs.mkdtempSync(path.join(os.tmpdir(),'bounded-qa064-ps-pipeline-')),script=path.join(out,'pipeline.ps1'),helper=require.resolve('../scripts/limit-owned-qa.ps1');
+ const child=cp.spawn(process.execPath,['--max-old-space-size=400','-e','setInterval(()=>{},1000)'],{windowsHide:true,stdio:'ignore'}),exit=once(child,'exit');exit.catch(()=>{});
+ t.after(async()=>{let timer,joined=false;try{if(child.exitCode===null&&child.signalCode===null)child.kill();await Promise.race([exit,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original pipeline test root did not exit')),2000);})]);joined=true;}finally{clearTimeout(timer);if(joined)fs.rmSync(out,{recursive:true,force:true});}});
+ // This is a REAL powershell.exe caller invoking the helper in-process with
+ // &, exactly the success-pipeline shape used by the original8501 owner.
+ fs.writeFileSync(script,`param([string]$Helper,[int]$RootPid)
+$ErrorActionPreference='Stop'
+function Require-Reply($Value,[string]$Mode) {
+ if ($null -eq $Value -or $Value.result -cne 'PASS') { throw ('Missing original success-pipeline reply: '+$Mode) }
+ return $Value
+}
+$birth=Require-Reply -Value (& $Helper -Mode Birth -OwnedPid $RootPid | ConvertFrom-Json) -Mode Birth
+if ($birth.pid -ne $RootPid -or $birth.startTicks -notmatch '^\\d+$') { throw 'Invalid pipeline Birth' }
+$inspected=Require-Reply -Value (& $Helper -Mode Inspect -OwnedPid $RootPid -ExpectedStartTicks $birth.startTicks | ConvertFrom-Json) -Mode Inspect
+$limited=Require-Reply -Value (& $Helper -Mode Limit -OwnedPid $RootPid -ExpectedStartTicks $birth.startTicks | ConvertFrom-Json) -Mode Limit
+$native=@($limited.processes | Where-Object { $_.pid -eq $RootPid -and $_.startTicks -ceq $birth.startTicks })
+if ($native.Count -ne 1 -or $native[0].priority -cne 'BelowNormal') { throw 'Pipeline Limit did not apply scheduler' }
+$receipts=ConvertTo-Json -InputObject @($limited.processes) -Compress -Depth 6
+$stopped=Require-Reply -Value (& $Helper -Mode Stop -OwnedPid $RootPid -ExpectedStartTicks $birth.startTicks -PinnedProcessesJson $receipts | ConvertFrom-Json) -Mode Stop
+if (@($stopped.processes | Where-Object { $_.pid -eq $RootPid -and $_.startTicks -ceq $birth.startTicks -and $_.stopped -eq $true }).Count -ne 1) { throw 'Original pinned Stop ACK not received in pipeline' }
+@{result='PASS';psVersion=$PSVersionTable.PSVersion.ToString();modes=@('Birth','Inspect','Limit','Stop');birth=$birth;inspect=$inspected;limit=$limited;stop=$stopped} | ConvertTo-Json -Compress -Depth 7
+`);
+ const receipt=await new Promise((resolve,reject)=>cp.execFile('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',script,'-Helper',helper,'-RootPid',String(child.pid)],{windowsHide:true,timeout:10000,maxBuffer:1024*1024},(error,stdout)=>{if(error){reject(error);return;}try{resolve(JSON.parse(stdout.replace(/^\uFEFF/,'')));}catch(parseError){reject(parseError);}}));
+ assert.equal(receipt.result,'PASS');assert.match(receipt.psVersion,/^5\.1\./);assert.deepEqual(receipt.modes,['Birth','Inspect','Limit','Stop']);assert.equal(receipt.birth.pid,child.pid);assert(receipt.inspect.processes.some(r=>r.pid===child.pid&&r.startTicks===receipt.birth.startTicks));
+ const applied=receipt.limit.processes.find(r=>r.pid===child.pid);assert.equal(applied.priority,'BelowNormal');assert.equal(BigInt(applied.affinity).toString(2).split('').filter(b=>b==='1').length,Math.min(2,os.availableParallelism()));assert.deepEqual(Object.keys(receipt.stop.processes[0]).sort(),['pid','startTicks','stopped']);await exit;
 });

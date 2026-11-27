@@ -163,6 +163,15 @@ jobs:
       - name: Build exact sources with the qualified native572 partition
         shell: pwsh
         run: python scripts/build-site.py site.zip _site --native572-tail-partition064
+      - name: Check all27 owned-process and PowerShell regressions on Windows
+        shell: pwsh
+        run: node --max-old-space-size=400 scripts/test-owned-helper-windows064.cjs _site test-results/owned-helper-windows
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-helper-windows-report
+          path: test-results/owned-helper-windows
+          if-no-files-found: ignore
       - name: Install the pinned isolated browser driver
         shell: pwsh
         run: |
