@@ -22,3 +22,24 @@ test('spawn failure and excess output cannot become a passing stage; successful 
  const loud=await run('large',process.execPath,['-e','process.stdout.write("x".repeat(4096))'],{out,maxBytes:128,timeout:5000});assert.equal(loud.result,'FAIL');assert.match(loud.error,/exceeded 128 bytes/);assert.ok(fs.statSync(path.join(out,loud.log)).size<256);
  const ok=await run('success',process.execPath,['-e','console.log("complete")'],{out,timeout:5000});assert.equal(ok.result,'PASS');assert.equal(ok.exitCode,0);assert.match(fs.readFileSync(path.join(out,ok.log),'utf8'),/complete/);
 }));
+
+test('targeted native541 command selects the exact original paired stage and rejects incomplete or ambiguous inventories',()=>{
+ const focused=require('../scripts/test-native-tail541-unit064.cjs'),registry=require('../scripts/unit-test-groups.cjs'),files=fs.readdirSync(__dirname).filter(name=>name.endsWith('.test.cjs')).map(name=>path.join(__dirname,name));
+ const original=registry(files).filter(stage=>stage[0]==='unit-native-tail541');assert.equal(original.length,1);assert.deepEqual(focused.selectStage(files),original[0]);
+ for(const missing of ['native-tail541-protocol064.test.cjs','native-tail541-audio064.test.cjs'])assert.throws(()=>focused.selectStage(files.filter(file=>path.basename(file)!==missing)),/Incomplete native-tail541/);
+ assert.throws(()=>focused.selectStage([...files,path.join(__dirname,'other/native-tail541-protocol064.test.cjs')]),/Ambiguous native-tail541/);
+});
+test('targeted native541 result preserves a real nonzero child and rejects missing metrics, RSS overflow or incomplete paired TAP',async()=>fixture(async out=>{
+ const focused=require('../scripts/test-native-tail541-unit064.cjs'),metrics={pid:1,exitCode:0,maxRSSKiB:333176,observedRSSLimitKiB:409600,observedRSSWithinLimit:true,heapLimitMiB:400},log='# tests 16\n# pass 16\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n',pass={result:'PASS',exitCode:0};
+ assert.equal(focused.verifyResult(pass,metrics,log).tests,16);
+ const failed=await run('paired-nonzero',process.execPath,['-e','console.error("original nonzero evidence");process.exitCode=7'],{out,timeout:5000,maxBytes:8*1024*1024});assert.equal(failed.exitCode,7);assert.match(fs.readFileSync(path.join(out,failed.log),'utf8'),/original nonzero evidence/);assert.throws(()=>focused.verifyResult(failed,metrics,log),/stage failed/);
+ assert.throws(()=>focused.verifyResult(pass,null,log),/metrics missing/);assert.throws(()=>focused.verifyResult(pass,{...metrics,maxRSSKiB:417668,observedRSSWithinLimit:false},log));
+ for(const changed of [{...metrics,observedRSSLimitKiB:500000},{...metrics,heapLimitMiB:512},{...metrics,observedRSSWithinLimit:false}])assert.throws(()=>focused.verifyResult(pass,changed,log));
+ for(const changed of [log.replace('# pass 16','# pass 15'),log.replace('# skipped 0','# skipped 1'),log.replace('# tests 16\n',''),log+'# tests 16\n'])assert.throws(()=>focused.verifyResult(pass,metrics,changed));
+}));
+test('Linux native541 feedback is an additional independent fresh-build job while full94 and Windows stay required',()=>{
+ const text=fs.readFileSync(path.join(__dirname,'../.github/workflows/qa.yml'),'utf8').replace(/\r\n/g,'\n'),marker='\n  native541-linux:\n',at=text.indexOf(marker);assert(at>0,'Additional Linux paired job required');assert.equal(text.indexOf(marker,at+1),-1);
+ const earlier=text.slice(0,at),job=text.slice(at);assert.match(earlier,/node scripts\/test-deep\.cjs _site test-results\/deep --python=python3/);assert.match(earlier,/\n  native541-windows:\n/);assert.match(earlier,/--mode=nominal --viewport=desktop --rate=1/);assert.match(earlier,/--mode=recovery --viewport=desktop --rate=1/);
+ assert.match(job,/runs-on: ubuntu-latest/);assert.match(job,/node-version: '22'/);assert.match(job,/@napi-rs\/canvas@0\.1\.100/);assert.doesNotMatch(job,/needs:|continue-on-error:|--test-name-pattern|--test-skip-pattern/);
+ const build=job.indexOf('python3 scripts/build-site.py site.zip _site --native572-tail-partition064'),check=job.indexOf('node scripts/test-native-tail541-unit064.cjs _site test-results/native541-linux');assert(build>=0&&check>build,'Run the original stage only after a fresh standard build');assert.match(job,/if: always\(\)[\s\S]*name: native541-linux-pair-report[\s\S]*path: test-results\/native541-linux/);
+});

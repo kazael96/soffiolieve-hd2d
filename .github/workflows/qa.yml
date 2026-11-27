@@ -189,3 +189,26 @@ jobs:
           name: native541-windows-report
           path: test-results/native541-*
           if-no-files-found: ignore
+
+  native541-linux:
+    # Additional early feedback from the same paired stage; full94 and Windows remain unchanged.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Download verified base assets
+        run: curl --fail --location --retry 3 https://github.com/kazael96/soffiolieve-hd2d/releases/download/v0.8/soffiolieve-demo-v08.zip -o site.zip
+      - name: Build exact sources
+        run: python3 scripts/build-site.py site.zip _site --native572-tail-partition064
+      - name: Install pinned native Canvas for CPU fixtures
+        run: npm install --no-save --ignore-scripts --package-lock=false @napi-rs/canvas@0.1.100
+      - name: Run the original paired native541 stage and RSS guard
+        run: node scripts/test-native-tail541-unit064.cjs _site test-results/native541-linux
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native541-linux-pair-report
+          path: test-results/native541-linux
+          if-no-files-found: ignore
