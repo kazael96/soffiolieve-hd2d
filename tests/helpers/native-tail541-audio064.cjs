@@ -46,6 +46,25 @@ replace('miss=false,realBytes=false}={})','miss=false,realBytes=false,hitIndex=0
 replace('profile={species:moveId===16?521:500,id:moveId,frames:126,impact:60,nativeEffects:true}',"profile=moveId===541?{species:572,id:541,key:'training-572-541',kind:'tailSlam',chapter:true,training:true,nativeEffects:true,attachment:'mouth',target:'foe',damage:true,frames:126,impact:60,nativeTail541064:'native572-tail541-oam-partition/v1',nativeTailContext541:{hitIndex,hitCount}}:{species:moveId===16?521:500,id:moveId,frames:126,impact:60,nativeEffects:true}",'only qualified541 branch');
 replace('requiredKeys:keys},nextKey=',"requiredKeys:keys,...(moveId===541?{profileSpecies:572,profileKey:profile.key,profileKind:profile.kind,profileMarker:profile.nativeTail541064,nativeTailContext541:{hitIndex,hitCount},nativeWaitGroups:false}:{})},nextKey=",'only541 contract metadata');
 let inverse=adapted;for(const op of operations.slice().reverse()){assert.equal(inverse.split(op.after).length-1,1);inverse=inverse.replace(op.after,op.before);}assert.equal(inverse,prefix,'No undeclared fixture math/body rewrite');
-const file=__filename+':qualified-existing-WebAudio-fixture',m=new Module(file,module);m.filename=file;m.paths=Module._nodeModulePaths(path.dirname(__filename));m.native541Loader=L;m.native541Load=loadProgram;
-const compiled="'use strict';const L=module.native541Loader,loadActualProgram=module.native541Load;\n"+adapted+'\nmodule.exports={fixture,data};\n';m._compile(compiled,file);
-module.exports=m.exports;
+const file=__filename+':qualified-existing-WebAudio-fixture';
+const compiled="'use strict';const L=module.native541Loader,loadActualProgram=module.native541Load;\n"+adapted+'\nmodule.exports={fixture,data};\n';
+let ownedFixtureModule=null,initialized=false,released=false;const completedCases=new Set();
+function releaseOwnedFixture(){
+ const m=ownedFixtureModule;if(!m)return;
+ m.exports=null;m.native541Loader=null;m.native541Load=null;
+ const owned=module.children.indexOf(m);if(owned>=0)module.children.splice(owned,1);
+ ownedFixtureModule=null;
+}
+function fixture(...args){
+ assert(!released,'Finite native541 audio fixture released after its four cases');
+ if(!initialized){
+  initialized=true;const m=new Module(file,module);m.filename=file;m.paths=Module._nodeModulePaths(path.dirname(__filename));m.native541Loader=L;m.native541Load=loadProgram;ownedFixtureModule=m;
+  try{m._compile(compiled,file);}catch(error){released=true;releaseOwnedFixture();throw error;}
+ }
+ return Reflect.apply(ownedFixtureModule.exports.fixture,this,args);
+}
+function completeCase(id){
+ assert(Number.isInteger(id)&&id>=0&&id<4,'Declared finite native541 audio case');completedCases.add(id);
+ if(completedCases.size===4){released=true;releaseOwnedFixture();}
+}
+module.exports={fixture,completeCase};
