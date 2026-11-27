@@ -26,15 +26,18 @@ assert.deepEqual(L.contract,{...beforeUnderActors,status:'ACTUAL_V4_CLOSED541_M3
 
 for(const file of closed541Names){assert(Object.hasOwn(L.contract.sourceLFHashes,file));assert(fs.existsSync(path.join(L.target,file)),'Explicit closed541 source missing');L.validate(file);}
 const diagnostic={hosts:0,gcMs:0,readMs:0,roundTripAndRecordMs:0,runMs:0,files:Object.create(null)},diagnosticNow=()=>Number(process.hrtime.bigint())/1e6;
-function runActual(c,file){
+function prepareActual(file){
  const readStart=diagnosticNow();
  const r=L.read(file),readEnd=diagnosticNow(),rawUTF8=Buffer.from(r.text,'utf8');diagnostic.readMs+=readEnd-readStart;
  assert(rawUTF8.equals(r.raw),'Compile actual UTF8 bytes before any cache hit');
- const before=compiledFixture.stats(),record={kind:'whole-raw-program-compiled',engine:'vm.Script.runInContext',file:r.file,logical:r.logical,rawSHA256:r.rawSHA256,canonicalLFSHA256:r.canonicalLFSHA256,actualCompiledUTF8SHA256:L.sha(rawUTF8),compiledTextRoundTripExact:true,compilationReused:false};
- L.records.push(record);
- const runStart=diagnosticNow();diagnostic.roundTripAndRecordMs+=runStart-readEnd;
- try{return compiledFixture.run(r.text,c,{filename:r.file});}
- finally{const ms=diagnosticNow()-runStart;diagnostic.runMs+=ms;const row=diagnostic.files[file]||(diagnostic.files[file]={calls:0,runMs:0});row.calls++;row.runMs+=ms;record.compilationReused=compiledFixture.stats().hits>before.hits;}
+ return{text:r.text,file:r.file,record:{kind:'whole-raw-program-compiled',engine:'vm.Script.runInContext',file:r.file,logical:r.logical,rawSHA256:r.rawSHA256,canonicalLFSHA256:r.canonicalLFSHA256,actualCompiledUTF8SHA256:L.sha(rawUTF8),compiledTextRoundTripExact:true,compilationReused:false}};
+}
+function runActual(c,file){
+ const prepareStart=diagnosticNow(),readMsBefore=diagnostic.readMs,prepared=prepareActual(file),before=compiledFixture.stats();
+ L.records.push(prepared.record);
+ const runStart=diagnosticNow();diagnostic.roundTripAndRecordMs+=runStart-prepareStart-(diagnostic.readMs-readMsBefore);
+ try{return compiledFixture.run(prepared.text,c,{filename:prepared.file});}
+ finally{const ms=diagnosticNow()-runStart;diagnostic.runMs+=ms;const row=diagnostic.files[file]||(diagnostic.files[file]={calls:0,runMs:0});row.calls++;row.runMs+=ms;prepared.record.compilationReused=compiledFixture.stats().hits>before.hits;}
 }
 function candidate(c,file){assert(closed541Names.includes(file),'Declared closed541 program');assert(fs.existsSync(path.join(L.target,file)),'Explicit five-source selection must exist');const r=L.read(file);assert.equal(r.canonicalLFSHA256,L.contract.sourceLFHashes[file]);return runActual(c,file);}
 function finale(){const file=path.join(cfg.repo,'tests/helpers/liepard-protocol064/finale-host.cjs'),m=new Module(file,module);m.filename=file;m.paths=Module._nodeModulePaths(path.dirname(file));m.require=id=>id==='./strict-loader.cjs'?{...L,run(c,f){if(f==='minccino-moves.js'){c.original541Samples=[];for(const object of [c.ChapterMoves,c.DemoMoves]){const old=object.sample;object.sample=function(...args){const value=Reflect.apply(old,this,args);if(args[0]?.nativeTail541064==='native572-tail541-oam-partition/v1')c.original541Samples.push({value,snapshot:Reflect.ownKeys(value).map(key=>[key,value[key]])});return value;};}}return closed541Names.includes(f)?candidate(c,f):runActual(c,f);}}:Module.prototype.require.call(m,id);try{m._compile(fs.readFileSync(file,'utf8'),file);return m.exports;}finally{const owned=module.children.indexOf(m);if(owned>=0)module.children.splice(owned,1);}}
