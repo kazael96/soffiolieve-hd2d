@@ -34,7 +34,7 @@
  }
  function clock(){
   let f=0,last=null,finished=false;
-   return{tick(now,{hidden=false,rate=1}={}){if(!Number.isFinite(now))throw Error('Invalid introduction clock');if(last===null){last=now;return pose(f);}const dt=Math.max(0,Math.min(100,now-last));last=now;if(!hidden&&!finished){const next=checkpoints.find(x=>x>f)??162;f=Math.min(next,f+dt*.045*Math.max(1,Math.min(4,Number(rate)||1)));if(f>=162)finished=true;}return pose(f);},get done(){return finished;},get frame(){return f;}};
+   return{resetTiming(){last=null;},tick(now,{hidden=false,rate=1}={}){if(!Number.isFinite(now))throw Error('Invalid introduction clock');if(last===null){last=now;return pose(f);}const dt=Math.max(0,Math.min(100,now-last));last=now;if(!hidden&&!finished){const next=checkpoints.find(x=>x>f)??162;f=Math.min(next,f+dt*.045*Math.max(1,Math.min(4,Number(rate)||1)));if(f>=162)finished=true;}return pose(f);},get done(){return finished;},get frame(){return f;}};
  }
  function sprites(images){
   const atlas=images.araliaThrow;
@@ -53,9 +53,11 @@
  function play({paint,onFrame=()=>{},sound=()=>{},cry=()=>{},document:doc=root.document,request=root.requestAnimationFrame,cancel=root.cancelAnimationFrame,rate=()=>root.GameSpeed?.rate||1}={}){
   const time=clock(),played=new Set();let raf,closed=false,resolve,reject;
   const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
-  const stop=()=>{if(closed)return;closed=true;if(raf!==undefined)cancel(raf);resolve(false);};
-  const tick=now=>{if(closed)return;try{const p=time.tick(now,{hidden:doc.hidden,rate:rate()});if(!doc.hidden){paint(p);onFrame(p);for(const [frame,key,action]of [[46,'throw',()=>sound(1382)],[76,'open',()=>sound(1383)],[112,'cry',cry]])if(p.frame>=frame&&!played.has(key)){played.add(key);action();}}if(time.done){closed=true;resolve(true);}else raf=request(tick);}catch(error){closed=true;reject(error);}};
-  raf=request(tick);return{promise,cancel:stop};
+  const resetClock=()=>{if(!closed)time.resetTiming();},cleanup=()=>doc.removeEventListener?.('visibilitychange',resetClock);
+  const stop=()=>{if(closed)return;closed=true;cleanup();if(raf!==undefined)cancel(raf);resolve(false);};
+  const tick=now=>{if(closed)return;try{const p=time.tick(now,{hidden:doc.hidden,rate:rate()});if(!doc.hidden){paint(p);onFrame(p);for(const [frame,key,action]of [[46,'throw',()=>sound(1382)],[76,'open',()=>sound(1383)],[112,'cry',cry]])if(p.frame>=frame&&!played.has(key)){played.add(key);action();}}if(time.done){closed=true;cleanup();resolve(true);}else raf=request(tick);}catch(error){closed=true;cleanup();reject(error);}};
+  doc.addEventListener?.('visibilitychange',resetClock);
+  try{raf=request(tick);}catch(error){closed=true;cleanup();throw error;}return{promise,cancel:stop};
  }
  const api={assets,checkpoints,poses,palms,launchVelocity,pose,clock,sprites,white,draw,play};root.IntroPokeball=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);

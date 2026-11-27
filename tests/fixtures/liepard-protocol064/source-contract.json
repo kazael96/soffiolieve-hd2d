@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "ACTUAL_V4_CLOSED541_M3_TAIL_TYNAMO33_NATIVE_FOE_DREAMYARD_FLOOR_CUT_TARGET_TRANSPARENCY_SOURCE_CONTRACT_NOT_EXECUTION",
-  "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe-dreamyard-floor-cut-target-transparency",
+  "status": "ACTUAL_V4_CLOSED541_M3_TAIL_TYNAMO33_NATIVE_FOE_DREAMYARD_FLOOR_CUT_TARGET_UNDER_ACTORS_SOURCE_CONTRACT_NOT_EXECUTION",
+  "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe-dreamyard-floor-cut-target-under-actors",
   "basisSourceManifestSHA256": "d8558489faa963bd032067b2436d697c34615bac1772762dc9b67601f482ba53",
   "sourceLFHashes": {
     "training-data.js": "8d20396f42cc664d5d404e317be97c672ccfcfad88290a36c0a17d73f40eed75",
@@ -38,7 +38,7 @@
     "move-fx.js": "1f0e563be80263b4263332f89266aad8266ded2a196ed9a6ce9a0c48615887c9",
     "double-battles.js": "b1bc07758b48bc1e1f94b84b87e691f9f3ea48f41020ff49d21af3583df3d38a",
     "runtime-assets.js": "e7130d01eb54b1f7b72ecb889db5c708778e32975b866e904373ce43291568c9",
-    "world3d.js": "3b03cbfd301f65c8b5935b7ece12151260704e6ae332e4d65417e2fec92ccf5e"
+    "world3d.js": "d1e3d8bf170a69de8b607701d12230e5ca7e223900aa14ebbf1ac1e8d756d102"
   },
   "buildProgramRawSHA256": {
     "battle-sim.js": "c7d74cd5ad50c62389db91176e74e095a71a0b75b5ac910c710ccd6ad697ebb9"
@@ -205,5 +205,38 @@
     },
     "rawAssetPinsRetainOriginalMeaning": true,
     "scope": "Declared scoped field-target visibility source migration only; battle body/draw, Tynamo, M3 and541 lineages unchanged. ART_LIMIT: ghost appearance, shell readability and full move remain unapproved; no new541 execution/motion/PCM/Android/build approval"
+  },
+  "previousCutTargetTransparencyContractCanonicalLFSHA256": "2dac324e7292721d334902c065bbe520b484876c0b52949a5a5b632ccd216458",
+  "cutTargetUnderActorsLineage": {
+    "schema": 1,
+    "sourceLFHashChanges": [
+      "world3d.js"
+    ],
+    "sourceLFHashes": {
+      "world3d.js": "d1e3d8bf170a69de8b607701d12230e5ca7e223900aa14ebbf1ac1e8d756d102"
+    },
+    "fieldForegroundPass": {
+      "scene": "zone152",
+      "nativeTargetModel": 108,
+      "move": 15,
+      "graphic": 501,
+      "direction": 1,
+      "passOrder": [
+        "all original contact shadows",
+        "same owned target cutaway tree",
+        "all opaque actors",
+        "original player silhouette"
+      ],
+      "opacityRange": [
+        0.38,
+        1
+      ],
+      "planeOpacityArgument": 11,
+      "depthWrite": "false only around the same owned target plane; restored true in finally",
+      "drawBody": "Exact previously qualified target-pass body moved; ordinary actor order/arguments and source pixels unchanged",
+      "floorQuery": "Prior Dreamyard excluded groups6,27,highest,cache and render geometry unchanged"
+    },
+    "rawAssetPinsRetainOriginalMeaning": true,
+    "scope": "Declared source-only target pass-order migration; native541,M3,Tynamo,battle bodies,clocks,audio and prior lineages remain unchanged. Scoped World component acceptance is not full-move,physical-contact,motion,PCM,Android,build or release approval."
   }
 }

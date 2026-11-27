@@ -4,8 +4,8 @@
   "metadataPolicy": "UTF8 exact; metadata/program CRLF to LF only; native PNG/JSON/FLAC RAW",
   "sourceContract": {
     "relative": "tests/fixtures/liepard-protocol064/source-contract.json",
-    "canonicalLFSHA256": "2dac324e7292721d334902c065bbe520b484876c0b52949a5a5b632ccd216458",
-    "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe-dreamyard-floor-cut-target-transparency"
+    "canonicalLFSHA256": "0a8aa06457efc90daea94e8f65339a83997f57a4427db790e3a1bcf877a59736",
+    "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe-dreamyard-floor-cut-target-under-actors"
   },
   "archiveSHA256": "2451b9f6531a90bcec395037624de300fa16a2e49f88becbe2701969a77176d6",
   "sourceOrder": [

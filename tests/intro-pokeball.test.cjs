@@ -62,3 +62,56 @@ test('every authored body cel survives slow rendering and x4; returning ball cle
  for(let f=128;f<=150;f+=.05){const p=P.pose(f);if(p.ball.x>=60&&p.ball.x<=100)assert.ok(p.ball.y>=68,'Returning sphere crosses the face at '+f);}
  assert.equal(P.pose(162).actor.cell,P.pose(0).actor.cell);
 });
+
+
+test('actual Aralia player resumes without consuming wall time when hidden RAFs are entirely suspended',async()=>{
+ class VisibilityDoc extends EventTarget{
+  constructor(){super();this.hidden=false;this.listeners=new Set();this.removed=[];}
+  addEventListener(type,listener,options){super.addEventListener(type,listener,options);if(type==='visibilitychange')this.listeners.add(listener);}
+  removeEventListener(type,listener,options){super.removeEventListener(type,listener,options);if(type==='visibilitychange'){this.listeners.delete(listener);this.removed.push(listener);}}
+  visibility(hidden){this.hidden=hidden;this.dispatchEvent(new Event('visibilitychange'));}
+ }
+ for(const rate of [1,2,4]){
+  const doc=new VisibilityDoc(),foreign=()=>{};doc.addEventListener('visibilitychange',foreign);
+  let next,lastPaint,paintCount=0;const events=[];
+  const run=P.play({document:doc,request:f=>(next=f,1),cancel(){next=null;},rate:()=>rate,paint:p=>{lastPaint=p;paintCount++;},sound:id=>events.push(id),cry:()=>events.push('cry')});
+  const frame=now=>{const tick=next;assert.equal(typeof tick,'function');next=null;tick(now);};
+  try{
+   frame(0);assert.equal(lastPaint.frame,0);
+   doc.visibility(true); // No RAF callback at all during these5000ms.
+   doc.visibility(false);frame(5000);
+   assert.equal(lastPaint.frame,0,'First visible RAF consumed hidden wall time at x'+rate);
+   assert.equal(paintCount,2);assert.deepEqual(events,[]);assert.equal(doc.listeners.size,2);
+   frame(5016);assert.equal(lastPaint.frame,16*.045*rate,'Ordinary visible rate changed');
+   doc.visibility(true);doc.visibility(false);frame(15016);
+   assert.equal(lastPaint.frame,16*.045*rate,'A second suspended interval advanced the gesture');
+   frame(15032);assert.equal(lastPaint.frame,2*(16*.045*rate));
+  }finally{run.cancel();assert.equal(await run.promise,false);}
+  assert.equal(doc.listeners.size,1);assert(doc.listeners.has(foreign));assert.equal(doc.removed.length,1);assert.notEqual(doc.removed[0],foreign);
+  doc.removeEventListener('visibilitychange',foreign);
+ }
+});
+
+test('Aralia visibility binding is released on completion, cancellation and original callback or scheduler error',async()=>{
+ class VisibilityDoc extends EventTarget{
+  constructor(){super();this.hidden=false;this.listeners=new Set();}
+  addEventListener(type,listener,options){super.addEventListener(type,listener,options);if(type==='visibilitychange')this.listeners.add(listener);}
+  removeEventListener(type,listener,options){super.removeEventListener(type,listener,options);if(type==='visibilitychange')this.listeners.delete(listener);}
+ }
+ const begin=(doc,extra={})=>{let next,lastTick,draws=0;const run=P.play({document:doc,request:f=>(next=f,1),cancel(){next=null;},paint(){draws++;},...extra});return{run,step(now){const tick=next;assert.equal(typeof tick,'function');next=null;lastTick=tick;tick(now);},get pending(){return !!next;},get draws(){return draws;},stale(now){lastTick(now);}};};
+ for(const mode of ['complete','cancel','paint-error','frame-error','rate-error','sound-error']){
+  const doc=new VisibilityDoc(),foreign=()=>{},sentinel=Error('original '+mode);doc.addEventListener('visibilitychange',foreign);
+  let paints=0;const extra=mode==='paint-error'?{paint(){paints++;throw sentinel;}}:mode==='frame-error'?{onFrame(){throw sentinel;}}:mode==='rate-error'?{rate(){throw sentinel;}}:mode==='sound-error'?{sound(){throw sentinel;}}:{};
+  const h=begin(doc,extra),work=h.run.promise;const rejected=mode.endsWith('error')?assert.rejects(work,error=>error===sentinel):null;
+  h.step(0);
+  if(mode==='complete'||mode==='sound-error')for(let i=1;i<1000&&h.pending;i++)h.step(i*180);
+  if(mode==='cancel')h.run.cancel();
+  if(rejected)await rejected;else assert.equal(await work,mode==='complete');
+  assert.equal(doc.listeners.size,1,mode);assert(doc.listeners.has(foreign));
+  const draws=h.draws;h.stale(100000);assert.equal(h.draws,draws,'A terminal callback painted again');if(mode==='paint-error')assert.equal(paints,1);
+  h.run.cancel();assert.equal(doc.listeners.size,1);doc.removeEventListener('visibilitychange',foreign);
+ }
+ const doc=new VisibilityDoc(),sentinel=Error('original initial RAF failure');let stale,draws=0;
+ assert.throws(()=>P.play({document:doc,paint(){draws++;},request(fn){stale=fn;throw sentinel;}}),error=>error===sentinel);
+ assert.equal(doc.listeners.size,0,'Initial scheduler error leaked the visibility binding');stale(100000);assert.equal(draws,0,'A failed initial scheduler retained a live player');
+});
