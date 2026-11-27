@@ -1792,8 +1792,8 @@
  // must return the field actor in that same draw; a previous card cannot pass.
  function observeFieldHMDraw055(onFrame){
   const draw=renderer.draw,present=FieldHMWorld.present;let frame=null,sequence=0;
-  FieldHMWorld.present=function(...args){const actors=present.apply(this,args);if(frame&&args[0]===renderer)frame.actor=actors.find(a=>a.fieldHM&&a.texture)||null;return actors;};
-  renderer.draw=function(...args){const previous=frame,current={actor:null,sequence:++sequence};frame=current;try{const result=draw.apply(this,args),action=FieldHMWorld.active;if(action&&!action.done)onFrame({action,actor:current.actor,progress:action.elapsed/action.duration,sequence:current.sequence});return result;}finally{frame=previous;}};
+  FieldHMWorld.present=function(...args){const actors=present.apply(this,args);if(frame&&args[0]===renderer){frame.actor=actors.find(a=>a.fieldHM&&a.texture)||null;frame.hero=actors.find(a=>a.name==='Alcide'&&!a.fieldHM)||null;}return actors;};
+  renderer.draw=function(...args){const previous=frame,current={actor:null,sequence:++sequence};frame=current;try{const result=draw.apply(this,args),action=FieldHMWorld.active;if(action&&!action.done)onFrame({action,actor:current.actor,hero:current.hero,progress:action.elapsed/action.duration,sequence:current.sequence});return result;}finally{frame=previous;}};
   return ()=>{renderer.draw=draw;FieldHMWorld.present=present;};
  }
  async function cutAction054(speed=1,identity=null){  await seed049({16532:5},[575,576,579,658,676,678,780]);if(identity)await prepareHMIdentity056(identity);NativeStory.state.dreamyardTreeCut=false;GameSpeed.set(speed);await fieldHMAudio054({silent:speed===4});

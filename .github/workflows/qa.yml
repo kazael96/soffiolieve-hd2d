@@ -135,6 +135,9 @@ jobs:
       - name: Check Tynamo native commands and audio in desktop at x4
         timeout-minutes: 30
         run: node scripts/test-browser-headless.cjs _site test-results/animation064-desktop-tynamo-x4 --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=desktop --cases=qaTynamoActions064 --rates=4
+      - name: Check Oshawott Cut front and back at all speeds in all formats
+        timeout-minutes: 30
+        run: node scripts/test-browser-headless.cjs _site test-results/animation064-oshawott-cut --browser=/opt/google/chrome/chrome --renderer=software --fail-fast=true --timeout=180000 --viewports=portrait,landscape,desktop --cases=qaOshawottCut064BackX1,qaOshawottCut064FrontX1,qaOshawottCut064BackX2,qaOshawottCut064FrontX2,qaOshawottCut064BackX4,qaOshawottCut064FrontX4
       - uses: actions/upload-artifact@v4
         if: always()
         with:

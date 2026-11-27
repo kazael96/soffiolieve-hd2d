@@ -4,6 +4,8 @@ Riscontro del 16 novembre 2026 sulla candidata 03 `3d5421e7fcab49e2`: 105 coppie
 
 ## Requisito del 16 novembre 2026
 
+Aggiornamento della revisione0.64: la camera di Oshawott–Taglio nel Cantiere dei Sogni è descritta in [FIELD-HM-CAMERA-064.md](FIELD-HM-CAMERA-064.md). Le prove effettive retro/×1 nei tre formati qualificano un miglioramento statico della leggibilità, mantenendo aperti contatto con il tronco e movimento completo. Non sostituiscono la matrice delle105coppie né trasferiscono alle modifiche attuali i PASS storici della0.55. I sei casi originali fronte/retro a×1/×2/×4 sono aggiunti ai controlli QA/Pages; nuova candidata e risultati completi restano gate distinti.
+
 L'utente richiede una coreografia completamente esclusiva per ciascuna delle 105 coppie specie/forma–MN già offerte: 60 Taglio, 16 Volo, 29 Surf. Ciascuna coppia deve avere un ordine riconoscibile di gesti, enfasi anatomica, traiettoria e recupero. Nomi diversi, variazioni di velocità, dimensioni o ampiezze della stessa sequenza di famiglia non soddisfano il requisito. Effetti, interpolazione e codice di composizione possono essere condivisi; il movimento effettivamente visibile deve distinguere le coppie.
 
 La storia principale, il primo finale e il limite 54 restano quelli consegnati nella 0.53. Non cambiano compatibilità native, ottenibilità, disponibilità delle MN, PP, coste, destinazioni di Volo o accessi dopo il finale. Un profilo per una specie avversaria non la rende ottenibile. Le tre MN non offerte, Forza/Cascata/Sub, restano fuori da questo inventario.

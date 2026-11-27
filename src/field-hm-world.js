@@ -30,7 +30,7 @@
  function swimmer(){const n=native(),party=root.Journey?.state.party||[];return party[n?.surfUserIndex]||party.find(p=>!p.egg&&p.pp?.some(m=>m.id===57));}
  function surfReady(){const mon=swimmer();return !!mon&&bank?.graphic===graphic(mon)&&!!bank.sitting&&!!root.FieldHMProfiles.profile(mon,57);}
  function surfRenderable(){return !!swimmer()&&!!bank&&!!root.FieldHMProfiles.profile(bank.displayMon,57);}
- function dispose(renderer){const card=cards.get(renderer);if(!card)return;if(renderer.gl.isTexture(card.texture.texture))renderer.gl.deleteTexture(card.texture.texture);cards.delete(renderer);}
+ function dispose(renderer){restoreCutCamera(renderer);const card=cards.get(renderer);if(!card)return;if(renderer.gl.isTexture(card.texture.texture))renderer.gl.deleteTexture(card.texture.texture);cards.delete(renderer);}
  function cardFor(renderer){let card=cards.get(renderer);if(card&&!renderer.gl.isTexture(card.texture.texture)){cards.delete(renderer);card=null;}if(!card){const canvas=document.createElement('canvas');canvas.width=canvas.height=512;card={canvas,context:canvas.getContext('2d'),texture:renderer.upload(canvas,true)};cards.set(renderer,card);}return card;}
  function surfPosture064(){const r=native()?.surfMotion;return !r?1:r.phase==='wait'?ease(clamp(r.wait/16)):r.phase==='recall'?1-ease(clamp(r.wait/16)):1;}
  function bodyPose(p,s){return {fieldHM:true,fieldMove:p.move,surfPosture:surfPosture064(),graphic:p.graphic,species:p.species,dir:-1,crouch:s.crouch,lean:s.lean,head:s.head,arms:s.arms,feet:s.feet,tail:s.tail,wings:s.wings,sideHeads:s.sideHeads,jets:s.jets};}
@@ -67,6 +67,7 @@
   presented.delete(renderer);
   if(renderer.contextLost||renderer.gl?.isContextLost?.())return actors;
   const original=actors.find(a=>a.hero||a.name==='Alcide'||a.name==='AlcideSurf');if(!original)return actors;
+  captureCutCamera(renderer,original,actors);
   let mon,move,sample,position,rider=true,scale=1;
   if(action){if(action.zone!==native()?.zone&&!action.transfer)return actors;({mon,move}=action);const p=root.FieldHMProfiles.profile(mon,move),t=clamp(action.elapsed/action.duration);const viewDirection=root.NativeRails&&renderer.yaw?root.NativeRails.screenDirection(action.direction,renderer.yaw):action.direction;sample=root.FieldHMProfiles.sample(p,time,{phase:action.phase,progress:t,direction:viewDirection});position={x:original.x,z:original.z,height:action.height};
    if(move===19){
@@ -102,7 +103,7 @@
   if(action)presented.set(renderer,{action,elapsed:action.elapsed});
   else if(native()?.surfMotion){const motion=native().surfMotion,gate=surfGates.get(motion);presented.set(renderer,{motion,progress:surfProgress(motion),...(gate?.leanOut&&!gate.leanOut.done?{balanceProgress:gate.leanOut.progress}:{})});}
   else if(bank?.leanIn&&!bank.leanIn.done)presented.set(renderer,{riderBank:bank,balanceProgress:bank.leanIn.progress});
-  return [...actors.filter(a=>a!==original||!rider),actor];
+  return [...cutForegroundActors064(renderer,actors).filter(a=>a!==original||!rider),actor];
  }
  function inspectCard(renderer){
   const card=cards.get(renderer);if(!card)return null;const pixels=card.context.getImageData(0,0,512,512).data;let riderUpperPixels=0,riderUpperVisible=0,riderUpperExactVisible=0;
@@ -127,8 +128,58 @@
  }
  function copyCard(renderer,context,...rect){const card=cards.get(renderer);if(!card)return false;context.drawImage(card.canvas,...rect);return true;}
  function placement(position,pitch=[.423,.906],bob=0,yaw=0){return {x:position.x+2*pitch[0]*Math.sin(yaw),z:position.z+2*pitch[0]*Math.cos(yaw),height:position.height+bob-2*pitch[1],groundHeight:position.height,groundX:position.x,groundZ:position.z};}
- function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;const t=clamp(action.elapsed/action.duration),amount=action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
- function applyCamera(renderer){const base=renderer.cameraPitch;if(![15,19].includes(action?.move))return ()=>{};renderer.cameraPitch=cameraFor(base);return ()=>{renderer.cameraPitch=base;};}
+ function cameraFor(base=[.423,.906]){if(![15,19].includes(action?.move))return base;if(cutCameraScope(action)&&action.direction===1)return base;const t=clamp(action.elapsed/action.duration),amount=action.move===15?ease(t/.18)*(1-ease((t-.82)/.18)):action.phase==='depart'?ease(t/.12):1-ease((t-.85)/.15),angle=Math.atan2(base[0],base[1]),target=Math.max(angle,62*Math.PI/180),pitch=angle+(target-angle)*amount;return [Math.sin(pitch),Math.cos(pitch)];}
+ // Private501/15 camera pilot. Geometry is frozen before the original staging.
+ const cutCameraPlans=new WeakMap(),cutCameraFrames=new Map();
+ function restoreCutCamera(renderer){const lease=cutCameraFrames.get(renderer);if(!lease)return;cutCameraFrames.delete(renderer);
+  for(const key of ['zoom','center','yaw','cameraPitch'])if(renderer[key]===lease.applied[key]&&(!Array.isArray(renderer[key])||renderer[key].every((v,i)=>v===lease.values[key][i])))renderer[key]=lease.base[key];
+ }
+ function releaseCutCameras(owner){for(const [renderer,lease]of cutCameraFrames)if(!owner||lease.owner===owner)restoreCutCamera(renderer);}
+ function cutCameraScope(a){return !!a&&!a.done&&a.move===15&&a.phase==='cut'&&+graphic(a.mon)===501&&[0,1].includes(a.direction)&&a.zone===152;}
+ function captureCutCamera(renderer,hero,actors){if(!cutCameraScope(action))return;let plans=cutCameraPlans.get(action);if(!plans){plans=new WeakMap();cutCameraPlans.set(action,plans);}const prior=plans.get(renderer);
+  if(prior){if(hero.x!==prior.hero.x||hero.z!==prior.hero.z||bank!==prior.bank)prior.invalid=true;return;}
+  const target=action.target,tree=actors.find(a=>a.source?.model===108&&a.x===target?.x&&a.z===target?.y),metadata=bank?.cutArt?.metadata,p=root.FieldHMProfiles.profile(action.mon,15);
+  if(!target||!tree||!metadata||bank.graphic!==graphic(action.mon)||!p||!renderer.images?.[(renderer.spriteName?.(tree.name)||tree.name)+'-0'])return;
+  const geometry=a=>({x:a.x,z:a.z,height:a.height??.04,width:a.worldWidth??2,tall:a.worldHeight??2,nativeBillboard:!!a.nativeBillboard});const h=geometry(hero),treeBox=geometry(tree);
+  if(![h.x,h.z,h.height,h.width,h.tall,treeBox.x,treeBox.z,treeBox.height,treeBox.width,treeBox.tall,action.height,p.height].every(Number.isFinite)||h.width<=0||h.tall<=0||treeBox.width<=0||treeBox.tall<=0)return;
+  const keys=p.choreography.cut.map(row=>row[1]),range=key=>[Math.min(0,...keys.map(k=>k[key]||0)),Math.max(0,...keys.map(k=>k[key]||0))],stretch=range('stretch'),squash=range('squash'),crouch=range('crouch'),bob=range('bob'),sx=1+stretch[1]+.32*crouch[1],sy=1+squash[1]-crouch[0];
+  const b=metadata.bounds[action.direction===0?'back':'front'],unit=p.height/(b[3]-b[1]),cx=(b[0]+b[2])/2,origin=metadata.origin,cell=metadata.cell;
+  // Every opaque texel lies inside its immutable atlas cell. A disc bounds
+  // every original lean angle; scale channel extrema follow the score keys.
+  const radius=unit*Math.hypot(Math.max(Math.abs(-origin[0]-cx),Math.abs(cell-origin[0]-cx)),Math.max(Math.abs(-origin[1]-b[3]),Math.abs(cell-origin[1]-b[3])));
+  const dx=target.x-h.x,dz=target.y-h.z,distance=Math.hypot(dx,dz),advance=distance>.65?(distance-.65)/distance:0,[vx,vz]=action.direction===0?[0,-1]:[0,1];
+  if(!(Number.isFinite(radius)&&radius>0&&sx>0&&sy>0&&p.height>0))return;
+  const roots=[[h.x,h.z],[h.x-.95*vx,h.z-.95*vz],[h.x+dx*advance,h.z+dz*advance]],low=action.height+Math.min(bob[0],0)-p.height*sy/8,high=action.height+Math.max(bob[1],1.1);
+  plans.set(renderer,{owner:action,bank,scene:renderer.scene,hero:h,tree:treeBox,targetSource:tree.source,roots,low,high,u:radius*sx,v:radius*sy,height:p.height,invalid:false});
+ }
+ // A copied render actor only: native target/save data and its hidden flag stay untouched.
+ function cutForegroundActors064(renderer,actors){
+  const owner=action,plan=owner&&cutCameraPlans.get(owner)?.get(renderer),lease=cutCameraFrames.get(renderer);
+  if(!cutCameraScope(owner)||owner.direction!==1||owner.committed||native()?.zone!==152||!plan||plan.invalid||plan.owner!==owner||plan.bank!==bank||plan.scene!==renderer.scene||lease?.owner!==owner)return actors;
+  const t=clamp(owner.elapsed/owner.duration),amount=ease(t/.18)*(1-ease((t-.82)/.18));if(amount===0)return actors;
+  const alpha=1-(1-.38)*amount;if(!Number.isFinite(alpha)||alpha<.38||alpha>1)return actors;
+  return actors.map(a=>a.name==='Original108'&&!a.hero&&!a.fieldHM&&!a.hidden&&a.source===plan.targetSource&&a.source?.model===108&&!a.source.hidden&&a.x===owner.target?.x&&a.z===owner.target?.y?{...a,fieldHMCutForeground064:{ownerRef:owner,treeSourceRef:plan.targetSource,alpha}}:a);
+ }
+ function cutCameraPoints(plan,pitch,yaw){const points=[],cs=Math.cos(yaw),sn=Math.sin(yaw),[ps,pc]=pitch;
+  const billboard=(box,x,z)=>{const w=box.width,h=box.tall,local=[[-w/2,0,0],[w/2,0,0],[-w/2,h*pc,-h*ps],[w/2,h*(box.nativeBillboard?pc:pc-.126),-h*(box.nativeBillboard?ps:ps+.202)]];for(const [u,v,d]of local)points.push([x+u*cs+d*sn,box.height+v,z-u*sn+d*cs]);};
+  billboard(plan.tree,plan.tree.x,plan.tree.z);for(const [x,z]of plan.roots.slice(0,2))billboard(plan.hero,x,z);
+  for(const [x,z]of plan.roots)for(const y of [plan.low,plan.high])for(const u of [-plan.u,plan.u])for(const v of [-plan.v,plan.v])points.push([x+u*cs-v*ps*sn,y+v*pc,z-u*sn-v*ps*cs]);return points;
+ }
+ function closeCutCamera(renderer,plan,base,pitch,amount){const w=renderer.viewSize?.[0]??root.innerWidth,h=renderer.viewSize?.[1]??root.innerHeight,gutter=16;
+  if(plan.invalid||plan.owner!==action||bank!==plan.bank||renderer.scene!==plan.scene||native()?.zone!==action.zone||renderer.taskProjection||(base.yaw||0)!==0||!(w>gutter*2&&h>gutter*2&&base.zoom>0)||!Array.isArray(base.center)||base.center.length!==2)return null;
+  const yaw=(base.yaw||0)+(action.direction===1?0:Math.PI/6*amount),points=cutCameraPoints(plan,pitch,yaw),[ps,pc]=pitch,cs=Math.cos(yaw),sn=Math.sin(yaw),elevation=renderer.elevation||0,distance=renderer.cameraDistance||65,rail=!!(renderer.scene.railZone||renderer.scene.verticalMap);
+  const middle=[0,1,2].map(i=>(Math.min(...points.map(p=>p[i]))+Math.max(...points.map(p=>p[i])))/2),depth=(middle[1]-elevation)*pc/ps,goal=[middle[0]-depth*sn,middle[2]-depth*cs],center=base.center.map((v,i)=>v+(goal[i]-v)*amount),pixels=Math.min(w/30,h/21);
+  let xMax=0,yMax=0,minQ=Infinity;const project=p=>{const dx=p[0]-center[0],dz=p[2]-center[1],py=p[1]-elevation,vx=dx*cs-dz*sn,vz=dx*sn+dz*cs,raw=1-(py*ps+vz*pc)/distance,q=rail?raw:Math.max(.35,raw);if(!(q>0&&Number.isFinite(q)))return null;return [vx/q,(pc*py-ps*vz)/q,q,vx,pc*py-ps*vz];};
+  for(const p of points){const q=project(p);if(!q)return null;minQ=Math.min(minQ,q[2]);xMax=Math.max(xMax,Math.abs(q[3]));yMax=Math.max(yMax,Math.abs(q[4]));}
+  xMax/=minQ;yMax/=minQ;
+  const foot=project([plan.hero.x,action.height,plan.hero.z]);if(!foot)return null;const preferred=Math.max(base.zoom,64*foot[2]/(plan.height*pixels)),interpolated=base.zoom+(preferred-base.zoom)*amount,cap=Math.min((w/2-gutter)/(xMax*pixels),(h/2-gutter)/(yMax*pixels)),zoom=Math.min(interpolated,cap);
+  if(!(Number.isFinite(zoom)&&zoom>0&&center.every(Number.isFinite)))return null;return {zoom,center,yaw,cameraPitch:pitch};
+ }
+ function applyCamera(renderer){restoreCutCamera(renderer);const pitchBase=renderer.cameraPitch;if(![15,19].includes(action?.move))return ()=>{};
+  const pitch=cameraFor(pitchBase),plan=cutCameraPlans.get(action)?.get(renderer),t=clamp(action.elapsed/action.duration),amount=ease(t/.18)*(1-ease((t-.82)/.18));
+  if(cutCameraScope(action)&&plan&&amount>0){const base={zoom:renderer.zoom,center:renderer.center,yaw:renderer.yaw,cameraPitch:pitchBase},applied=closeCutCamera(renderer,plan,base,pitch,amount);if(applied){const lease={owner:action,base,applied,values:Object.fromEntries(Object.entries(applied).map(([k,v])=>[k,Array.isArray(v)?v.slice():v]))};cutCameraFrames.set(renderer,lease);Object.assign(renderer,applied);return ()=>{if(cutCameraFrames.get(renderer)===lease)restoreCutCamera(renderer);};}}
+  renderer.cameraPitch=pitch;return ()=>{renderer.cameraPitch=pitchBase;};
+ }
  // GameSpeed may run many physics chunks before one draw. Keep every authored
  // gesture and physical contact behind a successful-frame acknowledgement.
  // At very low FPS the presentation takes longer instead of skipping poses.
@@ -154,21 +205,22 @@
   if(frame.motion){const motion=native()?.surfMotion,gate=surfGates.get(frame.motion);if(frame.motion!==motion||!gate||Math.abs(frame.progress-surfProgress(motion))>1e-9)return;if(frame.balanceProgress!==undefined){acknowledgeBalance064(gate.leanOut,frame.balanceProgress);return;}while(gate.index<gate.stops.length&&frame.progress+1e-9>=gate.stops[gate.index])gate.index++;if(frame.progress>=1-1e-9)gate.complete=true;return;}
   if(frame.action!==action||frame.elapsed!==action.elapsed||action.done)return;
   if(action.elapsed+1e-9>=action.checkpoints[action.checkpoint]*action.duration)action.checkpoint++;
-  if(action.elapsed>=action.duration){const old=action;old.done=true;if(!old.retain)action=null;old.resolve();}
+  if(action.elapsed>=action.duration){const old=action;releaseCutCameras(old);old.done=true;if(!old.retain)action=null;old.resolve();}
  }
- function tick(dt){if(document.hidden)return;if(bank?.leanIn&&root.SurfField?.mounted()&&!native()?.surfMotion)advanceBalance064(bank.leanIn,dt);if(!action)return;if(action.zone!==native()?.zone&&!action.transfer){const old=action;action=null;old.reject(Error('Scena MN sostituita'));return;}if(action.done||!Number.isFinite(dt)||dt<=0)return;
+ function tick(dt){if(document.hidden)return;if(bank?.leanIn&&root.SurfField?.mounted()&&!native()?.surfMotion)advanceBalance064(bank.leanIn,dt);if(!action)return;if(action.zone!==native()?.zone&&!action.transfer){const old=action;releaseCutCameras(old);action=null;old.reject(Error('Scena MN sostituita'));return;}if(action.done||!Number.isFinite(dt)||dt<=0)return;
   action.debt=Math.min(action.duration-action.elapsed,action.debt+dt);
   const limit=Math.max(action.elapsed,action.checkpoints[action.checkpoint]*action.duration);
   const elapsed=Math.min(limit,action.elapsed+action.debt);action.debt-=elapsed-action.elapsed;action.elapsed=elapsed;
-  if(action.onContact&&!action.committed&&action.elapsed/action.duration>=.52){action.committed=true;try{action.onContact();}catch(error){const old=action;action=null;old.reject(error);}}
+  if(action.onContact&&!action.committed&&action.elapsed/action.duration>=.52){action.committed=true;try{action.onContact();}catch(error){const old=action;releaseCutCameras(old);action=null;old.reject(error);}}
  }
  async function start(mon,move,{phase=move===19?'depart':'cut',direction=1,target=null,height=0,duration=2,transfer=false,retain=false,onContact=null}={}){
   if(action&&!action.done)throw Error('Azione MN già in corso');await prepare(mon,move);if(action&&!action.done)throw Error('Azione MN già in corso');
   if(!Number.isFinite(duration)||duration<=0)throw Error('Durata MN non valida');
+  releaseCutCameras(action);
   const stops=checkpoints(mon,move,phase);
   const finished=new Promise((resolve,reject)=>{action={mon,move,phase,direction,target,height,duration,transfer,retain,onContact,zone:native()?.zone,elapsed:0,debt:0,checkpoints:stops,checkpoint:0,resolve,reject};});if(move===15)void root.AudioEngine?.cry(root.PokemonVisuals.speciesId(mon));return {finished};
  }
  async function run(...args){return (await start(...args)).finished;}
- function clear(){generation++;const old=action;action=null;old?.reject(Error('Azione MN annullata'));bank?.release();bank=null;pending=null;root.FieldHMOshawottCut?.release();root.FieldHMEvolvedCut?.release();}
- root.FieldHMWorld={prepare,present,rendered,inspectCard,copyCard,placement,cameraFor,applyCamera,tick,start,run,end(){if(action?.done)action=null;},dispose,clear,swimmer,surfReady,surfRenderable,surfBudget,rendererStats(renderer){const card=cards.get(renderer),valid=!!card&&renderer.gl.isTexture(card.texture.texture);return {gpuCards:valid?1:0,gpuBytes:valid?512*512*4:0};},get active(){return action;},get retained(){return {banks:bank?1:0,gpuCardBudgetBytes:512*512*4,authoredAtlasBytes:(root.FieldHMOshawottCut?.stats.decodedBytes||0)+(root.FieldHMEvolvedCut?.stats.decodedBytes||0)};}};
+ function clear(){releaseCutCameras();generation++;const old=action;action=null;old?.reject(Error('Azione MN annullata'));bank?.release();bank=null;pending=null;root.FieldHMOshawottCut?.release();root.FieldHMEvolvedCut?.release();}
+ root.FieldHMWorld={prepare,present,rendered,inspectCard,copyCard,placement,cameraFor,applyCamera,tick,start,run,end(){if(action?.done){releaseCutCameras(action);action=null;}},dispose,clear,swimmer,surfReady,surfRenderable,surfBudget,rendererStats(renderer){const card=cards.get(renderer),valid=!!card&&renderer.gl.isTexture(card.texture.texture);return {gpuCards:valid?1:0,gpuBytes:valid?512*512*4:0};},get active(){return action;},get retained(){return {banks:bank?1:0,gpuCardBudgetBytes:512*512*4,authoredAtlasBytes:(root.FieldHMOshawottCut?.stats.decodedBytes||0)+(root.FieldHMEvolvedCut?.stats.decodedBytes||0)};}};
 })(typeof window==='undefined'?globalThis:window);

@@ -136,11 +136,11 @@ test('the opaque sprite foot, rather than the transparent card edge, coincides w
  }
 });
 test('Cut temporarily clears foreground trees with a smooth camera and restores the owned base view every frame',async()=>{
- const {world,c}=setup(),base=[Math.sin(.44),Math.cos(.44)],renderer={cameraPitch:base,zoom:1.8},f=fieldPresenter(world,c,renderer);const task=await world.start({id:501},15,{duration:2,target:{x:1,y:1}});
+ const {world,c}=setup(),base=[Math.sin(.44),Math.cos(.44)],renderer={cameraPitch:base,zoom:1.8},f=fieldPresenter(world,c,renderer);const task=await world.start({id:501},15,{direction:0,duration:2,target:{x:1,y:1}});
  assert.ok(Math.abs(Math.atan2(...world.cameraFor(base))-.44)<1e-10);while(world.active.elapsed/2<.3){f.tick(.04);f.draw();}
  for(let i=0;i<5;i++){const restore=world.applyCamera(renderer);assert.ok(Math.abs(Math.atan2(...renderer.cameraPitch)-62*Math.PI/180)<1e-10);restore();assert.equal(renderer.cameraPitch,base);assert.equal(renderer.zoom,1.8);}
  finishField(world,c,renderer);await task.finished;assert.equal(world.cameraFor(base),base);
- const steep=[Math.sin(1.2),Math.cos(1.2)],other=await world.start({id:501},15,{duration:2,target:{x:1,y:1}});f.tick(.6);f.draw();assert.ok(Math.abs(Math.atan2(...world.cameraFor(steep))-1.2)<1e-10);finishField(world,c,renderer);await other.finished;
+ const steep=[Math.sin(1.2),Math.cos(1.2)],other=await world.start({id:501},15,{direction:0,duration:2,target:{x:1,y:1}});f.tick(.6);f.draw();assert.ok(Math.abs(Math.atan2(...world.cameraFor(steep))-1.2)<1e-10);finishField(world,c,renderer);await other.finished;
 });
 test('Cut commits once at contact; a hidden tab advances neither pose nor native tree flag',async()=>{
  const {world,c}=setup(),f=fieldPresenter(world,c);let commits=0;const task=await world.start({id:501},15,{onContact:()=>commits++,duration:2,target:{x:1,y:1}});while(world.active.elapsed/2<.4){f.tick(.04);f.draw();}assert.equal(commits,0);const before=world.active.elapsed;
@@ -352,3 +352,136 @@ test('a freshly restored '+name+' landing or recall never restarts balancing or 
 });
 
 }
+
+
+/* Dedicated strict function block isolates all eight camera helpers/imports. */
+(() => {
+/* Portable camera/ownership contracts: actual source, generated-site native501
+ * JSON, original authored atlas and real Dreamyard scene shape. CPU matrix
+ * observation only; no Game, raster, continuous-motion or art approval. */
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const repo=path.resolve(__dirname,'..'),site=process.env.SOFFIOLIEVE_TEST_SITE||path.resolve(__dirname,'../_site'),source=path.join(repo,'src/field-hm-world.js');
+function matrixRecorder(onImage){let m=[1,0,0,1,0,0],stack=[];const mul=b=>{const a=m;m=[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];};return new Proxy({},{get:(_,k)=>k==='getImageData'?()=>({data:new Uint8Array(4096)}):k==='drawImage'?(im,...args)=>onImage({im,args,m:m.slice()}):k==='save'?()=>stack.push(m.slice()):k==='restore'?()=>{m=stack.pop();}:k==='scale'?(x,y)=>mul([x,0,0,y,0,0]):k==='translate'?(x,y)=>mul([1,0,0,1,x,y]):k==='rotate'?a=>mul([Math.cos(a),Math.sin(a),-Math.sin(a),Math.cos(a),0,0]):()=>{}});}
+async function fixture({direction=0,graphic=501,viewport=[390,844],zoom=1.4,firstTick=false,sceneDescriptor=null,heroZ=11.5,zone=152,onContact=null}={}){
+ const calls=[],context=matrixRecorder(row=>calls.push(row)),n={zone},c={Promise,Map,WeakMap,setTimeout,clearTimeout,console,innerWidth:viewport[0],innerHeight:viewport[1],document:{hidden:false,createElement:()=>({width:512,height:512,getContext:()=>context})},Image:class{set src(value){const b=Buffer.from(value.split(',')[1],'base64');this.naturalWidth=b.readUInt32BE(16);this.naturalHeight=b.readUInt32BE(20);queueMicrotask(()=>this.onload?.());}},NativeStory:{state:n,occupied:()=>false},blocked:()=>false,Journey:{state:{party:[],original:n}},OPENING_SPRITES:{Alcide:Array(12).fill('hero')},RuntimeAssets:{image:async()=>({width:32,height:32})}};
+ c.ROM_SPRITE_ANIM={cache:{},pin:()=>()=>{},prepare:async keys=>{for(const key of keys)c.ROM_SPRITE_ANIM.cache[key]={data:JSON.parse(fs.readFileSync(path.join(site,'assets/animated/'+key+'.json'))),groundBounds:[-128,-128,128,0]};},draw:()=>true,alphaBounds:()=>[0,0,32,32],frame:a=>a.frames[0]};c.window=c;vm.createContext(c);
+ for(const f of ['native-rails.js','pokemon-visuals.js','field-hm-cut-choreographies.js','field-hm-fly-choreographies.js','field-hm-surf-choreographies.js','field-hm-cut-anatomy.js','field-hm-fly-anatomy.js','field-hm-surf-anatomy.js','field-hm-choreography.js','field-hm-profiles.js','field-hm-oshawott-cut.js','field-hm-evolved-cut.js'])vm.runInContext(fs.readFileSync(path.join(repo,'src',f),'utf8'),c,{filename:f});vm.runInContext(fs.readFileSync(source,'utf8'),c,{filename:source});
+ const world=c.FieldHMWorld,center=[7.5,13],pitch=[Math.sin(.44),Math.cos(.44)],r={scene:sceneDescriptor||{zone},zoom,center,cameraPitch:pitch,yaw:0,elevation:0,viewSize:viewport,images:{'Original108-0':{}},spriteName:x=>x,groundHeight:()=>0,upload:()=>({texture:{}}),gl:{isTexture:()=>true,bindTexture(){},texSubImage2D(){},deleteTexture(){}}},base={zoom,center,cameraPitch:pitch,yaw:0};
+ const tree={name:'Original108',x:7.5,z:10.5,height:0,frame:0,source:{model:108,x:7.5,y:10.5}},hero={name:'Alcide',hero:true,x:7.5,z:heroZ,height:.04,frame:direction*3},actors=()=>[{...tree},{...hero}];const task=await world.start({id:graphic},15,{direction,target:{x:tree.x,y:tree.z},height:0,duration:2.4,onContact});task.finished.catch(()=>{});let firstElapsed=0,firstCamera=null;
+ if(firstTick){c.performance={now:()=>0};c.localStorage={getItem:()=>null,setItem(){}};vm.runInContext(fs.readFileSync(path.join(repo,'src/game-speed.js'),'utf8'),c,{filename:'game-speed.js'});for(const dt of c.GameSpeed.steps(1/60))world.tick(dt);firstElapsed=world.active.elapsed;const restore=world.applyCamera(r);try{firstCamera={samePitchReference:r.cameraPitch===base.cameraPitch,pitch:r.cameraPitch.slice(),yaw:r.yaw};world.present(r,0,actors());world.rendered(r);}finally{restore();}}
+ else world.present(r,0,actors());calls.length=0;
+ return {c,world,r,base,calls,actors,task,hero,tree,firstElapsed,firstCamera,close(){world.clear();}};
+}
+// Independent world3d shader projection, including its non-rail q clamp.
+function screen(r,[x,y,z]){const [w,h]=r.viewSize,[ps,pc]=r.cameraPitch,cs=Math.cos(r.yaw||0),sn=Math.sin(r.yaw||0),dx=x-r.center[0],dz=z-r.center[1],py=y-(r.elevation||0),vx=dx*cs-dz*sn,vz=dx*sn+dz*cs,q=Math.max(.35,1-(py*ps+vz*pc)/(r.cameraDistance||65)),s=Math.min(w/30,h/21)*r.zoom;return[w/2+vx*s/q,h/2-(pc*py-ps*vz)*s/q];}
+function actorPoint(r,a,px,py){const [ps,pc]=r.cameraPitch,cs=Math.cos(r.yaw),sn=Math.sin(r.yaw),u=(px/512-.5)*(a.worldWidth??2),v=(1-py/512)*(a.worldHeight??2);return[a.x+u*cs-v*ps*sn,(a.height??.04)+v*pc,a.z-u*sn-v*ps*cs];}
+function checkBounds(f,output){const r=f.r,[w,h]=r.viewSize,body=output.find(a=>a.fieldHM),draw=f.calls.find(row=>row.im.naturalWidth===448&&row.args.length===8);assert(body&&draw,'Original authored atlas draw missing');const d=draw.args,m=draw.m,points=[[d[4],d[5]],[d[4]+d[6],d[5]],[d[4],d[5]+d[7]],[d[4]+d[6],d[5]+d[7]]].map(([x,y])=>actorPoint(r,body,m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]));for(const a of output.filter(a=>!a.fieldHM))for(const [x,y]of [[-1,0],[1,0],[-1,2],[1,2]]){const [ps,pc]=r.cameraPitch,cs=Math.cos(r.yaw),sn=Math.sin(r.yaw),top=x===1&&y===2,v=y*pc-(top ? .126*y : 0),z=-y*ps-(top ? .202*y : 0);points.push([a.x+x*cs+z*sn,(a.height??.04)+v,a.z-x*sn+z*cs]);}for(const p of points){const [x,y]=screen(r,p);assert(x>=16&&x<=w-16&&y>=16&&y<=h-16,'Actual original draw escaped gutter '+JSON.stringify({p,x,y,w,h}));}}
+// Density is measured from the actually recorded 56px source-cell draw, not zoom.
+function sourceCellMinSingularValue(f,output){const body=output.find(a=>a.fieldHM),draw=f.calls.find(row=>row.im.naturalWidth===448&&row.args.length===8);assert(body&&draw,'Actual source cell draw missing');const d=draw.args,m=draw.m;assert.equal(d[2],56);assert.equal(d[3],56);const corners=[[d[4],d[5]],[d[4]+d[6],d[5]],[d[4],d[5]+d[7]]].map(([x,y])=>screen(f.r,actorPoint(f.r,body,m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]))),[o,x,y]=corners,a=(x[0]-o[0])/56,b=(x[1]-o[1])/56,c=(y[0]-o[0])/56,dv=(y[1]-o[1])/56,first=a*a+b*b,second=c*c+dv*dv,largest=Math.sqrt((first+second+Math.hypot(first-second,2*(a*c+b*dv)))/2),smallest=Math.abs(a*dv-b*c)/largest;assert(Number.isFinite(smallest),'Nonfinite source-pixel projection');return smallest;}
+test('close Cut camera preserves native source detail and bounds at the portrait plateau',async()=>{const f=await fixture();try{f.world.active.elapsed=2.4*.52;const restore=f.world.applyCamera(f.r);try{const out=f.world.present(f.r,.5,f.actors());const density=sourceCellMinSingularValue(f,out);assert(density>=1,'Portrait source-cell density below1 CSSpx/nativepx: '+density);assert.equal(f.r.yaw,Math.PI/6);assert.notEqual(f.r.center,f.base.center);assert.equal(f.world.inspectCard(f.r).authoredAtlas,'oshawott-cut-064');assert.equal(f.world.active.direction,0);const nativeDraw=f.calls.find(row=>row.im.naturalWidth===448&&row.args.length===8);assert(nativeDraw.args[0]/56+8*nativeDraw.args[1]/56>=71,'North view ceased using the authored back cells');checkBounds(f,out);}finally{restore();}assert.equal(f.r.center,f.base.center);assert.equal(f.r.cameraPitch,f.base.cameraPitch);assert.equal(f.r.zoom,f.base.zoom);}finally{f.close();}});
+test('close Cut camera contains real atlas draw corners, hero and tree across resize/user zoom on the unchanged route',async()=>{const f=await fixture({zoom:5});try{for(const size of [[390,844],[844,390],[1280,720]])for(const t of [.3,.52,.84]){f.r.viewSize=size;f.world.active.elapsed=t*2.4;f.calls.length=0;const restore=f.world.applyCamera(f.r);try{const out=f.world.present(f.r,t,f.actors());assert(f.r.yaw>0,'Baseline has no three-quarter separation');checkBounds(f,out);assert.deepEqual([f.hero.x,f.hero.z,f.tree.x,f.tree.z],[7.5,11.5,7.5,10.5]);}finally{restore();}assert.equal(f.r.zoom,5);assert.equal(f.r.center,f.base.center);}}finally{f.close();}});
+test('close Cut camera keeps scoped south on the native basis while west/east retain the old camera',async()=>{for(const direction of [1,2,3]){const f=await fixture({direction});try{f.world.active.elapsed=1.2;const restore=f.world.applyCamera(f.r);try{assert.equal(f.r.yaw,0);if(direction===1)assert.equal(f.r.cameraPitch,f.base.cameraPitch);if(direction>=2){assert.equal(f.r.zoom,f.base.zoom);assert.equal(f.r.center,f.base.center);}}finally{restore();}}finally{f.close();}}});
+test('close Cut camera restores original references on thrown draw and cancellation without persistent tween state',async()=>{const f=await fixture();try{f.world.active.elapsed=1.2;assert.throws(()=>{const restore=f.world.applyCamera(f.r);try{throw Error('original draw failure');}finally{restore();}},/original draw failure/);for(const k of ['zoom','center','yaw','cameraPitch'])assert.equal(f.r[k],f.base[k]);const late=f.world.applyCamera(f.r);f.world.clear();for(const k of ['zoom','center','yaw','cameraPitch'])assert.equal(f.r[k],f.base[k]);f.r.center=[100,200];late();assert.deepEqual(f.r.center,[100,200]);}finally{f.close();}});
+test('close Cut camera never overwrites a foreign camera field and its old finalizer cannot release a new lease',async()=>{const f=await fixture();try{f.world.active.elapsed=1.2;const old=f.world.applyCamera(f.r),foreign=[100,200];f.r.center=foreign;old();assert.equal(f.r.center,foreign);f.r.center=f.base.center;const next=f.world.applyCamera(f.r),owned=f.r.center;old();assert.equal(f.r.center,owned);next();assert.equal(f.r.center,f.base.center);}finally{f.close();}});
+test('close Cut camera is neutral at action boundaries and releases on scene replacement/dispose',async()=>{const f=await fixture();try{for(const t of [0,1]){f.world.active.elapsed=2.4*t;const restore=f.world.applyCamera(f.r);assert.equal(f.r.zoom,f.base.zoom);assert.equal(f.r.yaw,0);assert.equal(f.r.center,f.base.center);restore();}f.world.active.elapsed=1.2;let restore=f.world.applyCamera(f.r);f.world.dispose(f.r);assert.equal(f.r.center,f.base.center);restore();restore=f.world.applyCamera(f.r);f.c.NativeStory.state.zone=7;f.world.tick(.01);assert.equal(f.world.active,null);for(const k of ['zoom','center','yaw','cameraPitch'])assert.equal(f.r[k],f.base[k]);restore();}finally{f.close();}});// The original Game calls Journey.step -> HM.tick before renderer.draw/present.
+// Preserve all six prior cases; this seventh exercises that missing first-frame order.
+test('first positive native tick before first present still latches the unmodified real actor group',async()=>{const f=await fixture({firstTick:true});try{assert(f.firstElapsed>0,'Fixture must not supply the nonexistent initial0 draw');let frames=0,witnessed=false;while(!witnessed&&frames++<100){for(const dt of f.c.GameSpeed.steps(1/60))f.world.tick(dt);f.calls.length=0;const restore=f.world.applyCamera(f.r);try{const out=f.world.present(f.r,frames/60,f.actors());if(f.world.active.elapsed/f.world.active.duration>=.30){const density=sourceCellMinSingularValue(f,out);assert(density>=1,'First-positive-frame path has no close camera: '+density);assert.equal(f.r.yaw,Math.PI/6);checkBounds(f,out);witnessed=true;}f.world.rendered(f.r);}finally{restore();}}assert(witnessed,'Original tick/present/ACK sequence never reached preparation');assert.deepEqual([f.hero.x,f.hero.z,f.tree.x,f.tree.z],[7.5,11.5,7.5,10.5]);}finally{f.close();}});
+// Real chapter040 scene shape: original data + the exact bootstrap additions,
+// with NO fabricated .zone property. A same-native-zone replacement is foreign.
+test('actual Dreamyard scene without zone activates framing and same-zone object replacement releases it',async()=>{const text=fs.readFileSync(path.join(repo,'src/striaton-assets.js'),'utf8'),data=JSON.parse(text.slice(text.indexOf('=')+1).trim().replace(/;$/,'')),scene={...data.scenes[152],chapter040:true,outdoor:true};assert.equal(Object.prototype.hasOwnProperty.call(scene,'zone'),false);const f=await fixture({firstTick:true,sceneDescriptor:scene});try{let frames=0,witnessed=false;while(!witnessed&&frames++<100){for(const dt of f.c.GameSpeed.steps(1/60))f.world.tick(dt);f.calls.length=0;const restore=f.world.applyCamera(f.r);try{const out=f.world.present(f.r,frames/60,f.actors());if(f.world.active.elapsed/f.world.active.duration>=.30){const density=sourceCellMinSingularValue(f,out);assert(density>=1,'Real no-zone scene was rejected by camera: '+density);assert.equal(f.r.yaw,Math.PI/6);checkBounds(f,out);witnessed=true;}f.world.rendered(f.r);}finally{restore();}}assert(witnessed);const oldRestore=f.world.applyCamera(f.r);assert.equal(f.r.yaw,Math.PI/6);f.r.scene={...scene};assert.notEqual(f.r.scene,scene);assert.equal(f.c.NativeStory.state.zone,152);const replacementRestore=f.world.applyCamera(f.r);assert.equal(f.r.zoom,f.base.zoom);assert.equal(f.r.yaw,f.base.yaw);assert.equal(f.r.center,f.base.center);oldRestore();replacementRestore();assert.equal(f.r.center,f.base.center);}finally{f.close();}});
+
+// Native-front candidate only. CPU matrices do NOT prove an alpha aperture or LOS.
+test('native front Cut keeps its original basis from the first positive tick through original ACK completion',async()=>{
+ const f=await fixture({direction:1,heroZ:9.5,firstTick:true});
+ try{
+  assert(f.firstElapsed>0,'The first real tick must precede the first present');
+  assert(f.firstCamera.samePitchReference,'Front must never enter62 before the camera plan latches');
+  assert.equal(f.firstCamera.yaw,0);assert.deepEqual(f.firstCamera.pitch,f.base.cameraPitch);
+  let frames=0,preparation=false,contact=false,returning=false,completed=false;
+  f.task.finished.then(()=>{completed=true;});
+  while(f.world.active&&!f.world.active.done&&frames++<400){
+   for(const dt of f.c.GameSpeed.steps(1/60))f.world.tick(dt);
+   if(!f.world.active)break;
+   const progress=f.world.active.elapsed/f.world.active.duration;
+   assert.equal(f.world.cameraFor(f.base.cameraPitch),f.base.cameraPitch,'Native front pitch handoff changed the source base reference');
+   const restore=f.world.applyCamera(f.r);
+   try{
+    assert.equal(f.r.cameraPitch,f.base.cameraPitch);assert.equal(f.r.yaw,0);
+    f.calls.length=0;const out=f.world.present(f.r,frames/60,f.actors()),body=out.find(a=>a.fieldHM);
+    assert(body,'Original front body is required before completion');assert.equal(body.groundHeight,0);
+    assert.deepEqual([f.hero.x,f.hero.z,f.tree.x,f.tree.z],[7.5,9.5,7.5,10.5]);
+    if(progress>=.30&&progress<=.61){
+     assert(sourceCellMinSingularValue(f,out)>=1,'Native front source detail below1 CSSpx/nativepx');checkBounds(f,out);
+     const draw=f.calls.find(row=>row.im.naturalWidth===448&&row.args.length===8),cell=draw.args[0]/56+8*draw.args[1]/56;
+     assert(cell>=0&&cell<71,'Front switched to authored back cells');
+     if(progress<.52)preparation=true;else contact=true;
+    }
+    if(progress>=.90)returning=true;
+    await Promise.resolve();assert(!completed,'Original completion was released before its rendered ACK');
+    f.world.rendered(f.r);
+   }finally{restore();}
+   for(const key of ['zoom','center','yaw','cameraPitch'])assert.equal(f.r[key],f.base[key],'Front failed to restore '+key);
+  }
+  assert(frames<400&&preparation&&contact&&returning,'Original tick/present/ACK flow omitted a required phase');
+  await f.task.finished;assert.equal(f.world.active,null);assert(completed);
+  assert.equal(f.world.cameraFor(f.base.cameraPitch),f.base.cameraPitch);
+ }finally{f.close();}
+});
+test('native front exception leaves evolved Cut, another zone, west/east and back camera contracts intact',async()=>{
+ for(const options of [{direction:1,graphic:502},{direction:1,zone:7},{direction:2},{direction:3},{direction:0}]){
+  const f=await fixture(options);
+  try{
+   f.world.active.elapsed=1.2;const restore=f.world.applyCamera(f.r);
+   try{
+    assert(Math.abs(Math.atan2(...f.r.cameraPitch)-62*Math.PI/180)<1e-10,'Out-of-scope Cut lost its existing raised view');
+    if(options.direction===0){assert.equal(f.r.yaw,Math.PI/6);assert.notEqual(f.r.center,f.base.center);}
+    else{assert.equal(f.r.yaw,0);assert.equal(f.r.zoom,f.base.zoom);assert.equal(f.r.center,f.base.center);}
+   }finally{restore();}
+   for(const key of ['zoom','center','yaw','cameraPitch'])assert.equal(f.r[key],f.base[key]);
+  }finally{f.close();}
+ }
+});
+
+// Dedicated target transparency: synthetic CPU fixtures, never raster/art approval.
+test('only the exact front Cut target render actor fades, without changing its native source or commit/cancel',async()=>{
+ let commits=0;const f=await fixture({direction:1,heroZ:9.5,onContact(){commits++;}});
+ try{
+  const source=f.tree.source,sourceBefore=JSON.stringify(source),input={...f.tree},inputBefore=Object.keys(input).slice();
+  f.world.active.elapsed=.30*2.4;const owner=f.world.active,restore=f.world.applyCamera(f.r);let faded;
+  try{const out=f.world.present(f.r,.3,[input,{...f.hero}]);faded=out.find(a=>a.source===source);assert.notEqual(faded,input);assert.equal(faded.source,source);assert.equal(faded.fieldHMCutForeground064.ownerRef,owner);assert.equal(faded.fieldHMCutForeground064.treeSourceRef,source);assert.equal(faded.fieldHMCutForeground064.alpha,.38);assert(!faded.fieldHM);assert.equal(input.fieldHMCutForeground064,undefined);assert.deepEqual(Object.keys(input),inputBefore);assert.equal(JSON.stringify(source),sourceBefore);f.world.rendered(f.r);}finally{restore();}
+  const foreign={...input,source:{...source}},restoreForeign=f.world.applyCamera(f.r);try{const out=f.world.present(f.r,.3,[foreign,{...f.hero}]);assert.equal(out.find(a=>a.source===foreign.source),foreign,'Another source reference must not acquire the captured target capability');}finally{restoreForeign();}
+  let frames=0;while(f.world.active&&!f.world.active.committed&&frames++<200){f.world.tick(.04);const end=f.world.applyCamera(f.r);try{const out=f.world.present(f.r,frames/25,f.actors());if(f.world.active.committed)assert(!out.find(a=>a.source===source)?.fieldHMCutForeground064,'Native commit must end the foreground capability');f.world.rendered(f.r);}finally{end();}}
+  assert.equal(commits,1);assert(f.world.active.committed);assert.equal(JSON.stringify(source),sourceBefore,'Native/save source was mutated by presentation');
+  f.world.clear();await assert.rejects(f.task.finished,/annullata/);assert.equal(f.world.active,null);assert.equal(JSON.stringify(source),sourceBefore);
+ }finally{f.close();}
+ for(const options of [{direction:0},{direction:1,graphic:502},{direction:1,zone:7}]){const x=await fixture(options);try{x.world.active.elapsed=.30*2.4;const restore=x.world.applyCamera(x.r);try{const out=x.world.present(x.r,.3,x.actors());assert(!out.some(a=>a.fieldHMCutForeground064),'Out-of-scope target faded');}finally{restore();}}finally{x.close();}}
+});
+test('real World.draw defers only the owned target once, preserves ordinary calls and restores depth/camera on target failure',async()=>{
+ const f=await fixture({direction:1,heroZ:9.5});
+ try{
+  // Execute the real class method with a declared GL-command fixture, no GPU or constructor.
+  const text=fs.readFileSync(path.join(repo,'src/world3d.js'),'utf8'),draw=vm.runInContext('(function(){'+text+';return VillageRenderer.prototype.draw;})()',f.c,{filename:'world3d.js'});
+  const r=f.r,rows=[],states=[],treeTex={},heroTex={},otherTex={},owner=f.world.active;let depthWrites=true,depthFunction='LEQUAL',throwTarget=null,acks=0,lastActors;
+  const gl=new Proxy({isContextLost:()=>false,isTexture:()=>true,depthMask(value){depthWrites=value;states.push(value);},depthFunc(value){depthFunction=value;},getAttribLocation:()=>0},{get:(target,key)=>key in target?target[key]:typeof key==='string'&&key===key.toUpperCase()?key:()=>{}});
+  Object.assign(r,{gl,ready:true,canvas:{width:390,height:844},images:{'Original108-0':treeTex,'Alcide-3':heroTex,'Original200-0':otherTex},cache:{},models:{},presented:new WeakSet(),attrs:[],loc:new Proxy({},{get:(_,key)=>key}),program:{},post:{},quad:{},target:{},framebuffer:{},shadow:{},hasResources:()=>true,resourcePlan:()=>({}),resize(){},indoor:()=>false,screen:()=>[0,0,1],spriteName:x=>x});r.scene.instances=[];
+  const originalPresent=f.world.present,originalRendered=f.world.rendered;
+  f.world.present=function(...args){lastActors=Reflect.apply(originalPresent,this,args);return lastActors;};f.world.rendered=function(...args){acks++;return Reflect.apply(originalRendered,this,args);};
+  const ordinary={name:'Original200',x:9,z:8,height:0,frame:0,source:{model:200},opacity:.01};
+  r.plane=function(...args){const row={args,argsLength:args.length,texture:args[5],flat:args[6],opacity:args[10]??1,depthWrites,depthFunction};rows.push(row);if(throwTarget&&row.texture===treeTex&&!row.flat&&args.length===11)throw throwTarget;};
+  f.world.active.elapsed=.30*2.4;draw.call(r,.3,[{...f.tree},{...f.hero},ordinary]);
+  const body=rows.filter(row=>!row.flat),treeRows=body.filter(row=>row.texture===treeTex),otherRows=body.filter(row=>row.texture===otherTex),silhouette=body.find(row=>row.texture===heroTex&&row.depthFunction==='GREATER');
+  assert.equal(treeRows.length,1,'Target must replace its old draw, not add another');assert.equal(treeRows[0].argsLength,11);assert.equal(treeRows[0].opacity,.38);assert.equal(treeRows[0].depthWrites,false);assert.equal(treeRows[0].depthFunction,'LEQUAL');assert(silhouette&&body.indexOf(treeRows[0])>body.indexOf(silhouette),'Target pass precedes original player silhouette');
+  assert.equal(otherRows.length,1);assert.equal(otherRows[0].argsLength,10);assert.equal(otherRows[0].opacity,1,'Generic actor.opacity must remain ignored');assert.equal(otherRows[0].depthWrites,true);assert.deepEqual(otherRows[0].args.slice(0,5),[9,0,8,2,2]);assert.equal(acks,1);assert.equal(depthWrites,true);assert(r.presented.has(f.tree.source));
+  const tagged=lastActors.find(a=>a.source===f.tree.source);assert.equal(tagged.fieldHMCutForeground064.ownerRef,owner);
+  // Renderer admission subcases use a declared input passthrough, not a second
+  // HM producer: otherwise the real producer would renew valid target metadata.
+  const observePresent=f.world.present;f.world.present=(_renderer,_time,input)=>input;
+  try{for(const bad of [{...tagged,source:{...f.tree.source}},JSON.parse(JSON.stringify(tagged)),{...tagged,fieldHMCutForeground064:{...tagged.fieldHMCutForeground064,alpha:NaN}},{...tagged,fieldHMCutForeground064:{...tagged.fieldHMCutForeground064,alpha:.37}},{...tagged,fieldHMCutForeground064:{...tagged.fieldHMCutForeground064,alpha:1.01}}]){
+   rows.length=0;draw.call(r,.3,[bad,{...f.hero},ordinary]);assert.equal(rows.filter(row=>row.texture===treeTex&&!row.flat&&row.argsLength===11).length,0,'Foreign/JSON/invalid capability used the translucent pass');
+  }}finally{f.world.present=observePresent;}
+  rows.length=0;const sentinel=Error('owned target draw sentinel');throwTarget=sentinel;const beforeACK=acks;assert.throws(()=>draw.call(r,.3,[{...f.tree},{...f.hero},ordinary]),error=>error===sentinel);assert.equal(depthWrites,true,'Depth writes leaked off after the owned pass threw');assert.equal(acks,beforeACK,'Failed draw produced an original completion ACK');for(const key of ['zoom','center','yaw','cameraPitch'])assert.equal(r[key],f.base[key]);throwTarget=null;
+  f.world.clear();rows.length=0;draw.call(r,.3,[tagged,{...f.hero},ordinary]);assert.equal(rows.filter(row=>row.texture===treeTex&&!row.flat&&row.argsLength===11).length,0,'Cancelled action capability survived');assert.equal(depthWrites,true);f.world.present=originalPresent;f.world.rendered=originalRendered;
+ }finally{f.close();}
+});
+})();

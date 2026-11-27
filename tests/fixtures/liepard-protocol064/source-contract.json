@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "ACTUAL_V4_CLOSED541_M3_TAIL_TYNAMO33_NATIVE_FOE_SOURCE_CONTRACT_NOT_EXECUTION",
-  "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe",
+  "status": "ACTUAL_V4_CLOSED541_M3_TAIL_TYNAMO33_NATIVE_FOE_DREAMYARD_FLOOR_CUT_TARGET_TRANSPARENCY_SOURCE_CONTRACT_NOT_EXECUTION",
+  "revision": "coherent-v4-closed541-m3-tail-tynamo33-native-foe-dreamyard-floor-cut-target-transparency",
   "basisSourceManifestSHA256": "d8558489faa963bd032067b2436d697c34615bac1772762dc9b67601f482ba53",
   "sourceLFHashes": {
     "training-data.js": "8d20396f42cc664d5d404e317be97c672ccfcfad88290a36c0a17d73f40eed75",
@@ -38,7 +38,7 @@
     "move-fx.js": "1f0e563be80263b4263332f89266aad8266ded2a196ed9a6ce9a0c48615887c9",
     "double-battles.js": "b1bc07758b48bc1e1f94b84b87e691f9f3ea48f41020ff49d21af3583df3d38a",
     "runtime-assets.js": "e7130d01eb54b1f7b72ecb889db5c708778e32975b866e904373ce43291568c9",
-    "world3d.js": "97d6606ba2dee3e08062924d1b73647e457b9e1d54b36246f3af48dbeee87924"
+    "world3d.js": "3b03cbfd301f65c8b5935b7ece12151260704e6ae332e4d65417e2fec92ccf5e"
   },
   "buildProgramRawSHA256": {
     "battle-sim.js": "c7d74cd5ad50c62389db91176e74e095a71a0b75b5ac910c710ccd6ad697ebb9"
@@ -151,5 +151,59 @@
     "renderHost": "Original index has BattleGround before SpeciesMoves; default native602/33 integration is installed there",
     "rawAssetPinsRetainOriginalMeaning": true,
     "scope": "Declared shared source migration only; no new541 execution/Game/motion/PCM/Android approval"
+  },
+  "previousTynamo33NativeFoeContractCanonicalLFSHA256": "891ac3550f34f5602e82032f784ed299dec052d50be9c3df586a60f331f9f0a8",
+  "dreamyardFloorLineage": {
+    "schema": 1,
+    "sourceLFHashChanges": [
+      "world3d.js"
+    ],
+    "sourceLFHashes": {
+      "world3d.js": "c5bc8b14883014876ed81885d2150454279d61a2bb0a79ebc1adc082128f2da8"
+    },
+    "fieldGroundQuery": {
+      "scene": "zone152",
+      "nativeModel": "acc-map-279",
+      "groundExcludedGroups": [
+        6,
+        27
+      ],
+      "policy": "Only native arch cap and baked-shadow groups leave ground query; all other groups, highest/barycentric/cache and render geometry remain original"
+    },
+    "rawAssetPinsRetainOriginalMeaning": true,
+    "scope": "Declared field-floor source migration only; battle body/draw, Tynamo, M3 and541 lineages unchanged; no new execution/motion/PCM/Android approval"
+  },
+  "previousDreamyardFloorContractCanonicalLFSHA256": "83c04177e197d7100605cec4249edf025561581abfffafb4a5ccbdd61d902a47",
+  "cutTargetTransparencyLineage": {
+    "schema": 1,
+    "sourceLFHashChanges": [
+      "world3d.js"
+    ],
+    "sourceLFHashes": {
+      "world3d.js": "3b03cbfd301f65c8b5935b7ece12151260704e6ae332e4d65417e2fec92ccf5e"
+    },
+    "fieldForeground": {
+      "scene": "zone152",
+      "nativeTargetModel": 108,
+      "move": 15,
+      "graphic": 501,
+      "direction": 1,
+      "targetIdentity": "Copied returned actor must match the captured original target source and active action owner; native NPC/save remains unchanged",
+      "opacityRange": [
+        0.38,
+        1
+      ],
+      "planeOpacityArgument": 11,
+      "depthWrite": "false only around the owned deferred target plane; restored true in finally",
+      "ordinaryActorPass": "Existing opaque order/arguments remain unchanged; no generic actor.opacity coupling",
+      "floorQuery": "Prior Dreamyard floor query and its lineage remain unchanged"
+    },
+    "companionOutsideStrictSourceInventory": {
+      "relative": "src/field-hm-world.js",
+      "canonicalLFSHA256": "154530e88a55383e88044f7ed9a7cd3804a5bfb455701bd70b481a356001fac2",
+      "role": "Semantic companion provenance only; not a 36th source entry or a source loaded by the native541 fixture"
+    },
+    "rawAssetPinsRetainOriginalMeaning": true,
+    "scope": "Declared scoped field-target visibility source migration only; battle body/draw, Tynamo, M3 and541 lineages unchanged. ART_LIMIT: ghost appearance, shell readability and full move remain unapproved; no new541 execution/motion/PCM/Android/build approval"
   }
 }
